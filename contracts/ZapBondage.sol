@@ -8,10 +8,7 @@ contract ERC20Basic {
     function transfer(address to, uint256 value) public returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
 }
-/**
- * @title ERC20 interface
- * @dev see https://github.com/ethereum/EIPs/issues/20
- */
+
 contract ERC20 is ERC20Basic {
     function allowance(address owner, address spender) public constant returns (uint256);
     function transferFrom(address from, address to, uint256 value) public returns (bool);
@@ -21,11 +18,19 @@ contract ERC20 is ERC20Basic {
 
 pragma solidity ^0.4.14;
 
-contract ZapBondage {
+
+    /*
+       data structure for holder of ZAP bond to data provider
+       *currently "smart_contract" or "socket_subscription"
+    */
+
     struct Holder {
+        //endpoint specifier* => ( provider address => bond value)
         mapping (bytes32 => mapping(address => uint256)) bonds;
+        //provider address => initialized flag
         mapping (address => bool) initialized;
-        address[] oracleList;//for traversing
+        //for traversing
+        address[] oracleList;
     }
 
     ZapRegistry registry;
@@ -35,37 +40,52 @@ contract ZapBondage {
     address marketAddress;
     address dispatchAddress;
 
-
     mapping(address => Holder) holders;
+
     // (holder => (oracleAddress => (specifier => numEscrow)))
     mapping(address => mapping(address => mapping( bytes32 => uint256))) pendingEscrow;
+
     // (specifier=>(oracleAddress=>numZap)
     mapping(bytes32 => mapping(address=> uint)) public totalBound;
 
-
+    /*
+        for restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
+    */
     modifier operatorOnly {
         if ( msg.sender == marketAddress || msg.sender == dispatchAddress ) {
             _;
         }
     }
 
+    /*
+        initialize token and ZapRegistry contracts
+    */
     function ZapBondage(address tokenAddress, address registryAddress) public {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
     }
 
+    /*
+        set ZapArbiter address
+    */
     function setMarketAddress(address _marketAddress) public {
         if (marketAddress == 0) {
             marketAddress = _marketAddress;
         }
     }
 
+    /*
+        set ZapDispatch address
+    */
     function setDispatchAddress(address _dispatchAddress) public {
         if ( dispatchAddress == 0 ) {
             dispatchAddress = _dispatchAddress;
         }
     }
 
+    /*
+        returns total ZAP held by contract
+    */
     function getZapBound(address oracleAddress,
                          bytes32 endpoint)
                          public
@@ -74,8 +94,10 @@ contract ZapBondage {
         return totalBound[endpoint][oracleAddress];
     }
 
-    // Transfer N dots from fromAddress to destAddress called only by the DisptachContract or MarketContract
-    // In smart contract endpoint, occurs per satisfied request, in socket endpoint called on termination of subscription
+    /*
+       Transfer N dots from fromAddress to destAddress called only by the DisptachContract or ArbiterContract
+       In smart contract endpoint, occurs per satisfied request, in socket endpoint called on termination of subscription
+    */
     function transferDots(bytes32 specifier,
                           address holderAddress,
                           address oracleAddress,
@@ -96,12 +118,15 @@ contract ZapBondage {
         }
     }
 
-    function escrowDots(bytes32 specifier, address holderAddress, address oracleAddress, uint256 numDots) 
+    /*
+       move numDots dots from provider-requester to bondage according to data-provider address, holder address and endpoint specifier( ala 'smart_contract')
+    */
+    function escrowDots(bytes32 specifier, address holderAddress, address oracleAddress, uint256 numDots)
     operatorOnly returns (bool success)  {
-        
+
         uint currentDots = _getDots(specifier, holderAddress, oracleAddress);
         if(currentDots >= numDots){
-            
+
             holders[holderAddress].bonds[specifier][oracleAddress]-=numDots;
             pendingEscrow[holderAddress][oracleAddress][specifier]+=numDots;
             return true;
@@ -184,11 +209,15 @@ contract ZapBondage {
         totalBound[specifier][oracleAddress] += numZap;
     }
 
-    function calcZapForDots(        
-        bytes32 specifier, 
+
+    /*
+        calculate quantity of ZAP token required for specified amount of dots for endpoint defined by specifier and data provider defined by oracleAddress
+    */
+    function calcZapForDots(
+        bytes32 specifier,
         uint numDots,
         address oracleAddress) public constant returns(uint256 _numZap){
-            
+
         uint256 localTotal = totalBound[specifier][oracleAddress];
         uint256 numZap;
         for(uint i=0; i<numDots; i++){
@@ -201,12 +230,17 @@ contract ZapBondage {
         return numZap;
     }
 
+
+    /*
+        calculate amount of dots which could be purchased with given numZap ZAP token for endpoint specified by specifier and data-provider address specified by oracleAddress
+    */
     function calcZap(address oracleAddress,
                      bytes32 specifier,
                      uint256 numZap)
                      public constant
                      returns(uint256 _numZap, uint256 _numDots) {
-        uint infinity = 10;
+
+        uint infinity = 10*10;
         uint dotCost = 0;
 
         for ( uint numDots = 0; numDots < infinity; numDots++ ) {
@@ -225,6 +259,11 @@ contract ZapBondage {
         }
     }
 
+
+
+    /*
+        get the current cost of a doc. endpoint specified by specifier, data-provider specified by oracleAddress,
+    */
     function currentCostOfDot(address oracleAddress,
                               bytes32 specifier,
                               uint _totalBound)
@@ -269,6 +308,8 @@ contract ZapBondage {
     }
 
     // SPECTIAL CURVES
+
+    //log based 2 taylor series in assembly
     function fastlog2(uint x) public pure returns (uint y) {
        assembly {
             let arg := x
