@@ -1,6 +1,6 @@
-pragma solidity ^0.4.14;
+pragma solidity ^0.4.17;
 
-import "ZapRegistry.sol";
+import "./ZapRegistry.sol";
 
 contract ERC20Basic {
     uint256 public totalSupply;
@@ -16,8 +16,7 @@ contract ERC20 is ERC20Basic {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-pragma solidity ^0.4.14;
-
+contract ZapBondage {
 
     /*
        data structure for holder of ZAP bond to data provider

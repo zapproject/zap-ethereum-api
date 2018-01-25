@@ -1,4 +1,6 @@
-import "ZapBondage.sol";
+pragma solidity ^0.4.17;
+
+import "./ZapBondage.sol";
 
 
 /*

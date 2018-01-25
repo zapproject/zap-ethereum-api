@@ -1,9 +1,10 @@
+pragma solidity ^0.4.17;
 
 /*
 THIS IS AN EARLY EXPERIMENTAL DEMONSTRATION. DO NOT USE WITH REAL ETHER.
 */
-import "ZapDispatch.sol";
-import "ZapBondage.sol";
+import "./ZapDispatch.sol";
+import "./ZapBondage.sol";
 
 
 contract SampleClient1 {
