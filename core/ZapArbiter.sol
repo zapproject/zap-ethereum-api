@@ -3,7 +3,14 @@ pragma solidity ^0.4.14;
 import "ZapRegistry.sol";
 import "ZapBondage.sol";
 
+
+/*
+
+
+*/
+
 contract ZapAribiter {
+
     // Called when a data purchase is initiated
     event ZapDataPurchase(
         address provider_address,  // Etheruem address of the provider
