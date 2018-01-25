@@ -10,6 +10,9 @@ contract ERC20Basic {
 }
 
 contract ERC20 is ERC20Basic {
+    string public name;
+    string public symbol;
+    uint256 public decimals;
     function allowance(address owner, address spender) public constant returns (uint256);
     function transferFrom(address from, address to, uint256 value) public returns (bool);
     function approve(address spender, uint256 value) public returns (bool);

@@ -48,7 +48,7 @@ contract ZapRegistry {
                               uint256[] ext_info,
                               string title)
                               public {
-        if(oracles[msg.sender] == 0){
+        if(oracles[msg.sender].public_key == 0){
             oracles[msg.sender] = ZapOracle(
             public_key,
             ext_info,
