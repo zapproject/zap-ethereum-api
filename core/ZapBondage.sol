@@ -16,9 +16,7 @@ contract ERC20 is ERC20Basic {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-pragma solidity ^0.4.14;
-
-
+contract ZapBondage{
     /* 
        data structure for holder of ZAP bond to data provider
        *currently "smart_contract" or "socket_subscription"
