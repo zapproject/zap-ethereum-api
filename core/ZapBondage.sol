@@ -16,16 +16,16 @@ contract ERC20 is ERC20Basic {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract ZapBondage{
-    /* 
+contract ZapBondage {
+    /*
        data structure for holder of ZAP bond to data provider
        *currently "smart_contract" or "socket_subscription"
     */
 
     struct Holder {
-        //endpoint specifier* => ( provider address => bond value) 
-        mapping (bytes32 => mapping(address => uint256)) bonds; 
-        //provider address => initialized flag 
+        //endpoint specifier* => ( provider address => bond value)
+        mapping (bytes32 => mapping(address => uint256)) bonds;
+        //provider address => initialized flag
         mapping (address => bool) initialized;
         //for traversing
         address[] oracleList;
@@ -82,7 +82,7 @@ contract ZapBondage{
     }
 
     /*
-        returns total ZAP held by contract 
+        returns total ZAP held by contract
     */
     function getZapBound(address oracleAddress,
                          bytes32 endpoint)
@@ -119,12 +119,17 @@ contract ZapBondage{
     /*
        move numDots dots from provider-requester to bondage according to data-provider address, holder address and endpoint specifier( ala 'smart_contract')
     */
-    function escrowDots(bytes32 specifier, address holderAddress, address oracleAddress, uint256 numDots) 
-    operatorOnly returns (bool success)  {
-        
+    function escrowDots(bytes32 specifier,
+                        address holderAddress,
+                        address oracleAddress,
+                        uint256 numDots)
+                        operatorOnly
+                        public
+                        returns (bool success)  {
+
         uint currentDots = _getDots(specifier, holderAddress, oracleAddress);
         if(currentDots >= numDots){
-            
+
             holders[holderAddress].bonds[specifier][oracleAddress]-=numDots;
             pendingEscrow[holderAddress][oracleAddress][specifier]+=numDots;
             return true;
@@ -211,11 +216,11 @@ contract ZapBondage{
     /*
         calculate quantity of ZAP token required for specified amount of dots for endpoint defined by specifier and data provider defined by oracleAddress
     */
-    function calcZapForDots(        
-        bytes32 specifier, 
+    function calcZapForDots(
+        bytes32 specifier,
         uint numDots,
         address oracleAddress) public constant returns(uint256 _numZap){
-            
+
         uint256 localTotal = totalBound[specifier][oracleAddress];
         uint256 numZap;
         for(uint i=0; i<numDots; i++){
@@ -237,7 +242,7 @@ contract ZapBondage{
                      uint256 numZap)
                      public constant
                      returns(uint256 _numZap, uint256 _numDots) {
-        
+
         uint infinity = 10*10;
         uint dotCost = 0;
 
@@ -260,7 +265,7 @@ contract ZapBondage{
 
 
     /*
-        get the current cost of a doc. endpoint specified by specifier, data-provider specified by oracleAddress, 
+        get the current cost of a doc. endpoint specified by specifier, data-provider specified by oracleAddress,
     */
     function currentCostOfDot(address oracleAddress,
                               bytes32 specifier,
@@ -291,17 +296,21 @@ contract ZapBondage{
         return cost;
     }
 
-   
+
     function getDots(bytes32 specifier,
                      address oracleAddress)
-                     public view returns(uint dots) {
+                     view
+                     public
+                     returns(uint dots) {
         return _getDots(specifier, msg.sender, oracleAddress);
     }
 
     function _getDots(bytes32 specifier,
                       address holderAddress,
                       address oracleAddress)
-                      view returns(uint dots) {
+                      view
+                      internal
+                      returns(uint dots) {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
 
