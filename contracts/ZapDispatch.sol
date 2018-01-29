@@ -79,7 +79,7 @@ contract ZapDispatch {
         bytes32[] endpoint_params//endpoint-specific params
     ) external returns (uint256 id) {
 
-        uint dots = bondage._getDots(endpoint, subscriber, oracleAddress);
+        uint dots = bondage.getDots(endpoint, oracleAddress);
 
         if(dots >= 1){
             //enough dots
