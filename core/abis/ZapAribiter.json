@@ -1,0 +1,150 @@
+[
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "endpoint",
+                "type": "bytes32"
+            },
+            {
+                "name": "subscriber_address",
+                "type": "address"
+            },
+            {
+                "name": "provider_address",
+                "type": "address"
+            }
+        ],
+        "name": "endZapSubscription_Subscriber",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "provider_address",
+                "type": "address"
+            },
+            {
+                "name": "endpoint_params",
+                "type": "bytes32[]"
+            },
+            {
+                "name": "endpoint",
+                "type": "bytes32"
+            },
+            {
+                "name": "public_key",
+                "type": "uint256"
+            },
+            {
+                "name": "blocks",
+                "type": "uint256"
+            }
+        ],
+        "name": "initiateSubscription",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "endpoint",
+                "type": "bytes32"
+            },
+            {
+                "name": "subscriber_address",
+                "type": "address"
+            },
+            {
+                "name": "provider_address",
+                "type": "address"
+            }
+        ],
+        "name": "endZapSubscription_Provider",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "name": "_bondageAddress",
+                "type": "address"
+            },
+            {
+                "name": "_registryAddress",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "name": "provider_address",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "subscriber",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "public_key",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "name": "amount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "name": "endpoint_params",
+                "type": "bytes32[]"
+            },
+            {
+                "indexed": false,
+                "name": "enpoint",
+                "type": "bytes32"
+            }
+        ],
+        "name": "ZapDataPurchase",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "name": "provider",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "subsriber",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "name": "terminator",
+                "type": "uint8"
+            }
+        ],
+        "name": "ZapDataSubscriptionEnd",
+        "type": "event"
+    }
+]
