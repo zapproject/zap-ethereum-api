@@ -1,0 +1,144 @@
+[
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "provider",
+                "type": "address"
+            },
+            {
+                "name": "specifier",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getProviderCurve",
+        "outputs": [
+            {
+                "name": "curveType",
+                "type": "uint8"
+            },
+            {
+                "name": "curveStart",
+                "type": "uint256"
+            },
+            {
+                "name": "curveMultiplier",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "provider",
+                "type": "address"
+            }
+        ],
+        "name": "getProviderPublicKey",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "provider",
+                "type": "address"
+            }
+        ],
+        "name": "getProviderTitle",
+        "outputs": [
+            {
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "specifier",
+                "type": "bytes32"
+            },
+            {
+                "name": "curveType",
+                "type": "uint8"
+            },
+            {
+                "name": "curveStart",
+                "type": "uint256"
+            },
+            {
+                "name": "curveMultiplier",
+                "type": "uint256"
+            }
+        ],
+        "name": "initiateProviderCurve",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "public_key",
+                "type": "uint256"
+            },
+            {
+                "name": "ext_info",
+                "type": "uint256[]"
+            },
+            {
+                "name": "title",
+                "type": "string"
+            }
+        ],
+        "name": "initiateProvider",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "name": "provider",
+                "type": "address"
+            }
+        ],
+        "name": "getProviderRouteKeys",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    }
+]

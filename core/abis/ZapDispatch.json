@@ -1,0 +1,112 @@
+[
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "specifier",
+				"type": "bytes32"
+			},
+			{
+				"name": "holderAddress",
+				"type": "address"
+			},
+			{
+				"name": "oracleAddress",
+				"type": "address"
+			}
+		],
+		"name": "_getDots",
+		"outputs": [
+			{
+				"name": "dots",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "oracleAddress",
+				"type": "address"
+			},
+			{
+				"name": "specifier",
+				"type": "bytes32"
+			},
+			{
+				"name": "numZap",
+				"type": "uint256"
+			}
+		],
+		"name": "calcZapForDots",
+		"outputs": [
+			{
+				"name": "_numZap",
+				"type": "uint256"
+			},
+			{
+				"name": "_numDots",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "specifier",
+				"type": "bytes32"
+			},
+			{
+				"name": "holderAddress",
+				"type": "address"
+			},
+			{
+				"name": "oracleAddress",
+				"type": "address"
+			},
+			{
+				"name": "numDots",
+				"type": "uint256"
+			}
+		],
+		"name": "escrowDots",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "specifier",
+				"type": "bytes32"
+			},
+			{
+				"name": "holderAddress",
+				"type": "address"
+			},
+			{
+				"name": "oracleAddress",
+				"type": "address"
+			},
+			{
+				"name": "numDots",
+				"type": "uint256"
+			}
+		],
+		"name": "transferDots",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
