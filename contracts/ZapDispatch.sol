@@ -7,16 +7,16 @@ import "./ZapBondage.sol";
 expose interface to user contracts
 */
 contract Client1 {
-    function __zapCallback(uint256 id, string _response1);
+    function __zapCallback(uint256 id, string _response1) public;
 }
 contract Client2 {
-    function __zapCallback(uint256 id, string _response1, string _response2);
+    function __zapCallback(uint256 id, string _response1, string _response2) public;
 }
 contract Client3 {
-    function __zapCallback(uint256 id, string _response1, string _response2, string _response3);
+    function __zapCallback(uint256 id, string _response1, string _response2, string _response3) public;
 }
 contract Client4 {
-    function __zapCallback(uint256 id, string _response1, string _response2, string _response3, string _response4);
+    function __zapCallback(uint256 id, string _response1, string _response2, string _response3, string _response4) public;
 }
 
 
@@ -54,12 +54,12 @@ contract ZapDispatch {
     address bondageAddress;
     ZapBondage bondage;
 
-    function ZapDataProxyDispatch() {}
+    function ZapDataProxyDispatch() view {}
 
     /*
         initialize bondage contract for reference
     */
-    function setBondageAddress(address _bondageAddress){
+    function setBondageAddress(address _bondageAddress) external {
         if(bondageAddress == 0){
             bondageAddress = _bondageAddress;
             bondage = ZapBondage(_bondageAddress);
@@ -109,7 +109,7 @@ contract ZapDispatch {
     /*
         parameter-count specific method called by data provider in response
     */
-    function respond1(uint256 id, string _response) {
+    function respond1(uint256 id, string _response) external returns (bool) {
         if (queries[id].provider != msg.sender || !fulfillQuery(id))
             revert();
         Client1(queries[id].subscriber).__zapCallback(id, _response);

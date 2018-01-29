@@ -124,7 +124,7 @@ contract ZapBondage {
        move numDots dots from provider-requester to bondage according to data-provider address, holder address and endpoint specifier( ala 'smart_contract')
     */
     function escrowDots(bytes32 specifier, address holderAddress, address oracleAddress, uint256 numDots)
-    operatorOnly returns (bool success)  {
+    operatorOnly public returns (bool success)  {
 
         uint currentDots = _getDots(specifier, holderAddress, oracleAddress);
         if(currentDots >= numDots){

@@ -7,7 +7,7 @@ import "./ZapDispatch.sol";
 import "./ZapBondage.sol";
 
 
-contract SampleClient1 {
+contract ZapDispatchExample {
 
   string public response1;
   event Result(string response1);
@@ -16,8 +16,7 @@ contract SampleClient1 {
   ZapDispatch dispatch;
   ZapBondage bondage;
 
-  function SampleClient1(address tokenAddress, address dispatchAddress, address bondageAddress){
-
+  function ZapDispatchExample(address tokenAddress, address dispatchAddress, address bondageAddress) {
       token = ERC20(tokenAddress);
       dispatch = ZapDispatch(dispatchAddress);
       bondage = ZapBondage(bondageAddress);
@@ -34,7 +33,7 @@ HANDLE PROVIDERS RESPONSE HERE: house_passage ("true" or "false")
 /*
 YOUR QUERY: "0x48da300FA4A832403aF2369cF32d453c599616A6", "hr3101,house_passage,_1515733200"
 */
-  function queryTest(address oracleAddress, string query, string enpoint) {
+  function queryTest(address oracleAddress, string query, string enpoint) public {
 
     bytes32 endpoint = "smartcontract";
     uint256 numZap = bondage.calcZapForDots(endpoint, 1, oracleAddress);

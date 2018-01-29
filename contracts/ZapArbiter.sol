@@ -9,7 +9,7 @@ import "./ZapBondage.sol";
 
 */
 
-contract ZapAribiter {
+contract ZapArbiter {
 
     // Called when a data purchase is initiated
     event ZapDataPurchase(
