@@ -1,4 +1,4 @@
-pragma solidity ^0.4.14;
+pragma solidity ^0.4.17;
 
 contract ZapRegistry {
 
@@ -10,7 +10,7 @@ contract ZapRegistry {
         uint256[] route_keys;                // IPFS routing/other
         string title;                        // Tags (csv)
         mapping(bytes32 => ZapCurve) curves; // Price vs Supply (contract endpoint)
-   }
+    }
 
     /*
         enumeration of curve types representing dot(access token) prices as function of supply
@@ -35,24 +35,24 @@ contract ZapRegistry {
 
     function ZapRegistry() public { }
 
-   /*
-   Initiates a provider.
-    public key: unique id for provider. used for encyrpted key swap for subscription endpoints
-    ext_into: endpoint specific params. TODO: update to bytes32[] endpoint params
-    title: name
+    /*
+    Initiates a provider.
+     public key: unique id for provider. used for encyrpted key swap for subscription endpoints
+     ext_into: endpoint specific params. TODO: update to bytes32[] endpoint params
+     title: name
 
-    if no address->ZapOracle mapping exists, ZapOracle object is created
+     if no address->ZapOracle mapping exists, ZapOracle object is created
 
-   */
+    */
     function initiateProvider(uint256 public_key,
-                              uint256[] ext_info,
-                              string title)
-                              public {
-        if(oracles[msg.sender] == 0){
+        uint256[] ext_info,
+        string title)
+    public {
+        if(oracles[msg.sender].public_key == 0){
             oracles[msg.sender] = ZapOracle(
-            public_key,
-            ext_info,
-            title
+                public_key,
+                ext_info,
+                title
             );
 
         }
@@ -70,10 +70,10 @@ contract ZapRegistry {
     */
 
     function initiateProviderCurve(bytes32 specifier,
-                                   ZapCurveType curveType,
-                                   uint256 curveStart,
-                                   uint256 curveMultiplier)
-                                   public {
+        ZapCurveType curveType,
+        uint256 curveStart,
+        uint256 curveMultiplier)
+    public {
         // Must have previously initiated themselves
         require(oracles[msg.sender].public_key != 0);
 
@@ -96,9 +96,9 @@ contract ZapRegistry {
     */
 
     function getProviderRouteKeys(address provider)
-                                  public
-                                  view
-                                  returns(uint256[]) {
+    public
+    view
+    returns(uint256[]) {
         return oracles[provider].route_keys;
     }
 
@@ -107,36 +107,36 @@ contract ZapRegistry {
         return name
     */
     function getProviderTitle(address provider)
-                              public
-                              view
-                              returns(string) {
+    public
+    view
+    returns(string) {
         return oracles[provider].title;
     }
 
     function getProviderPublicKey(address provider)
-                                  public
-                                  view
-                                  returns(uint256) {
+    public
+    view
+    returns(uint256) {
         return oracles[provider].public_key;
     }
     /*
         get curve params
     */
     function getProviderCurve(address provider,
-                              bytes32 specifier)
-                              view
-                              public
-                              returns (
-                                  ZapCurveType curveType,
-                                  uint256 curveStart,
-                                  uint256 curveMultiplier
-                              ) {
+        bytes32 specifier)
+    view
+    public
+    returns (
+        ZapCurveType curveType,
+        uint256 curveStart,
+        uint256 curveMultiplier
+    ) {
         ZapCurve storage curve = oracles[provider].curves[specifier];
 
         return (
-            curve.curveType,
-            curve.curveStart,
-            curve.curveMultiplier
+        curve.curveType,
+        curve.curveStart,
+        curve.curveMultiplier
         );
     }
 }

@@ -1,23 +1,22 @@
+pragma solidity ^0.4.17;
 
 /*
 THIS IS AN EARLY EXPERIMENTAL DEMONSTRATION. DO NOT USE WITH REAL ETHER.
 */
-import "ZapDispatch.sol";
-import "ZapBondage.sol";
+import "./ZapDispatch.sol";
+import "./ZapBondage.sol";
 
 
-contract SampleClient1 {
+contract ZapDispatchExample {
 
   string public response1;
   event Result(string response1);
 
   ERC20 token;
-  address dispatchAddress;
   ZapDispatch dispatch;
   ZapBondage bondage;
 
-  function SampleClient1(address tokenAddress, address dispatchAddress, address bondageAddress){
-
+  function ZapDispatchExample(address tokenAddress, address dispatchAddress, address bondageAddress) {
       token = ERC20(tokenAddress);
       dispatch = ZapDispatch(dispatchAddress);
       bondage = ZapBondage(bondageAddress);
@@ -34,18 +33,29 @@ HANDLE PROVIDERS RESPONSE HERE: house_passage ("true" or "false")
 /*
 YOUR QUERY: "0x48da300FA4A832403aF2369cF32d453c599616A6", "hr3101,house_passage,_1515733200"
 */
-  function queryTest(address oracleAddress, string query, string enpoint) {
+  function queryTest(address oracleAddress, string query, string enpoint) public {
 
     bytes32 endpoint = "smartcontract";
     uint256 numZap = bondage.calcZapForDots(endpoint, 1, oracleAddress);
-    if( (token.balanceOf(this) / (token.decimals/100)) >= numZap){
-        token.approve(dispatchAddress, numZap * token.decimals );
-        
-        string args='1';
-        bytes32 endpoint_params = [ZapDispatch.stringToBytes32(args)];
-        ZapDispatch.query(oracleAddress, query, endpoint, endpoint_params);
+    if( (token.balanceOf(this) / (token.decimals() / 100)) >= numZap){
+        token.approve(dispatch, numZap * token.decimals());
+
+        bytes32[] memory endpoint_params = new bytes32[](1);
+        endpoint_params[0] = stringToBytes32("1");
+        dispatch.query(oracleAddress, this, query, endpoint, endpoint_params);
     }
   }
-  
+
+  function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+       bytes memory tempEmptyStringTest = bytes(source);
+
+       if (tempEmptyStringTest.length == 0) {
+           return 0x0;
+       }
+       assembly {
+        result := mload(add(source, 32))
+       }
+  }
+
 }
 

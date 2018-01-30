@@ -1,6 +1,6 @@
-pragma solidity ^0.4.14;
+pragma solidity ^0.4.17;
 
-import "ZapRegistry.sol";
+import "./ZapRegistry.sol";
 
 contract ERC20Basic {
     uint256 public totalSupply;
@@ -10,15 +10,16 @@ contract ERC20Basic {
 }
 
 contract ERC20 is ERC20Basic {
+    string public name;
+    string public symbol;
+    uint256 public decimals;
     function allowance(address owner, address spender) public constant returns (uint256);
     function transferFrom(address from, address to, uint256 value) public returns (bool);
     function approve(address spender, uint256 value) public returns (bool);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-pragma solidity ^0.4.14;
-
-
+contract ZapBondage {
     /*
        data structure for holder of ZAP bond to data provider
        *currently "smart_contract" or "socket_subscription"
@@ -87,10 +88,10 @@ pragma solidity ^0.4.14;
         returns total ZAP held by contract
     */
     function getZapBound(address oracleAddress,
-                         bytes32 endpoint)
-                         public
-                         view
-                         returns (uint256) {
+        bytes32 endpoint)
+    public
+    view
+    returns (uint256) {
         return totalBound[endpoint][oracleAddress];
     }
 
@@ -99,10 +100,10 @@ pragma solidity ^0.4.14;
        In smart contract endpoint, occurs per satisfied request, in socket endpoint called on termination of subscription
     */
     function transferDots(bytes32 specifier,
-                          address holderAddress,
-                          address oracleAddress,
-                          uint256 numDots)
-                          public operatorOnly {
+        address holderAddress,
+        address oracleAddress,
+        uint256 numDots)
+    public operatorOnly {
         Holder storage holder = holders[oracleAddress];
 
         if ( numDots <= pendingEscrow[holderAddress][oracleAddress][specifier] ) {
@@ -121,8 +122,13 @@ pragma solidity ^0.4.14;
     /*
        move numDots dots from provider-requester to bondage according to data-provider address, holder address and endpoint specifier( ala 'smart_contract')
     */
-    function escrowDots(bytes32 specifier, address holderAddress, address oracleAddress, uint256 numDots)
-    operatorOnly returns (bool success)  {
+    function escrowDots(bytes32 specifier,
+        address holderAddress,
+        address oracleAddress,
+        uint256 numDots)
+    operatorOnly
+    public
+    returns (bool success)  {
 
         uint currentDots = _getDots(specifier, holderAddress, oracleAddress);
         if(currentDots >= numDots){
@@ -137,9 +143,9 @@ pragma solidity ^0.4.14;
     }
 
     function unbond(bytes32 specifier,
-                    uint numDots,
-                    address oracleAddress)
-                    public {
+        uint numDots,
+        address oracleAddress)
+    public {
         _unbond(
             specifier,
             msg.sender,
@@ -149,10 +155,10 @@ pragma solidity ^0.4.14;
     }
 
     function _unbond(bytes32 specifier,
-                     address holderAddress,
-                     uint numDots,
-                     address oracleAddress)
-                     internal {
+        address holderAddress,
+        uint numDots,
+        address oracleAddress)
+    internal {
         Holder storage holder = holders[holderAddress];
         uint256 currentDots = holder.bonds[specifier][oracleAddress];
 
@@ -178,17 +184,17 @@ pragma solidity ^0.4.14;
     }
 
     function bond(bytes32 specifier,
-                  uint numZap,
-                  address oracleAddress)
-                  public {
+        uint numZap,
+        address oracleAddress)
+    public {
         _bond(specifier, msg.sender, numZap, oracleAddress);
     }
 
     function _bond(bytes32 specifier,
-                   address holderAddress,
-                   uint numZap,
-                   address oracleAddress)
-                   internal {
+        address holderAddress,
+        uint numZap,
+        address oracleAddress)
+    internal {
         Holder storage holder = holders[holderAddress];
 
         if ( !holder.initialized[oracleAddress] ) {
@@ -222,9 +228,9 @@ pragma solidity ^0.4.14;
         uint256 numZap;
         for(uint i=0; i<numDots; i++){
             numZap += currentCostOfDot(
-            oracleAddress,
-            specifier,
-            localTotal+i
+                oracleAddress,
+                specifier,
+                localTotal+i
             );
         }
         return numZap;
@@ -235,10 +241,10 @@ pragma solidity ^0.4.14;
         calculate amount of dots which could be purchased with given numZap ZAP token for endpoint specified by specifier and data-provider address specified by oracleAddress
     */
     function calcZap(address oracleAddress,
-                     bytes32 specifier,
-                     uint256 numZap)
-                     public constant
-                     returns(uint256 _numZap, uint256 _numDots) {
+        bytes32 specifier,
+        uint256 numZap)
+    public constant
+    returns(uint256 _numZap, uint256 _numDots) {
 
         uint infinity = 10*10;
         uint dotCost = 0;
@@ -265,11 +271,11 @@ pragma solidity ^0.4.14;
         get the current cost of a doc. endpoint specified by specifier, data-provider specified by oracleAddress,
     */
     function currentCostOfDot(address oracleAddress,
-                              bytes32 specifier,
-                              uint _totalBound)
-                              internal
-                              constant
-                              returns (uint _cost) {
+        bytes32 specifier,
+        uint _totalBound)
+    internal
+    constant
+    returns (uint _cost) {
         var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
         ZapRegistry.ZapCurveType curveType = ZapRegistry.ZapCurveType(curveTypeIndex);
 
@@ -295,15 +301,19 @@ pragma solidity ^0.4.14;
 
 
     function getDots(bytes32 specifier,
-                     address oracleAddress)
-                     public view returns(uint dots) {
+        address oracleAddress)
+    view
+    public
+    returns(uint dots) {
         return _getDots(specifier, msg.sender, oracleAddress);
     }
 
     function _getDots(bytes32 specifier,
-                      address holderAddress,
-                      address oracleAddress)
-                      view returns(uint dots) {
+        address holderAddress,
+        address oracleAddress)
+    view
+    internal
+    returns(uint dots) {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
 
@@ -311,7 +321,7 @@ pragma solidity ^0.4.14;
 
     //log based 2 taylor series in assembly
     function fastlog2(uint x) public pure returns (uint y) {
-       assembly {
+        assembly {
             let arg := x
             x := sub(x,1)
             x := or(x, div(x, 0x02))
