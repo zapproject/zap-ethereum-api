@@ -1,7 +1,7 @@
-pragma solidity ^0.4.14;
+pragma solidity ^0.4.17;
 
-import "ZapRegistry.sol";
-import "ZapBondage.sol";
+import "./ZapRegistry.sol";
+import "./ZapBondage.sol";
 
 
 /*
@@ -9,7 +9,7 @@ import "ZapBondage.sol";
 
 */
 
-contract ZapAribiter {
+contract ZapArbiter {
 
     // Called when a data purchase is initiated
     event ZapDataPurchase(
