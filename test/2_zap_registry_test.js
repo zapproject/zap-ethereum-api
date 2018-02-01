@@ -49,7 +49,7 @@ contract('ZapRegistry', function (accounts) {
         const receivedTitle = await zapRegistry.getProviderTitle.call(owner);
         const receivedPublickKey = await zapRegistry.getProviderPublicKey.call(owner);
         receivedTitle.should.be.equal(title);
-        receivedPublickKey.should.be.equal(publicKey);
+        receivedPublickKey.should.be.equal(publicKey.toString());
     });
 
     it("ZAP_REGISTRY_3 - Check that we can initiate provider curve", async function () {
@@ -104,13 +104,13 @@ contract('ZapRegistry', function (accounts) {
 
         const publicKey = 111;
         const title = "test";
-        const routeKeys = [1];
+        const routeKeys = [1, 2, 3];
 
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: owner });
 
         const receivedRouteKeys = await zapRegistry.getProviderRouteKeys.call(owner);
 
-        assert.equal(receivedRouteKeys, routeKeys);
+        receivedRouteKeys.should.be.equal(routeKeys);
     });
 
     it("ZAP_REGISTRY_7 - Check that we can't get route keys of provider that doesn't exists", async function () {
@@ -132,7 +132,7 @@ contract('ZapRegistry', function (accounts) {
 
         const receivedTitle = await zapRegistry.getProviderTitle.call(owner);
 
-        assert.equal(receivedTitle, title);
+        receivedTitle.should.be.equal(title);
     });
 
     it("ZAP_REGISTRY_9 - Check that we can't get title of provider that doesn't exists", async function () {
@@ -154,7 +154,7 @@ contract('ZapRegistry', function (accounts) {
 
         const receivedPublicKey = await zapRegistry.getProviderPublicKey.call(owner);
 
-        assert.equal(receivedPublicKey, publicKey);
+        receivedPublicKey.should.be.equal(publicKey);
     });
 
     it("ZAP_REGISTRY_11 - Check that we can't get public key of provider that doesn't exists", async function () {
@@ -179,11 +179,11 @@ contract('ZapRegistry', function (accounts) {
 
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curve, start, mul, { from: owner });
 
-        const res = await zapRegistry.getProviderCurve.call(owner, specifier.valueOf());
+        const res = await zapRegistry.getProviderCurve.call(owner, specifier.valueOf(), { from: owner });
 
-        assert.equal(res[0].valueOf(), curve);
-        assert.equal(res[1].valueOf(), start);
-        assert.equal(res[2].valueOf(), mul);
+        res[0].valueOf().should.be.equal(curve);
+        res[1].valueOf().should.be.equal(start);
+        res[2].valueOf().should.be.equal(mul);
     });
 
 });

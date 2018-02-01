@@ -2,7 +2,6 @@ const ZapDispatch = artifacts.require("ZapDispatch");
 const ZapBondage = artifacts.require("ZapBondage");
 const ZapToken = artifacts.require("ZapToken");
 const ZapRegistry = artifacts.require("ZapRegistry");
-const Oracle = artifacts.require("ZapDispatchExample");
 
 const deployZapDispatch = () => {
     return ZapDispatch.new();
@@ -19,10 +18,6 @@ const deployZapRegistry = () => {
 const deployZapBondage = (tokenAddress, registryAddress) => {
     return ZapBondage.new(tokenAddress, registryAddress);
 };
-
-const deployOracle = (tokenAddress, dispatchAddress, bondageAddress) => {
-    return Oracle.new(tokenAddress, dispatchAddress, bondageAddress);
-}
 
 const DECIMALS = 1000000000000000000;
 
@@ -60,8 +55,6 @@ contract('ZapDispatch', function (accounts) {
         let zapRegistry = await deployZapRegistry();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
 
-        let oracle = await deployOracle(zapToken.address, zapDispatch.address, zapBondage.address, zapRegistry.address);
-
         await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
 
 
@@ -88,7 +81,7 @@ contract('ZapDispatch', function (accounts) {
         console.log("dots count for zap tokens: ", dotsAndZap[1].valueOf());
         console.log("number of zap for bonding: ", dotsAndZap[0].valueOf());
 
-        let totalBound = await zapBondage.getZapBound.call(oracle.address, specifier.valueOf());
+        let totalBound = await zapBondage.getZapBound.call(owner, specifier.valueOf());
         console.log("total bound before: ", totalBound.valueOf());
 
         const res = await zapBondage.bond(specifier.valueOf(), 10001, owner, {from: owner});
@@ -97,9 +90,9 @@ contract('ZapDispatch', function (accounts) {
         ownerBalance = await zapToken.balanceOf.call(owner);
         console.log("owner balance after bonding: ", ownerBalance.valueOf() / DECIMALS);
 
-        totalBound = await zapBondage.getZapBound.call(oracle.address, specifier.valueOf());
+        totalBound = await zapBondage.getZapBound.call(owner, specifier.valueOf());
         console.log("total bound after: ", totalBound.valueOf());
 
-        await zapDispatch.query(oracle.address, accounts[9], specifier.valueOf(), endpoint.valueOf(), params); 
+        await zapDispatch.query(owner, accounts[9], specifier.valueOf(), endpoint.valueOf(), params); 
     });
 });
