@@ -69,7 +69,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: owner});
 
         let ownerBalance = await zapToken.balanceOf.call(owner);
-        console.log("acc1 balance before bonding: ", ownerBalance.valueOf() / DECIMALS);
+        console.log("owner balance before bonding: ", ownerBalance.valueOf() / DECIMALS);
 
         await zapRegistry.initiateProvider(111, [1], "test", {from: owner});
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), 1, 1, 2, {from: owner});
