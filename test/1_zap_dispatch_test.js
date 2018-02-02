@@ -74,8 +74,8 @@ contract('ZapDispatch', function (accounts) {
         await zapRegistry.initiateProvider(111, [1], "test", {from: owner});
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), 1, 1, 2, {from: owner});
         let c = await zapRegistry.getProviderCurve.call(owner, specifier.valueOf())
-        console.log("registered curve for provider spevcifier:")
-        console.log(c);
+       // console.log("registered curve for provider spevcifier:")
+       // console.log(c);
 
         let dotsAndZap = await zapBondage.calcZap.call(owner, specifier.valueOf(), 10001, {from: owner});
         console.log("dots count for zap tokens: ", dotsAndZap[1].valueOf());
@@ -85,7 +85,7 @@ contract('ZapDispatch', function (accounts) {
         console.log("total bound before: ", totalBound.valueOf());
 
         const res = await zapBondage.bond(specifier.valueOf(), 10001, owner, {from: owner});
-        console.log("bond res code: ", res.valueOf());
+        //console.log("bond res code: ", res.valueOf());
 
         ownerBalance = await zapToken.balanceOf.call(owner);
         console.log("owner balance after bonding: ", ownerBalance.valueOf() / DECIMALS);
