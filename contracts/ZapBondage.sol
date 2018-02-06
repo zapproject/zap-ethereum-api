@@ -183,18 +183,21 @@ contract ZapBondage {
         }
     }
 
+    //TODO: remove return value and require() check
     function bond(bytes32 specifier,
         uint numZap,
         address oracleAddress)
-    public {
-        _bond(specifier, msg.sender, numZap, oracleAddress);
+    public returns(uint256) {
+        require(_bond(specifier, msg.sender, numZap, oracleAddress) == 111);
+        return 10;
     }
 
+    //TODO: remove return value and uncomment if{}
     function _bond(bytes32 specifier,
         address holderAddress,
         uint numZap,
         address oracleAddress)
-    internal {
+    internal returns(uint256) {
         Holder storage holder = holders[holderAddress];
 
         if ( !holder.initialized[oracleAddress] ) {
@@ -207,14 +210,17 @@ contract ZapBondage {
         (numZap, numDots) = calcZap(oracleAddress, specifier, numZap);
 
         // Move zap user must have approved contract to transfer workingZap
-        if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
+        /*if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
             revert();
         }
+*/
+        token.transferFrom(msg.sender, this, numZap * decimals);
 
         holder.bonds[specifier][oracleAddress] += numDots;
         totalBound[specifier][oracleAddress] += numZap;
-    }
 
+        return 111;
+    }
 
     /*
         calculate quantity of ZAP token required for specified amount of dots for endpoint defined by specifier and data provider defined by oracleAddress
