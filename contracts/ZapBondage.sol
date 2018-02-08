@@ -183,16 +183,13 @@ contract ZapBondage {
         }
     }
 
-    //TODO: remove return value and require() check
     function bond(bytes32 specifier,
         uint numZap,
         address oracleAddress)
     public returns(uint256) {
-        require(_bond(specifier, msg.sender, numZap, oracleAddress) == 111);
-        return 10;
+        _bond(specifier, msg.sender, numZap, oracleAddress);
     }
 
-    //TODO: remove return value and uncomment if{}
     function _bond(bytes32 specifier,
         address holderAddress,
         uint numZap,
@@ -218,8 +215,6 @@ contract ZapBondage {
 
         holder.bonds[specifier][oracleAddress] += numDots;
         totalBound[specifier][oracleAddress] += numZap;
-
-        return 111;
     }
 
     /*
