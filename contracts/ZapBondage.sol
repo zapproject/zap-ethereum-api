@@ -280,6 +280,8 @@ contract ZapBondage {
         var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
         ZapRegistry.ZapCurveType curveType = ZapRegistry.ZapCurveType(curveTypeIndex);
 
+        require(curveType != ZapRegistry.ZapCurveType.ZapCurveNone);
+
         uint cost = 0;
 
         if ( curveType == ZapRegistry.ZapCurveType.ZapCurveLinear ) {
