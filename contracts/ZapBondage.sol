@@ -249,7 +249,7 @@ contract ZapBondage {
 
         uint infinity = 10*10;
         uint dotCost = 0;
-
+        uint totalDotCost = 0;
         for ( uint numDots = 0; numDots < infinity; numDots++ ) {
             dotCost = currentCostOfDot(
                 oracleAddress,
@@ -259,9 +259,10 @@ contract ZapBondage {
 
             if ( numZap > dotCost ) {
                 numZap -= dotCost;
+                totalDotCost += dotCost;
             }
             else {
-                return (numZap, numDots);
+                return (totalDotCost, numDots);
             }
         }
     }
