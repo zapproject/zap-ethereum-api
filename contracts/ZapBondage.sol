@@ -47,7 +47,7 @@ contract ZapBondage {
     mapping(address => mapping(address => mapping( bytes32 => uint256))) pendingEscrow;
 
     // (specifier=>(oracleAddress=>numZap)
-    mapping(bytes32 => mapping(address=> uint)) public totalBound;
+    mapping(bytes32 => mapping(address=> uint)) totalBound;
 
     /*
         for restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
@@ -99,6 +99,7 @@ contract ZapBondage {
        Transfer N dots from fromAddress to destAddress called only by the DisptachContract or ArbiterContract
        In smart contract endpoint, occurs per satisfied request, in socket endpoint called on termination of subscription
     */
+    // TODO: it transfer dots only from caller address to caller address
     function transferDots(bytes32 specifier,
         address holderAddress,
         address oracleAddress,
@@ -207,11 +208,11 @@ contract ZapBondage {
         (numZap, numDots) = calcZap(oracleAddress, specifier, numZap);
 
         // Move zap user must have approved contract to transfer workingZap
-        /*if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
+      /*  if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
             revert();
-        }
-*/
-        token.transferFrom(msg.sender, this, numZap * decimals);
+        }*/
+
+        require(token.transferFrom(msg.sender, this, numZap * decimals));
 
         holder.bonds[specifier][oracleAddress] += numDots;
         totalBound[specifier][oracleAddress] += numZap;
@@ -249,7 +250,7 @@ contract ZapBondage {
 
         uint infinity = 10*10;
         uint dotCost = 0;
-
+        uint totalDotCost = 0;
         for ( uint numDots = 0; numDots < infinity; numDots++ ) {
             dotCost = currentCostOfDot(
                 oracleAddress,
@@ -259,9 +260,10 @@ contract ZapBondage {
 
             if ( numZap > dotCost ) {
                 numZap -= dotCost;
+                totalDotCost += dotCost;
             }
             else {
-                return (numZap, numDots);
+                return (totalDotCost, numDots);
             }
         }
     }
@@ -279,6 +281,8 @@ contract ZapBondage {
     returns (uint _cost) {
         var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
         ZapRegistry.ZapCurveType curveType = ZapRegistry.ZapCurveType(curveTypeIndex);
+
+        require(curveType != ZapRegistry.ZapCurveType.ZapCurveNone);
 
         uint cost = 0;
 
