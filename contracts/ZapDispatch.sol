@@ -72,21 +72,21 @@ contract ZapDispatch {
         escrows dot for oracle request, emitts Incoming event for data-provider
     */
     function query(
-        address oracleAddress, //data provider address
+        address provider, //data provider address
         address subscriber, //user contract address( dot-holder)
         string query, //query string
         bytes32 endpoint,// endpoint specifier ala 'smart_contract'
         bytes32[] endpoint_params//endpoint-specific params
     ) external returns (uint256 id) {
 
-        uint dots = bondage.getDots(endpoint, oracleAddress);
+        uint dots = bondage.getDots(endpoint, provider);
 
         if(dots >= 1){
             //enough dots
-            bondage.escrowDots(endpoint, subscriber, oracleAddress, 1);
+            bondage.escrowDots(endpoint, subscriber, provider, 1);
             id = uint256(sha3(block.number, now, query, msg.sender));
-            queries[id] = Query(subscriber, oracleAddress, endpoint, Status.Pending);
-            Incoming(id, oracleAddress, msg.sender, query, endpoint, endpoint_params);
+            queries[id] = Query(subscriber, provider, endpoint, Status.Pending);
+            Incoming(id, provider, msg.sender, query, endpoint, endpoint_params);
         }
 
     }

@@ -9,7 +9,6 @@ require('./helpers/utils');
 const ZapRegistry = artifacts.require("ZapRegistry");
 const ZapToken = artifacts.require("ZapToken");
 const ZapBondage = artifacts.require("TestZapBondage");
-const Oracle = artifacts.require("TestOracle");
 const ZapDispatch = artifacts.require("ZapDispatch");
 const ZapArbiter = artifacts.require("ZapArbiter"); 
 
@@ -93,7 +92,7 @@ contract('ZapBondage', function (accounts) {
     const mul = 2;
 
 
-    /*it("ZAP_BONDAGE_1 - bond() - Check bond function", async function () {
+    it("ZAP_BONDAGE_1 - bond() - Check bond function", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -514,7 +513,7 @@ contract('ZapBondage', function (accounts) {
         const receivedZap = parseInt(res.valueOf());
 
         receivedZap.should.be.equal(0);
-    });*/
+    });
 
     it("ZAP_BONDAGE_23 - escrowDots() - Check that operator can escrow dots", async function () {
         let zapRegistry = await deployZapRegistry();
@@ -614,5 +613,86 @@ contract('ZapBondage', function (accounts) {
         oracleDots.should.be.equal(0);
         escrowDots.should.be.equal(0);
     });
-    
+
+    it("ZAP_BONDAGE_26 - releaseDots() - Check that operator can release dots", async function () {
+        let zapRegistry = await deployZapRegistry();
+        let zapToken = await deployZapToken();
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
+        let zapDisaptch = await deployZapDispatch();
+        let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
+
+        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
+
+        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
+        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
+        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+
+        // we get 5 dots with current linear curve (start = 1, mul = 2)
+        await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
+
+        const dots = 5;
+        const dotsForEscrow = 2;
+
+        const forRelease = accounts[8];
+
+        await zapBondage.setDispatchAddress(accounts[3], { from: owner });
+        await zapBondage.escrowDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
+        await zapBondage.releaseDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
+
+        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const oracleDots = parseInt(oracleDotsRes.valueOf());
+
+        const escrowDotsRes = await zapBondage.pendingEscrow.call(provider, oracle, specifier.valueOf());
+        const escrowDots = parseInt(escrowDotsRes.valueOf());
+
+        const releaseRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: oracle });
+        const releaseDots = parseInt(releaseRes.valueOf());
+
+
+        oracleDots.should.be.equal(dots - dotsForEscrow);
+        escrowDots.should.be.equal(0);
+        releaseDots.should.be.equal(dotsForEscrow);
+    });
+
+    it("ZAP_BONDAGE_27 - releaseDots() - Check that operator can release dots if trying to release more dots than escrowed", async function () {
+        let zapRegistry = await deployZapRegistry();
+        let zapToken = await deployZapToken();
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
+        let zapDisaptch = await deployZapDispatch();
+        let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
+
+        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
+
+        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
+        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
+        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+
+        // we get 5 dots with current linear curve (start = 1, mul = 2)
+        await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
+
+        const dots = 5;
+        const dotsForEscrow = 2;
+
+        const forRelease = accounts[8];
+
+        await zapBondage.setDispatchAddress(accounts[3], { from: owner });
+        await zapBondage.escrowDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
+        await zapBondage.releaseDots(specifier.valueOf(), provider, oracle, dotsForEscrow + 2, { from: accounts[3] });
+
+        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const oracleDots = parseInt(oracleDotsRes.valueOf());
+
+        const escrowDotsRes = await zapBondage.pendingEscrow.call(provider, oracle, specifier.valueOf());
+        const escrowDots = parseInt(escrowDotsRes.valueOf());
+
+        const releaseRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: oracle });
+        const releaseDots = parseInt(releaseRes.valueOf());
+
+
+        oracleDots.should.be.equal(dots - dotsForEscrow);
+        escrowDots.should.be.equal(dotsForEscrow);
+        releaseDots.should.be.equal(0);
+    });
 });

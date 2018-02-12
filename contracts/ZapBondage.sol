@@ -100,22 +100,22 @@ contract ZapBondage {
        In smart contract endpoint, occurs per satisfied request, in socket endpoint called on termination of subscription
     */
     function releaseDots(bytes32 specifier,
-        address holderAddress,
-        address oracleAddress,
+        address fromProviderHolder,
+        address toOracleHolder,
         uint256 numDots)
     public operatorOnly {
-        Holder storage holder = holders[oracleAddress];
+        Holder storage holder = holders[toOracleHolder];
 
-        if ( numDots <= pendingEscrow[holderAddress][oracleAddress][specifier] ) {
-            pendingEscrow[holderAddress][oracleAddress][specifier] -= numDots;
+        if ( numDots <= pendingEscrow[fromProviderHolder][toOracleHolder][specifier] ) {
+            pendingEscrow[fromProviderHolder][toOracleHolder][specifier] -= numDots;
 
-            if ( !holder.initialized[oracleAddress] ) {
+            if ( !holder.initialized[toOracleHolder] ) {
                 // Initialize uninitialized holder
-                holder.initialized[oracleAddress] = true;
-                holder.oracleList.push(oracleAddress);
+                holder.initialized[toOracleHolder] = true;
+                holder.oracleList.push(toOracleHolder);
             }
 
-            holder.bonds[specifier][oracleAddress] += numDots;
+            holder.bonds[specifier][toOracleHolder] += numDots;
         }
     }
 
