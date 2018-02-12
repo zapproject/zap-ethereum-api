@@ -8,7 +8,8 @@ require('chai')
 const ZapRegistry = artifacts.require("ZapRegistry");
 
 import EVMRevert from './helpers/EVMRevert';
-import expectThrow from './helpers/expectThrow';
+
+const Utils = require(".test/helpers/Utils.js");
 
 const deployZapRegistry = () => {
     return ZapRegistry.new();

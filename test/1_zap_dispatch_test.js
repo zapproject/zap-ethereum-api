@@ -3,6 +3,8 @@ const ZapBondage = artifacts.require("ZapBondage");
 const ZapToken = artifacts.require("ZapToken");
 const ZapRegistry = artifacts.require("ZapRegistry");
 
+const Utils = require("./test/helpers/utils.js");
+
 const deployZapDispatch = () => {
     return ZapDispatch.new();
 };
@@ -20,15 +22,6 @@ const deployZapBondage = (tokenAddress, registryAddress) => {
 };
 
 const DECIMALS = 1000000000000000000;
-
-function calculateZapWithLinierCurve(dotsRequired, startValue, multiplier) {
-    let zap = 0;
-    for (i = 0; i < dotsRequired; i++) {
-        zap += multiplier * i + startValue
-    }
-    return zap;
-}
-
 
 contract('ZapDispatch', function (accounts) {
     const owner = accounts[0];
