@@ -100,7 +100,7 @@ contract ZapDispatch {
         if (queries[id].status != Status.Pending)
             revert();
 
-        bondage.transferDots(queries[id].endpoint, queries[id].subscriber, queries[id].provider, 1);
+        bondage.releaseDots(queries[id].endpoint, queries[id].subscriber, queries[id].provider, 1);
         queries[id].status = Status.Fulfilled;
         return true;
     }

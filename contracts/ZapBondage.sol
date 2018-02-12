@@ -99,8 +99,7 @@ contract ZapBondage {
        Transfer N dots from fromAddress to destAddress called only by the DisptachContract or ArbiterContract
        In smart contract endpoint, occurs per satisfied request, in socket endpoint called on termination of subscription
     */
-    // TODO: it transfer dots only from caller address to caller address
-    function transferDots(bytes32 specifier,
+    function releaseDots(bytes32 specifier,
         address holderAddress,
         address oracleAddress,
         uint256 numDots)
