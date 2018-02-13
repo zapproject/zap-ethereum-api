@@ -24,6 +24,8 @@ contract ZapBondage {
        data structure for holder of ZAP bond to data provider
        *currently "smart_contract" or "socket_subscription"
     */
+    event Error();
+    event ReceivedDots(uint256 dots, uint256 zap);
 
     struct Holder {
         //endpoint specifier* => ( provider address => bond value)
@@ -183,16 +185,13 @@ contract ZapBondage {
         }
     }
 
-    //TODO: remove return value and require() check
     function bond(bytes32 specifier,
         uint numZap,
         address oracleAddress)
     public returns(uint256) {
-        require(_bond(specifier, msg.sender, numZap, oracleAddress) == 111);
-        return 10;
+        _bond(specifier, msg.sender, numZap, oracleAddress);
     }
 
-    //TODO: remove return value and uncomment if{}
     function _bond(bytes32 specifier,
         address holderAddress,
         uint numZap,
@@ -209,17 +208,16 @@ contract ZapBondage {
         uint numDots;
         (numZap, numDots) = calcZap(oracleAddress, specifier, numZap);
 
+        ReceivedDots(numDots, numZap);
+
         // Move zap user must have approved contract to transfer workingZap
-        /*if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
+        if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
+            Error();
             revert();
         }
-*/
-        token.transferFrom(msg.sender, this, numZap * decimals);
 
         holder.bonds[specifier][oracleAddress] += numDots;
         totalBound[specifier][oracleAddress] += numZap;
-
-        return 111;
     }
 
     /*
@@ -250,25 +248,27 @@ contract ZapBondage {
         bytes32 specifier,
         uint256 numZap)
     public constant
-    returns(uint256 _numZap, uint256 _numDots) {
+    returns (uint256 _numZap, uint256 _numDots) {
 
-        uint infinity = 10*10;
+        uint infinity = 10 * 10;
         uint dotCost = 0;
-
-        for ( uint numDots = 0; numDots < infinity; numDots++ ) {
+        uint totalDotCost = 0;
+        for (uint numDots = 0; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
                 specifier,
                 (totalBound[specifier][oracleAddress] + numDots)
             );
 
-            if ( numZap > dotCost ) {
+            if (numZap > dotCost) {
                 numZap -= dotCost;
+                totalDotCost += dotCost;
             }
             else {
-                return (numZap, numDots);
+                break;
             }
         }
+        return (totalDotCost, numDots);
     }
 
 
@@ -284,6 +284,8 @@ contract ZapBondage {
     returns (uint _cost) {
         var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
         ZapRegistry.ZapCurveType curveType = ZapRegistry.ZapCurveType(curveTypeIndex);
+
+        require(curveType != ZapRegistry.ZapCurveType.ZapCurveNone);
 
         uint cost = 0;
 
@@ -318,7 +320,7 @@ contract ZapBondage {
         address holderAddress,
         address oracleAddress)
     view
-    internal
+    public
     returns(uint dots) {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
