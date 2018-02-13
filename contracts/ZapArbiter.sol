@@ -11,8 +11,8 @@ contract ZapArbiter {
         address subscriber,        // Ethereum address of the subscriber
         uint256 public_key,        // Public key of the subscriber
         uint256 amount,            // Amount (in 1/100 zap) of ethereum sent
-        bytes32[] endpoint_params, // Endpoint specific( nonce,encrypted_uuid),
-        bytes32 enpoint);
+        bytes32[] endpoint_params, // Endpoint specific(nonce,encrypted_uuid),
+        bytes32 endpoint);
 
     // Used to specify who is the terminator of a contract
     enum ZapSubscriptionTerminator { ZapTermProvider, ZapTermSubscriber }
@@ -70,8 +70,7 @@ contract ZapArbiter {
         subscriptions[provider_address][msg.sender][endpoint] = ZapSubscription({
             dots: blocks,
             blockstart: block.number,
-            preblockend: block.number + blocks
-        });
+            preblockend: block.number + blocks});
 
         // Emit the event
         ZapDataPurchase(provider_address,
@@ -82,7 +81,7 @@ contract ZapArbiter {
                         endpoint);
     }
 
-    // Finish the data feed
+    /// @dev Finish the data feed
     function endZapSubscription(
         bytes32 endpoint,
         address provider_address,
@@ -114,7 +113,7 @@ contract ZapArbiter {
         return true;
     }
 
-    /// @notice Finish the data feed from the provider
+    /// @dev Finish the data feed from the provider
     function endZapSubscription_Provider(
         bytes32 endpoint,
         address subscriber_address,
@@ -130,7 +129,7 @@ contract ZapArbiter {
                 ZapSubscriptionTerminator.ZapTermProvider);
     }
 
-    /// @notice Finish the data feed from the provider
+    /// @dev Finish the data feed from the provider
     function endZapSubscription_Subscriber(
         bytes32 endpoint,
         address subscriber_address,
