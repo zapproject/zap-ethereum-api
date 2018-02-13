@@ -345,18 +345,7 @@ contract('ZapBondage', function (accounts) {
         jsResult.should.be.equal(ethResult);
     });
 
-    it("ZAP_BONDAGE_15 - setMarketAddress() - Check that market address is null before it set", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let zapToken = await deployZapToken();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let zapDisaptch = await deployZapDispatch();
-        let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-
-        const res = await zapBondage.marketAddress.call();
-        res.valueOf().should.be.equal(zeroAddress);
-    });
-
-    it("ZAP_BONDAGE_16 - setMarketAddress() - Check that market address was set", async function () {
+    it("ZAP_BONDAGE_15 - setMarketAddress() - Check that market address was set", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -369,7 +358,7 @@ contract('ZapBondage', function (accounts) {
         res.valueOf().should.be.not.equal(zeroAddress);
     });
 
-    it("ZAP_BONDAGE_17 - setMarketAddress() - Check that market address can't be reset", async function () {
+    it("ZAP_BONDAGE_16 - setMarketAddress() - Check that market address can't be reset", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -385,20 +374,9 @@ contract('ZapBondage', function (accounts) {
         const res2 = await zapBondage.marketAddress.call();
 
         res1.valueOf().should.be.equal(res2.valueOf());
-    });
+    })
 
-    it("ZAP_BONDAGE_18 - setDispatchAddress() - Check that dispatch address is null before it set", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let zapToken = await deployZapToken();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let zapDisaptch = await deployZapDispatch();
-        let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-
-        const res = await zapBondage.dispatchAddress.call();
-        res.valueOf().should.be.equal(zeroAddress);
-    });
-
-    it("ZAP_BONDAGE_19 - setDispatchAddress() - Check that dispatch address was set", async function () {
+    it("ZAP_BONDAGE_17 - setDispatchAddress() - Check that dispatch address was set", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -411,7 +389,7 @@ contract('ZapBondage', function (accounts) {
         res.valueOf().should.be.not.equal(zeroAddress);
     });
 
-    it("ZAP_BONDAGE_20 - setDispatchAddress() - Check that market address can't be reset", async function () {
+    it("ZAP_BONDAGE_18 - setDispatchAddress() - Check that dispatch address can't be reset", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -429,7 +407,7 @@ contract('ZapBondage', function (accounts) {
         res1.valueOf().should.be.equal(res2.valueOf());
     });
 
-    it("ZAP_BONDAGE_21 - getZapBound() - Check received zap getting", async function () {
+    it("ZAP_BONDAGE_19 - getZapBound() - Check received zap getting", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -451,7 +429,7 @@ contract('ZapBondage', function (accounts) {
         receivedZap.should.be.equal(25);
     });
 
-    it("ZAP_BONDAGE_22 - getZapBound() - Check that received zap of unbonded provider is 0", async function () {
+    it("ZAP_BONDAGE_20 - getZapBound() - Check that received zap of unbonded provider is 0", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -469,7 +447,7 @@ contract('ZapBondage', function (accounts) {
         receivedZap.should.be.equal(0);
     });
 
-    it("ZAP_BONDAGE_23 - escrowDots() - Check that operator can escrow dots", async function () {
+    it("ZAP_BONDAGE_21 - escrowDots() - Check that operator can escrow dots", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -502,7 +480,7 @@ contract('ZapBondage', function (accounts) {
         escrowDots.should.be.equal(dotsForEscrow);
     });
 
-    it("ZAP_BONDAGE_24 - escrowDots() - Check that not operator can't escrow dots", async function () {
+    it("ZAP_BONDAGE_22 - escrowDots() - Check that not operator can't escrow dots", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -535,7 +513,7 @@ contract('ZapBondage', function (accounts) {
         escrowDots.should.be.equal(0);
     });
 
-    it("ZAP_BONDAGE_25 - escrowDots() - Check that operator can't escrow dots from oracle that haven't got enough dots", async function () {
+    it("ZAP_BONDAGE_23 - escrowDots() - Check that operator can't escrow dots from oracle that haven't got enough dots", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -568,7 +546,7 @@ contract('ZapBondage', function (accounts) {
         escrowDots.should.be.equal(0);
     });
 
-    it("ZAP_BONDAGE_26 - releaseDots() - Check that operator can release dots", async function () {
+    it("ZAP_BONDAGE_24 - releaseDots() - Check that operator can release dots", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -609,7 +587,7 @@ contract('ZapBondage', function (accounts) {
         releaseDots.should.be.equal(dotsForEscrow);
     });
 
-    it("ZAP_BONDAGE_27 - releaseDots() - Check that operator can release dots if trying to release more dots than escrowed", async function () {
+    it("ZAP_BONDAGE_25 - releaseDots() - Check that operator can release dots if trying to release more dots than escrowed", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
