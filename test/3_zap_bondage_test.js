@@ -4,7 +4,8 @@ require('chai')
     .use(require('chai-as-promised'))
     .use(require('chai-bignumber')(BigNumber))
     .should();
-require('./helpers/utils');
+
+const Utils = require('./helpers/utils.js');
 
 const ZapRegistry = artifacts.require("ZapRegistry");
 const ZapToken = artifacts.require("ZapToken");
@@ -38,42 +39,6 @@ const deployZapArbiter = (bondageAddress, registryAddress) => {
     return ZapArbiter.new(bondageAddress, registryAddress);
 };
 
-const curveTypes = {
-    "None": 0,
-    "Linier": 1,
-    "Exponential": 2,
-    "Logarithmic": 3
-}
-
-const DECIMALS = 1000000000000000000;
-
-function calculateZapWithLinearCurve(dotsRequired, startValue, multiplier) {
-    let zap = 0;
-    for (let i = 0; i < dotsRequired; i++) {
-        zap += multiplier * i + startValue
-    }
-    return zap;
-}
-
-function calculateZapWithExponentialCurve(dotsRequired, startValue, multiplier) {
-    let zap = 0;
-    for (let i = 0; i < dotsRequired; i++) {
-        zap += multiplier * Math.pow(i, 2) + startValue;
-    }
-    return zap;
-}
-
-function calculateZapWithLogarithmicCurve(dotsRequired, startValue, multiplier) {
-    let zap = 0;
-    for (let i = 0; i < dotsRequired; i++) {
-        let totalBound = i;
-        if (totalBound == 0) {
-            totalBound = 1;
-        }
-        zap += multiplier * Math.log2(totalBound) + startValue;
-    }
-    return Math.ceil(zap);
-}
 
 contract('ZapBondage', function (accounts) {
     const owner = accounts[0];
@@ -85,11 +50,16 @@ contract('ZapBondage', function (accounts) {
     const routeKeys = [1];
 
     const specifier = new String("test-specifier");
-    const curveLinear = curveTypes["Linier"];
-    const curveExponential = curveTypes["Exponential"];
-    const curveLogarithmic = curveTypes["Logarithmic"];
+    const curveLinear = Utils.CurveTypes["Linier"];
+    const curveExponential = Utils.CurveTypes["Exponential"];
+    const curveLogarithmic = Utils.CurveTypes["Logarithmic"];
+    const zeroAddress = Utils.ZeroAddress;
     const start = 1;
     const mul = 2;
+
+    const tokensForOwner = new BigNumber("1500e18");
+    const tokensForProvider = new BigNumber("5000e18");
+    const approveTokens = new BigNumber("1000e18");
 
 
     it("ZAP_BONDAGE_1 - bond() - Check bond function", async function () {
@@ -100,9 +70,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         const res = await zapBondage.bond(specifier.valueOf(), 100, oracle, {from: provider});
     });
@@ -116,9 +86,9 @@ contract('ZapBondage', function (accounts) {
         //await zapRegistry.initiateProviderCurve(specifier.valueOf(), curve, start, mul, { from: provider });
 
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         zapBondage.bond(specifier.valueOf(), 1000, oracle, {from: provider}).should.be.eventually.rejectedWith(EVMRevert);
     });
@@ -128,22 +98,12 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
 
-        const publicKey = 111;
-        const title = "test";
-        const routeKeys = [1]; 
-
-        const specifier = new String("test-liner-specifier");
-        const curve = curveTypes["Linier"];
-        const start = 1;
-        const mul = 2;
-
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         //await zapRegistry.initiateProviderCurve(specifier.valueOf(), curve, start, mul, { from: provider });
 
-
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         zapBondage.bond(specifier.valueOf(), 1000, oracle, {from: provider}).should.be.eventually.rejectedWith(EVMRevert);
     });
@@ -157,9 +117,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         await zapBondage.bond(specifier.valueOf(), 1000, oracle, {from: provider});
 
@@ -174,10 +134,8 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[5] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: accounts[5] });
 
-        const jsLinearZap = calculateZapWithLinearCurve(5, start, mul);
-        console.log("js linear calc zap results: ", jsLinearZap);
+        const jsLinearZap = Utils.calculateZapWithLinearCurve(5, start, mul);
         const res1 = await zapBondage.calcZapForDots.call(specifier.valueOf(), 5, accounts[5]);
-        console.log("eth linear calc zap results: ", res1);
         const ethLinearZap = parseInt(res1.valueOf());
 
         jsLinearZap.should.be.equal(ethLinearZap);
@@ -185,10 +143,8 @@ contract('ZapBondage', function (accounts) {
 
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[6] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveExponential, start, mul, { from: accounts[6] });
-        const jsExponentialZap = calculateZapWithExponentialCurve(5, start, mul);
-        console.log("js exponential calc zap results: ", jsExponentialZap);
+        const jsExponentialZap = Utils.calculateZapWithExponentialCurve(5, start, mul);
         const res2 = await zapBondage.calcZapForDots.call(specifier.valueOf(), 5, accounts[6]);
-        console.log("eth exponential calc zap results: ", res2);
         const ethExponentialZap = parseInt(res2.valueOf());
 
         jsExponentialZap.should.be.equal(ethExponentialZap);
@@ -196,10 +152,8 @@ contract('ZapBondage', function (accounts) {
 
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[7] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLogarithmic, start, mul, { from: accounts[7] });
-        const jsLogarithmicZap = calculateZapWithLogarithmicCurve(5, start, mul);
-        console.log("js logarithmic calc zap results: ", jsLogarithmicZap);
+        const jsLogarithmicZap = Utils.calculateZapWithLogarithmicCurve(5, start, mul);
         const res3 = await zapBondage.calcZapForDots.call(specifier.valueOf(), 5, accounts[7]);
-        console.log("eth logarithmic calc zap results: ", res3);
         const ethLogarithmicZap = parseInt(res3.valueOf());
 
         jsLogarithmicZap.should.be.equal(ethLogarithmicZap);
@@ -272,8 +226,8 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle});
 
-        const jsLinearZap = calculateZapWithLinearCurve(101, start, mul);
-        const jsLinearZapWillUsed = calculateZapWithLinearCurve(100, start, mul);
+        const jsLinearZap = Utils.calculateZapWithLinearCurve(101, start, mul);
+        const jsLinearZapWillUsed = Utils.calculateZapWithLinearCurve(100, start, mul);
 
         // TODO: it will not perfomed right way if numZap is 25, should be investigated
         const res1 = await zapBondage.calcZap.call(oracle, specifier.valueOf(), jsLinearZap);
@@ -329,9 +283,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
         await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
@@ -350,9 +304,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         const res = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
         const receivedDots = parseInt(res.valueOf());
@@ -399,7 +353,7 @@ contract('ZapBondage', function (accounts) {
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
 
         const res = await zapBondage.marketAddress.call();
-        res.valueOf().should.be.equal("0x0000000000000000000000000000000000000000");
+        res.valueOf().should.be.equal(zeroAddress);
     });
 
     it("ZAP_BONDAGE_16 - setMarketAddress() - Check that market address was set", async function () {
@@ -412,7 +366,7 @@ contract('ZapBondage', function (accounts) {
         await zapBondage.setMarketAddress(zapArbiter.address, { from: owner });
 
         const res = await zapBondage.marketAddress.call();
-        res.valueOf().should.be.not.equal("0x0000000000000000000000000000000000000000");
+        res.valueOf().should.be.not.equal(zeroAddress);
     });
 
     it("ZAP_BONDAGE_17 - setMarketAddress() - Check that market address can't be reset", async function () {
@@ -441,7 +395,7 @@ contract('ZapBondage', function (accounts) {
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
 
         const res = await zapBondage.dispatchAddress.call();
-        res.valueOf().should.be.equal("0x0000000000000000000000000000000000000000");
+        res.valueOf().should.be.equal(zeroAddress);
     });
 
     it("ZAP_BONDAGE_19 - setDispatchAddress() - Check that dispatch address was set", async function () {
@@ -454,7 +408,7 @@ contract('ZapBondage', function (accounts) {
         await zapBondage.setDispatchAddress(zapDisaptch.address, { from: owner });
 
         const res = await zapBondage.dispatchAddress.call();
-        res.valueOf().should.be.not.equal("0x0000000000000000000000000000000000000000");
+        res.valueOf().should.be.not.equal(zeroAddress);
     });
 
     it("ZAP_BONDAGE_20 - setDispatchAddress() - Check that market address can't be reset", async function () {
@@ -484,9 +438,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
         await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
@@ -505,9 +459,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         const res = await zapBondage.getZapBound.call(oracle, specifier.valueOf(), { from: provider });
         const receivedZap = parseInt(res.valueOf());
@@ -525,9 +479,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
@@ -558,9 +512,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
@@ -591,9 +545,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await zapBondage.bond(specifier.valueOf(), 0, oracle, {from: provider});
@@ -624,9 +578,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
@@ -665,9 +619,9 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(provider, 5000 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: provider});
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
