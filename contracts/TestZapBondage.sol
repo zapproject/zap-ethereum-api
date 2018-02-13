@@ -69,7 +69,6 @@ contract TestZapBondage {
     /*
         set ZapArbiter address
     */
-    //TODO: Should be called only by owner?
     function setMarketAddress(address _marketAddress) public {
         if (marketAddress == 0) {
             marketAddress = _marketAddress;
@@ -79,7 +78,6 @@ contract TestZapBondage {
     /*
         set ZapDispatch address
     */
-    //TODO: Should be called only by owner?
     function setDispatchAddress(address _dispatchAddress) public {
         if ( dispatchAddress == 0 ) {
             dispatchAddress = _dispatchAddress;
