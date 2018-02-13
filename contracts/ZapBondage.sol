@@ -54,20 +54,20 @@ contract ZapBondage {
         }
     }
 
-    /// @notice Initialize Token and ZapRegistry Contracts
+    /// @dev Initialize Token and ZapRegistry Contracts
     function ZapBondage(address tokenAddress, address registryAddress) public {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
     }
 
-    /// @notice Set ZapArbiter address
+    /// @dev Set ZapArbiter address
     function setMarketAddress(address _marketAddress) public {
         if (marketAddress == 0) {
             marketAddress = _marketAddress;
         }
     }
 
-    /// @notice Set ZapDispatch address
+    /// @dev Set ZapDispatch address
     function setDispatchAddress(address _dispatchAddress) public {
         if (dispatchAddress == 0) {
             dispatchAddress = _dispatchAddress;
@@ -83,8 +83,8 @@ contract ZapBondage {
         return totalBound[endpoint][oracleAddress];
     }
 
-    /// @notice Transfer N dots from fromAddress to destAddress. 
-    /// @dev Called only by the DisptachContract or ArbiterContract.
+    /// @dev Transfer N dots from fromAddress to destAddress. 
+    /// Called only by the DisptachContract or ArbiterContract.
     /// In smart contract endpoint, occurs per satisfied request. 
     /// In socket endpoint called on termination of subscription.
     function transferDots(
@@ -111,7 +111,7 @@ contract ZapBondage {
         }
     }
 
-    /// @notice Move numDots dots from provider-requester to bondage according to 
+    /// @dev Move numDots dots from provider-requester to bondage according to 
     /// data-provider address, holder address, and endpoint specifier (ala 'smart_contract')
     function escrowDots(
         bytes32 specifier,
@@ -223,7 +223,7 @@ contract ZapBondage {
         return 111;
     }
 
-    /// @notice Calculate quantity of ZAP token required for specified amount of dots
+    /// @dev Calculate quantity of ZAP token required for specified amount of dots
     /// for endpoint defined by specifier and data provider defined by oracleAddress
     function calcZapForDots(
         bytes32 specifier,
@@ -245,7 +245,7 @@ contract ZapBondage {
         return numZap;
     }
 
-    /// @notice Calculate amount of dots which could be purchased with given numZap ZAP token 
+    /// @dev Calculate amount of dots which could be purchased with given numZap ZAP token 
     /// for endpoint specified by specifier and data-provider address specified by oracleAddress
     function calcZap(
         address oracleAddress,
@@ -273,7 +273,7 @@ contract ZapBondage {
         }
     }
 
-    /// @notice Get the current cost of a dot. 
+    /// @dev Get the current cost of a dot. 
     /// Endpoint specified by specifier.
     /// Data-provider specified by oracleAddress,
     function currentCostOfDot(
