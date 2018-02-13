@@ -46,7 +46,7 @@ contract BasicToken is ERC20Basic {
     using SafeMath for uint256;
     mapping(address => uint256) balances;
 
-    /// @notice Transfer token to a specified address
+    /// @dev Transfer token to a specified address
     /// @param _to The address to transfer to
     /// @param _value The amount to be transferred
     function transfer(address _to, uint256 _value) public returns (bool) {
@@ -58,7 +58,7 @@ contract BasicToken is ERC20Basic {
         return true;
     }
     
-    /// @notice Get the balance of the specified address
+    /// @dev Get the balance of the specified address
     /// @param _owner The address to query the the balance of
     /// @return The amount owned by the passed address
     function balanceOf(address _owner) public constant returns (uint256 balance) {
@@ -73,7 +73,7 @@ contract Ownable {
         address indexed previousOwner, 
         address indexed newOwner);
      
-    /// @notice Set the original `owner` of the contract to the sender account
+    /// @dev Set the original `owner` of the contract to the sender account
     function Ownable() { owner = msg.sender; }
 
     /// @dev Throws if called by any account other than the owner
@@ -82,7 +82,7 @@ contract Ownable {
         _;
     }
 
-    /// @notice Transfers control of the contract to a newOwner
+    /// @dev Transfers control of the contract to a newOwner
     /// @param newOwner The address to transfer ownership to
     function transferOwnership(address newOwner) onlyOwner public {
         require(newOwner != address(0));
@@ -95,7 +95,7 @@ contract Ownable {
 contract StandardToken is ERC20, BasicToken {
     mapping (address => mapping (address => uint256)) allowed;
     
-    /// @notice Transfer tokens from one address to another
+    /// @dev Transfer tokens from one address to another
     /// @param _from address The address which you want to send tokens from
     /// @param _to address The address which you want to transfer to
     /// @param _value uint256 the amount of tokens to be transferred
