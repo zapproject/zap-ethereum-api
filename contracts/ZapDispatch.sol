@@ -36,7 +36,13 @@ __zapCallback is called in user contract
 contract ZapDispatch {
 
     //event data provider is listening for, containing all relevant request parameters
-    event Incoming(uint256 id, address provider, address recipient, string query, bytes32 endpoint, bytes32[] endpoint_params);
+    event Incoming(
+        uint256 id, 
+        address provider, 
+        address recipient, 
+        string query, 
+        bytes32 endpoint, 
+        bytes32[] endpoint_params);
 
     enum Status { Pending, Fulfilled }
 
@@ -66,7 +72,6 @@ contract ZapDispatch {
         }
     }
 
-
     /*
         called by user contract.
         escrows dot for oracle request, emitts Incoming event for data-provider
@@ -77,7 +82,10 @@ contract ZapDispatch {
         string query, //query string
         bytes32 endpoint,// endpoint specifier ala 'smart_contract'
         bytes32[] endpoint_params//endpoint-specific params
-    ) external returns (uint256 id) {
+    ) 
+        external 
+        returns (uint256 id) 
+    {
 
         uint dots = bondage.getDots(endpoint, oracleAddress);
 
@@ -100,7 +108,11 @@ contract ZapDispatch {
         if (queries[id].status != Status.Pending)
             revert();
 
-        bondage.transferDots(queries[id].endpoint, queries[id].subscriber, queries[id].provider, 1);
+        bondage.transferDots(
+            queries[id].endpoint,
+            queries[id].subscriber,
+            queries[id].provider,
+            1);
         queries[id].status = Status.Fulfilled;
         return true;
     }
@@ -118,7 +130,14 @@ contract ZapDispatch {
     /*
         parameter-count specific method called by data provider in response
     */
-    function respond2(uint256 id, string _response1, string _response2) external returns (bool) {
+    function respond2(
+        uint256 id,
+        string _response1,
+        string _response2
+    )
+        external
+        returns (bool) 
+    {
         if (queries[id].provider != msg.sender || !fulfillQuery(id))
             revert();
         Client2(queries[id].subscriber).__zapCallback(id, _response1, _response2);
@@ -127,7 +146,15 @@ contract ZapDispatch {
     /*
         parameter-count specific method called by data provider in response
     */
-    function respond3(uint256 id, string _response1, string _response2, string _response3) external returns (bool) {
+    function respond3(
+        uint256 id,
+        string _response1,
+        string _response2,
+        string _response3
+    )
+        external
+        returns (bool) 
+    {
         if (queries[id].provider != msg.sender || !fulfillQuery(id))
             revert();
         Client3(queries[id].subscriber).__zapCallback(id, _response1, _response2, _response3);
@@ -136,7 +163,16 @@ contract ZapDispatch {
     /*
         parameter-count specific method called by data provider in response
     */
-    function respond4(uint256 id, string _response1, string _response2, string _response3, string _response4) external returns (bool) {
+    function respond4(
+        uint256 id, 
+        string _response1,
+        string _response2,
+        string _response3,
+        string _response4
+    )
+        external
+        returns (bool)
+    {
         if (queries[id].provider != msg.sender || !fulfillQuery(id))
             revert();
         Client4(queries[id].subscriber).__zapCallback(id, _response1, _response2, _response3, _response4);
