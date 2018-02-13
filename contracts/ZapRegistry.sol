@@ -10,7 +10,7 @@ contract ZapRegistry {
         mapping(bytes32 => ZapCurve) curves; // Price vs Supply (contract endpoint)
     }
 
-    // enumeration of curve types representing dot(access token) prices as function of supply
+    // curve types representing dot(access token) prices as function of supply
     enum ZapCurveType {
         ZapCurveNone,
         ZapCurveLinear,
@@ -18,7 +18,7 @@ contract ZapRegistry {
         ZapCurveLogarithmic
     }
 
-    //curve data structure representing dot(access token) prices as function of supply
+    // curve data structure representing dot(access token) prices as function of supply
     struct ZapCurve {
         ZapCurveType curveType;
         uint256 curveStart;
