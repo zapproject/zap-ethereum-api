@@ -1,11 +1,11 @@
 pragma solidity ^0.4.17;
 
-/*
-THIS IS AN EARLY EXPERIMENTAL DEMONSTRATION. DO NOT USE WITH REAL ETHER.
-*/
+
+// THIS IS AN EARLY EXPERIMENTAL DEMONSTRATION. 
+// DO NOT USE WITH REAL ETHER.
+
 import "./ZapDispatch.sol";
 import "./ZapBondage.sol";
-
 
 contract ZapDispatchExample {
 
@@ -29,17 +29,13 @@ contract ZapDispatchExample {
         bondage = ZapBondage(bondageAddress);
     }
 
-    /*
-    HANDLE PROVIDERS RESPONSE HERE: house_passage ("true" or "false")
-    */
+    // HANDLE PROVIDERS RESPONSE HERE: house_passage ("true" or "false")
     function __zapCallback(uint256 id, string _response1) public {
         response1 = _response1;
         Result(_response1);
     }
 
-    /*
-    YOUR QUERY: "0x48da300FA4A832403aF2369cF32d453c599616A6", "hr3101,house_passage,_1515733200"
-    */
+    // YOUR QUERY: "0x48da300FA4A832403aF2369cF32d453c599616A6", "hr3101,house_passage,_1515733200"
     function queryTest(
         address oracleAddress, 
         string query, 
@@ -65,13 +61,11 @@ contract ZapDispatchExample {
     {
         bytes memory tempEmptyStringTest = bytes(source);
 
-        if (tempEmptyStringTest.length == 0) {
+        if (tempEmptyStringTest.length == 0) 
             return 0x0;
-        }
         assembly {
             result := mload(add(source, 32))
         }
     }
-
 }
 
