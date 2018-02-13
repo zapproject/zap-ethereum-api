@@ -20,11 +20,9 @@ contract ERC20 is ERC20Basic {
 }
 
 contract ZapBondage {
-    /*
-       data structure for holder of ZAP bond to data provider
-       *currently "smart_contract" or "socket_subscription"
-    */
-
+      
+    //   data structure for holder of ZAP bond to data provider
+    //   currently ONLY "smart_contract" or "socket_subscription"
     struct Holder {
         //endpoint specifier* => ( provider address => bond value)
         mapping (bytes32 => mapping(address => uint256)) bonds;
@@ -49,44 +47,34 @@ contract ZapBondage {
     // (specifier=>(oracleAddress=>numZap)
     mapping(bytes32 => mapping(address=> uint)) public totalBound;
 
-    /*
-        for restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
-    */
+    // For restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
     modifier operatorOnly {
         if ( msg.sender == marketAddress || msg.sender == dispatchAddress ) {
             _;
         }
     }
 
-    /*
-        initialize token and ZapRegistry contracts
-    */
+    /// @notice Initialize Token and ZapRegistry Contracts
     function ZapBondage(address tokenAddress, address registryAddress) public {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
     }
 
-    /*
-        set ZapArbiter address
-    */
+    /// @notice Set ZapArbiter address
     function setMarketAddress(address _marketAddress) public {
         if (marketAddress == 0) {
             marketAddress = _marketAddress;
         }
     }
 
-    /*
-        set ZapDispatch address
-    */
+    /// @notice Set ZapDispatch address
     function setDispatchAddress(address _dispatchAddress) public {
-        if ( dispatchAddress == 0 ) {
+        if (dispatchAddress == 0) {
             dispatchAddress = _dispatchAddress;
         }
     }
 
-    /*
-        returns total ZAP held by contract
-    */
+    /// @return total ZAP held by contract
     function getZapBound(address oracleAddress,
         bytes32 endpoint)
     public
@@ -95,21 +83,25 @@ contract ZapBondage {
         return totalBound[endpoint][oracleAddress];
     }
 
-    /*
-       Transfer N dots from fromAddress to destAddress called only by the DisptachContract or ArbiterContract
-       In smart contract endpoint, occurs per satisfied request, in socket endpoint called on termination of subscription
-    */
-    function transferDots(bytes32 specifier,
+    /// @notice Transfer N dots from fromAddress to destAddress. 
+    /// @dev Called only by the DisptachContract or ArbiterContract.
+    /// In smart contract endpoint, occurs per satisfied request. 
+    /// In socket endpoint called on termination of subscription.
+    function transferDots(
+        bytes32 specifier,
         address holderAddress,
         address oracleAddress,
-        uint256 numDots)
-    public operatorOnly {
+        uint256 numDots
+    )
+        public 
+        operatorOnly 
+    {
         Holder storage holder = holders[oracleAddress];
 
-        if ( numDots <= pendingEscrow[holderAddress][oracleAddress][specifier] ) {
+        if (numDots <= pendingEscrow[holderAddress][oracleAddress][specifier]) {
             pendingEscrow[holderAddress][oracleAddress][specifier] -= numDots;
 
-            if ( !holder.initialized[oracleAddress] ) {
+            if (!holder.initialized[oracleAddress]) {
                 // Initialize uninitialized holder
                 holder.initialized[oracleAddress] = true;
                 holder.oracleList.push(oracleAddress);
@@ -119,88 +111,98 @@ contract ZapBondage {
         }
     }
 
-    /*
-       move numDots dots from provider-requester to bondage according to data-provider address, holder address and endpoint specifier( ala 'smart_contract')
-    */
-    function escrowDots(bytes32 specifier,
+    /// @notice Move numDots dots from provider-requester to bondage according to 
+    /// data-provider address, holder address, and endpoint specifier (ala 'smart_contract')
+    function escrowDots(
+        bytes32 specifier,
         address holderAddress,
         address oracleAddress,
-        uint256 numDots)
-    operatorOnly
-    public
-    returns (bool success)  {
+        uint256 numDots
+    )
+        operatorOnly
+        public
+        returns (bool success)  
+    {
 
         uint currentDots = _getDots(specifier, holderAddress, oracleAddress);
-        if(currentDots >= numDots){
-
-            holders[holderAddress].bonds[specifier][oracleAddress]-=numDots;
-            pendingEscrow[holderAddress][oracleAddress][specifier]+=numDots;
+        if(currentDots >= numDots) {
+            holders[holderAddress].bonds[specifier][oracleAddress] -= numDots;
+            pendingEscrow[holderAddress][oracleAddress][specifier] += numDots;
             return true;
         }
-        else{
             return false;
-        }
     }
 
-    function unbond(bytes32 specifier,
+    function unbond(
+        bytes32 specifier,
         uint numDots,
-        address oracleAddress)
-    public {
+        address oracleAddress
+    )
+        public 
+    {
         _unbond(
             specifier,
             msg.sender,
             numDots,
-            oracleAddress
-        );
+            oracleAddress);
     }
 
-    function _unbond(bytes32 specifier,
+    function _unbond(
+        bytes32 specifier,
         address holderAddress,
         uint numDots,
-        address oracleAddress)
-    internal {
+        address oracleAddress
+    )
+        internal 
+    {
         Holder storage holder = holders[holderAddress];
         uint256 currentDots = holder.bonds[specifier][oracleAddress];
 
-        if ( currentDots >= numDots ) {
+        if (currentDots >= numDots) {
             uint numZap = 0;
             uint localTotal = totalBound[specifier][oracleAddress];
 
-            for ( uint i = 0; i < numDots; i++ ) {
+            for (uint i = 0; i < numDots; i++) {
                 totalBound[specifier][oracleAddress] -= 1;
                 holder.bonds[specifier][oracleAddress] -= 1;
 
                 numZap += currentCostOfDot(
                     oracleAddress,
                     specifier,
-                    localTotal
-                );
+                    localTotal);
 
                 localTotal -= 1;
             }
-
             token.transfer(holderAddress, numZap*decimals);
         }
     }
 
     //TODO: remove return value and require() check
-    function bond(bytes32 specifier,
+    function bond(
+        bytes32 specifier,
         uint numZap,
-        address oracleAddress)
-    public returns(uint256) {
+        address oracleAddress
+    )
+        public 
+        returns(uint256) 
+    {
         require(_bond(specifier, msg.sender, numZap, oracleAddress) == 111);
         return 10;
     }
 
     //TODO: remove return value and uncomment if{}
-    function _bond(bytes32 specifier,
+    function _bond(
+        bytes32 specifier,
         address holderAddress,
         uint numZap,
-        address oracleAddress)
-    internal returns(uint256) {
+        address oracleAddress
+    )
+        internal 
+        returns(uint256) 
+    {
         Holder storage holder = holders[holderAddress];
 
-        if ( !holder.initialized[oracleAddress] ) {
+        if (!holder.initialized[oracleAddress]) {
             // Initialize uninitialized holder
             holder.initialized[oracleAddress] = true;
             holder.oracleList.push(oracleAddress);
@@ -210,10 +212,9 @@ contract ZapBondage {
         (numZap, numDots) = calcZap(oracleAddress, specifier, numZap);
 
         // Move zap user must have approved contract to transfer workingZap
-        /*if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
+        /*if (!token.transferFrom(msg.sender, this, numZap * decimals)) 
             revert();
-        }
-*/
+        */
         token.transferFrom(msg.sender, this, numZap * decimals);
 
         holder.bonds[specifier][oracleAddress] += numDots;
@@ -222,104 +223,105 @@ contract ZapBondage {
         return 111;
     }
 
-    /*
-        calculate quantity of ZAP token required for specified amount of dots for endpoint defined by specifier and data provider defined by oracleAddress
-    */
+    /// @notice Calculate quantity of ZAP token required for specified amount of dots
+    /// for endpoint defined by specifier and data provider defined by oracleAddress
     function calcZapForDots(
         bytes32 specifier,
         uint numDots,
-        address oracleAddress) public constant returns(uint256 _numZap){
-
+        address oracleAddress
+    ) 
+        public
+        view
+        returns (uint256 _numZap)
+    {
         uint256 localTotal = totalBound[specifier][oracleAddress];
         uint256 numZap;
         for(uint i=0; i<numDots; i++){
             numZap += currentCostOfDot(
                 oracleAddress,
                 specifier,
-                localTotal+i
-            );
+                localTotal+i);
         }
         return numZap;
     }
 
-
-    /*
-        calculate amount of dots which could be purchased with given numZap ZAP token for endpoint specified by specifier and data-provider address specified by oracleAddress
-    */
-    function calcZap(address oracleAddress,
+    /// @notice Calculate amount of dots which could be purchased with given numZap ZAP token 
+    /// for endpoint specified by specifier and data-provider address specified by oracleAddress
+    function calcZap(
+        address oracleAddress,
         bytes32 specifier,
-        uint256 numZap)
-    public constant
-    returns(uint256 _numZap, uint256 _numDots) {
-
+        uint256 numZap
+    )
+        public
+        view
+        returns (uint256 _numZap, uint256 _numDots) 
+    {
         uint infinity = 10*10;
         uint dotCost = 0;
 
-        for ( uint numDots = 0; numDots < infinity; numDots++ ) {
+        for (uint numDots = 0; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
                 specifier,
-                (totalBound[specifier][oracleAddress] + numDots)
-            );
+                (totalBound[specifier][oracleAddress] + numDots));
 
-            if ( numZap > dotCost ) {
+            if (numZap > dotCost) {
                 numZap -= dotCost;
-            }
-            else {
+            } else {
                 return (numZap, numDots);
             }
         }
     }
 
-
-
-    /*
-        get the current cost of a doc. endpoint specified by specifier, data-provider specified by oracleAddress,
-    */
-    function currentCostOfDot(address oracleAddress,
+    /// @notice Get the current cost of a dot. 
+    /// Endpoint specified by specifier.
+    /// Data-provider specified by oracleAddress,
+    function currentCostOfDot(
+        address oracleAddress,
         bytes32 specifier,
-        uint _totalBound)
-    internal
-    constant
-    returns (uint _cost) {
+        uint _totalBound
+    )
+        internal
+        view
+        returns (uint _cost)
+    {
         var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
         ZapRegistry.ZapCurveType curveType = ZapRegistry.ZapCurveType(curveTypeIndex);
 
         uint cost = 0;
 
-        if ( curveType == ZapRegistry.ZapCurveType.ZapCurveLinear ) {
+        if (curveType == ZapRegistry.ZapCurveType.ZapCurveLinear) {
             cost = curveMultiplier * _totalBound + curveStart;
-        }
-        else if ( curveType == ZapRegistry.ZapCurveType.ZapCurveExponential ) {
-
+        } else if (curveType == ZapRegistry.ZapCurveType.ZapCurveExponential) {
             cost = curveMultiplier * (_totalBound ** 2) + curveStart;
-        }
-        else if ( curveType == ZapRegistry.ZapCurveType.ZapCurveLogarithmic ) {
-            if ( _totalBound == 0 ) {
+        } else if (curveType == ZapRegistry.ZapCurveType.ZapCurveLogarithmic) {
+            if (_totalBound == 0)
                 _totalBound = 1;
-            }
-
             cost = curveMultiplier * fastlog2(_totalBound) + curveStart;
         }
-
         return cost;
     }
 
-
-    function getDots(bytes32 specifier,
-        address oracleAddress)
-    view
-    public
-    returns(uint dots) {
+    function getDots(
+        bytes32 specifier,
+        address oracleAddress
+    )
+        view
+        public
+        returns (uint dots)
+    {
         return _getDots(specifier, msg.sender, oracleAddress);
     }
 
-    function _getDots(bytes32 specifier,
+    function _getDots(
+        bytes32 specifier,
         address holderAddress,
-        address oracleAddress)
-    view
-    internal
-    returns(uint dots) {
+        address oracleAddress
+    )
+        view
+        internal
+        returns (uint dots) 
+    {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
 
