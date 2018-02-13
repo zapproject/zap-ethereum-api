@@ -19,7 +19,7 @@ contract ERC20 is ERC20Basic {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract ZapBondage {
+contract TestZapBondage {
     /*
        data structure for holder of ZAP bond to data provider
        *currently "smart_contract" or "socket_subscription"
@@ -34,20 +34,20 @@ contract ZapBondage {
         address[] oracleList;
     }
 
-    ZapRegistry registry;
-    ERC20 token;
+    ZapRegistry public registry;
+    ERC20 public token;
     uint public decimals = 10**16; //dealing in units of 1/100 zap
 
-    address marketAddress;
-    address dispatchAddress;
+    address public marketAddress;
+    address public dispatchAddress;
 
     mapping(address => Holder) holders;
 
     // (holder => (oracleAddress => (specifier => numEscrow)))
-    mapping(address => mapping(address => mapping( bytes32 => uint256))) pendingEscrow;
+    mapping(address => mapping(address => mapping( bytes32 => uint256))) public pendingEscrow;
 
     // (specifier=>(oracleAddress=>numZap)
-    mapping(bytes32 => mapping(address=> uint)) totalBound;
+    mapping(bytes32 => mapping(address=> uint)) public totalBound;
 
     /*
         for restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
@@ -61,7 +61,7 @@ contract ZapBondage {
     /*
         initialize token and ZapRegistry contracts
     */
-    function ZapBondage(address tokenAddress, address registryAddress) public {
+    function TestZapBondage(address tokenAddress, address registryAddress) public {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
     }
@@ -158,7 +158,7 @@ contract ZapBondage {
         address holderAddress,
         uint numDots,
         address oracleAddress)
-    internal {
+    public {
         Holder storage holder = holders[holderAddress];
         uint256 currentDots = holder.bonds[specifier][oracleAddress];
 
@@ -194,7 +194,7 @@ contract ZapBondage {
         address holderAddress,
         uint numZap,
         address oracleAddress)
-    internal returns(uint256) {
+    public returns(uint256) {
         Holder storage holder = holders[holderAddress];
 
         if ( !holder.initialized[oracleAddress] ) {
@@ -207,9 +207,9 @@ contract ZapBondage {
         (numZap, numDots) = calcZap(oracleAddress, specifier, numZap);
 
         // Move zap user must have approved contract to transfer workingZap
-      /*  if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
-            revert();
-        }*/
+        /*  if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
+              revert();
+          }*/
 
         require(token.transferFrom(msg.sender, this, numZap * decimals));
 
@@ -276,7 +276,7 @@ contract ZapBondage {
     function currentCostOfDot(address oracleAddress,
         bytes32 specifier,
         uint _totalBound)
-    internal
+    public
     constant
     returns (uint _cost) {
         var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
@@ -317,7 +317,7 @@ contract ZapBondage {
         address holderAddress,
         address oracleAddress)
     view
-    internal
+    public
     returns(uint dots) {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
