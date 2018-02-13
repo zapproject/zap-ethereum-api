@@ -1,7 +1,18 @@
+const BigNumber = web3.BigNumber;
+
+require('chai')
+    .use(require('chai-as-promised'))
+    .use(require('chai-bignumber')(BigNumber))
+    .should();
+
+const Utils = require("./helpers/utils");
+
 const ZapDispatch = artifacts.require("ZapDispatch");
 const ZapBondage = artifacts.require("ZapBondage");
 const ZapToken = artifacts.require("ZapToken");
 const ZapRegistry = artifacts.require("ZapRegistry");
+const Subscriber = artifacts.require("TestSubscriber");
+
 
 const deployZapDispatch = () => {
     return ZapDispatch.new();
@@ -19,19 +30,40 @@ const deployZapBondage = (tokenAddress, registryAddress) => {
     return ZapBondage.new(tokenAddress, registryAddress);
 };
 
-const DECIMALS = 1000000000000000000;
+const deploySubscriber = (tokenAddress, dispatchAddress, bondageAddress) => {
+    return Subscriber.new(tokenAddress, dispatchAddress, bondageAddress);
+};
 
-function calculateZapWithLinierCurve(dotsRequired, startValue, multiplier) {
-    let zap = 0;
-    for (i = 0; i < dotsRequired; i++) {
-        zap += multiplier * i + startValue
-    }
-    return zap;
+
+const CurveTypes = {
+    "None": 0,
+    "Linear": 1,
+    "Exponentioal": 2,
+    "Logarithmic": 3
 }
-
 
 contract('ZapDispatch', function (accounts) {
     const owner = accounts[0];
+    const provider = accounts[1];
+    const subscriber = accounts[2];
+
+
+    const tokensForOwner = new BigNumber("1500e18");
+    const tokensForProvider = new BigNumber("2000e18");
+    const tokensForSubscriber = new BigNumber("2000e18");
+    const approveTokens = new BigNumber("1000e18");
+
+
+    const specifier = new String("spec01");
+    const publicKey = 10001;
+    const title = "tst";
+    const extInfo = [111, 222, 333];
+
+    const curveStart = 1;
+    const curveMultiplier = 2;
+
+    const query = "Hello!";
+
 
     it("ZAP_DISPATCH_1 - Check bondage address setuping", async function () {
         try {
@@ -50,49 +82,42 @@ contract('ZapDispatch', function (accounts) {
     it("ZAP_DISPATCH_2 - Check query function", async function () {
 
         let zapDispatch = await deployZapDispatch();
-
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
+        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
 
         await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
 
-
-        const specifier = new String("test-liner-specifier");
-        const endpoint = new String("test-endppoint");
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
-        await zapToken.allocate(owner, 1500 * DECIMALS, { from: owner });
-        await zapToken.allocate(accounts[1], 100 * DECIMALS, { from: owner });
-        await zapToken.approve(zapBondage.address, 1000 * DECIMALS, {from: owner});
+        // TOKEN ALLOCATION
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await zapToken.approve(zapBondage.address, approveTokens, {from: subscriber});
+        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
-        let ownerBalance = await zapToken.balanceOf.call(owner);
-        console.log("owner balance before bonding: ", ownerBalance.valueOf() / DECIMALS);
+        // CREATING DATA PROVIDER
+        await zapRegistry.initiateProvider(publicKey, extInfo, title, {from: provider});
+        await zapRegistry.initiateProviderCurve(specifier.valueOf(), 1, curveStart, curveMultiplier, {from: provider});
 
-        await zapRegistry.initiateProvider(111, [1], "test", {from: owner});
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), 1, 1, 2, {from: owner});
-        let c = await zapRegistry.getProviderCurve.call(owner, specifier.valueOf())
-       // console.log("registered curve for provider spevcifier:")
-       // console.log(c);
+        // BONDING DATA USER WITH DATA PROVIDER
+       // await zapBondage.bond(specifier.valueOf(), 10000, provider, { from: subscriber });
+        await subscriberContract.bondToOracle(provider, 10000);
 
-        let dotsAndZap = await zapBondage.calcZap.call(owner, specifier.valueOf(), 10001, {from: owner});
-        console.log("dots count for zap tokens: ", dotsAndZap[1].valueOf());
-        console.log("number of zap for bonding: ", dotsAndZap[0].valueOf());
+        const res = await subscriberContract.queryTest(provider, query);
 
-        let totalBound = await zapBondage.getZapBound.call(owner, specifier.valueOf());
-        console.log("total bound before: ", totalBound.valueOf());
+        // We can loop through result.logs to see if we triggered the Transfer event.
+        for (var i = 0; i < res.logs.length; i++) {
+            var log = res.logs[i];
 
-        const res = await zapBondage.bond(specifier.valueOf(), 10001, owner, {from: owner});
-        //console.log("bond res code: ", res.valueOf());
-
-        ownerBalance = await zapToken.balanceOf.call(owner);
-        console.log("owner balance after bonding: ", ownerBalance.valueOf() / DECIMALS);
-
-        totalBound = await zapBondage.getZapBound.call(owner, specifier.valueOf());
-        console.log("total bound after: ", totalBound.valueOf());
-
-        await zapDispatch.query(owner, accounts[9], specifier.valueOf(), endpoint.valueOf(), params); 
+            if (log.event == "Incoming") {
+                console.log("Query perfomed!");
+                break;
+            }
+        }
     });
 });

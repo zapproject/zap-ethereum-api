@@ -22,7 +22,7 @@ contract Client4 {
 
 /*
 
-For use in example contract, see ZapDispatchExample.sol
+For use in example contract, see TestSubscriber.sol
 
 when user contract calls ZapDispatch.query(), 1 oracle specific dot is escrowed by ZapBondage and Incoming event is emitted
 
@@ -37,6 +37,8 @@ contract ZapDispatch {
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(uint256 id, address provider, address recipient, string query, bytes32 endpoint, bytes32[] endpoint_params);
+    event QueryPerformError();
+    event HolderDots(address holder, uint256 dots);
 
     enum Status { Pending, Fulfilled }
 
@@ -79,7 +81,9 @@ contract ZapDispatch {
         bytes32[] endpoint_params//endpoint-specific params
     ) external returns (uint256 id) {
 
-        uint dots = bondage.getDots(endpoint, oracleAddress);
+        uint dots = bondage._getDots(endpoint, subscriber, oracleAddress);
+
+        HolderDots(subscriber, dots);
 
         if(dots >= 1){
             //enough dots
@@ -87,6 +91,8 @@ contract ZapDispatch {
             id = uint256(sha3(block.number, now, query, msg.sender));
             queries[id] = Query(subscriber, oracleAddress, endpoint, Status.Pending);
             Incoming(id, oracleAddress, msg.sender, query, endpoint, endpoint_params);
+        } else {
+            QueryPerformError();
         }
 
     }

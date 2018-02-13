@@ -20,7 +20,7 @@ contract Client4 {
 
 /*
 
-For use in example contract, see ZapDispatchExample.sol
+For use in example contract, see TestSubscriber.sol
 
 when user contract calls ZapDispatch.query(), 1 oracle specific dot is escrowed by ZapBondage and Incoming event is emitted
  
