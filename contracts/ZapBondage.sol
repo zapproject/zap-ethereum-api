@@ -45,7 +45,7 @@ contract ZapBondage {
     mapping(address => mapping(address => mapping( bytes32 => uint256))) pendingEscrow;
 
     // (specifier=>(oracleAddress=>numZap)
-    mapping(bytes32 => mapping(address=> uint)) public totalBound;
+    mapping(bytes32 => mapping(address=> uint)) totalBound;
 
     // For restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
     modifier operatorOnly {
@@ -83,31 +83,32 @@ contract ZapBondage {
         return totalBound[endpoint][oracleAddress];
     }
 
+
     /// @dev Transfer N dots from fromAddress to destAddress. 
     /// Called only by the DisptachContract or ArbiterContract.
     /// In smart contract endpoint, occurs per satisfied request. 
     /// In socket endpoint called on termination of subscription.
-    function transferDots(
+    function releaseDots(
         bytes32 specifier,
-        address holderAddress,
-        address oracleAddress,
+        address fromProviderHolder,
+        address toOracleHolder,
         uint256 numDots
     )
         public 
         operatorOnly 
     {
-        Holder storage holder = holders[oracleAddress];
+        Holder storage holder = holders[toOracleHolder];
 
-        if (numDots <= pendingEscrow[holderAddress][oracleAddress][specifier]) {
-            pendingEscrow[holderAddress][oracleAddress][specifier] -= numDots;
+        if (numDots <= pendingEscrow[fromProviderHolder][toOracleHolder][specifier]) {
+            pendingEscrow[fromProviderHolder][toOracleHolder][specifier] -= numDots;
 
-            if (!holder.initialized[oracleAddress]) {
+            if (!holder.initialized[toOracleHolder]) {
                 // Initialize uninitialized holder
-                holder.initialized[oracleAddress] = true;
-                holder.oracleList.push(oracleAddress);
+                holder.initialized[toOracleHolder] = true;
+                holder.oracleList.push(toOracleHolder);
             }
 
-            holder.bonds[specifier][oracleAddress] += numDots;
+            holder.bonds[specifier][toOracleHolder] += numDots;
         }
     }
 
@@ -177,7 +178,6 @@ contract ZapBondage {
         }
     }
 
-    //TODO: remove return value and require() check
     function bond(
         bytes32 specifier,
         uint numZap,
@@ -186,11 +186,9 @@ contract ZapBondage {
         public 
         returns(uint256) 
     {
-        require(_bond(specifier, msg.sender, numZap, oracleAddress) == 111);
-        return 10;
+        _bond(specifier, msg.sender, numZap, oracleAddress);
     }
 
-    //TODO: remove return value and uncomment if{}
     function _bond(
         bytes32 specifier,
         address holderAddress,
@@ -215,12 +213,11 @@ contract ZapBondage {
         /*if (!token.transferFrom(msg.sender, this, numZap * decimals)) 
             revert();
         */
-        token.transferFrom(msg.sender, this, numZap * decimals);
+        require(token.transferFrom(msg.sender, this, numZap * decimals));
+
 
         holder.bonds[specifier][oracleAddress] += numDots;
         totalBound[specifier][oracleAddress] += numZap;
-
-        return 111;
     }
 
     /// @dev Calculate quantity of ZAP token required for specified amount of dots
@@ -258,7 +255,8 @@ contract ZapBondage {
     {
         uint infinity = 10*10;
         uint dotCost = 0;
-
+        uint totalDotCost = 0;
+        
         for (uint numDots = 0; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
@@ -267,10 +265,12 @@ contract ZapBondage {
 
             if (numZap > dotCost) {
                 numZap -= dotCost;
+                totalDotCost += dotCost;
             } else {
-                return (numZap, numDots);
+                break;
             }
         }
+        return (totalDotCost, numDots);
     }
 
     /// @dev Get the current cost of a dot. 
@@ -287,6 +287,8 @@ contract ZapBondage {
     {
         var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
         ZapRegistry.ZapCurveType curveType = ZapRegistry.ZapCurveType(curveTypeIndex);
+
+        require(curveType != ZapRegistry.ZapCurveType.ZapCurveNone);
 
         uint cost = 0;
 

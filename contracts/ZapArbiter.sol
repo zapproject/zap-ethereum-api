@@ -101,20 +101,20 @@ contract ZapArbiter {
             uint256 returnedDots = subscription.dots - earnedDots;
 
             // Transfer the earned dots to the provider
-            bondage.transferDots(
+            bondage.releaseDots(
                 endpoint,
                 subscriber_address,
                 provider_address,
                 earnedDots);
             //  Transfer the returned dots to the subscriber
-            bondage.transferDots(
+            bondage.releaseDots(
                 endpoint,
                 subscriber_address,
                 subscriber_address,
                 returnedDots);
         } else {
             // Transfer all the dots
-            bondage.transferDots(
+            bondage.releaseDots(
                 endpoint,
                 subscriber_address,
                 provider_address,
