@@ -218,7 +218,7 @@ contract('ZapBondage', function (accounts) {
         ethZap.should.be.equal(0);
     });
 
-    it("ZAP_BONDAGE_10 - calcZap() - Check calcZap function return 0 dots and 0 zap if numZap is more than 100 dots cost", async function () {
+    it("ZAP_BONDAGE_10 - calcZap() - Check calcZap function return maximum dots and maximum zap if numZap is more than 100 dots cost", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
