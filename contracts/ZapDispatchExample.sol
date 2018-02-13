@@ -17,7 +17,13 @@ contract ZapDispatchExample {
     ZapDispatch dispatch;
     ZapBondage bondage;
 
-    function ZapDispatchExample(address tokenAddress, address dispatchAddress, address bondageAddress) {
+    function ZapDispatchExample(
+        address tokenAddress, 
+        address dispatchAddress, 
+        address bondageAddress
+    )   
+        public
+    {
         token = ERC20(tokenAddress);
         dispatch = ZapDispatch(dispatchAddress);
         bondage = ZapBondage(bondageAddress);
@@ -34,8 +40,13 @@ contract ZapDispatchExample {
     /*
     YOUR QUERY: "0x48da300FA4A832403aF2369cF32d453c599616A6", "hr3101,house_passage,_1515733200"
     */
-    function queryTest(address oracleAddress, string query, string enpoint) public {
-
+    function queryTest(
+        address oracleAddress, 
+        string query, 
+        string enpoint
+    ) 
+        public 
+    {
         bytes32 endpoint = "smartcontract";
         uint256 numZap = bondage.calcZapForDots(endpoint, 1, oracleAddress);
         if ((token.balanceOf(this) / (token.decimals() / 100)) >= numZap) {
@@ -47,7 +58,11 @@ contract ZapDispatchExample {
         }
     }
 
-    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
+    function stringToBytes32(string memory source) 
+        internal 
+        pure 
+        returns (bytes32 result) 
+    {
         bytes memory tempEmptyStringTest = bytes(source);
 
         if (tempEmptyStringTest.length == 0) {
