@@ -29,11 +29,11 @@ contract ZapRegistry {
 
     function ZapRegistry() public { }
 
-    /// @notice Initiates a provider
-    /// @dev If no address->ZapOracle mapping exists, ZapOracle object is created
-    /// @param public key: unique id for provider. used for encyrpted key swap for subscription endpoints
-    /// @param ext_into: endpoint specific params. TODO: update to bytes32[] endpoint params
-    /// @param title: name
+    /// @dev Initiates a provider.
+    /// If no address->ZapOracle mapping exists, ZapOracle object is created
+    /// @param public key unique id for provider. used for encyrpted key swap for subscription endpoints
+    /// @param ext_into endpoint specific params. TODO: update to bytes32[] endpoint params
+    /// @param title name
     function initiateProvider(
         uint256 public_key,
         uint256[] ext_info,
@@ -50,12 +50,12 @@ contract ZapRegistry {
         }
     }
 
-    /// @notice Initiates an endpoint specific provider curve
-    /// @dev If oracle[specfifier] is uninitialized, ZapCurve is mapped to specifier
-    /// @param specifier: specifier of endpoint. currently "smart_contract" or "socket_subscription"
-    /// @param curveType: dot-cost vs oracle-specific dot-supply
-    /// @param curveStart: y-offset of cost( always initial cost )
-    /// @param curveMultiplier: coefficient to curveType
+    /// @dev Initiates an endpoint specific provider curve
+    /// If oracle[specfifier] is uninitialized, ZapCurve is mapped to specifier
+    /// @param specifier specifier of endpoint. currently "smart_contract" or "socket_subscription"
+    /// @param curveType dot-cost vs oracle-specific dot-supply
+    /// @param curveStart y-offset of cost( always initial cost )
+    /// @param curveMultiplier coefficient to curveType
     function initiateProviderCurve(
         bytes32 specifier,
         ZapCurveType curveType,
@@ -103,7 +103,7 @@ contract ZapRegistry {
         return oracles[provider].public_key;
     }
     
-    /// @notice Get curve paramaters from oracle
+    /// @dev Get curve paramaters from oracle
     function getProviderCurve(
         address provider,
         bytes32 specifier
