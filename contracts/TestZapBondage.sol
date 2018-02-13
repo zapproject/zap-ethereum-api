@@ -264,7 +264,7 @@ contract TestZapBondage {
                 totalDotCost += dotCost;
             }
             else {
-                return (totalDotCost, numDots);
+                break;
             }
         }
         return (totalDotCost, numDots);
