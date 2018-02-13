@@ -32,6 +32,7 @@ contract ZapRegistry {
     }
 
     mapping(address => ZapOracle) oracles;
+    address[] oracleIndex;
 
     function ZapRegistry() public { }
 
@@ -54,7 +55,7 @@ contract ZapRegistry {
                 ext_info,
                 title
             );
-
+            oracleIndex.push(msg.sender);
         }
     }
 
@@ -138,5 +139,37 @@ contract ZapRegistry {
         curve.curveStart,
         curve.curveMultiplier
         );
+    }
+
+    function getNextProvider(uint256 index)
+        view returns(
+            uint256 nextIndex,
+            address oracleAddress,
+            uint256 public_key,
+            string title
+        ){
+        
+        if(index < oracleIndex.length){
+            if(index+1 < oracleIndex.length){
+                
+                return(
+                    index+1, 
+                    oracleIndex[index], 
+                    oracles[oracleIndex[index]].public_key, 
+                    oracles[oracleIndex[index]].title
+                );            
+            }
+            else{
+                return(
+                    0, 
+                    oracleIndex[index], 
+                    oracles[oracleIndex[index]].public_key, 
+                    oracles[oracleIndex[index]].title
+                );                            
+            }
+        }
+        else{
+            return(0,0x0,0,"");
+        }
     }
 }
