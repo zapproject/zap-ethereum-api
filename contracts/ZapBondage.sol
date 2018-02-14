@@ -188,15 +188,15 @@ contract ZapBondage {
     function bond(bytes32 specifier,
         uint numZap,
         address oracleAddress)
-    public returns(uint256) {
-        _bond(specifier, msg.sender, numZap, oracleAddress);
+    public {
+        return _bond(specifier, msg.sender, numZap, oracleAddress);
     }
 
     function _bond(bytes32 specifier,
         address holderAddress,
         uint numZap,
         address oracleAddress)
-    internal returns(uint256) {
+    internal {
         Holder storage holder = holders[holderAddress];
 
         if ( !holder.initialized[oracleAddress] ) {
@@ -212,7 +212,6 @@ contract ZapBondage {
 
         // Move zap user must have approved contract to transfer workingZap
         if ( !token.transferFrom(msg.sender, this, numZap * decimals) ) {
-            Error();
             revert();
         }
 
