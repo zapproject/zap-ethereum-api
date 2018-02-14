@@ -33,7 +33,7 @@ dots are moved from ZapBondage escrow, to data-provider's bond Holder struct, wi
 __zapCallback is called in user contract
 
 */
-contract ZapDispatch {
+contract TestZapDispatch {
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(uint256 id, address provider, address recipient, string query, bytes32 endpoint, bytes32[] endpoint_params);
@@ -50,10 +50,10 @@ contract ZapDispatch {
     }
 
     //mapping of unique ids to query objects
-    mapping (uint256 => Query) queries;
+    mapping (uint256 => Query) public queries;
 
-    address bondageAddress;
-    ZapBondage bondage;
+    address public bondageAddress;
+    ZapBondage public bondage;
 
     function ZapDataProxyDispatch() view {}
 
@@ -98,7 +98,7 @@ contract ZapDispatch {
         called upon data-provider request fulfillment
         transfers dot from ZapBondage escrow to data provider's Holder object under its own address
     */
-    function fulfillQuery(uint256 id) internal returns (bool) {
+    function fulfillQuery(uint256 id) public returns (bool) {
 
         if (queries[id].status != Status.Pending)
             revert();
@@ -144,5 +144,5 @@ contract ZapDispatch {
             revert();
         Client4(queries[id].subscriber).__zapCallback(id, _response1, _response2, _response3, _response4);
     }
-    
+
 }

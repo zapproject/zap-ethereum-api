@@ -32,13 +32,23 @@ contract TestSubscriber {
         Result(_response1);
     }
 
+    event NumZapReceived(uint256 numZap);
+    event TokensApproved(bool isApproved);
+    event Bonded();
+    event BalanceReceived(uint256 balance);
+    event AvailableZapCalculated(uint256 zap);
+    event LogDecimals(uint256 decimals, uint256 bondage_decimals);
+
     /*
     SPECIFY DATA PROVIDER FROM WHAT YOU WILL RECEIVING DATA, AND PAY FOR IT
     */
-    function bondToOracle(address provider, uint256 numberOfDataRequests) {
+    function bondToOracle(address provider, uint256 numberOfDataRequests) public {
+        uint256 balance = token.balanceOf(this);
         uint256 numZap = bondage.calcZapForDots(specifier, numberOfDataRequests, provider);
-        if ((token.balanceOf(this) / (token.decimals() / 100)) >= numZap) {
-            token.approve(dispatch, numZap * token.decimals());
+        uint256 bondageDecimals = 10 ** (token.decimals() - 2);
+        uint256 availableZap = balance * 100;
+        if (availableZap >= numZap) {
+            token.approve(bondage, numZap * bondageDecimals);
             bondage.bond(specifier, numZap, provider);
         }
     }
