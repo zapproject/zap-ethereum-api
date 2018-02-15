@@ -11,7 +11,9 @@ In order to contribute it may be useful to...
 In particular, we need help in the following areas:
 
   * [NatSpec Documentation](https://github.com/ethereum/wiki/wiki/Ethereum-Natural-Specification-Format) 
-  for all contracts and functions, especially `@notice` tags for public and external methods 
+  for all contracts and functions, especially `@notice` tags for public and external methods (use of [dynamic 
+  expressions](https://github.com/ethereum/wiki/wiki/Ethereum-Natural-Specification-Format#dynamic-expressions) 
+  is encouraged)
   
   
 ## How to Report Issues  
