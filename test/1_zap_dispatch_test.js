@@ -6,6 +6,7 @@ require('chai')
     .should();
 
 var Utils = require("./helpers/utils.js");
+var getParamFromTxEvent = require("./helpers/getParamFromTxEvent.js");
 
 const ZapDispatch = artifacts.require("TestZapDispatch");
 const ZapBondage = artifacts.require("ZapBondage");
@@ -130,15 +131,15 @@ contract('ZapDispatch', function (accounts) {
             if (res.event == "Incoming") {
                 console.log("Query perfomed!");
             } else if (res.event == "QueryPerformError") {
-                console.log("ERROR WHILE PERFORMING QUERY!");
-                assert(false);
+                console.log("3 ERROR WHILE PERFORMING QUERY!");
+                
             }
         });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
         await subscriberContract.bondToOracle(provider, 2, { from: owner });
 
-        // SUBSCRIBE SUBSCRIBEER TO RECIVE DATA FROM PROVIDER
+        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
         const res = await subscriberContract.queryTest(provider, query, { from: owner });       
     });
 
@@ -169,15 +170,7 @@ contract('ZapDispatch', function (accounts) {
             if (res.event == "Incoming") {
                 console.log("Query perfomed!");
             } else if (res.event == "QueryPerformError") {
-                console.log("ERROR WHILE PERFORMING QUERY!");
-            }
-        });
-        const subEvents = subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subEvents.watch((err, res) => {
-            if (res.event == "Incoming") {
-                console.log("Query perfomed!");
-            } else if (res.event == "QueryPerformError") {
-                console.log("ERROR WHILE PERFORMING QUERY!");
+                console.log("4 ERROR WHILE PERFORMING QUERY!");
             }
         });
 
@@ -187,7 +180,7 @@ contract('ZapDispatch', function (accounts) {
         const res = await zapBondage._getDots(specifier.valueOf(), subscriberContract.address, provider);
         console.log(res);
 
-        // SUBSCRIBE SUBSCRIBEER TO RECIVE DATA FROM PROVIDER
+        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
         await subscriberContract.queryTest(provider, query, { from: owner });       
     });
 
@@ -218,27 +211,56 @@ contract('ZapDispatch', function (accounts) {
             if (res.event == "Incoming") {
                 console.log("Query perfomed!");
             } else if (res.event == "QueryPerformError") {
-                console.log("ERROR WHILE PERFORMING QUERY!");
-            }
-        });
-
-        const subEvents = subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subEvents.watch((err, res) => {
-            if (res.event == "Incoming") {
-                console.log("Query perfomed!");
-            } else if (res.event == "QueryPerformError") {
-                console.log("ERROR WHILE PERFORMING QUERY!");
+                console.log("5 ERROR WHILE PERFORMING QUERY!");
             }
         });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
         //await subscriberContract.bondToOracle(provider, 0, { from: owner });
 
-        // SUBSCRIBE SUBSCRIBEER TO RECIVE DATA FROM PROVIDER
+        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
         const res = await subscriberContract.queryTest(provider, query, { from: owner });  
     });
 
-    it("ZAP_DISPATCH_6 - Respond check", async function () {
+    it("ZAP_DISPATCH_6 - Check query function will not performed if subscriber don't have enough zap", async function () {
+        let zapDispatch = await deployZapDispatch();
+        let zapToken = await deployZapToken();
+        let zapRegistry = await deployZapRegistry();
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
+        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
+
+        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+
+        const param1 = new String("p1");
+        const param2 = new String("p2");
+        const params = [param1.valueOf(), param2.valueOf()];
+
+        // TOKEN ALLOCATION
+        await zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        //await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+
+        // CREATING DATA PROVIDER
+        await zapRegistry.initiateProvider(publicKey, extInfo, title, {from: provider});
+        await zapRegistry.initiateProviderCurve(specifier.valueOf(), 1, curveStart, curveMultiplier, {from: provider});
+
+        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        dispatchEvents.watch((err, res) => {
+            if (res.event == "Incoming") {
+                console.log("Query perfomed!");
+            } else if (res.event == "QueryPerformError") {
+                console.log("6 ERROR WHILE PERFORMING QUERY!");
+            }
+        });
+
+        // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
+        await subscriberContract.bondToOracle(provider, 100, { from: owner });
+
+        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
+        const res = await subscriberContract.queryTest(provider, query, { from: owner });  
+    });
+
+    it("ZAP_DISPATCH_7 - Respond check", async function () {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
@@ -266,5 +288,7 @@ contract('ZapDispatch', function (accounts) {
 
         // SUBSCRIBE SUBSCRIBEER TO RECIVE DATA FROM PROVIDER
         const res = await subscriberContract.queryTest(provider, query, { from: owner });  
+
+        
     });
 });
