@@ -5,8 +5,6 @@ const expect = require('chai')
     .use(require('chai-bignumber')(BigNumber))
     .expect;
 
-const ZapRegistry = artifacts.require("ZapRegistry");
-
 import EVMRevert from './helpers/EVMRevert';
 
 
@@ -14,7 +12,7 @@ const ZapRegistry = artifacts.require("ZapRegistry");
 const ZapToken = artifacts.require("ZapToken");
 const ZapBondage = artifacts.require("TestZapBondage");
 const ZapDispatch = artifacts.require("ZapDispatch");
-const ZapArbiter = artifacts.require("ZapArbiter"); 
+const ZapArbiter = artifacts.require("TestZapArbiter"); 
 
 const deployZapToken = () => {
     return ZapToken.new();
@@ -40,6 +38,13 @@ const deployZapArbiter = (bondageAddress, registryAddress) => {
     return ZapArbiter.new(bondageAddress, registryAddress);
 };
 
+const CurveTypes = {
+    "None": 0,
+    "Linear": 1,
+    "Exponential": 2,
+    "Logarithmic": 3
+};
+
 
 contract('ZapBondage', function (accounts) {
     const owner = accounts[0];
@@ -55,11 +60,15 @@ contract('ZapBondage', function (accounts) {
     const start = 1;
     const mul = 2;
 
+    const param1 = new String("p1");
+    const param2 = new String("p2");
+    const params = [param1.valueOf(), param2.valueOf()];
+
     const tokensForOwner = new BigNumber("1500e18");
     const tokensForProvider = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
 
-    it("ZAP_BONDAGE_1 - bond() - Check bond function", async function () {
+    it("ZAP_ARBITER_1 - initiateSubscription() - Check subscription", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -72,7 +81,12 @@ contract('ZapBondage', function (accounts) {
         await zapToken.allocate(provider, tokensForProvider, { from: owner });
         await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
-        const res = await zapBondage.bond(specifier.valueOf(), 100, oracle, {from: provider});
+        await zapBondage.bond(specifier.valueOf(), 1000, oracle, {from: provider});
+
+        await zapArbiter.initiateSubscription(provider, params, specifier.valueOf(), publicKey, 10);
+
+        const res = await zapArbiter.subscriptions.call(provider, owner, specifier.valueOf());
+        expect(parseInt(res[0].valueOf())).to.be.equal(10);
     });
 
 });
