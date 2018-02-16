@@ -1,6 +1,6 @@
 pragma solidity ^0.4.17;
 
-import "./FunctionsInterface";
+import "./FunctionsInterface.sol";
 
 contract FunctionsAdmin {
     FunctionsInterface public functions;
