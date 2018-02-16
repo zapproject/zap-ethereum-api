@@ -38,5 +38,6 @@ In order to contribute, please fork off of the ``develop`` branch and make your
 changes there. Your commit messages should detail *why* you made your change
 in addition to *what* you did (unless it is a tiny change).
 
-Also, please make sure to follow the project coding standards, [airbnb](https://github.com/airbnb/javascript) 
-for JS and the official Solidity [Style Guide](http://solidity.readthedocs.io/en/develop/style-guide.html).
+Also, please make sure to follow the project coding standards from the [Google JS Style Guide](https://google.github.io/styleguide/jsguide.html) and the [Solidity Style Guide](http://solidity.readthedocs.io/en/develop/style-guide.html).
+
+Thanks for the help!
