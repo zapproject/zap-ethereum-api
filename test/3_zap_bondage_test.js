@@ -95,7 +95,7 @@ contract('ZapBondage', function (accounts) {
     const approveTokens = new BigNumber("1000e18");
 
 
-    /* it("ZAP_BONDAGE_1 - bond() - Check bond function", async function () {
+     it("ZAP_BONDAGE_1 - bond() - Check bond function", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -201,7 +201,7 @@ contract('ZapBondage', function (accounts) {
         // await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: accounts[5] });
 
         zapBondage.calcZapForDots.call(specifier.valueOf(), 5, accounts[5]).should.be.eventually.rejectedWith(EVMRevert);
-    }); */
+    }); 
 
     it("ZAP_BONDAGE_7 - calcZap() - Check calcZap function", async function () {
         let zapRegistry = await deployZapRegistry();
@@ -220,7 +220,7 @@ contract('ZapBondage', function (accounts) {
         ethZap.should.be.equal(25);
     });
 
-    /* it("ZAP_BONDAGE_8 - calcZap() - Check calcZap function throw error if curve not initoalized", async function () {
+     it("ZAP_BONDAGE_8 - calcZap() - Check calcZap function throw error if curve not initoalized", async function () {
         let zapRegistry = await deployZapRegistry();
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
@@ -659,5 +659,5 @@ contract('ZapBondage', function (accounts) {
         oracleDots.should.be.equal(dots - dotsForEscrow);
         escrowDots.should.be.equal(dotsForEscrow);
         releaseDots.should.be.equal(0);
-    }); */
+    });
 });
