@@ -32,8 +32,8 @@ contract ZapRegistry {
 
     /// @dev Initiates a provider.
     /// If no address->ZapOracle mapping exists, ZapOracle object is created
-    /// @param public key unique id for provider. used for encyrpted key swap for subscription endpoints
-    /// @param ext_into endpoint specific params. TODO: update to bytes32[] endpoint params
+    /// @param public_key unique id for provider. used for encyrpted key swap for subscription endpoints
+    /// @param ext_info endpoint specific params. TODO: update to bytes32[] endpoint params
     /// @param title name
     function initiateProvider(
         uint256 public_key,
