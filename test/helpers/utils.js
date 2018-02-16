@@ -1,13 +1,23 @@
-module.exports.ZeroAddress = "0x0000000000000000000000000000000000000000";
 
-module.exports.CurveTypes = {
+exports.CurveTypes = {
+    "None": 0,
+    "Linier": 1,
+    "Exponentioal": 2,
+    "Logarithmic": 3
+}
+
+exports.DECIMALS = 1000000000000000000;
+
+exports.ZeroAddress = "0x0000000000000000000000000000000000000000";
+
+exports.CurveTypes = {
     "None": 0,
     "Linier": 1,
     "Exponential": 2,
     "Logarithmic": 3
 };
 
-module.exports.fetchPureArray = function (res, parseFunc) {
+exports.fetchPureArray = function (res, parseFunc) {
     let arr = [];
     for (let key in res) {
         arr.push(parseFunc(res[key].valueOf()));
@@ -15,7 +25,7 @@ module.exports.fetchPureArray = function (res, parseFunc) {
     return arr;
 }
 
-module.exports.calculateZapWithLinierCurve = function (dotsRequired, startValue, multiplier) {
+exports.calculateZapWithLinierCurve = function (dotsRequired, startValue, multiplier) {
     let zap = 0;
     for (i = 0; i < dotsRequired; i++) {
         zap += multiplier * i + startValue
@@ -23,7 +33,7 @@ module.exports.calculateZapWithLinierCurve = function (dotsRequired, startValue,
     return zap;
 }
 
-module.exports.calculateZapWithLinearCurve = function (dotsRequired, startValue, multiplier) {
+exports.calculateZapWithLinearCurve = function (dotsRequired, startValue, multiplier) {
     let zap = 0;
     for (let i = 0; i < dotsRequired; i++) {
         zap += multiplier * i + startValue
@@ -31,7 +41,7 @@ module.exports.calculateZapWithLinearCurve = function (dotsRequired, startValue,
     return zap;
 }
 
-module.exports.calculateZapWithExponentialCurve = function (dotsRequired, startValue, multiplier) {
+exports.calculateZapWithExponentialCurve = function (dotsRequired, startValue, multiplier) {
     let zap = 0;
     for (let i = 0; i < dotsRequired; i++) {
         zap += multiplier * Math.pow(i, 2) + startValue;
@@ -39,7 +49,7 @@ module.exports.calculateZapWithExponentialCurve = function (dotsRequired, startV
     return zap;
 }
 
-module.exports.calculateZapWithLogarithmicCurve = function (dotsRequired, startValue, multiplier) {
+exports.calculateZapWithLogarithmicCurve = function (dotsRequired, startValue, multiplier) {
     let zap = 0;
     for (let i = 0; i < dotsRequired; i++) {
         let totalBound = i;
