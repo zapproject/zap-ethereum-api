@@ -257,6 +257,17 @@ contract ZapBondage {
         uint dotCost = 0;
         uint totalDotCost = 0;
 
+        // 1
+        // 3
+        // 5
+        // 7
+        // 9
+
+        /** 24
+          * 21
+          * 16
+          * 9
+         */
         for (uint numDots = 0; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
