@@ -1,9 +1,9 @@
 const BigNumber = web3.BigNumber;
 
-require('chai')
+const expect = require('chai')
     .use(require('chai-as-promised'))
     .use(require('chai-bignumber')(BigNumber))
-    .should();
+    .expect;
 
 const ZapRegistry = artifacts.require("ZapRegistry");
 
@@ -57,8 +57,8 @@ contract('ZapRegistry', function (accounts) {
 
         const receivedTitle = await zapRegistry.getProviderTitle.call(owner);
         const receivedPublickKey = await zapRegistry.getProviderPublicKey.call(owner);
-        receivedTitle.should.be.equal(title);
-        receivedPublickKey.valueOf().should.be.equal(publicKey.toString());
+        expect(receivedTitle).to.be.equal(title);
+        expect(receivedPublickKey.valueOf()).to.be.equal(publicKey.toString());
     });
 
     it("ZAP_REGISTRY_3 - Check that we can initiate provider curve", async function () {
@@ -84,7 +84,7 @@ contract('ZapRegistry', function (accounts) {
         const start = 1;
         const mul = 2;
 
-       zapRegistry.initiateProviderCurve(specifier.valueOf(), curve, start, mul, { from: owner }).should.eventually.be.rejectedWith(EVMRevert);
+        expect(zapRegistry.initiateProviderCurve(specifier.valueOf(), curve, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("ZAP_REGISTRY_5 - Check that we can't initiate provider curve if curve type is none", async function () {
@@ -99,7 +99,7 @@ contract('ZapRegistry', function (accounts) {
 
         await zapRegistry.initiateProvider(publicKey, [1], title, { from: owner });
 
-        zapRegistry.initiateProviderCurve(specifier.valueOf(), curve, start, mul, { from: owner }).should.eventually.be.rejectedWith(EVMRevert);
+        expect(zapRegistry.initiateProviderCurve(specifier.valueOf(), curve, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("ZAP_REGISTRY_6 - Check that we can get provider route keys", async function () {
@@ -113,7 +113,7 @@ contract('ZapRegistry', function (accounts) {
 
         const receivedRouteKeys = await zapRegistry.getProviderRouteKeys.call(owner);
 
-        fetchPureArray(receivedRouteKeys, parseInt).should.have.deep.members(routeKeys);
+        expect(fetchPureArray(receivedRouteKeys, parseInt)).to.have.deep.members(routeKeys);
     });
 
     it("ZAP_REGISTRY_7 - Check that route keys of uninitialized provider are empty", async function () {
@@ -136,13 +136,13 @@ contract('ZapRegistry', function (accounts) {
 
         const receivedTitle = await zapRegistry.getProviderTitle.call(owner);
 
-        receivedTitle.valueOf().should.be.equal(title);
+        expect(receivedTitle.valueOf()).to.be.equal(title);
     });
 
     it("ZAP_REGISTRY_9 - Check that title of uninitialized provider is empty", async function () {
         let zapRegistry = await deployZapRegistry();
         
-        zapRegistry.getProviderTitle.call(owner).should.eventually.be.equal('');
+        expect(zapRegistry.getProviderTitle.call(owner)).to.eventually.be.equal('');
     });
 
     it("ZAP_REGISTRY_10 - Check that we can get provider public key", async function () {
@@ -156,7 +156,7 @@ contract('ZapRegistry', function (accounts) {
 
         const receivedPublicKey = await zapRegistry.getProviderPublicKey.call(owner);
 
-        receivedPublicKey.valueOf().should.be.equal(publicKey.toString());
+        expect(receivedPublicKey.valueOf()).to.be.equal(publicKey.toString());
     });
 
     it("ZAP_REGISTRY_11 - Check that public key of uninitialized provider is equal to 0", async function () {
@@ -164,7 +164,7 @@ contract('ZapRegistry', function (accounts) {
 
         const res = await zapRegistry.getProviderPublicKey.call(owner);
        
-        res.valueOf().should.be.equal('0');
+        expect(res.valueOf()).to.be.equal('0');
     });
 
     it("ZAP_REGISTRY_12 - Check that we can get provider curve", async function () {
@@ -186,9 +186,9 @@ contract('ZapRegistry', function (accounts) {
 
         const arr = fetchPureArray(res, parseInt);
 
-        arr[0].valueOf().should.be.an('number').equal(curve);
-        arr[1].valueOf().should.be.an('number').equal(start);
-        arr[2].valueOf().should.be.an('number').equal(mul);
+        expect(arr[0].valueOf()).to.be.an('number').equal(curve);
+        expect(arr[1].valueOf()).to.be.an('number').equal(start);
+        expect(arr[2].valueOf()).to.be.an('number').equal(mul);
     });
 
     it("ZAP_REGISTRY_13 - Check that uninitialized provider curve is empty", async function () {
@@ -208,8 +208,8 @@ contract('ZapRegistry', function (accounts) {
 
         const arr = fetchPureArray(res, parseInt);
 
-        arr[0].valueOf().should.be.an('number').equal(0);
-        arr[1].valueOf().should.be.an('number').equal(0);
-        arr[2].valueOf().should.be.an('number').equal(0);
+        expect(arr[0].valueOf()).to.be.an('number').equal(0);
+        expect(arr[1].valueOf()).to.be.an('number').equal(0);
+        expect(arr[2].valueOf()).to.be.an('number').equal(0);
     });
 });
