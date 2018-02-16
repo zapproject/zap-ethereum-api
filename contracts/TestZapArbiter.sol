@@ -87,7 +87,7 @@ contract TestZapArbiter {
         address provider_address,
         address subscriber_address
     )
-    internal
+    public
     returns (bool)
     {
         ZapSubscription storage subscription = subscriptions[provider_address][subscriber_address][endpoint];
