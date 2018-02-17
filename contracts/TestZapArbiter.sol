@@ -42,7 +42,7 @@ contract TestZapArbiter {
         address _bondageAddress,
         address _registryAddress
     )
-    public
+        public
     {
         registry = ZapRegistry(_registryAddress);
         bondage = ZapBondage(_bondageAddress);
@@ -55,7 +55,7 @@ contract TestZapArbiter {
         uint256 public_key,        // Public key of the purchaser
         uint256 blocks             // Number of blocks subscribed, 1block=1dot
     )
-    public
+        public
     {
         // Must be atleast one block
         require(blocks > 0);
@@ -73,7 +73,8 @@ contract TestZapArbiter {
             preblockend: block.number + blocks});
 
         // Emit the event
-        ZapDataPurchase(provider_address,
+        ZapDataPurchase(
+            provider_address,
             msg.sender,
             public_key,
             blocks,
@@ -87,8 +88,8 @@ contract TestZapArbiter {
         address provider_address,
         address subscriber_address
     )
-    public
-    returns (bool)
+        public
+        returns (bool)
     {
         ZapSubscription storage subscription = subscriptions[provider_address][subscriber_address][endpoint];
 
@@ -132,7 +133,7 @@ contract TestZapArbiter {
         address subscriber_address,
         address provider_address
     )
-    public
+        public
     {
         // Emit an event on success about who ended the contract
         if (endZapSubscription(endpoint, provider_address, subscriber_address))
@@ -148,7 +149,7 @@ contract TestZapArbiter {
         address subscriber_address,
         address provider_address
     )
-    public
+        public
     {
         // Emit an event on success about who ended the contract
         if (endZapSubscription(endpoint, provider_address, subscriber_address))

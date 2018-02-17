@@ -60,22 +60,23 @@ contract ZapDispatch {
 
     function ZapDataProxyDispatch() view {}
 
-    /// @notice Initialize bondage contract for reference
+    /// @dev Initialize bondage contract for reference
     function setBondageAddress(address _bondageAddress) external {
-        if(bondageAddress == 0){
+        if(bondageAddress == 0) {
             bondageAddress = _bondageAddress;
             bondage = ZapBondage(_bondageAddress);
         }
     }
 
-    /// @notice Escrow dot for oracle request, emits Incoming event for data-provider
-    /// @dev Called by user contract
+    /// @dev Escrow dots for oracle request. 
+    /// Emits Incoming event for data-provider.
+    /// Called by User Contract.
     function query(
-        address provider, //data provider address
-        address subscriber, //user contract address( dot-holder)
-        string query, //query string
-        bytes32 endpoint,// endpoint specifier ala 'smart_contract'
-        bytes32[] endpoint_params//endpoint-specific params
+        address provider,           // data provider address
+        address subscriber,         // user contract address (dot-holder)
+        string query,               // query string
+        bytes32 endpoint,           // endpoint specifier (ala 'smart_contract')
+        bytes32[] endpoint_params   // endpoint-specific params
     ) 
         external 
         returns (uint256 id) 
@@ -83,7 +84,7 @@ contract ZapDispatch {
 
         uint dots = bondage.getDots(endpoint, provider);
 
-        if(dots >= 1){
+        if(dots >= 1) {
             //enough dots
             bondage.escrowDots(endpoint, subscriber, provider, 1);
             id = uint256(sha3(block.number, now, query, msg.sender));
@@ -93,8 +94,9 @@ contract ZapDispatch {
 
     }
     
-    /// @notice Transfer dots from ZapBondage escrow to data provider's Holder object under its own address
-    /// @dev Called upon data-provider request fulfillment
+    /// @dev Transfer dots from ZapBondage escrow to 
+    /// data provider's Holder object under its own address.
+    /// @dev Called upon data-provider request fulfillment.
     function fulfillQuery(uint256 id) internal returns (bool) {
 
         if (queries[id].status != Status.Pending)
