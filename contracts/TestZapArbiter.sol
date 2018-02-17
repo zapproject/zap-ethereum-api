@@ -12,7 +12,8 @@ contract TestZapArbiter {
         uint256 public_key,        // Public key of the subscriber
         uint256 amount,            // Amount (in 1/100 zap) of ethereum sent
         bytes32[] endpoint_params, // Endpoint specific(nonce,encrypted_uuid),
-        bytes32 endpoint);
+        bytes32 endpoint
+    );
 
     // Used to specify who is the terminator of a contract
     enum ZapSubscriptionTerminator { ZapTermProvider, ZapTermSubscriber }
@@ -21,7 +22,8 @@ contract TestZapArbiter {
     event ZapDataSubscriptionEnd(
         address provider,                      // Provider from the subscription
         address subsriber,                     // Subscriber from the subscription
-        ZapSubscriptionTerminator terminator); // Which terminated the contract
+        ZapSubscriptionTerminator terminator   // Which terminated the contract
+    ); 
 
     // Each subscription is represented as the following
     struct ZapSubscription {
@@ -42,7 +44,7 @@ contract TestZapArbiter {
         address _bondageAddress,
         address _registryAddress
     )
-    public
+        public
     {
         registry = ZapRegistry(_registryAddress);
         bondage = ZapBondage(_bondageAddress);
@@ -55,7 +57,7 @@ contract TestZapArbiter {
         uint256 public_key,        // Public key of the purchaser
         uint256 blocks             // Number of blocks subscribed, 1block=1dot
     )
-    public
+        public
     {
         // Must be atleast one block
         require(blocks > 0);
@@ -70,15 +72,18 @@ contract TestZapArbiter {
         subscriptions[provider_address][msg.sender][endpoint] = ZapSubscription({
             dots: blocks,
             blockstart: block.number,
-            preblockend: block.number + blocks});
+            preblockend: block.number + blocks
+        });
 
         // Emit the event
-        ZapDataPurchase(provider_address,
+        ZapDataPurchase(
+            provider_address,
             msg.sender,
             public_key,
             blocks,
             endpoint_params,
-            endpoint);
+            endpoint
+        );
     }
 
     /// @dev Finish the data feed
@@ -87,17 +92,22 @@ contract TestZapArbiter {
         address provider_address,
         address subscriber_address
     )
-    public
-    returns (bool)
+        public
+        returns (bool)
     {
-        ZapSubscription storage subscription = subscriptions[provider_address][subscriber_address][endpoint];
+        ZapSubscription storage subscription = (
+            subscriptions[provider_address][subscriber_address][endpoint]
+        );
 
         // Make sure the subscriber has a subscription
         require(subscription.dots > 0);
 
         if (block.number < subscription.preblockend) {
             // Subscription ended early
-            uint256 earnedDots = (block.number * subscription.dots) / subscription.preblockend;
+            uint256 earnedDots = (
+                (block.number * subscription.dots) / subscription.preblockend
+            );
+
             uint256 returnedDots = subscription.dots - earnedDots;
 
             // Transfer the earned dots to the provider
@@ -105,20 +115,25 @@ contract TestZapArbiter {
                 endpoint,
                 subscriber_address,
                 provider_address,
-                earnedDots);
+                earnedDots
+            );
+
             //  Transfer the returned dots to the subscriber
             bondage.releaseDots(
                 endpoint,
                 subscriber_address,
                 subscriber_address,
-                returnedDots);
+                returnedDots
+            );
+
         } else {
             // Transfer all the dots
             bondage.releaseDots(
                 endpoint,
                 subscriber_address,
                 provider_address,
-                subscription.dots);
+                subscription.dots
+            );
         }
         // Kill the subscription
         subscription.dots = 0;
@@ -132,14 +147,15 @@ contract TestZapArbiter {
         address subscriber_address,
         address provider_address
     )
-    public
+        public
     {
         // Emit an event on success about who ended the contract
         if (endZapSubscription(endpoint, provider_address, subscriber_address))
             ZapDataSubscriptionEnd(
                 msg.sender,
                 subscriber_address,
-                ZapSubscriptionTerminator.ZapTermProvider);
+                ZapSubscriptionTerminator.ZapTermProvider
+            );
     }
 
     /// @dev Finish the data feed from the provider
@@ -148,13 +164,14 @@ contract TestZapArbiter {
         address subscriber_address,
         address provider_address
     )
-    public
+        public
     {
         // Emit an event on success about who ended the contract
         if (endZapSubscription(endpoint, provider_address, subscriber_address))
             ZapDataSubscriptionEnd(
                 provider_address,
                 msg.sender,
-                ZapSubscriptionTerminator.ZapTermProvider);
+                ZapSubscriptionTerminator.ZapTermProvider
+            );
     }
 }

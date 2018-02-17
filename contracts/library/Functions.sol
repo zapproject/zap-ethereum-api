@@ -8,7 +8,8 @@ contract Ownable {
     address public owner;
     event OwnershipTransferred(
         address indexed previousOwner,
-        address indexed newOwner);
+        address indexed newOwner
+    );
 
     /// @dev Set the original `owner` of the contract to the sender account
     function Ownable() { owner = msg.sender; }
@@ -30,9 +31,8 @@ contract Ownable {
 
 
 contract Functions is Ownable {
-    /*
-       enumeration of curve types representing dot(access token) prices as function of supply
-   */
+    // Enumeration of curve types 
+    // representing dot(access token) prices as function of supply
     enum ZapCurveType {
         ZapCurveNone,
         ZapCurveLinear,
@@ -40,9 +40,8 @@ contract Functions is Ownable {
         ZapCurveLogarithmic
     }
 
-    /*
-        curve data structure representing dot(access token) prices as function of supply
-    */
+    // Curve data structure 
+    // representing dot(access token) prices as function of supply
     struct ZapCurve {
         ZapCurveType curveType;
         uint256 curveStart;
@@ -67,9 +66,9 @@ contract Functions is Ownable {
         bytes32 specifier,
         uint _totalBound
     )
-    public
-    view
-    returns (uint _cost)
+        public
+        view
+        returns (uint _cost)
     {
         var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
         ZapCurveType curveType = ZapCurveType(curveTypeIndex);

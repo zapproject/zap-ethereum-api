@@ -6,16 +6,19 @@ library SafeMath {
         assert(a == 0 || c / a == b);
         return c;
     }
+
     function div(uint256 a, uint256 b) internal constant returns (uint256) {
         // assert(b > 0); // Solidity automatically throws when dividing by 0
         uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return c;
     }
+
     function sub(uint256 a, uint256 b) internal constant returns (uint256) {
         assert(b <= a);
         return a - b;
     }
+
     function add(uint256 a, uint256 b) internal constant returns (uint256) {
         uint256 c = a + b;
         assert(c >= a);
@@ -61,7 +64,11 @@ contract BasicToken is ERC20Basic {
     /// @dev Get the balance of the specified address
     /// @param _owner The address to query the the balance of
     /// @return The amount owned by the passed address
-    function balanceOf(address _owner) public constant returns (uint256 balance) {
+    function balanceOf(address _owner)
+        public
+        constant
+        returns (uint256 balance) 
+    {
         return balances[_owner];
     }
 }
@@ -71,7 +78,8 @@ contract Ownable {
     address public owner;
     event OwnershipTransferred(
         address indexed previousOwner, 
-        address indexed newOwner);
+        address indexed newOwner
+    );
      
     /// @dev Set the original `owner` of the contract to the sender account
     function Ownable() { owner = msg.sender; }
@@ -138,7 +146,14 @@ contract StandardToken is ERC20, BasicToken {
     /// @param _owner address The address which owns the funds.
     /// @param _spender address The address which will spend the funds.
     /// @return A uint256 specifying the amount of tokens still available for the spender.
-    function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
+    function allowance(
+        address _owner,
+        address _spender
+    )
+        public
+        constant
+        returns (uint256 remaining)
+    {
         return allowed[_owner][_spender];
     }
 
@@ -147,14 +162,16 @@ contract StandardToken is ERC20, BasicToken {
     /// to avoid 2 calls (and wait until the first transaction is mined)
     /// From MonolithDAO Token.sol
     function increaseApproval (address _spender, uint _addedValue)
-        returns (bool success) {
+        returns (bool success) 
+    {
         allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
         Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
         return true;
     }
     
     function decreaseApproval (address _spender, uint _subtractedValue)
-        returns (bool success) {
+        returns (bool success) 
+    {
         uint oldValue = allowed[msg.sender][_spender];
         if (_subtractedValue > oldValue) {
             allowed[msg.sender][_spender] = 0;

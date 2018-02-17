@@ -40,7 +40,8 @@ contract ZapDispatch {
         address recipient, 
         string query, 
         bytes32 endpoint, 
-        bytes32[] endpoint_params);
+        bytes32[] endpoint_params
+    );
 
     enum Status { Pending, Fulfilled }
 
@@ -60,22 +61,23 @@ contract ZapDispatch {
 
     function ZapDataProxyDispatch() view {}
 
-    /// @notice Initialize bondage contract for reference
+    /// @dev Initialize bondage contract for reference
     function setBondageAddress(address _bondageAddress) external {
-        if(bondageAddress == 0){
+        if(bondageAddress == 0) {
             bondageAddress = _bondageAddress;
             bondage = ZapBondage(_bondageAddress);
         }
     }
 
-    /// @notice Escrow dot for oracle request, emits Incoming event for data-provider
-    /// @dev Called by user contract
+    /// @dev Escrow dots for oracle request. 
+    /// Emits Incoming event for data-provider.
+    /// Called by User Contract.
     function query(
-        address provider, //data provider address
-        address subscriber, //user contract address( dot-holder)
-        string query, //query string
-        bytes32 endpoint,// endpoint specifier ala 'smart_contract'
-        bytes32[] endpoint_params//endpoint-specific params
+        address provider,           // data provider address
+        address subscriber,         // user contract address (dot-holder)
+        string query,               // query string
+        bytes32 endpoint,           // endpoint specifier (ala 'smart_contract')
+        bytes32[] endpoint_params   // endpoint-specific params
     ) 
         external 
         returns (uint256 id) 
@@ -83,7 +85,7 @@ contract ZapDispatch {
 
         uint dots = bondage.getDots(endpoint, provider);
 
-        if(dots >= 1){
+        if(dots >= 1) {
             //enough dots
             bondage.escrowDots(endpoint, subscriber, provider, 1);
             id = uint256(sha3(block.number, now, query, msg.sender));
@@ -93,8 +95,9 @@ contract ZapDispatch {
 
     }
     
-    /// @notice Transfer dots from ZapBondage escrow to data provider's Holder object under its own address
-    /// @dev Called upon data-provider request fulfillment
+    /// @dev Transfer dots from ZapBondage escrow to 
+    /// data provider's Holder object under its own address.
+    /// @dev Called upon data-provider request fulfillment.
     function fulfillQuery(uint256 id) internal returns (bool) {
 
         if (queries[id].status != Status.Pending)
@@ -104,7 +107,8 @@ contract ZapDispatch {
             queries[id].endpoint,
             queries[id].subscriber,
             queries[id].provider,
-            1);
+            1
+        );
 
         queries[id].status = Status.Fulfilled;
         return true;
@@ -112,7 +116,13 @@ contract ZapDispatch {
 
 
     /// @dev Parameter-count specific method called by data provider in response
-    function respond1(uint256 id, string _response) external returns (bool) {
+    function respond1(
+        uint256 id,
+        string _response
+    )
+        external
+        returns (bool) 
+    {
         if (queries[id].provider != msg.sender || !fulfillQuery(id))
             revert();
         Client1(queries[id].subscriber).__zapCallback(id, _response);
@@ -129,8 +139,7 @@ contract ZapDispatch {
     {
         if (queries[id].provider != msg.sender || !fulfillQuery(id))
             revert();
-        Client2(queries[id].subscriber)
-            .__zapCallback(id, _response1, _response2);
+        Client2(queries[id].subscriber).__zapCallback(id, _response1, _response2);
     }
 
     /// @dev Parameter-count specific method called by data provider in response

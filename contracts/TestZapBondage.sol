@@ -19,12 +19,9 @@ contract ERC20 is ERC20Basic {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract TestZapBondage is FunctionsAdmin {
-    /*
-       data structure for holder of ZAP bond to data provider
-       *currently "smart_contract" or "socket_subscription"
-    */
-
+contract TestZapBondage is FunctionsAdmin {  
+    // data structure for holder of ZAP bond to data provider
+    // *currently "smart_contract" or "socket_subscription"
     struct Holder {
         //endpoint specifier* => ( provider address => bond value)
         mapping (bytes32 => mapping(address => uint256)) bonds;
@@ -49,103 +46,104 @@ contract TestZapBondage is FunctionsAdmin {
     // (specifier=>(oracleAddress=>numZap)
     mapping(bytes32 => mapping(address=> uint)) public totalBound;
 
-    /*
-        for restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
-    */
+    // for restricting dot escrow/transfer method calls 
+    // to ZapDispatch and ZapArbiter
     modifier operatorOnly {
-        if ( msg.sender == marketAddress || msg.sender == dispatchAddress ) {
+        if (msg.sender == marketAddress || msg.sender == dispatchAddress) {
             _;
         }
     }
 
-    /*
-        initialize token and ZapRegistry contracts
-    */
-    function TestZapBondage(address tokenAddress, address registryAddress) public {
+    /// @dev initialize token and ZapRegistry contracts
+    function TestZapBondage(
+        address tokenAddress,
+        address registryAddress
+    ) 
+        public
+    {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
     }
 
-    /*
-        set ZapArbiter address
-    */
+    /// @dev set ZapArbiter address
     function setMarketAddress(address _marketAddress) public {
-        if (marketAddress == 0) {
+        if (marketAddress == 0)
             marketAddress = _marketAddress;
-        }
     }
 
-    /*
-        set ZapDispatch address
-    */
+    /// @dev set ZapDispatch address
     function setDispatchAddress(address _dispatchAddress) public {
-        if ( dispatchAddress == 0 ) {
+        if (dispatchAddress == 0)
             dispatchAddress = _dispatchAddress;
-        }
     }
 
-    /*
-        returns total ZAP held by contract
-    */
-    function getZapBound(address oracleAddress,
-        bytes32 endpoint)
-    public
-    view
-    returns (uint256) {
+    /// @dev returns total ZAP held by contract
+    function getZapBound(address oracleAddress, bytes32 endpoint)
+        public
+        view
+        returns (uint256) 
+    {
         return totalBound[endpoint][oracleAddress];
     }
 
-    /*
-       Transfer N dots from fromAddress to destAddress called only by the DisptachContract or ArbiterContract
-       In smart contract endpoint, occurs per satisfied request, in socket endpoint called on termination of subscription
-    */
-    function releaseDots(bytes32 specifier,
+    /// @dev Transfer N dots from fromAddress to destAddress. 
+    /// Called only by the DisptachContract or ArbiterContract.
+    /// In smart contract endpoint, occurs per satisfied request. 
+    /// In socket endpoint called on termination of subscription.
+    function releaseDots(
+        bytes32 specifier,
         address fromProviderHolder,
         address toOracleHolder,
-        uint256 numDots)
-    public operatorOnly {
+        uint256 numDots
+    )
+        public
+        operatorOnly 
+    {
         Holder storage holder = holders[toOracleHolder];
 
-        if ( numDots <= pendingEscrow[fromProviderHolder][toOracleHolder][specifier] ) {
+        if (numDots <= pendingEscrow[fromProviderHolder][toOracleHolder][specifier]) {
             pendingEscrow[fromProviderHolder][toOracleHolder][specifier] -= numDots;
 
-            if ( !holder.initialized[toOracleHolder] ) {
+            if (!holder.initialized[toOracleHolder]) {
                 // Initialize uninitialized holder
                 holder.initialized[toOracleHolder] = true;
                 holder.oracleList.push(toOracleHolder);
             }
-
             holder.bonds[specifier][toOracleHolder] += numDots;
         }
     }
 
-    /*
-       move numDots dots from provider-requester to bondage according to data-provider address, holder address and endpoint specifier( ala 'smart_contract')
-    */
-    function escrowDots(bytes32 specifier,
+    /// @dev move numDots dots from provider-requester to bondage 
+    /// according to data-provider address, holder address, 
+    /// and endpoint specifier (ala 'smart_contract')
+    function escrowDots(
+        bytes32 specifier,
         address holderAddress,
         address oracleAddress,
-        uint256 numDots)
-    operatorOnly
-    public
-    returns (bool success)  {
+        uint256 numDots
+    )
+        operatorOnly
+        public
+        returns (bool success)
+    {
 
         uint currentDots = _getDots(specifier, holderAddress, oracleAddress);
-        if(currentDots >= numDots){
-
-            holders[holderAddress].bonds[specifier][oracleAddress]-=numDots;
-            pendingEscrow[holderAddress][oracleAddress][specifier]+=numDots;
+        if(currentDots >= numDots) {
+            holders[holderAddress].bonds[specifier][oracleAddress] -= numDots;
+            pendingEscrow[holderAddress][oracleAddress][specifier] += numDots;
             return true;
-        }
-        else{
-            return false;
-        }
+        } 
+
+        return false;
     }
 
-    function unbond(bytes32 specifier,
+    function unbond(
+        bytes32 specifier,
         uint numDots,
-        address oracleAddress)
-    public {
+        address oracleAddress
+    )
+        public 
+    {
         _unbond(
             specifier,
             msg.sender,
@@ -154,27 +152,29 @@ contract TestZapBondage is FunctionsAdmin {
         );
     }
 
-    function _unbond(bytes32 specifier,
+    function _unbond(
+        bytes32 specifier,
         address holderAddress,
         uint numDots,
-        address oracleAddress)
-    public {
+        address oracleAddress
+    )
+        public 
+    {
         Holder storage holder = holders[holderAddress];
         uint256 currentDots = holder.bonds[specifier][oracleAddress];
 
-        if ( currentDots >= numDots ) {
+        if (currentDots >= numDots) {
             uint numZap = 0;
             uint localTotal = totalBound[specifier][oracleAddress];
 
-            for ( uint i = 0; i < numDots; i++ ) {
+            for (uint i = 0; i < numDots; i++) {
                 totalBound[specifier][oracleAddress] -= 1;
                 holder.bonds[specifier][oracleAddress] -= 1;
 
                 numZap += functions.currentCostOfDot(
                     oracleAddress,
                     specifier,
-                    localTotal
-                );
+                    localTotal);
 
                 localTotal -= 1;
             }
@@ -183,21 +183,25 @@ contract TestZapBondage is FunctionsAdmin {
         }
     }
 
-    function bond(bytes32 specifier,
-        uint numZap,
-        address oracleAddress)
-    public returns(uint256) {
+    function bond(bytes32 specifier, uint numZap, address oracleAddress)
+        public 
+        returns (uint256) 
+    {
         _bond(specifier, msg.sender, numZap, oracleAddress);
     }
 
-    function _bond(bytes32 specifier,
+    function _bond(
+        bytes32 specifier,
         address holderAddress,
         uint numZap,
-        address oracleAddress)
-    public returns(uint256) {
+        address oracleAddress
+    )
+        public 
+        returns(uint256) 
+    {
         Holder storage holder = holders[holderAddress];
 
-        if ( !holder.initialized[oracleAddress] ) {
+        if (!holder.initialized[oracleAddress]) {
             // Initialize uninitialized holder
             holder.initialized[oracleAddress] = true;
             holder.oracleList.push(oracleAddress);
@@ -224,9 +228,9 @@ contract TestZapBondage is FunctionsAdmin {
         uint numDots,
         address oracleAddress
     )
-    public
-    view
-    returns (uint256 _numZap)
+        public
+        view
+        returns (uint256 _numZap)
     {
         uint256 localTotal = totalBound[specifier][oracleAddress];
         uint256 numZap;
@@ -235,7 +239,8 @@ contract TestZapBondage is FunctionsAdmin {
             numZap += functions.currentCostOfDot(
                 oracleAddress,
                 specifier,
-                localTotal + i);
+                localTotal + i
+            );
         }
         return numZap;
     }
@@ -247,9 +252,9 @@ contract TestZapBondage is FunctionsAdmin {
         bytes32 specifier,
         uint256 numZap
     )
-    public
-    view
-    returns (uint256 _numZap, uint256 _numDots)
+        public
+        view
+        returns (uint256 _numZap, uint256 _numDots)
     {
         uint infinity = 10*10;
         uint dotCost = 0;
@@ -272,20 +277,23 @@ contract TestZapBondage is FunctionsAdmin {
     }
 
 
-    function getDots(bytes32 specifier,
-        address oracleAddress)
-    view
-    public
-    returns(uint dots) {
+    function getDots(bytes32 specifier, address oracleAddress)
+        view
+        public
+        returns (uint dots) 
+    {
         return _getDots(specifier, msg.sender, oracleAddress);
     }
 
-    function _getDots(bytes32 specifier,
+    function _getDots(
+        bytes32 specifier,
         address holderAddress,
-        address oracleAddress)
-    view
-    public
-    returns(uint dots) {
+        address oracleAddress
+    )
+        view
+        public
+        returns(uint dots) 
+    {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
 }

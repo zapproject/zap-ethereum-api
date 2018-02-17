@@ -20,7 +20,6 @@ contract ERC20 is ERC20Basic {
 }
 
 contract ZapBondage is FunctionsAdmin {
-      
     //   data structure for holder of ZAP bond to data provider
     //   currently ONLY "smart_contract" or "socket_subscription"
     struct Holder {
@@ -49,13 +48,19 @@ contract ZapBondage is FunctionsAdmin {
 
     // For restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
     modifier operatorOnly {
-        if ( msg.sender == marketAddress || msg.sender == dispatchAddress ) {
+        if (msg.sender == marketAddress || msg.sender == dispatchAddress) {
             _;
         }
     }
 
     /// @dev Initialize Token and ZapRegistry Contracts
-    function ZapBondage(address tokenAddress, address registryAddress, address _adminAddress) public {
+    function ZapBondage(
+        address tokenAddress, 
+        address registryAddress, 
+        address _adminAddress
+    ) 
+        public 
+    {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
         adminAddress = _adminAddress;
@@ -76,11 +81,14 @@ contract ZapBondage is FunctionsAdmin {
     }
 
     /// @return total ZAP held by contract
-    function getZapBound(address oracleAddress,
-        bytes32 endpoint)
-    public
-    view
-    returns (uint256) {
+    function getZapBound(
+        address oracleAddress,
+        bytes32 endpoint
+    )
+        public
+        view
+        returns (uint256)
+    {
         return totalBound[endpoint][oracleAddress];
     }
 
@@ -132,7 +140,8 @@ contract ZapBondage is FunctionsAdmin {
             pendingEscrow[holderAddress][oracleAddress][specifier] += numDots;
             return true;
         }
-            return false;
+        
+        return false;
     }
 
     function unbond(
@@ -146,7 +155,8 @@ contract ZapBondage is FunctionsAdmin {
             specifier,
             msg.sender,
             numDots,
-            oracleAddress);
+            oracleAddress
+        );
     }
 
     function _unbond(
@@ -171,7 +181,8 @@ contract ZapBondage is FunctionsAdmin {
                 numZap += functions.currentCostOfDot(
                     oracleAddress,
                     specifier,
-                    localTotal);
+                    localTotal
+                );
 
                 localTotal -= 1;
             }
@@ -239,7 +250,8 @@ contract ZapBondage is FunctionsAdmin {
             numZap += functions.currentCostOfDot(
                 oracleAddress,
                 specifier,
-                localTotal + i);
+                localTotal + i
+            );
         }
         return numZap;
     }
@@ -263,7 +275,8 @@ contract ZapBondage is FunctionsAdmin {
             dotCost = functions.currentCostOfDot(
                 oracleAddress,
                 specifier,
-                (totalBound[specifier][oracleAddress] + numDots));
+                (totalBound[specifier][oracleAddress] + numDots)
+            );
 
             if (numZap > dotCost) {
                 numZap -= dotCost;
@@ -297,5 +310,4 @@ contract ZapBondage is FunctionsAdmin {
     {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
-
 }

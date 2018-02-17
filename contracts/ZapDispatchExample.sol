@@ -35,7 +35,8 @@ contract ZapDispatchExample {
         Result(_response1);
     }
 
-    // YOUR QUERY: "0x48da300FA4A832403aF2369cF32d453c599616A6", "hr3101,house_passage,_1515733200"
+    // YOUR QUERY: "0x48da300FA4A832403aF2369cF32d453c599616A6", 
+    //             "hr3101,house_passage,_1515733200"
     function queryTest(
         address oracleAddress, 
         string query, 
