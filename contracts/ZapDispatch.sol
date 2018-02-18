@@ -114,7 +114,13 @@ contract ZapDispatch {
 
 
     /// @dev Parameter-count specific method called by data provider in response
-    function respond1(uint256 id, string _response) external returns (bool) {
+    function respond1(
+        uint256 id,
+        string _response
+    )
+        external
+        returns (bool) 
+    {
         if (queries[id].provider != msg.sender || !fulfillQuery(id))
             revert();
         Client1(queries[id].subscriber).__zapCallback(id, _response);
