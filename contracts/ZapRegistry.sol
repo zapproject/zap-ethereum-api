@@ -6,20 +6,20 @@ contract ZapRegistry is FunctionsAdmin {
 
     // fundamental account type for zap platform
     struct ZapOracle {
-        uint256 public_key;                  // Public key of the data provider
-        uint256[] route_keys;                // IPFS routing/other
-        string title;                        // Tags (csv)
+        uint256 public_key;                                     // Public key of the data provider
+        uint256[] route_keys;                                   // IPFS routing/other
+        string title;                                           // Tags (csv)
         mapping(bytes32 => FunctionsInterface.ZapCurve) curves; // Price vs Supply (contract endpoint)
     }
 
     mapping(address => ZapOracle) oracles;
     address[] oracleIndex;
 
-    function ZapRegistry() public { }
+    function ZapRegistry() public {}
 
     /// @dev Initiates a provider.
-    /// If no address->ZapOracle mapping exists, ZapOracle object is created
-    /// @param public_key unique id for provider. used for encyrpted key swap for subscription endpoints
+    /// If no address->ZapOracle mapping exists, ZapOracle object is created.
+    /// @param public_key unique id for provider. Used for encyrpted key swap for subscription endpoints.
     /// @param ext_info endpoint specific params. TODO: update to bytes32[] endpoint params
     /// @param title name
     function initiateProvider(
@@ -29,7 +29,7 @@ contract ZapRegistry is FunctionsAdmin {
     )
         public
     {
-        if(oracles[msg.sender].public_key == 0){
+        if(oracles[msg.sender].public_key == 0) {
             oracles[msg.sender] = ZapOracle(
                 public_key,
                 ext_info,
@@ -39,9 +39,9 @@ contract ZapRegistry is FunctionsAdmin {
         }
     }
 
-    /// @dev Initiates an endpoint specific provider curve
-    /// If oracle[specfifier] is uninitialized, ZapCurve is mapped to specifier
-    /// @param specifier specifier of endpoint. currently "smart_contract" or "socket_subscription"
+    /// @dev Initiates an endpoint specific provider curve.
+    /// If oracle[specfifier] is uninitialized, ZapCurve is mapped to specifier.
+    /// @param specifier specifier of endpoint. Currently "smart_contract" or "socket_subscription".
     /// @param curveType dot-cost vs oracle-specific dot-supply
     /// @param curveStart y-offset of cost( always initial cost )
     /// @param curveMultiplier coefficient to curveType
@@ -65,30 +65,32 @@ contract ZapRegistry is FunctionsAdmin {
         oracles[msg.sender].curves[specifier] = FunctionsInterface.ZapCurve(
             curveType,
             curveStart,
-            curveMultiplier
-        );
+            curveMultiplier);
     }
 
     /// @return endpoint-specific params
     function getProviderRouteKeys(address provider)
-    public
-    view
-    returns(uint256[]) {
+        public
+        view
+        returns (uint256[]) 
+    {
         return oracles[provider].route_keys;
     }
 
     /// @return oracle name
     function getProviderTitle(address provider)
-    public
-    view
-    returns(string) {
+        public
+        view
+        returns (string) 
+    {
         return oracles[provider].title;
     }
 
     function getProviderPublicKey(address provider)
-    public
-    view
-    returns(uint256) {
+        public
+        view
+        returns (uint256)
+    {
         return oracles[provider].public_key;
     }
     
@@ -99,9 +101,10 @@ contract ZapRegistry is FunctionsAdmin {
     )
         view
         public
-        returns (FunctionsInterface.ZapCurveType curveType,
-                 uint256 curveStart,
-                 uint256 curveMultiplier)
+        returns (
+            FunctionsInterface.ZapCurveType curveType,
+            uint256 curveStart,
+            uint256 curveMultiplier)
     {
         FunctionsInterface.ZapCurve storage curve = oracles[provider].curves[specifier];
 
@@ -111,34 +114,30 @@ contract ZapRegistry is FunctionsAdmin {
     }
 
     function getNextProvider(uint256 index)
-        view returns(
+        view 
+        returns (
             uint256 nextIndex,
             address oracleAddress,
             uint256 public_key,
-            string title
-        ){
+            string title)
+    {
         
-        if(index < oracleIndex.length){
-            if(index+1 < oracleIndex.length){
-                
-                return(
-                    index+1, 
+        if(index < oracleIndex.length) {
+            if(index + 1 < oracleIndex.length) {
+                return (
+                    index + 1, 
                     oracleIndex[index], 
                     oracles[oracleIndex[index]].public_key, 
-                    oracles[oracleIndex[index]].title
-                );            
+                    oracles[oracleIndex[index]].title);            
             }
-            else{
-                return(
-                    0, 
-                    oracleIndex[index], 
-                    oracles[oracleIndex[index]].public_key, 
-                    oracles[oracleIndex[index]].title
-                );                            
-            }
+            
+            return (
+                0,
+                oracleIndex[index],
+                oracles[oracleIndex[index]].public_key,
+                oracles[oracleIndex[index]].title);
         }
-        else{
-            return(0,0x0,0,"");
-        }
+        
+        return(0,0x0,0,"");
     }
 }

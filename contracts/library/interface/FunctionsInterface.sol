@@ -1,19 +1,18 @@
 pragma solidity ^0.4.17;
 
 contract FunctionsInterface {
-    /*
-      enumeration of curve types representing dot(access token) prices as function of supply
-  */
+
+    // Enumeration of curve types 
+    // representing dot(access token) prices as function of supply.
     enum ZapCurveType {
         ZapCurveNone,
         ZapCurveLinear,
         ZapCurveExponential,
         ZapCurveLogarithmic
     }
-
-    /*
-        curve data structure representing dot(access token) prices as function of supply
-    */
+    
+    // Curve data structure 
+    // representing dot(access token) prices as function of supply.
     struct ZapCurve {
         ZapCurveType curveType;
         uint256 curveStart;

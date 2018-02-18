@@ -73,12 +73,13 @@ contract ZapArbiter {
             preblockend: block.number + blocks});
 
         // Emit the event
-        ZapDataPurchase(provider_address,
-                        msg.sender,
-                        public_key,
-                        blocks,
-                        endpoint_params,
-                        endpoint);
+        ZapDataPurchase(
+            provider_address,
+            msg.sender,
+            public_key,
+            blocks,
+            endpoint_params,
+            endpoint);
     }
 
     /// @dev Finish the data feed
