@@ -1,8 +1,7 @@
-
 exports.CurveTypes = {
     "None": 0,
-    "Linier": 1,
-    "Exponentioal": 2,
+    "Linear": 1,
+    "Exponential": 2,
     "Logarithmic": 3
 }
 
@@ -10,27 +9,17 @@ exports.DECIMALS = 1000000000000000000;
 
 exports.ZeroAddress = "0x0000000000000000000000000000000000000000";
 
-exports.CurveTypes = {
-    "None": 0,
-    "Linier": 1,
-    "Exponential": 2,
-    "Logarithmic": 3
-};
 
 exports.fetchPureArray = function (res, parseFunc) {
     let arr = [];
     for (let key in res) {
-        arr.push(parseFunc(res[key].valueOf()));
+        if (parseFunc != null) {
+            arr.push(parseFunc(res[key].valueOf()));
+        } else {
+            arr.push(res[key].valueOf());
+        }
     }
     return arr;
-}
-
-exports.calculateZapWithLinierCurve = function (dotsRequired, startValue, multiplier) {
-    let zap = 0;
-    for (i = 0; i < dotsRequired; i++) {
-        zap += multiplier * i + startValue
-    }
-    return zap;
 }
 
 exports.calculateZapWithLinearCurve = function (dotsRequired, startValue, multiplier) {
