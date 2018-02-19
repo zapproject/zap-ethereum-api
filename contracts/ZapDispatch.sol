@@ -81,7 +81,7 @@ contract ZapDispatch {
         returns (uint256 id)
     {
 
-        uint dots = bondage.getDots(endpoint, provider);
+        uint dots = bondage.getDots(endpoint, subscriber, provider);
 
         if(dots >= 1){
             //enough dots

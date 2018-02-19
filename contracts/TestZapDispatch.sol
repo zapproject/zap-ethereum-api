@@ -80,7 +80,7 @@ contract TestZapDispatch {
         bytes32[] endpoint_params//endpoint-specific params
     ) external returns (uint256 id) {
 
-        uint dots = bondage.getDots(endpoint, oracleAddress);
+        uint dots = bondage.getDots(endpoint, subscriber, oracleAddress);
 
         if(dots >= 1){
             //enough dots

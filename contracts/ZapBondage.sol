@@ -126,7 +126,7 @@ contract ZapBondage is FunctionsAdmin {
         returns (bool success)  
     {
 
-        uint currentDots = _getDots(specifier, holderAddress, oracleAddress);
+        uint currentDots = getDots(specifier, holderAddress, oracleAddress);
         if(currentDots >= numDots) {
             holders[holderAddress].bonds[specifier][oracleAddress] -= numDots;
             pendingEscrow[holderAddress][oracleAddress][specifier] += numDots;
@@ -277,25 +277,13 @@ contract ZapBondage is FunctionsAdmin {
 
     function getDots(
         bytes32 specifier,
+        address holderAddress,
         address oracleAddress
     )
         view
         public
         returns (uint dots)
     {
-        return _getDots(specifier, msg.sender, oracleAddress);
-    }
-
-    function _getDots(
-        bytes32 specifier,
-        address holderAddress,
-        address oracleAddress
-    )
-        view
-        internal
-        returns (uint dots) 
-    {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
-
 }
