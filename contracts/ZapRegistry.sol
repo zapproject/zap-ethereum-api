@@ -1,28 +1,15 @@
 pragma solidity ^0.4.17;
 
-contract ZapRegistry {
+import "./library/FunctionsAdmin.sol";
+
+contract ZapRegistry is FunctionsAdmin {
 
     // fundamental account type for zap platform
     struct ZapOracle {
         uint256 public_key;                  // Public key of the data provider
         uint256[] route_keys;                // IPFS routing/other
         string title;                        // Tags (csv)
-        mapping(bytes32 => ZapCurve) curves; // Price vs Supply (contract endpoint)
-    }
-
-    // curve types representing dot(access token) prices as function of supply
-    enum ZapCurveType {
-        ZapCurveNone,
-        ZapCurveLinear,
-        ZapCurveExponential,
-        ZapCurveLogarithmic
-    }
-
-    // curve data structure representing dot(access token) prices as function of supply
-    struct ZapCurve {
-        ZapCurveType curveType;
-        uint256 curveStart;
-        uint256 curveMultiplier;
+        mapping(bytes32 => FunctionsInterface.ZapCurve) curves; // Price vs Supply (contract endpoint)
     }
 
     mapping(address => ZapOracle) oracles;
@@ -60,7 +47,7 @@ contract ZapRegistry {
     /// @param curveMultiplier coefficient to curveType
     function initiateProviderCurve(
         bytes32 specifier,
-        ZapCurveType curveType,
+        FunctionsInterface.ZapCurveType curveType,
         uint256 curveStart,
         uint256 curveMultiplier
     )
@@ -70,12 +57,12 @@ contract ZapRegistry {
         require(oracles[msg.sender].public_key != 0);
 
         // Can't use a ZapCurveNone
-        require(curveType != ZapCurveType.ZapCurveNone);
+        require(curveType != FunctionsInterface.ZapCurveType.ZapCurveNone);
 
         // Can't reset their curve
-        require(oracles[msg.sender].curves[specifier].curveType == ZapCurveType.ZapCurveNone);
+        require(oracles[msg.sender].curves[specifier].curveType == FunctionsInterface.ZapCurveType.ZapCurveNone);
 
-        oracles[msg.sender].curves[specifier] = ZapCurve(
+        oracles[msg.sender].curves[specifier] = FunctionsInterface.ZapCurve(
             curveType,
             curveStart,
             curveMultiplier
@@ -112,11 +99,11 @@ contract ZapRegistry {
     )
         view
         public
-        returns (ZapCurveType curveType,
+        returns (FunctionsInterface.ZapCurveType curveType,
                  uint256 curveStart,
                  uint256 curveMultiplier)
     {
-        ZapCurve storage curve = oracles[provider].curves[specifier];
+        FunctionsInterface.ZapCurve storage curve = oracles[provider].curves[specifier];
 
         return (curve.curveType,
                 curve.curveStart,
