@@ -7,8 +7,8 @@ contract ZapRegistry is FunctionsAdmin {
     // fundamental account type for zap platform
     struct ZapOracle {
         uint256 public_key;                  // Public key of the data provider
-        uint256[] route_keys;                // IPFS routing/other
         string title;                        // Tags (csv)
+        mapping(bytes32=>bytes32[]) endpoint_params; // Endpoint specific parameters
         mapping(bytes32 => FunctionsInterface.ZapCurve) curves; // Price vs Supply (contract endpoint)
     }
 
@@ -20,21 +20,26 @@ contract ZapRegistry is FunctionsAdmin {
     /// @dev Initiates a provider.
     /// If no address->ZapOracle mapping exists, ZapOracle object is created
     /// @param public_key unique id for provider. used for encyrpted key swap for subscription endpoints
-    /// @param ext_info endpoint specific params. TODO: update to bytes32[] endpoint params
     /// @param title name
+    /// @param endpoint_specifier endpoint specific params 
+    /// @param endpoint_specifier endpoint specific  
     function initiateProvider(
         uint256 public_key,
-        uint256[] ext_info,
-        string title
+        string title,
+        bytes32 endpoint_specifier,
+        bytes32[] endpoint_params
     )
         public
     {
         if(oracles[msg.sender].public_key == 0){
             oracles[msg.sender] = ZapOracle(
                 public_key,
-                ext_info,
                 title
             );
+            if(endpoint_specifier != 0){
+                oracles[msg.sender].endpoint_params[endpoint_specifier] = endpoint_params;
+            }
+
             oracleIndex.push(msg.sender);
         }
     }
@@ -69,12 +74,20 @@ contract ZapRegistry is FunctionsAdmin {
         );
     }
 
+    ///@dev sets endpoint-specific parameters
+    ///@param specifier specifier of endpoint. currently "smart_contract" or "socket_subscription"
+    ///@param endpoint_params paremeters specific to endpoint. ex IPFS address
+    function setEndpointParams(bytes32 specifier, bytes32[] endpoint_params)
+    public {
+        oracles[msg.sender].endpoint_params[specifier] = endpoint_params;
+    }
+
     /// @return endpoint-specific params
-    function getProviderRouteKeys(address provider)
+    function getProviderRouteKeys(address provider, bytes32 specifier)
     public
     view
-    returns(uint256[]) {
-        return oracles[provider].route_keys;
+    returns(bytes32[]) {
+        return oracles[provider].endpoint_params[specifier];
     }
 
     /// @return oracle name
@@ -142,3 +155,4 @@ contract ZapRegistry is FunctionsAdmin {
         }
     }
 }
+
