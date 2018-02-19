@@ -3,7 +3,7 @@ pragma solidity ^0.4.17;
 import "./ZapRegistry.sol";
 import "./ZapBondage.sol";
 
-contract ZapArbiter {
+contract TestZapArbiter {
 
     // Called when a data purchase is initiated
     event ZapDataPurchase(
@@ -30,19 +30,19 @@ contract ZapArbiter {
         uint preblockend;   // Precalculated block end
     }
 
-    uint decimals = 10**16; // 1/100th of zap
+    uint public decimals = 10**16; // 1/100th of zap
 
-    ZapBondage bondage;
-    ZapRegistry registry;
+    ZapBondage public bondage;
+    ZapRegistry public registry;
 
     //provider_address => subscriber_address => endpoint => ZapSubscription
-    mapping(address => mapping(address => mapping(bytes32 => ZapSubscription))) subscriptions;
+    mapping(address => mapping(address => mapping(bytes32 => ZapSubscription))) public subscriptions;
 
-    function ZapArbiter(
+    function TestZapArbiter(
         address _bondageAddress,
         address _registryAddress
     )
-        public 
+    public
     {
         registry = ZapRegistry(_registryAddress);
         bondage = ZapBondage(_bondageAddress);
@@ -54,9 +54,9 @@ contract ZapArbiter {
         bytes32 endpoint,          // Endpoint specifier
         uint256 public_key,        // Public key of the purchaser
         uint256 blocks             // Number of blocks subscribed, 1block=1dot
-    ) 
-        public 
-    {   
+    )
+    public
+    {
         // Must be atleast one block
         require(blocks > 0);
 
@@ -74,11 +74,11 @@ contract ZapArbiter {
 
         // Emit the event
         ZapDataPurchase(provider_address,
-                        msg.sender,
-                        public_key,
-                        blocks,
-                        endpoint_params,
-                        endpoint);
+            msg.sender,
+            public_key,
+            blocks,
+            endpoint_params,
+            endpoint);
     }
 
     /// @dev Finish the data feed
@@ -87,8 +87,8 @@ contract ZapArbiter {
         address provider_address,
         address subscriber_address
     )
-        internal
-        returns (bool) 
+    public
+    returns (bool)
     {
         ZapSubscription storage subscription = subscriptions[provider_address][subscriber_address][endpoint];
 
@@ -132,13 +132,13 @@ contract ZapArbiter {
         address subscriber_address,
         address provider_address
     )
-        public 
+    public
     {
         // Emit an event on success about who ended the contract
         if (endZapSubscription(endpoint, provider_address, subscriber_address))
             ZapDataSubscriptionEnd(
-                msg.sender, 
-                subscriber_address, 
+                msg.sender,
+                subscriber_address,
                 ZapSubscriptionTerminator.ZapTermProvider);
     }
 
@@ -148,7 +148,7 @@ contract ZapArbiter {
         address subscriber_address,
         address provider_address
     )
-        public 
+    public
     {
         // Emit an event on success about who ended the contract
         if (endZapSubscription(endpoint, provider_address, subscriber_address))
