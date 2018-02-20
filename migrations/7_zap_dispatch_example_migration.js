@@ -1,4 +1,4 @@
-var ZapDispatchExample = artifacts.require("./ZapDispatchExample.sol");
+var ZapDispatchExample = artifacts.require("./TestSubscriber.sol");
 var ZapDispatch = artifacts.require("./ZapDispatch.sol");
 var ZapBondage = artifacts.require("./ZapBondage.sol");
 var ZapToken = artifacts.require("./ZapToken.sol");
