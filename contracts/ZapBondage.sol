@@ -55,10 +55,9 @@ contract ZapBondage is FunctionsAdmin {
     }
 
     /// @dev Initialize Token and ZapRegistry Contracts
-    function ZapBondage(address tokenAddress, address registryAddress, address _adminAddress) public {
+    function ZapBondage(address tokenAddress, address registryAddress) public {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
-        adminAddress = _adminAddress;
     }
 
     /// @dev Set ZapArbiter address
