@@ -3,7 +3,7 @@ const ZapBondage = artifacts.require("ZapBondage");
 const ZapToken = artifacts.require("ZapToken");
 const ZapRegistry = artifacts.require("ZapRegistry");
 
-const Utils = require("./test/helpers/utils.js");
+const Utils = require("./helpers/utils.js");
 
 const deployZapDispatch = () => {
     return ZapDispatch.new();
