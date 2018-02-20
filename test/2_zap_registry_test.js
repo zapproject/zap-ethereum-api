@@ -10,7 +10,7 @@ const Functions = artifacts.require("Functions");
 
 import EVMRevert from './helpers/EVMRevert';
 
-const Utils = require("./helpers/Utils.js");
+const Utils = require("./helpers/utils.js");
 
 const deployZapRegistry = () => {
     return ZapRegistry.new();
