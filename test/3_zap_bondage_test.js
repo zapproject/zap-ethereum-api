@@ -53,15 +53,16 @@ contract('ZapBondage', function (accounts) {
     const publicKey = 111;
     const title = "test";
     const routeKeys = [1];
+    const params = ["param1", "param2"];
 
     const specifier = new String("test-specifier");
-    const curveLinear = Utils.CurveTypes["Linier"];
+    const curveLinear = Utils.CurveTypes["Linear"];
     const curveExponential = Utils.CurveTypes["Exponential"];
     const curveLogarithmic = Utils.CurveTypes["Logarithmic"];
     const zeroAddress = Utils.ZeroAddress;
     const start = 1;
     const mul = 2;
-
+    
     const tokensForOwner = new BigNumber("1500e18");
     const tokensForProvider = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
@@ -76,7 +77,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -115,7 +116,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         //await zapRegistry.initiateProviderCurve(specifier.valueOf(), curve, start, mul, { from: provider });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -134,7 +135,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
 
@@ -156,7 +157,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[5] });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: accounts[5] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: accounts[5] });
 
         const jsLinearZap = Utils.calculateZapWithLinearCurve(5, start, mul);
@@ -166,7 +167,7 @@ contract('ZapBondage', function (accounts) {
         expect(jsLinearZap).to.be.equal(ethLinearZap);
 
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[6] });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: accounts[6] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveExponential, start, mul, { from: accounts[6] });
         const jsExponentialZap = Utils.calculateZapWithExponentialCurve(5, start, mul);
         const res2 = await zapBondage.calcZapForDots.call(specifier.valueOf(), 5, accounts[6]);
@@ -175,7 +176,7 @@ contract('ZapBondage', function (accounts) {
         expect(jsExponentialZap).to.be.equal(ethExponentialZap);
 
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[7] });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: accounts[7] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLogarithmic, start, mul, { from: accounts[7] });
         const jsLogarithmicZap = Utils.calculateZapWithLogarithmicCurve(5, start, mul);
         const res3 = await zapBondage.calcZapForDots.call(specifier.valueOf(), 5, accounts[7]);
@@ -208,7 +209,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         // TODO: it will not perfomed right way if numZap is 25, should be investigated
@@ -247,7 +248,7 @@ contract('ZapBondage', function (accounts) {
         await zapBondage.setFunctionsAddress(functions.address);
 
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         // TODO: it will not perfomed right way if numZap is 25, should be investigated
@@ -268,7 +269,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle});
 
         const jsLinearZap = Utils.calculateZapWithLinearCurve(101, start, mul);
@@ -293,7 +294,7 @@ contract('ZapBondage', function (accounts) {
         await zapBondage.setFunctionsAddress(functions.address);
 
       
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -303,7 +304,7 @@ contract('ZapBondage', function (accounts) {
         // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
         await zapBondage.bond(specifier.valueOf(), 26, oracle, {from: provider});
 
-        const res = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const res = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: provider });
         const receivedDots = parseInt(res.valueOf());
 
         expect(receivedDots).to.be.equal(5);
@@ -318,14 +319,14 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
         await zapToken.allocate(provider, tokensForProvider, { from: owner });
         await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
 
-        const res = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const res = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: provider });
         const receivedDots = parseInt(res.valueOf());
 
         expect(receivedDots).to.be.equal(0);
@@ -403,7 +404,7 @@ contract('ZapBondage', function (accounts) {
         await zapBondage.setFunctionsAddress(functions.address);
 
       
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -428,7 +429,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -452,7 +453,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -468,7 +469,7 @@ contract('ZapBondage', function (accounts) {
         await zapBondage.setDispatchAddress(accounts[3], { from: owner });
         await zapBondage.escrowDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
 
-        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: provider });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
         const escrowDotsRes = await zapBondage.pendingEscrow.call(provider, oracle, specifier.valueOf());
@@ -489,7 +490,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -505,7 +506,7 @@ contract('ZapBondage', function (accounts) {
        // await zapBondage.setDispatchAddress(accounts[3], { from: owner });
         await zapBondage.escrowDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
         
-        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: provider });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
         const escrowDotsRes = await zapBondage.pendingEscrow.call(provider, oracle, specifier.valueOf());
@@ -526,7 +527,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -542,7 +543,7 @@ contract('ZapBondage', function (accounts) {
        // await zapBondage.setDispatchAddress(accounts[3], { from: owner });
         await zapBondage.escrowDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
         
-        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: provider });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
         const escrowDotsRes = await zapBondage.pendingEscrow.call(provider, oracle, specifier.valueOf());
@@ -563,7 +564,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -582,13 +583,13 @@ contract('ZapBondage', function (accounts) {
         await zapBondage.escrowDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
         await zapBondage.releaseDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
 
-        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: provider });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
         const escrowDotsRes = await zapBondage.pendingEscrow.call(provider, oracle, specifier.valueOf());
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
-        const releaseRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: oracle });
+        const releaseRes = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: oracle });
         const releaseDots = parseInt(releaseRes.valueOf());
 
 
@@ -608,7 +609,7 @@ contract('ZapBondage', function (accounts) {
         await zapRegistry.setFunctionsAddress(functions.address);
         await zapBondage.setFunctionsAddress(functions.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -627,13 +628,13 @@ contract('ZapBondage', function (accounts) {
         await zapBondage.escrowDots(specifier.valueOf(), provider, oracle, dotsForEscrow, { from: accounts[3] });
         await zapBondage.releaseDots(specifier.valueOf(), provider, oracle, dotsForEscrow + 2, { from: accounts[3] });
 
-        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: provider });
+        const oracleDotsRes = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: provider });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
         const escrowDotsRes = await zapBondage.pendingEscrow.call(provider, oracle, specifier.valueOf());
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
-        const releaseRes = await zapBondage.getDots.call(specifier.valueOf(), oracle, { from: oracle });
+        const releaseRes = await zapBondage.getDots.call(specifier.valueOf(), provider, oracle, { from: oracle });
         const releaseDots = parseInt(releaseRes.valueOf());
 
 
