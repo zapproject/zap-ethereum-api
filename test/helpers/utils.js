@@ -9,7 +9,6 @@ exports.DECIMALS = 1000000000000000000;
 
 exports.ZeroAddress = "0x0000000000000000000000000000000000000000";
 
-
 exports.fetchPureArray = function (res, parseFunc) {
     let arr = [];
     for (let key in res) {

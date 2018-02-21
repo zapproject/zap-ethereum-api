@@ -292,12 +292,14 @@ contract ZapBondage is FunctionsAdmin {
 
     function getDotsIssued(
         bytes32 specifier,
+        address holderAddress,
         address oracleAddress
     )
         view
         public
         returns(uint dots)
     {
+
         return totalIssued[specifier][oracleAddress];
     }
 
