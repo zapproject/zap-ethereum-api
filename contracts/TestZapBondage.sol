@@ -19,7 +19,7 @@ contract ERC20 is ERC20Basic {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract ZapBondage is FunctionsAdmin {
+contract TestZapBondage is FunctionsAdmin {
 
     //   data structure for holder of ZAP bond to data provider
     //   currently ONLY "smart_contract" or "socket_subscription"
@@ -59,7 +59,7 @@ contract ZapBondage is FunctionsAdmin {
     }
 
     /// @dev Initialize Token and ZapRegistry Contracts
-    function ZapBondage(address tokenAddress, address registryAddress) public {
+    function TestZapBondage(address tokenAddress, address registryAddress) public {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
     }
