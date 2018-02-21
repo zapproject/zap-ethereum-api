@@ -34,7 +34,7 @@ contract ZapBondage is FunctionsAdmin {
 
     ZapRegistry registry;
     ERC20 token;
-    uint public decimals = 10**16; //dealing in units of 1/100 zap
+    uint public decimals = 10**18;
 
     address marketAddress;
     address dispatchAddress;
@@ -46,6 +46,10 @@ contract ZapBondage is FunctionsAdmin {
 
     // (specifier=>(oracleAddress=>numZap)
     mapping(bytes32 => mapping(address=> uint)) totalBound;
+
+    // (specifier=>(oracleAddress=>numDots)
+    mapping(bytes32 => mapping(address=> uint)) totalIssued;
+
 
     // For restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
     modifier operatorOnly {
@@ -154,28 +158,41 @@ contract ZapBondage is FunctionsAdmin {
         uint numDots,
         address oracleAddress
     )
-        internal 
+        internal returns(bool success)
     {
+
         Holder storage holder = holders[holderAddress];
-        uint256 currentDots = holder.bonds[specifier][oracleAddress];
 
-        if (currentDots >= numDots) {
+        //currentDots
+        if (holder.bonds[specifier][oracleAddress] >= numDots && numDots > 0) {
             uint numZap = 0;
-            uint localTotal = totalBound[specifier][oracleAddress];
-
+            uint localTotal = holder.bonds[specifier][oracleAddress];
+            
             for (uint i = 0; i < numDots; i++) {
-                totalBound[specifier][oracleAddress] -= 1;
-                holder.bonds[specifier][oracleAddress] -= 1;
+
+                localTotal -= 1;
 
                 numZap += functions.currentCostOfDot(
                     oracleAddress,
                     specifier,
                     localTotal);
-
-                localTotal -= 1;
+                    
             }
-            token.transfer(holderAddress, numZap*decimals);
+            
+            totalBound[specifier][oracleAddress] -= numZap;
+            totalIssued[specifier][oracleAddress] -= i;
+            
+            holder.bonds[specifier][oracleAddress] = localTotal;
+        
+            if(token.transfer(holderAddress, numZap*decimals)){
+                return true;
+            }
+            else{
+                return false;
+            }
         }
+        return false;
+
     }
 
     function bond(
@@ -210,14 +227,13 @@ contract ZapBondage is FunctionsAdmin {
         (numZap, numDots) = calcZap(oracleAddress, specifier, numZap);
 
         // Move zap user must have approved contract to transfer workingZap
-        /*if (!token.transferFrom(msg.sender, this, numZap * decimals)) 
-            revert();
-        */
         require(token.transferFrom(msg.sender, this, numZap * decimals));
 
-
         holder.bonds[specifier][oracleAddress] += numDots;
+        
+        totalIssued[specifier][oracleAddress] += numDots;
         totalBound[specifier][oracleAddress] += numZap;
+
     }
 
     /// @dev Calculate quantity of ZAP token required for specified amount of dots
@@ -231,14 +247,13 @@ contract ZapBondage is FunctionsAdmin {
         view
         returns (uint256 _numZap)
     {
-        uint256 localTotal = totalBound[specifier][oracleAddress];
         uint256 numZap;
 
         for (uint i = 0; i < numDots; i++) {
             numZap += functions.currentCostOfDot(
                 oracleAddress,
                 specifier,
-                localTotal + i);
+                totalIssued[specifier][oracleAddress] + i);
         }
         return numZap;
     }
@@ -254,7 +269,7 @@ contract ZapBondage is FunctionsAdmin {
         view
         returns (uint256 _numZap, uint256 _numDots) 
     {
-        uint infinity = 10*10;
+        uint infinity = decimals;
         uint dotCost = 0;
         uint totalDotCost = 0;
 
@@ -262,7 +277,7 @@ contract ZapBondage is FunctionsAdmin {
             dotCost = functions.currentCostOfDot(
                 oracleAddress,
                 specifier,
-                (totalBound[specifier][oracleAddress] + numDots));
+                (totalIssued[specifier][oracleAddress] + numDots));
 
             if (numZap > dotCost) {
                 numZap -= dotCost;
@@ -272,6 +287,20 @@ contract ZapBondage is FunctionsAdmin {
             }
         }
         return (totalDotCost, numDots);
+    }
+
+
+    function getDotsIssued(
+        bytes32 specifier,
+        address holderAddress,
+        address oracleAddress
+    )
+        view
+        public
+        returns(uint dots)
+    {
+
+        return totalIssued[specifier][oracleAddress];
     }
 
     function getDots(
