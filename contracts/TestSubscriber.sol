@@ -72,8 +72,8 @@ contract TestSubscriber {
     function bondToOracle(address provider, uint256 numberOfDataRequests) public {
         uint256 balance = token.balanceOf(this);
         uint256 numZap = bondage.calcZapForDots(specifier, numberOfDataRequests, provider);
-        uint256 bondageDecimals = 10 ** (token.decimals() - 2);
-        uint256 availableZap = balance * 100;
+        uint256 bondageDecimals = 10 ** token.decimals();
+        uint256 availableZap = balance;
         if (availableZap >= numZap) {
             token.approve(bondage, numZap * bondageDecimals);
             bondage.bond(specifier, numZap, provider);
