@@ -17,6 +17,8 @@ const Subscriber = artifacts.require("TestSubscriber");
 const Functions = artifacts.require("Functions");
 
 
+const Utils = require("./helpers/utils.js");
+
 const deployZapDispatch = () => {
     return ZapDispatch.new();
 };
