@@ -36,7 +36,7 @@ contract ZapBondage is FunctionsAdmin {
     ERC20 token;
     uint public decimals = 10**18;
 
-    address marketAddress;
+    address arbiterAddress;
     address dispatchAddress;
 
     mapping(address => Holder) holders;
@@ -53,7 +53,7 @@ contract ZapBondage is FunctionsAdmin {
 
     // For restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
     modifier operatorOnly {
-        if ( msg.sender == marketAddress || msg.sender == dispatchAddress ) {
+        if ( msg.sender == arbiterAddress || msg.sender == dispatchAddress ) {
             _;
         }
     }
@@ -65,9 +65,9 @@ contract ZapBondage is FunctionsAdmin {
     }
 
     /// @dev Set ZapArbiter address
-    function setMarketAddress(address _marketAddress) public {
-        if (marketAddress == 0) {
-            marketAddress = _marketAddress;
+    function setArbiterAddress(address _arbiterAddress) public {
+        if (arbiterAddress == 0) {
+            arbiterAddress = _arbiterAddress;
         }
     }
 
@@ -175,12 +175,13 @@ contract ZapBondage is FunctionsAdmin {
                 numZap += functions.currentCostOfDot(
                     oracleAddress,
                     specifier,
-                    localTotal);
+                    (totalIssued[specifier][oracleAddress]-1)
+                );
                     
             }
             
             totalBound[specifier][oracleAddress] -= numZap;
-            totalIssued[specifier][oracleAddress] -= i;
+            totalIssued[specifier][oracleAddress] -= numDots;
             
             holder.bonds[specifier][oracleAddress] = localTotal;
         
@@ -279,7 +280,7 @@ contract ZapBondage is FunctionsAdmin {
                 specifier,
                 (totalIssued[specifier][oracleAddress] + numDots));
 
-            if (numZap > dotCost) {
+            if (numZap >= dotCost) {
                 numZap -= dotCost;
                 totalDotCost += dotCost;
             } else {
@@ -292,14 +293,12 @@ contract ZapBondage is FunctionsAdmin {
 
     function getDotsIssued(
         bytes32 specifier,
-        address holderAddress,
         address oracleAddress
     )
         view
         public
         returns(uint dots)
     {
-
         return totalIssued[specifier][oracleAddress];
     }
 
