@@ -32,9 +32,10 @@ contract('Functions', function (accounts) {
     const publicKey = 111;
     const title = "test";
     const routeKeys = [1];
+    const params = ["param1", "param2"];
 
     const specifier = new String("test-specifier");
-    const curveLinear = Utils.CurveTypes["Linier"];
+    const curveLinear = Utils.CurveTypes["Linear"];
     const curveExponential = Utils.CurveTypes["Exponential"];
     const curveLogarithmic = Utils.CurveTypes["Logarithmic"];
     const zeroAddress = Utils.ZeroAddress;
@@ -48,13 +49,13 @@ contract('Functions', function (accounts) {
         const dotNumber = 99;
 
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[5] });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: accounts[5] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: accounts[5] });
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[6] });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: accounts[6] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveExponential, start, mul, { from: accounts[6] });
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: accounts[7] });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: accounts[7] });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLogarithmic, start, mul, { from: accounts[7] });
 
 
