@@ -17,8 +17,6 @@ const Subscriber = artifacts.require("TestSubscriber");
 const Functions = artifacts.require("Functions");
 
 
-const Utils = require("./helpers/utils.js");
-
 const deployZapDispatch = () => {
     return ZapDispatch.new();
 };
@@ -31,8 +29,8 @@ const deployZapRegistry = () => {
     return ZapRegistry.new();
 };
 
-const deployZapBondage = (tokenAddress, registryAddress, adminAddress) => {
-    return ZapBondage.new(tokenAddress, registryAddress, adminAddress);
+const deployZapBondage = (tokenAddress, registryAddress) => {
+    return ZapBondage.new(tokenAddress, registryAddress);
 };
 
 const deploySubscriber = (tokenAddress, dispatchAddress, bondageAddress) => {
@@ -121,7 +119,7 @@ contract('ZapDispatch', function (accounts) {
 
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let functions = await deployFunctions(zapRegistry.address);
 
         await zapRegistry.setFunctionsAddress(functions.address, { from: owner });
@@ -138,7 +136,7 @@ contract('ZapDispatch', function (accounts) {
 
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let functions = await deployFunctions(zapRegistry.address);
 
         await zapRegistry.setFunctionsAddress(functions.address, { from: owner });
@@ -155,7 +153,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -174,12 +172,12 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, {from: provider});
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, {from: provider});
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, {from: provider});
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => {});
-
+        
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
         await subscriberContract.bondToOracle(provider, 2, { from: owner });
 
@@ -194,7 +192,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -213,7 +211,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, {from: provider});
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, {from: provider});
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, {from: provider});
 
         // START WATCHIG EVENTS
@@ -238,7 +236,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -257,7 +255,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -281,7 +279,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -300,7 +298,7 @@ contract('ZapDispatch', function (accounts) {
         //await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -324,7 +322,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -343,7 +341,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -379,7 +377,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -398,7 +396,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -428,7 +426,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -447,7 +445,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -483,7 +481,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -502,7 +500,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
         
 
@@ -533,7 +531,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -552,7 +550,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -588,7 +586,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -607,7 +605,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -638,7 +636,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -657,7 +655,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -693,7 +691,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -712,7 +710,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -742,7 +740,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -761,7 +759,7 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -794,7 +792,7 @@ contract('ZapDispatch', function (accounts) {
         let zapDispatch = await deployZapDispatch();
         let zapToken = await deployZapToken();
         let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, owner);
+        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
         let functions = await deployFunctions(zapRegistry.address);
 
@@ -813,8 +811,8 @@ contract('ZapDispatch', function (accounts) {
         await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, extInfo, title, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinears, curveStart, curveMultiplier, { from: provider });
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
         const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
@@ -842,5 +840,5 @@ contract('ZapDispatch', function (accounts) {
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
         subscriberEvents.stopWatching();
-    }); 
+    });
 }); 

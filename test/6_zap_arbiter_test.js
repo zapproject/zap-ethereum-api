@@ -13,6 +13,7 @@ const ZapToken = artifacts.require("ZapToken");
 const ZapBondage = artifacts.require("TestZapBondage");
 const ZapDispatch = artifacts.require("ZapDispatch");
 const ZapArbiter = artifacts.require("TestZapArbiter"); 
+const Functions = artifacts.require("Functions");
 
 const deployZapToken = () => {
     return ZapToken.new();
@@ -36,6 +37,10 @@ const deployZapDispatch = () => {
 
 const deployZapArbiter = (bondageAddress, registryAddress) => {
     return ZapArbiter.new(bondageAddress, registryAddress);
+};
+
+const deployFunctions = (registryAddress) => {
+    return Functions.new(registryAddress);
 };
 
 const CurveTypes = {
@@ -73,8 +78,13 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
+        let functions = await deployFunctions(zapRegistry.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.setFunctionsAddress(functions.address);
+        await zapBondage.setFunctionsAddress(functions.address);
+
+
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -94,8 +104,13 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
+        let functions = await deployFunctions(zapRegistry.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.setFunctionsAddress(functions.address);
+        await zapBondage.setFunctionsAddress(functions.address);
+
+
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -112,8 +127,13 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
+        let functions = await deployFunctions(zapRegistry.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.setFunctionsAddress(functions.address);
+        await zapBondage.setFunctionsAddress(functions.address);
+
+
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -135,8 +155,13 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
+        let functions = await deployFunctions(zapRegistry.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.setFunctionsAddress(functions.address);
+        await zapBondage.setFunctionsAddress(functions.address);
+
+
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -161,8 +186,13 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
+        let functions = await deployFunctions(zapRegistry.address);
 
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
+        await zapRegistry.setFunctionsAddress(functions.address);
+        await zapBondage.setFunctionsAddress(functions.address);
+
+
+        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
@@ -175,100 +205,4 @@ contract('ZapBondage', function (accounts) {
 
         expect(zapArbiter.endZapSubscription(specifier.valueOf(), provider, owner)).to.eventually.be.rejectedWith(EVMRevert);
     });
-
-    it("ZAP_ARBITER_6 - endZapSubscription_Provider() - Check ending subscription", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let zapToken = await deployZapToken();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
-
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
-
-        await zapBondage.bond(specifier.valueOf(), 1000, oracle, {from: provider});
-
-        await zapArbiter.initiateSubscription(provider, params, specifier.valueOf(), publicKey, 10);
-
-        let res = await zapArbiter.subscriptions.call(provider, owner, specifier.valueOf());
-        expect(parseInt(res[0].valueOf())).to.be.equal(10);
-
-        await zapArbiter.endZapSubscription_Provider(specifier.valueOf(), owner, provider);
-
-        res = await zapArbiter.subscriptions.call(provider, owner, specifier.valueOf());
-        expect(parseInt(res[0].valueOf())).to.be.equal(0);
-    });
-
-    
-    it("ZAP_ARBITER_7 - endZapSubscription_Provider() - Check that user can't end uninitialized subscription", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let zapToken = await deployZapToken();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
-
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
-
-        await zapBondage.bond(specifier.valueOf(), 1000, oracle, {from: provider});
-
-        //await zapArbiter.initiateSubscription(provider, params, specifier.valueOf(), publicKey, 10);
-
-        expect(zapArbiter.endZapSubscription_Provider(specifier.valueOf(), owner, provider)).to.eventually.be.rejectedWith(EVMRevert);
-    });
-
-    it("ZAP_ARBITER_8 - endZapSubscription_Subscriber() - Check ending subscription", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let zapToken = await deployZapToken();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
-
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
-
-        await zapBondage.bond(specifier.valueOf(), 1000, oracle, {from: provider});
-
-        await zapArbiter.initiateSubscription(provider, params, specifier.valueOf(), publicKey, 10);
-
-        let res = await zapArbiter.subscriptions.call(provider, owner, specifier.valueOf());
-        expect(parseInt(res[0].valueOf())).to.be.equal(10);
-
-        await zapArbiter.endZapSubscription_Subscriber(specifier.valueOf(), owner, provider);
-
-        res = await zapArbiter.subscriptions.call(provider, owner, specifier.valueOf());
-        expect(parseInt(res[0].valueOf())).to.be.equal(0);
-    });
-
-    
-    it("ZAP_ARBITER_9 - endZapSubscription_Subscriber() - Check that user can't end uninitialized subscription", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let zapToken = await deployZapToken();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-
-        await zapRegistry.initiateProvider(publicKey, routeKeys, title, { from: oracle });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
-
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.approve(zapBondage.address, approveTokens, {from: provider});
-
-        await zapBondage.bond(specifier.valueOf(), 1000, oracle, {from: provider});
-
-        //await zapArbiter.initiateSubscription(provider, params, specifier.valueOf(), publicKey, 10);
-
-        expect(zapArbiter.endZapSubscription_Subscriber(specifier.valueOf(), owner, provider)).to.eventually.be.rejectedWith(EVMRevert);
-    });
-
-
 });
