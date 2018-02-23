@@ -27,5 +27,5 @@ library LibInterface {
     /// @dev Get the current cost of a dot.
     /// Endpoint specified by specifier.
     /// Data-provider specified by oracleAddress,
-    function currentCostOfDot(uint _totalBound, ZapCurveType index, uint curveStart, uint curveMultiplier) public view returns (uint _cost);
+    function currentCostOfDot(uint _totalBound, ZapCurveType curveType, uint curveStart, uint curveMultiplier) public view returns (uint _cost);
 }

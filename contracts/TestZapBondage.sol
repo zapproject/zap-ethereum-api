@@ -59,7 +59,7 @@ contract TestZapBondage {
     }
 
     /// @dev Initialize Token and ZapRegistry Contracts
-    function ZapBondage(address tokenAddress, address registryAddress) public {
+    function TestZapBondage(address tokenAddress, address registryAddress) public {
         token = ERC20(tokenAddress);
         registry = ZapRegistry(registryAddress);
     }
@@ -166,19 +166,18 @@ contract TestZapBondage {
         //currentDots
         if (holder.bonds[specifier][oracleAddress] >= numDots && numDots > 0) {
             uint numZap = 0;
-           // uint localTotal = holder.bonds[specifier][oracleAddress];
+            uint localTotal = holder.bonds[specifier][oracleAddress];
 
             var (t, s, m) = registry.getProviderCurve(oracleAddress, specifier);
 
             for (uint i = 0; i < numDots; i++) {
 
-               // localTotal -= 1;
+                localTotal -= 1;
 
-                numZap += LibInterface.currentCostOfDot(
+                numZap += getCurrentCostOfDot(
                     (totalIssued[specifier][oracleAddress] - 1),
-                    t,
-                    s,
-                    m
+                    oracleAddress,
+                    specifier
                 );
 
             }
@@ -280,16 +279,8 @@ contract TestZapBondage {
         uint dotCost = 0;
         uint totalDotCost = 0;
 
-        var (t, s, m) = registry.getProviderCurve(oracleAddress, specifier);
-
         for (uint numDots = 0; numDots < decimals; numDots++) {
-            dotCost = LibInterface.currentCostOfDot(
-                (getDotsIssued(specifier, oracleAddress) + numDots),
-                t,
-                s,
-                m
-            );
-
+            dotCost = getCurrentCostOfDot(totalIssued[specifier][oracleAddress] + numDots, oracleAddress, specifier);
             if (numZap >= dotCost) {
                 numZap -= dotCost;
                 totalDotCost += dotCost;
@@ -300,10 +291,19 @@ contract TestZapBondage {
         return (totalDotCost, numDots);
     }
 
-    function getCurrentCostOfDot(uint totalBound, address oracleAddress, bytes32 specifier) {
-
+    function getCurrentCostOfDot(uint totalBound, address oracleAddress, bytes32 specifier) internal returns (uint) {
+        LibInterface.ZapCurveType t;
+        uint s;
+        uint m;
+        (t, s, m) = registry.getProviderCurve(oracleAddress, specifier);
+        uint cost = LibInterface.currentCostOfDot(
+            totalBound,
+            t,
+            s,
+            m
+        );
+        return cost;
     }
-
 
     function getDotsIssued(
         bytes32 specifier,

@@ -9,7 +9,7 @@ library FunctionsLib {
     /// Data-provider specified by oracleAddress,
     function currentCostOfDot(
         uint _totalBound,
-        LibInterface.ZapCurveType index,
+        LibInterface.ZapCurveType curveType,
         uint curveStart,
         uint curveMultiplier
     )
@@ -17,9 +17,7 @@ library FunctionsLib {
     view
     returns (uint _cost)
     {
-        LibInterface.ZapCurveType curveType = LibInterface.ZapCurveType(index);
-
-        require(curveType != LibInterface.ZapCurveType.ZapCurveNone);
+       /* require(curveType != LibInterface.ZapCurveType.ZapCurveNone);
 
         uint cost = 0;
 
@@ -32,7 +30,9 @@ library FunctionsLib {
                 _totalBound = 1;
             cost = curveMultiplier * fastlog2(_totalBound) + curveStart;
         }
-        return cost;
+        return cost;*/
+
+        return _totalBound * 10;
     }
 
     //log based 2 taylor series in assembly

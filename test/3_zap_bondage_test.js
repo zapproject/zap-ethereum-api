@@ -92,6 +92,7 @@ contract('ZapBondage', function (accounts) {
 
         const zapToken = await deployZapToken();
         const zapRegistry = await deployZapRegistry(dispatcher.address);
+        console.log(zapRegistry.address);
         const zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address, dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
@@ -100,6 +101,9 @@ contract('ZapBondage', function (accounts) {
         await zapToken.allocate(owner, tokensForOwner, { from: owner });
         await zapToken.allocate(subscriber, tokensForProvider, { from: owner });
         await zapToken.approve(zapBondage.address, approveTokens, {from: subscriber});
+
+        const ra = await zapBondage.registry.call();
+        console.log(ra);
 
         const res = await zapBondage.bond(specifier.valueOf(), 100, oracle, {from: subscriber});
     });
