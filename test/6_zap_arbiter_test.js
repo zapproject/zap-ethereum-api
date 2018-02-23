@@ -13,7 +13,6 @@ const ZapToken = artifacts.require("ZapToken");
 const ZapBondage = artifacts.require("TestZapBondage");
 const ZapDispatch = artifacts.require("ZapDispatch");
 const ZapArbiter = artifacts.require("TestZapArbiter"); 
-const Functions = artifacts.require("Functions");
 
 const deployZapToken = () => {
     return ZapToken.new();
@@ -78,10 +77,6 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
 
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
@@ -104,11 +99,6 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
@@ -127,11 +117,6 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
@@ -155,11 +140,6 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
@@ -186,10 +166,6 @@ contract('ZapBondage', function (accounts) {
         let zapToken = await deployZapToken();
         let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
         let zapArbiter = await deployZapArbiter(zapBondage.address, zapRegistry.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
 
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });

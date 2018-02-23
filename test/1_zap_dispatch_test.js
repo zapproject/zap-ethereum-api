@@ -14,7 +14,6 @@ const ZapBondage = artifacts.require("ZapBondage");
 const ZapToken = artifacts.require("ZapToken");
 const ZapRegistry = artifacts.require("ZapRegistry");
 const Subscriber = artifacts.require("TestSubscriber");
-const Functions = artifacts.require("Functions");
 
 
 const deployZapDispatch = () => {

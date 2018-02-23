@@ -1,15 +1,14 @@
 pragma solidity ^0.4.17;
 
-import "./library/FunctionsAdmin.sol";
+import "./library/interface/LibInterface.sol";
 
-contract ZapRegistry is FunctionsAdmin {
-
+contract ZapRegistry {
     // fundamental account type for zap platform
     struct ZapOracle {
         uint256 public_key;                  // Public key of the data provider
         string title;                        // Tags (csv)
         mapping(bytes32=>bytes32[]) endpoint_params; // Endpoint specific parameters
-        mapping(bytes32 => FunctionsInterface.ZapCurve) curves; // Price vs Supply (contract endpoint)
+        mapping(bytes32 => LibInterface.ZapCurve) curves; // Price vs Supply (contract endpoint)
     }
 
     mapping(address => ZapOracle) oracles;
@@ -52,7 +51,7 @@ contract ZapRegistry is FunctionsAdmin {
     /// @param curveMultiplier coefficient to curveType
     function initiateProviderCurve(
         bytes32 specifier,
-        FunctionsInterface.ZapCurveType curveType,
+        LibInterface.ZapCurveType curveType,
         uint256 curveStart,
         uint256 curveMultiplier
     )
@@ -62,12 +61,12 @@ contract ZapRegistry is FunctionsAdmin {
         require(oracles[msg.sender].public_key != 0);
 
         // Can't use a ZapCurveNone
-        require(curveType != FunctionsInterface.ZapCurveType.ZapCurveNone);
+        require(curveType != LibInterface.ZapCurveType.ZapCurveNone);
 
         // Can't reset their curve
-        require(oracles[msg.sender].curves[specifier].curveType == FunctionsInterface.ZapCurveType.ZapCurveNone);
+        require(oracles[msg.sender].curves[specifier].curveType == LibInterface.ZapCurveType.ZapCurveNone);
 
-        oracles[msg.sender].curves[specifier] = FunctionsInterface.ZapCurve(
+        oracles[msg.sender].curves[specifier] = LibInterface.ZapCurve(
             curveType,
             curveStart,
             curveMultiplier
@@ -112,11 +111,11 @@ contract ZapRegistry is FunctionsAdmin {
     )
         view
         public
-        returns (FunctionsInterface.ZapCurveType curveType,
+        returns (LibInterface.ZapCurveType curveType,
                  uint256 curveStart,
                  uint256 curveMultiplier)
     {
-        FunctionsInterface.ZapCurve storage curve = oracles[provider].curves[specifier];
+        LibInterface.ZapCurve storage curve = oracles[provider].curves[specifier];
 
         return (curve.curveType,
                 curve.curveStart,

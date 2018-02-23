@@ -6,20 +6,31 @@ const expect = require('chai')
     .expect;
 
 const ZapRegistry = artifacts.require("ZapRegistry");
-const Functions = artifacts.require("Functions"); 
+const ProxyDispatcher = artifacts.require("ProxyDispatcher");
+const ProxyDispatcherStorage = artifacts.require("ProxyDispatcherStorage");
+const FunctionsLib = artifacts.require("FunctionsLib");
 
 import EVMRevert from './helpers/EVMRevert';
 
 const Utils = require("./helpers/utils.js");
 
-const deployZapRegistry = () => {
+const deployLib = () => {
+    return FunctionsLib.new();
+}
+
+const deployDispatcherStorage = (libAddr) => {
+    return ProxyDispatcherStorage.new(libAddr)
+}
+
+const deployDispatcher = (dispatcherStorage) => {
+    ProxyDispatcher.unlinked_binary = ProxyDispatcher.unlinked_binary.replace('1111222233334444555566667777888899990000', dispatcherStorage.address.slice(2))
+    return ProxyDispatcher.new()
+}
+
+const deployZapRegistry = (dispatcherAddress) => {
+    ZapRegistry.link('LibInterface', dispatcherAddress);
     return ZapRegistry.new();
 };
-
-const deployFunctions = (registryAddress) => {
-    return Functions.new(registryAddress);
-};
-
 
 function hex2a(hexx) { 
     var hex = hexx.toString();//force conversion
@@ -46,19 +57,20 @@ contract('ZapRegistry', function (accounts) {
     const params = ["param1", "param2"];
 
     it("ZAP_REGISTRY_1 - initiateProvider() - Check that we can initiate provider", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
+        
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
     });
 
     it("ZAP_REGISTRY_2 - initiateProvider() - Check that we can't change provider info if it was initated", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
         
         const newPublicKey = 222;
         const newTitle = "test-test"
@@ -74,10 +86,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_3 - initiateProviderCurve() - Check that we can initiate provider curve", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
@@ -85,19 +97,19 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't intiated", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         expect(zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("ZAP_REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if curve type is none", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
@@ -105,10 +117,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_6 - getProviderRouteKeys() - Check that we can get provider route keys", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
@@ -118,10 +130,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_7 - getProviderRouteKeys() - Check that route keys of uninitialized provider are empty", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         const res = await zapRegistry.getProviderRouteKeys.call(owner, specifier.valueOf());
         
@@ -130,10 +142,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_8 - getProviderTitle() - Check that we can get provider title", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
@@ -143,19 +155,19 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_9 - getProviderTitle() - Check that title of uninitialized provider is empty", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
         
         expect(zapRegistry.getProviderTitle.call(owner)).to.eventually.be.equal('');
     });
 
     it("ZAP_REGISTRY_10 - getProviderPublicKey() - Check that we can get provider public key", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
@@ -165,10 +177,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_11 - getProviderPublicKey() -  Check that public key of uninitialized provider is equal to 0", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         const res = await zapRegistry.getProviderPublicKey.call(owner);
        
@@ -176,10 +188,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_12 - getProviderCurve() - Check that we can get provider curve", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
@@ -195,10 +207,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_13 - getProviderCurve() - Check that uninitialized provider curve is empty", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
@@ -212,10 +224,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_14 - setEndpointParams() - Check that we can set endpoint params", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
@@ -229,10 +241,10 @@ contract('ZapRegistry', function (accounts) {
     });
 
     it("ZAP_REGISTRY_15 - getNextProvider() - Check that we can iterate through providers", async function () {
-        let zapRegistry = await deployZapRegistry();
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
+        const lib = await deployLib();
+        const storage = await deployDispatcherStorage(lib.address);
+        const dispatcher = await deployDispatcher(storage);
+        const zapRegistry = await deployZapRegistry(dispatcher.address);
 
         await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: owner });
 
