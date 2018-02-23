@@ -17,7 +17,7 @@ library FunctionsLib {
     view
     returns (uint _cost)
     {
-       /* require(curveType != LibInterface.ZapCurveType.ZapCurveNone);
+        require(curveType != LibInterface.ZapCurveType.ZapCurveNone);
 
         uint cost = 0;
 
@@ -30,9 +30,7 @@ library FunctionsLib {
                 _totalBound = 1;
             cost = curveMultiplier * fastlog2(_totalBound) + curveStart;
         }
-        return cost;*/
-
-        return _totalBound * 10;
+        return cost;
     }
 
     //log based 2 taylor series in assembly
