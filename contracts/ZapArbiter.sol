@@ -87,8 +87,8 @@ contract ZapArbiter {
         address provider_address,
         address subscriber_address
     )
-        internal
-        returns (bool) 
+    public
+    returns (bool)
     {
         ZapSubscription storage subscription = subscriptions[provider_address][subscriber_address][endpoint];
 
@@ -123,38 +123,11 @@ contract ZapArbiter {
         // Kill the subscription
         subscription.dots = 0;
 
+        ZapDataSubscriptionEnd(
+            provider_address,
+            subscriber_address,
+            ZapSubscriptionTerminator.ZapTermProvider);
+
         return true;
-    }
-
-    /// @dev Finish the data feed from the provider
-    function endZapSubscription_Provider(
-        bytes32 endpoint,
-        address subscriber_address,
-        address provider_address
-    )
-        public 
-    {
-        // Emit an event on success about who ended the contract
-        if (endZapSubscription(endpoint, provider_address, subscriber_address))
-            ZapDataSubscriptionEnd(
-                msg.sender, 
-                subscriber_address, 
-                ZapSubscriptionTerminator.ZapTermProvider);
-    }
-
-    /// @dev Finish the data feed from the provider
-    function endZapSubscription_Subscriber(
-        bytes32 endpoint,
-        address subscriber_address,
-        address provider_address
-    )
-        public 
-    {
-        // Emit an event on success about who ended the contract
-        if (endZapSubscription(endpoint, provider_address, subscriber_address))
-            ZapDataSubscriptionEnd(
-                provider_address,
-                msg.sender,
-                ZapSubscriptionTerminator.ZapTermProvider);
     }
 }
