@@ -178,8 +178,7 @@ contract('ZapBondage', function (accounts) {
         await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: oracle });
         await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, start, mul, { from: oracle });
 
-        // TODO: it will not perfomed right way if numZap is 25, should be investigated
-        const res1 = await this.test.zapBondage.calcZap.call(oracle, specifier.valueOf(), 26, { from: subscriber });
+        const res1 = await this.test.zapBondage.calcZap.call(oracle, specifier.valueOf(), 25, { from: subscriber });
         const ethZap = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
 
@@ -188,8 +187,7 @@ contract('ZapBondage', function (accounts) {
     });
 
     it("ZAP_BONDAGE_8 - calcZap() - Check calcZap function throw error if curve not initoalized", async function () {
-        // TODO: it will not perfomed right way if numZap is 25, should be investigated
-        expect(this.test.zapBondage.calcZap.call(oracle, specifier.valueOf(), 26)).to.eventually.be.rejectedWith(EVMRevert);
+        expect(this.test.zapBondage.calcZap.call(oracle, specifier.valueOf(), 25)).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("ZAP_BONDAGE_9 - calcZap() - Check calcZap function return 0 dots if numZap is 0", async function () {
@@ -230,7 +228,7 @@ contract('ZapBondage', function (accounts) {
         await this.test.zapToken.approve(this.test.zapBondage.address, approveTokens, {from: subscriber});
 
         // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
-        await this.test.zapBondage.bond(specifier.valueOf(), 26, oracle, {from: subscriber});
+        await this.test.zapBondage.bond(specifier.valueOf(), 25, oracle, {from: subscriber});
 
         const res = await this.test.zapBondage.getDots.call(specifier.valueOf(), subscriber, oracle);
         const receivedDots = parseInt(res.valueOf());
@@ -326,7 +324,7 @@ contract('ZapBondage', function (accounts) {
         await this.test.zapToken.approve(this.test.zapBondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
-        await this.test.zapBondage.bond(specifier.valueOf(), 26, oracle, {from: subscriber});
+        await this.test.zapBondage.bond(specifier.valueOf(), 25, oracle, {from: subscriber});
 
         const dots = 5;
         const dotsForEscrow = 2;
@@ -353,7 +351,7 @@ contract('ZapBondage', function (accounts) {
         await this.test.zapToken.approve(this.test.zapBondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
-        await this.test.zapBondage.bond(specifier.valueOf(), 26, oracle, {from: subscriber});
+        await this.test.zapBondage.bond(specifier.valueOf(), 25, oracle, {from: subscriber});
 
         const dots = 5;
         const dotsForEscrow = 2;
@@ -407,7 +405,7 @@ contract('ZapBondage', function (accounts) {
         await this.test.zapToken.approve(this.test.zapBondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
-        await this.test.zapBondage.bond(specifier.valueOf(), 26, oracle, {from: subscriber});
+        await this.test.zapBondage.bond(specifier.valueOf(), 25, oracle, {from: subscriber});
 
         const dots = 5;
         const dotsForEscrow = 2;
@@ -441,7 +439,7 @@ contract('ZapBondage', function (accounts) {
         await this.test.zapToken.approve(this.test.zapBondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
-        await this.test.zapBondage.bond(specifier.valueOf(), 26, oracle, {from: subscriber});
+        await this.test.zapBondage.bond(specifier.valueOf(), 25, oracle, {from: subscriber});
 
         const dots = 5;
         const dotsForEscrow = 2;
