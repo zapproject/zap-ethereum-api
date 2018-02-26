@@ -1,9 +1,5 @@
 pragma solidity ^0.4.18;
 
-contract ZapRegistryInterface {
-    function getProviderCurve(address provider, bytes32 specifier) view public returns (LibInterface.ZapCurveType curveType, uint256 curveStart, uint256 curveMultiplier);
-}
-
 library LibInterface {
     /*
           enumeration of curve types representing dot(access token) prices as function of supply
@@ -28,4 +24,6 @@ library LibInterface {
     /// Endpoint specified by specifier.
     /// Data-provider specified by oracleAddress,
     function currentCostOfDot(uint _totalBound, ZapCurveType curveType, uint curveStart, uint curveMultiplier) public view returns (uint _cost);
+
+    function fastlog2(uint x) public pure returns (uint y);
 }

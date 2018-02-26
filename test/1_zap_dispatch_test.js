@@ -14,7 +14,30 @@ const ZapBondage = artifacts.require("ZapBondage");
 const ZapToken = artifacts.require("ZapToken");
 const ZapRegistry = artifacts.require("ZapRegistry");
 const Subscriber = artifacts.require("TestSubscriber");
+const ProxyDispatcher = artifacts.require("ProxyDispatcher");
+const ProxyDispatcherStorage = artifacts.require("ProxyDispatcherStorage");
+const FunctionsLib = artifacts.require("FunctionsLib");
 
+var replaceAddr = '1111222233334444555566667777888899990000';
+
+const deployLib = () => {
+    return FunctionsLib.new();
+}
+
+const deployDispatcherStorage = (libAddr) => {
+    return ProxyDispatcherStorage.new(libAddr)
+}
+
+const deployDispatcher = (dispatcherStorage) => {
+    ProxyDispatcher.unlinked_binary = ProxyDispatcher.unlinked_binary.replace(replaceAddr, dispatcherStorage.address.slice(2));
+    replaceAddr = dispatcherStorage.address.slice(2);
+    return ProxyDispatcher.new()
+}
+
+const deployZapRegistry = (dispatcherAddress) => {
+    ZapRegistry.link('LibInterface', dispatcherAddress);
+    return ZapRegistry.new();
+};
 
 const deployZapDispatch = () => {
     return ZapDispatch.new();
@@ -24,11 +47,8 @@ const deployZapToken = () => {
     return ZapToken.new();
 };
 
-const deployZapRegistry = () => {
-    return ZapRegistry.new();
-};
-
-const deployZapBondage = (tokenAddress, registryAddress) => {
+const deployZapBondage = (tokenAddress, registryAddress, dispatcherAddress) => {
+    ZapBondage.link('LibInterface', dispatcherAddress);
     return ZapBondage.new(tokenAddress, registryAddress);
 };
 
@@ -112,116 +132,86 @@ contract('ZapDispatch', function (accounts) {
 
     const query = "Hello!";
 
+    beforeEach(async function deployContracts() {
+        this.currentTest.functionsLib = await deployLib();
+        this.currentTest.storage = await deployDispatcherStorage(this.currentTest.functionsLib.address);
+        this.currentTest.dispatcher = await deployDispatcher(this.currentTest.storage);
+        this.currentTest.zapRegistry = await deployZapRegistry(this.currentTest.dispatcher.address);
+        this.currentTest.zapToken = await deployZapToken();
+        this.currentTest.zapBondage = await deployZapBondage(this.currentTest.zapToken.address, this.currentTest.zapRegistry.address, this.currentTest.dispatcher.address);
+        this.currentTest.zapDispatch = await deployZapDispatch();
+        this.currentTest.subscriberContract = await deploySubscriber(this.currentTest.zapToken.address, this.currentTest.zapDispatch.address, this.currentTest.zapBondage.address);
+    });
 
     it("ZAP_DISPATCH_1 - setBondageAddress() - Check bondage address setuping", async function () {
-        let zapDispatch = await deployZapDispatch();
+        await this.test.zapDispatch.setBondageAddress(this.test.zapBondage.address);
 
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address, { from: owner });
-        await zapBondage.setFunctionsAddress(functions.address, { from: owner});
-
-        await zapDispatch.setBondageAddress(zapBondage.address);
-
-        const res = await zapDispatch.bondageAddress.call();
-        expect(res.valueOf()).to.be.equal(zapBondage.address);
+        const res = await this.test.zapDispatch.bondageAddress.call();
+        expect(res.valueOf()).to.be.equal(this.test.zapBondage.address);
     });
 
     it("ZAP_DISPATCH_2 - setBondageAddress() - Check bondage address can not be reseted", async function () {
-       let zapDispatch = await deployZapDispatch();
+        await this.test.zapDispatch.setBondageAddress(this.test.zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress(this.test.zapRegistry.address);
 
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address, { from: owner });
-        await zapBondage.setFunctionsAddress(functions.address, { from: owner});
-
-        await zapDispatch.setBondageAddress(zapBondage.address);
-        await zapDispatch.setBondageAddress(zapRegistry.address);
-
-        const res = await zapDispatch.bondageAddress.call();
-        expect(res.valueOf()).to.be.equal(zapBondage.address);
+        const res = await this.test.zapDispatch.bondageAddress.call();
+        expect(res.valueOf()).to.be.equal(this.test.zapBondage.address);
     });
 
     it("ZAP_DISPATCH_3 - query() - Check query function", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, {from: provider});
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, {from: provider});
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, {from: provider});
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, {from: provider});
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => {});
         
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 2, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 2, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });   
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });   
 
         // STOP WATCHING EVENTS
         dispatchEvents.stopWatching();
     });
 
     it("ZAP_DISPATCH_4 - query() - Check query function will not performed if subscriber will not have enough dots", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, {from: provider});
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, {from: provider});
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, {from: provider});
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, {from: provider});
 
         // START WATCHIG EVENTS
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => {});
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 0, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 0, { from: owner });
     
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner }); 
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner }); 
 
         // GET ALL EVENTS LOG 
         const logs = await dispatchEvents.get();
@@ -232,39 +222,29 @@ contract('ZapDispatch', function (accounts) {
     });
 
     it("ZAP_DISPATCH_5 - query() - Check query function will not performed if subscriber was not bond provider", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => {});
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
         //await subscriberContract.bondToOracle(provider, 0, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         const logs = await dispatchEvents.get();
@@ -275,39 +255,29 @@ contract('ZapDispatch', function (accounts) {
     });
 
     it("ZAP_DISPATCH_6 - query() - Check query function will not performed if subscriber don't have enough zap", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
         //await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => {});
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 100, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 100, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         const logs = await dispatchEvents.get();
@@ -318,53 +288,43 @@ contract('ZapDispatch', function (accounts) {
     });
 
     it("ZAP_DISPATCH_7 - respond1() - Respond check", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const subscriberEvents = this.test.subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
         subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        await zapDispatch.respond1(data.id, "pum-tum-pum", { from: provider })
+        await this.test.zapDispatch.respond1(data.id, "pum-tum-pum", { from: provider })
 
         logs = await subscriberEvents.get();
         expect(isEventReceived(logs, "Result1")).to.be.equal(true);
 
-        const q = await zapDispatch.queries.call(data.id, { from: owner });
+        const q = await this.test.zapDispatch.queries.call(data.id, { from: owner });
         expect(parseInt(q[3].valueOf())).to.be.equal(1);
 
         // STOP WATCHING EVENTS 
@@ -373,48 +333,38 @@ contract('ZapDispatch', function (accounts) {
     });
 
     it("ZAP_DISPATCH_8 - respond1() - Respond will throw error if it was called not from provider address", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const subscriberEvents = this.test.subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
         subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        expect(zapDispatch.respond1(data.id, "pum-tum-pum", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        expect(this.test.zapDispatch.respond1(data.id, "pum-tum-pum", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
 
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
@@ -422,53 +372,43 @@ contract('ZapDispatch', function (accounts) {
     });
 
     it("ZAP_DISPATCH_9 - respond2() - Respond check", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const subscriberEvents = this.test.subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
         subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        await zapDispatch.respond2(data.id, "pum-tum-pum", "hi", { from: provider })
+        await this.test.zapDispatch.respond2(data.id, "pum-tum-pum", "hi", { from: provider })
 
         logs = await subscriberEvents.get();
         expect(isEventReceived(logs, "Result2")).to.be.equal(true);
 
-        const q = await zapDispatch.queries.call(data.id, { from: owner });
+        const q = await this.test.zapDispatch.queries.call(data.id, { from: owner });
         expect(parseInt(q[3].valueOf())).to.be.equal(1);
 
         // STOP WATCHING EVENTS 
@@ -477,103 +417,80 @@ contract('ZapDispatch', function (accounts) {
     });
 
     it("ZAP_DISPATCH_10 - respond2() - Respond will throw error if it was called not from provider address", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
         
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        expect(zapDispatch.respond2(data.id, "pum-tum-pum", "hi", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        expect(this.test.zapDispatch.respond2(data.id, "pum-tum-pum", "hi", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
 
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
-        subscriberEvents.stopWatching();
     });
 
     it("ZAP_DISPATCH_11 - respond3() - Respond check", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const subscriberEvents = this.test.subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
         subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        await zapDispatch.respond3(data.id, "pum", "tum", "pum", { from: provider })
+        await this.test.zapDispatch.respond3(data.id, "pum", "tum", "pum", { from: provider })
 
         logs = await subscriberEvents.get();
         expect(isEventReceived(logs, "Result3")).to.be.equal(true);
 
-        const q = await zapDispatch.queries.call(data.id, { from: owner });
+        const q = await this.test.zapDispatch.queries.call(data.id, { from: owner });
         expect(parseInt(q[3].valueOf())).to.be.equal(1);
 
         // STOP WATCHING EVENTS 
@@ -582,103 +499,80 @@ contract('ZapDispatch', function (accounts) {
     });
 
     it("ZAP_DISPATCH_12 - respond3() - Respond will throw error if it was called not from provider address", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        expect(zapDispatch.respond3(data.id, "pum", "tum", "pum", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        expect(this.test.zapDispatch.respond3(data.id, "pum", "tum", "pum", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
 
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
-        subscriberEvents.stopWatching();
     });
 
 
     it("ZAP_DISPATCH_13 - respond4() - Respond check", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const subscriberEvents = this.test.subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
         subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        await zapDispatch.respond4(data.id, "1", "2", "4", "8", { from: provider })
+        await this.test.zapDispatch.respond4(data.id, "1", "2", "4", "8", { from: provider })
 
         logs = await subscriberEvents.get();
         expect(isEventReceived(logs, "Result4")).to.be.equal(true);
 
-        const q = await zapDispatch.queries.call(data.id, { from: owner });
+        const q = await this.test.zapDispatch.queries.call(data.id, { from: owner });
         expect(parseInt(q[3].valueOf())).to.be.equal(1);
 
         // STOP WATCHING EVENTS 
@@ -687,157 +581,118 @@ contract('ZapDispatch', function (accounts) {
     });
 
     it("ZAP_DISPATCH_14 - respond4() - Respond will throw error if it was called not from provider address", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        expect(zapDispatch.respond4(data.id, "1", "2", "4", "8", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        expect(this.test.zapDispatch.respond4(data.id, "1", "2", "4", "8", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
 
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
-        subscriberEvents.stopWatching();
     });
 
     it("ZAP_DISPATCH_15 - fulfillQuery() - Check that query can be fulfilled", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        await zapDispatch.fulfillQuery(data.id);
+        await this.test.zapDispatch.fulfillQuery(data.id);
 
-        const q = await zapDispatch.queries.call(data.id, { from: owner });
+        const q = await this.test.zapDispatch.queries.call(data.id, { from: owner });
         expect(parseInt(q[3].valueOf())).to.be.equal(1);
 
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
-        subscriberEvents.stopWatching();
     });
 
     it("ZAP_DISPATCH_16 - fulfillQuery() - Check that fulfilled query can not be fulfilled anymore", async function () {
-        let zapDispatch = await deployZapDispatch();
-        let zapToken = await deployZapToken();
-        let zapRegistry = await deployZapRegistry();
-        let zapBondage = await deployZapBondage(zapToken.address, zapRegistry.address);
-        let subscriberContract = await deploySubscriber(zapToken.address, zapDispatch.address, zapBondage.address);
-        let functions = await deployFunctions(zapRegistry.address);
-
-        await zapRegistry.setFunctionsAddress(functions.address);
-        await zapBondage.setFunctionsAddress(functions.address);
-
-        await zapDispatch.setBondageAddress.sendTransaction(zapBondage.address);
+        await this.test.zapDispatch.setBondageAddress.sendTransaction(this.test.zapBondage.address);
 
         const param1 = new String("p1");
         const param2 = new String("p2");
         const params = [param1.valueOf(), param2.valueOf()];
 
         // TOKEN ALLOCATION
-        await zapToken.allocate(owner, tokensForOwner, { from: owner });
-        await zapToken.allocate(provider, tokensForProvider, { from: owner });
-        await zapToken.allocate(subscriberContract.address, tokensForSubscriber, { from: owner });
+        await this.test.zapToken.allocate(owner, tokensForOwner, { from: owner });
+        await this.test.zapToken.allocate(provider, tokensForProvider, { from: owner });
+        await this.test.zapToken.allocate(this.test.subscriberContract.address, tokensForSubscriber, { from: owner });
 
         // CREATING DATA PROVIDER
-        await zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
-        await zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
+        await this.test.zapRegistry.initiateProvider(publicKey, title, specifier.valueOf(), params, { from: provider });
+        await this.test.zapRegistry.initiateProviderCurve(specifier.valueOf(), curveLinear, curveStart, curveMultiplier, { from: provider });
 
-        const dispatchEvents = zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        const dispatchEvents = this.test.zapDispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
-        const subscriberEvents= subscriberContract.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { });
 
         // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await subscriberContract.bondToOracle(provider, 10, { from: owner });
+        await this.test.subscriberContract.bondToOracle(provider, 10, { from: owner });
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await subscriberContract.queryTest(provider, query, { from: owner });
+        await this.test.subscriberContract.queryTest(provider, query, { from: owner });
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
-        await zapDispatch.fulfillQuery(data.id);
+        await this.test.zapDispatch.fulfillQuery(data.id);
 
-        const q = await zapDispatch.queries.call(data.id, { from: owner });
+        const q = await this.test.zapDispatch.queries.call(data.id, { from: owner });
         expect(parseInt(q[3].valueOf())).to.be.equal(1);
 
-        expect(zapDispatch.fulfillQuery(data.id)).to.eventually.be.rejectedWith(EVMRevert);
+        expect(this.test.zapDispatch.fulfillQuery(data.id)).to.eventually.be.rejectedWith(EVMRevert);
 
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
-        subscriberEvents.stopWatching();
     });
 }); 

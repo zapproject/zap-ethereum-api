@@ -6,7 +6,6 @@ contract ProxyDispatcher {
     function() public {
         ProxyDispatcherStorage dispatcherStorage = ProxyDispatcherStorage(0x1111222233334444555566667777888899990000);
         address target = dispatcherStorage.lib();
-
         assembly {
             calldatacopy(0x0, 0x0, calldatasize)
             let success := delegatecall(sub(gas, 10000), target, 0x0, calldatasize, 0, 0)

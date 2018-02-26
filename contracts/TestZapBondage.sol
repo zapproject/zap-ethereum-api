@@ -228,14 +228,14 @@ contract TestZapBondage {
 
         uint numDots;
         (numZap, numDots) = calcZap(oracleAddress, specifier, numZap);
-/*
+
         // Move zap user must have approved contract to transfer workingZap
-        require(token.transferFrom(msg.sender, this, numZap * decimals));
+        require(token.transferFrom(holderAddress, this, numZap * decimals));
 
         holder.bonds[specifier][oracleAddress] += numDots;
 
         totalIssued[specifier][oracleAddress] += numDots;
-        totalBound[specifier][oracleAddress] += numZap;*/
+        totalBound[specifier][oracleAddress] += numZap;
 
     }
 
@@ -276,10 +276,11 @@ contract TestZapBondage {
     view
     returns (uint256 _numZap, uint256 _numDots)
     {
+        uint infinity = 100;
         uint dotCost = 0;
         uint totalDotCost = 0;
 
-        for (uint numDots = 0; numDots < decimals; numDots++) {
+        for (uint numDots = 0; numDots < infinity; numDots++) {
             dotCost = getCurrentCostOfDot(totalIssued[specifier][oracleAddress] + numDots, oracleAddress, specifier);
             if (numZap >= dotCost) {
                 numZap -= dotCost;
