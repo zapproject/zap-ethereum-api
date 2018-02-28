@@ -1,88 +1,31 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
-contract ZapRegistryInterface {
-    function getProviderCurve(address provider, bytes32 specifier) view public returns (Functions.ZapCurveType curveType, uint256 curveStart, uint256 curveMultiplier);
-}
+import "./interface/LibInterface.sol";
 
-contract Ownable {
-    address public owner;
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner);
-
-    /// @dev Set the original `owner` of the contract to the sender account
-    function Ownable() { owner = msg.sender; }
-
-    /// @dev Throws if called by any account other than the owner
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
-    /// @dev Transfers control of the contract to a newOwner
-    /// @param newOwner The address to transfer ownership to
-    function transferOwnership(address newOwner) onlyOwner public {
-        require(newOwner != address(0));
-        OwnershipTransferred(owner, newOwner);
-        owner = newOwner;
-    }
-}
-
-
-contract Functions is Ownable {
-    /*
-       enumeration of curve types representing dot(access token) prices as function of supply
-   */
-    enum ZapCurveType {
-        ZapCurveNone,
-        ZapCurveLinear,
-        ZapCurveExponential,
-        ZapCurveLogarithmic
-    }
-
-    /*
-        curve data structure representing dot(access token) prices as function of supply
-    */
-    struct ZapCurve {
-        ZapCurveType curveType;
-        uint256 curveStart;
-        uint256 curveMultiplier;
-    }
-
-    ZapRegistryInterface registry;
-
-    function Functions(ZapRegistryInterface _registryAddress) {
-        registry = ZapRegistryInterface(_registryAddress);
-    }
-
-    function setRegistryAddress(address _registry) onlyOwner {
-        registry = ZapRegistryInterface(_registry);
-    }
+library FunctionsLib {
 
     /// @dev Get the current cost of a dot.
     /// Endpoint specified by specifier.
     /// Data-provider specified by oracleAddress,
     function currentCostOfDot(
-        address oracleAddress,
-        bytes32 specifier,
-        uint _totalBound
+        uint _totalBound,
+        LibInterface.ZapCurveType curveType,
+        uint curveStart,
+        uint curveMultiplier
     )
     public
     view
     returns (uint _cost)
     {
-        var (curveTypeIndex, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
-        ZapCurveType curveType = ZapCurveType(curveTypeIndex);
-
-        require(curveType != ZapCurveType.ZapCurveNone);
+        require(curveType != LibInterface.ZapCurveType.ZapCurveNone);
 
         uint cost = 0;
 
-        if (curveType == ZapCurveType.ZapCurveLinear) {
+        if (curveType == LibInterface.ZapCurveType.ZapCurveLinear) {
             cost = curveMultiplier * _totalBound + curveStart;
-        } else if (curveType == ZapCurveType.ZapCurveExponential) {
+        } else if (curveType == LibInterface.ZapCurveType.ZapCurveExponential) {
             cost = curveMultiplier * (_totalBound ** 2) + curveStart;
-        } else if (curveType == ZapCurveType.ZapCurveLogarithmic) {
+        } else if (curveType == LibInterface.ZapCurveType.ZapCurveLogarithmic) {
             if (_totalBound == 0)
                 _totalBound = 1;
             cost = curveMultiplier * fastlog2(_totalBound) + curveStart;
@@ -122,4 +65,3 @@ contract Functions is Ownable {
         }
     }
 }
-

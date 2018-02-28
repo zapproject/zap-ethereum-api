@@ -19,7 +19,7 @@ contract ERC20 is ERC20Basic {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract TestZapBondage is FunctionsAdmin {
+contract TestZapBondage {
 
     //   data structure for holder of ZAP bond to data provider
     //   currently ONLY "smart_contract" or "socket_subscription"
@@ -36,7 +36,7 @@ contract TestZapBondage is FunctionsAdmin {
     ERC20 public token;
     uint public decimals = 10**18;
 
-    address public marketAddress;
+    address public arbiterAddress;
     address public dispatchAddress;
 
     mapping(address => Holder) holders;
@@ -53,7 +53,7 @@ contract TestZapBondage is FunctionsAdmin {
 
     // For restricting dot escrow/transfer method calls to ZapDispatch and ZapArbiter
     modifier operatorOnly {
-        if ( msg.sender == marketAddress || msg.sender == dispatchAddress ) {
+        if ( msg.sender == arbiterAddress || msg.sender == dispatchAddress ) {
             _;
         }
     }
@@ -65,9 +65,9 @@ contract TestZapBondage is FunctionsAdmin {
     }
 
     /// @dev Set ZapArbiter address
-    function setMarketAddress(address _marketAddress) public {
-        if (marketAddress == 0) {
-            marketAddress = _marketAddress;
+    function setArbiterAddress(address _arbiterAddress) public {
+        if (arbiterAddress == 0) {
+            arbiterAddress = _arbiterAddress;
         }
     }
 
@@ -158,7 +158,7 @@ contract TestZapBondage is FunctionsAdmin {
         uint numDots,
         address oracleAddress
     )
-    public returns(bool success)
+    internal returns(bool success)
     {
 
         Holder storage holder = holders[holderAddress];
@@ -168,21 +168,24 @@ contract TestZapBondage is FunctionsAdmin {
             uint numZap = 0;
             uint localTotal = holder.bonds[specifier][oracleAddress];
 
+            var (t, s, m) = registry.getProviderCurve(oracleAddress, specifier);
+
             for (uint i = 0; i < numDots; i++) {
 
                 localTotal -= 1;
 
-                numZap += functions.currentCostOfDot(
+                numZap += getCurrentCostOfDot(
+                    (totalIssued[specifier][oracleAddress] - 1),
                     oracleAddress,
-                    specifier,
-                    localTotal);
+                    specifier
+                );
 
             }
 
             totalBound[specifier][oracleAddress] -= numZap;
-            totalIssued[specifier][oracleAddress] -= i;
+            totalIssued[specifier][oracleAddress] -= numDots;
 
-            holder.bonds[specifier][oracleAddress] = localTotal;
+            //holder.bonds[specifier][oracleAddress] = localTotal;
 
             if(token.transfer(holderAddress, numZap*decimals)){
                 return true;
@@ -212,7 +215,7 @@ contract TestZapBondage is FunctionsAdmin {
         uint numZap,
         address oracleAddress
     )
-    public
+    internal
     returns(uint256)
     {
         Holder storage holder = holders[holderAddress];
@@ -227,7 +230,7 @@ contract TestZapBondage is FunctionsAdmin {
         (numZap, numDots) = calcZap(oracleAddress, specifier, numZap);
 
         // Move zap user must have approved contract to transfer workingZap
-        require(token.transferFrom(msg.sender, this, numZap * decimals));
+        require(token.transferFrom(holderAddress, this, numZap * decimals));
 
         holder.bonds[specifier][oracleAddress] += numDots;
 
@@ -249,11 +252,15 @@ contract TestZapBondage is FunctionsAdmin {
     {
         uint256 numZap;
 
+        var (t, s, m) = registry.getProviderCurve(oracleAddress, specifier);
+
         for (uint i = 0; i < numDots; i++) {
-            numZap += functions.currentCostOfDot(
-                oracleAddress,
-                specifier,
-                totalIssued[specifier][oracleAddress] + i);
+            numZap += LibInterface.currentCostOfDot(
+                totalIssued[specifier][oracleAddress] + i,
+                t,
+                s,
+                m
+            );
         }
         return numZap;
     }
@@ -269,17 +276,13 @@ contract TestZapBondage is FunctionsAdmin {
     view
     returns (uint256 _numZap, uint256 _numDots)
     {
-        uint infinity = decimals;
+        uint infinity = 100;
         uint dotCost = 0;
         uint totalDotCost = 0;
 
         for (uint numDots = 0; numDots < infinity; numDots++) {
-            dotCost = functions.currentCostOfDot(
-                oracleAddress,
-                specifier,
-                (totalIssued[specifier][oracleAddress] + numDots));
-
-            if (numZap > dotCost) {
+            dotCost = getCurrentCostOfDot(totalIssued[specifier][oracleAddress] + numDots, oracleAddress, specifier);
+            if (numZap >= dotCost) {
                 numZap -= dotCost;
                 totalDotCost += dotCost;
             } else {
@@ -289,17 +292,28 @@ contract TestZapBondage is FunctionsAdmin {
         return (totalDotCost, numDots);
     }
 
+    function getCurrentCostOfDot(uint totalBound, address oracleAddress, bytes32 specifier) internal returns (uint) {
+        LibInterface.ZapCurveType t;
+        uint s;
+        uint m;
+        (t, s, m) = registry.getProviderCurve(oracleAddress, specifier);
+        uint cost = LibInterface.currentCostOfDot(
+            totalBound,
+            t,
+            s,
+            m
+        );
+        return cost;
+    }
 
     function getDotsIssued(
         bytes32 specifier,
-        address holderAddress,
         address oracleAddress
     )
     view
     public
     returns(uint dots)
     {
-
         return totalIssued[specifier][oracleAddress];
     }
 
