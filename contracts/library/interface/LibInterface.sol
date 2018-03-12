@@ -1,9 +1,9 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
-contract FunctionsInterface {
+library LibInterface {
     /*
-      enumeration of curve types representing dot(access token) prices as function of supply
-  */
+          enumeration of curve types representing dot(access token) prices as function of supply
+      */
     enum ZapCurveType {
         ZapCurveNone,
         ZapCurveLinear,
@@ -23,8 +23,7 @@ contract FunctionsInterface {
     /// @dev Get the current cost of a dot.
     /// Endpoint specified by specifier.
     /// Data-provider specified by oracleAddress,
-    function currentCostOfDot(address oracleAddress, bytes32 specifier, uint _totalBound) public view returns (uint _cost);
+    function currentCostOfDot(uint _totalBound, ZapCurveType curveType, uint curveStart, uint curveMultiplier) public view returns (uint _cost);
 
-    //log based 2 taylor series in assembly
     function fastlog2(uint x) public pure returns (uint y);
 }

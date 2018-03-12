@@ -19,7 +19,7 @@ contract ERC20 is ERC20Basic {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-contract ZapBondage is FunctionsAdmin {
+contract ZapBondage {
       
     //   data structure for holder of ZAP bond to data provider
     //   currently ONLY "smart_contract" or "socket_subscription"
@@ -172,10 +172,10 @@ contract ZapBondage is FunctionsAdmin {
 
                 localTotal -= 1;
 
-                numZap += functions.currentCostOfDot(
+                numZap += getCurrentCostOfDot(
+                    (totalIssued[specifier][oracleAddress] - 1),
                     oracleAddress,
-                    specifier,
-                    (totalIssued[specifier][oracleAddress]-1)
+                    specifier
                 );
                     
             }
@@ -183,8 +183,8 @@ contract ZapBondage is FunctionsAdmin {
             totalBound[specifier][oracleAddress] -= numZap;
             totalIssued[specifier][oracleAddress] -= numDots;
             
-            holder.bonds[specifier][oracleAddress] = localTotal;
-        
+            //holder.bonds[specifier][oracleAddress] = localTotal;
+
             if(token.transfer(holderAddress, numZap*decimals)){
                 return true;
             }
@@ -251,10 +251,10 @@ contract ZapBondage is FunctionsAdmin {
         uint256 numZap;
 
         for (uint i = 0; i < numDots; i++) {
-            numZap += functions.currentCostOfDot(
+            numZap += getCurrentCostOfDot(
+                totalIssued[specifier][oracleAddress] + i,
                 oracleAddress,
-                specifier,
-                totalIssued[specifier][oracleAddress] + i);
+                specifier);
         }
         return numZap;
     }
@@ -275,10 +275,11 @@ contract ZapBondage is FunctionsAdmin {
         uint totalDotCost = 0;
 
         for (uint numDots = 0; numDots < infinity; numDots++) {
-            dotCost = functions.currentCostOfDot(
+            dotCost = getCurrentCostOfDot(
+                (totalIssued[specifier][oracleAddress] + numDots),
                 oracleAddress,
-                specifier,
-                (totalIssued[specifier][oracleAddress] + numDots));
+                specifier
+            );
 
             if (numZap >= dotCost) {
                 numZap -= dotCost;
@@ -290,6 +291,15 @@ contract ZapBondage is FunctionsAdmin {
         return (totalDotCost, numDots);
     }
 
+    function getCurrentCostOfDot(uint totalBound, address oracleAddress, bytes32 specifier) internal returns (uint _cost) {
+        var (t, s, m) = registry.getProviderCurve(oracleAddress, specifier);
+        return LibInterface.currentCostOfDot(
+            totalBound,
+            t,
+            s,
+            m
+        );
+    }
 
     function getDotsIssued(
         bytes32 specifier,
