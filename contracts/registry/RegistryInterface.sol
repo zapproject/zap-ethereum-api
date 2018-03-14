@@ -1,7 +1,7 @@
 pragma solidity ^0.4.17;
 
 // Make sure to implement a setRegistryAddress fx in contracts that use this interface to support upgrades
-// Technically an abstract contract, not interface
+// Technically an abstract contract, not interface (solidity compiler devs are working to fix this right now)
 
 contract RegistryInterface {
 	enum CurveType { None, Linear, Exponential, Logarithmic }

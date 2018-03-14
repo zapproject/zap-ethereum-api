@@ -4,10 +4,10 @@ pragma solidity ^0.4.17;
 
 interface BondageInterface {
     function bond(address, bytes32, uint256) public returns(uint256);
-    function unbond(address, bytes32, uint256) public returns (bool);
+    function unbond(address, bytes32, uint256) public returns (uint256);
     function getTokBound(address, bytes32) public view returns (uint256);
     function escrowDots(address, address, bytes32, uint256) public returns (bool);
-    function releaseDots(address, address, bytes32, uint256) public;
+    function releaseDots(address, address, bytes32, uint256) public returns (bool);
     function calcTokForDots(address, bytes32, uint256) public view returns (uint256);
     function calcTok(address, bytes32, uint256) public view returns (uint256, uint256);
     function currentCostOfDot(address, bytes32, uint256) public view returns (uint256);

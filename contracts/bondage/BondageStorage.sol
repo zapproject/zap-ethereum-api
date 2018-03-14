@@ -3,8 +3,7 @@ pragma solidity ^0.4.17;
 /* ******************************************************************
 /* MAKE SURE TO transferOwnership TO Bondage Contract UPON DEPLOYMENT
 /* ******************************************************************/
-// CHANGE PUBLIC TO EXTERNAL/INTERNAL AFTER DEBUGGING!!!!!!!!!!!!!!!!!
-// WE SHOULD PROBABLY USE SAFE MATH LIB FOR UPDATE FUNCTIONS
+// CHANGE PUBLIC TO EXTERNAL AFTER DEBUGGING!!!!!!!!!!!!!!!!!!!!!!!!!
 
 import "../aux/Ownable.sol";
 

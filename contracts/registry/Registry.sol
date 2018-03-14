@@ -1,17 +1,13 @@
 pragma solidity ^0.4.17;
+// v1.0
 
 // getProviderRouteKeys and setEndpointParams FAILING, HAVE TO REWRITE TEST CASES (work in truffle console)
 
-// NOTE IN initiateProvider
-
-// RETURN BOOL FOR ALL SETTERS
-
-// FINISH NatSpec DOCS FOR ALL CONTRACTS (MAYBE)
+// FINISH NatSpec DOCS FOR ALL CONTRACTS
+//////https://github.com/ethereum/wiki/wiki/NatSpec-Determination
 ///Consider using @notice tag to utilize dynamic expressions
 ///https://github.com/ethereum/wiki/wiki/Ethereum-Natural-Specification-Format#dynamic-expressions
-
-// SHOULD WE PUT VERSION NUMBERS AT THE TOP OF CONTRACTS SINCE THEY ARE UPGRADABLE? 
-// WE COULD KEEP A NOTE IN THE API DOCS OF WHAT VERSION IS CURRENTLY DEPLOYED AND ALIVE.
+///https://ethereum.gitbooks.io/frontier-guide/content/natspec.html
 
 import "./../aux/Mortal.sol";
 import "./RegistryStorage.sol";
@@ -45,9 +41,6 @@ contract Registry is Mortal {
                 setEndpointParams(endpoint_specifier, endpoint_params);
 
             stor.addOracle(msg.sender);
-            // Do we want to store a reference to the oracleIndex in the Oracle struct?
-            // See Pointer Logic in Inserts  
-            // https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a
             return true;
         }
         else {
@@ -67,7 +60,7 @@ contract Registry is Mortal {
         uint256 curveStart,
         uint256 curveMultiplier
     )
-        public    
+        public
     {
         // Must have previously initiated themselves
         require(stor.getPublicKey(msg.sender) != 0);

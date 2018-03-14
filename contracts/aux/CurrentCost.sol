@@ -12,18 +12,14 @@ contract CurrentCost {
     )
         public
         view
-        returns (uint256 _cost)
+        returns (uint256 cost)
     {
         RegistryInterface.CurveType curveType;
         uint256 curveStart;
         uint256 curveMultiplier;
         (curveType, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
 
-
-        
         require(curveType != RegistryInterface.CurveType.None);
-
-        uint256 cost;
 
         if (curveType == RegistryInterface.CurveType.Linear) {
             cost = curveMultiplier * totalBound + curveStart;
@@ -68,5 +64,4 @@ contract CurrentCost {
             y := add(y, mul(256, gt(arg, 0x8000000000000000000000000000000000000000000000000000000000000000)))
         }
     }
-
 }

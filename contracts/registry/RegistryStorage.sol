@@ -3,9 +3,6 @@ pragma solidity ^0.4.17;
 /* ******************************************************************
 /* MAKE SURE TO transferOwnership TO Registry Contract UPON DEPLOYMENT
 /* ******************************************************************/
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// DO WE WANT TO IMPLEMENT Delete Methods FOR ANY OF THE STORAGE CONTRACTS!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 import "../aux/Mortal.sol";
 
@@ -24,13 +21,13 @@ contract RegistryStorage is Ownable {
     // fundamental account type for the platform
     struct Oracle {
         uint256 public_key;                              // Public key of the data provider
-        bytes32 title;                                    // Tags (csv)
+        bytes32 title;                                   // Tags (csv)
         mapping(bytes32 => bytes32[]) endpoint_params;   // Endpoint specific parameters
         mapping(bytes32 => Curve) curves;                // Price vs Supply (contract endpoint)
     }
 
     mapping(address => Oracle) private oracles;
-    address[] private oracleIndex;  
+    address[] private oracleIndex;
 
     /**** Get Methods ****/
 

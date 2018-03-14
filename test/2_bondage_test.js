@@ -437,5 +437,5 @@ x
         const issuedDots = await this.test.bondage.getDotsIssued.call(subscriber, oracle, specifier);
         expect(parseInt(issuedDots.valueOf())).to.be.equal(5);
     });
-*/
+
 });

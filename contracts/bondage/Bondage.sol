@@ -1,11 +1,12 @@
 pragma solidity ^0.4.17;
 
+//calcTok should be called calcDots?
+
 // bond works right now bc commented out following issues
 // RUNNING THROUGH ALL OF GAS in calcTok (see infinite for loop)
 // require(token.transferFrom ...) reverting in _bond 
 // require(curveType != RegistryInterface.CurveType.None) reverting in _currentCostOfDot (see CurrentCost.sol)
 // ^^ this last issue only is a problem w/js tests, can get to run in truffle console.
-//    problem is w/the enum, need to look at Registry Contracts
 
 // MAKE SURE TO CALL setArbiterAddress & setDispatchAddress UPON DEPLOYMENT
 
@@ -32,7 +33,6 @@ approveTokens = new web3.BigNumber("1000e18")
 token.allocate(owner, tokensForOwner, { from: owner })
 token.allocate(haddr, tokensForProvider, { from: owner })
 token.approve(Bondage.address, approveTokens, {from: haddr})
-
 */
 
 import "../aux/Mortal.sol";
@@ -44,7 +44,7 @@ import "./BondageStorage.sol";
 contract Bondage is Mortal {
 
     BondageStorage stor;
-    RegistryInterface registry;    
+    RegistryInterface registry;
     ERC20 token;
     CurrentCostInterface currentCost;
     uint256 public decimals = 10 ** 18;
@@ -88,12 +88,14 @@ contract Bondage is Mortal {
         dispatchAddress = _dispatchAddress;
     }
 
+    /// @notice Will bond `numTok` to `registry.getProviderTitle(oracleAddress)`
+    /// @return total TOK bound to oracle
     function bond(address oracleAddress, bytes32 specifier, uint256 numTok) public returns (uint256) {
         return _bond(msg.sender, oracleAddress, specifier, numTok);
     }
 
-    // return numTok instead of bool 
-    function unbond(address oracleAddress, bytes32 specifier, uint256 numDots) public returns (bool) {
+    /// @return total TOK unbound from oracle
+    function unbond(address oracleAddress, bytes32 specifier, uint256 numDots) public returns (uint256) {
         return _unbond(msg.sender, oracleAddress, specifier, numDots);
     }
 
@@ -110,9 +112,9 @@ contract Bondage is Mortal {
         bytes32 specifier,
         uint256 numDots
     )
-        operatorOnly
         public
-        returns (bool success)  
+        operatorOnly        
+        returns (bool success)
     {
 
         uint256 currentDots = getDots(holderAddress, oracleAddress, specifier);
@@ -136,14 +138,15 @@ contract Bondage is Mortal {
     )
         public 
         operatorOnly 
+        returns (bool success)
     {
         if (numDots <= stor.getNumEscrow(holderAddress, oracleAddress, specifier)) {
             stor.updateEscrow(holderAddress, oracleAddress, specifier, numDots, "sub");
-            
             initializeProvider(holderAddress, oracleAddress);
-
             stor.updateBondValue(holderAddress, oracleAddress, specifier, numDots, "add");
+            return true;
         }
+        return false;
     }
 
     /// @dev Calculate quantity of TOK token required for specified amount of dots
@@ -155,10 +158,8 @@ contract Bondage is Mortal {
     ) 
         public
         view
-        returns (uint256 _numTok)
+        returns (uint256 numTok)
     {
-        uint256 numTok;
-
         for (uint256 i = 0; i < numDots; i++) {
             numTok += currentCostOfDot(
                 oracleAddress,
@@ -178,13 +179,12 @@ contract Bondage is Mortal {
     )
         public
         view
-        returns (uint256 _numTok, uint256 _numDots) 
+        returns (uint256 totalDotCost, uint256 numDots) 
     {
         uint256 infinity = decimals;
         uint256 dotCost = 0;
-        uint256 totalDotCost = 0;
 
-        for (uint256 numDots = 0; numDots < 10/*infinity*/; numDots++) {
+        for (numDots; numDots < 10/*infinity*/; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
                 specifier,
@@ -246,11 +246,10 @@ contract Bondage is Mortal {
         uint256 numTok        
     )
         private
-        returns (uint256 _numDots) 
+        returns (uint256 numDots) 
     {
         initializeProvider(holderAddress, oracleAddress);
 
-        uint256 numDots;
         (numTok, numDots) = calcTok(oracleAddress, specifier, numTok);
 
         // User must have approved contract to transfer workingTOK
@@ -270,12 +269,11 @@ contract Bondage is Mortal {
         uint256 numDots
     )
         private
-        returns (bool success)
+        returns (uint256 numTok)
     {
         //currentDots
         uint256 bondValue = stor.getBondValue(holderAddress, oracleAddress, specifier);
         if (bondValue >= numDots && numDots > 0) {
-            uint256 numTok = 0;
             uint256 subTotal = 0;
 
             for (uint256 i = 0; i < numDots; i++) {
@@ -290,13 +288,12 @@ contract Bondage is Mortal {
 
             stor.updateTotalBound(oracleAddress, specifier, numTok, "sub");
             stor.updateTotalIssued(oracleAddress, specifier, numDots, "sub");
-            
             stor.updateBondValue(holderAddress, oracleAddress, specifier, subTotal, "sub");
 
             if(token.transfer(holderAddress, numTok * decimals))
-                return true;
+                return numTok;
         }
-        return false;
+        return 0;
     }
 
     /// @dev Initialize uninitialized provider
