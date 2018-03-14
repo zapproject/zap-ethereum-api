@@ -1,4 +1,5 @@
 contract Token {
+                uint256 public decimals = 18;
                 function transfer(address _to, uint256 _amount) returns (bool);
                 function balanceOf(address _addr) constant returns (uint256 bal);
             }
@@ -28,8 +29,10 @@ contract Token {
     function() payable {
         if((msg.value > 0)){
             Log(msg.value, rate);
-            amt = (msg.value / rate);
-            amt = amt*(10**18);
+
+            uint256 weiAmount = msg.value * (10 ** token.decimals());
+            amt = (weiAmount / rate);
+
             Log(amt, token.balanceOf(this));
             if(amt <= token.balanceOf(this)){
                 token.transfer(msg.sender, amt);                
