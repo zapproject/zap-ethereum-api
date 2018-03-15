@@ -1,11 +1,9 @@
 pragma solidity ^0.4.17;
+// v1.0
 
 /* ******************************************************************
 /* MAKE SURE TO transferOwnership TO Arbiter Contract UPON DEPLOYMENT
-/* ******************************************************************/
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// DO WE WANT TO MAKE LOOOKUP TABLES FOR ANY MAPPINGS BESIDES ORACLES IN REGISTRY/BONDAGE!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+/* ******************************************************************/ 
 
 import "../aux/Ownable.sol";
 
@@ -19,7 +17,7 @@ contract ArbiterStorage is Ownable {
     }
     
     // provider_address => subscriber_address => endpoint => Subscription
-    mapping(address => mapping(address => mapping(bytes32 => Subscription))) subscriptions;
+    mapping(address => mapping(address => mapping(bytes32 => Subscription))) private subscriptions;
 
     /**** Get Methods ****/
 

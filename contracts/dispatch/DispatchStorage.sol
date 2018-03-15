@@ -1,4 +1,5 @@
 pragma solidity ^0.4.17;
+// v1.0
 
 /* ******************************************************************
 /* MAKE SURE TO transferOwnership TO Dispatch Contract UPON DEPLOYMENT
@@ -19,22 +20,22 @@ contract DispatchStorage is Ownable {
     }
 
     //mapping of unique ids to query objects
-    mapping (uint256 => Query) queries;
+    mapping (uint256 => Query) private queries;
 
     /**** Get Methods ****/
-    function getProvider(uint256 id) external view returns (address _provider) {
+    function getProvider(uint256 id) external view returns (address) {
         return queries[id].provider;
     }
 
-    function getSubscriber(uint256 id) external view returns (address _subscriber) {
+    function getSubscriber(uint256 id) external view returns (address) {
         return queries[id].subscriber;
     }
 
-    function getEndpoint(uint256 id) external view returns (bytes32 _endpoint) {
+    function getEndpoint(uint256 id) external view returns (bytes32) {
         return queries[id].endpoint;
     }
 
-    function getStatus(uint256 id) external view returns (Status _status) {
+    function getStatus(uint256 id) external view returns (Status) {
         return queries[id].status;
     }
 

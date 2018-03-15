@@ -1,4 +1,5 @@
 pragma solidity ^0.4.17;
+// v1.0
 
 /* ******************************************************************
 /* MAKE SURE TO transferOwnership TO Bondage Contract UPON DEPLOYMENT
@@ -20,16 +21,16 @@ contract BondageStorage is Ownable {
         address[] oracleList;
     }
 
-    mapping(address => Holder) holders;
+    mapping(address => Holder) private holders;
 
     // (holder => (oracleAddress => (specifier => numEscrow)))
-    mapping(address => mapping(address => mapping(bytes32 => uint256))) pendingEscrow;
+    mapping(address => mapping(address => mapping(bytes32 => uint256))) private pendingEscrow;
 
     // (specifier=>(oracleAddress=>numTOK)
-    mapping(bytes32 => mapping(address=> uint)) totalBound;
+    mapping(bytes32 => mapping(address=> uint)) private totalBound;
 
     // (specifier=>(oracleAddress=>numDots)
-    mapping(bytes32 => mapping(address=> uint)) totalIssued;
+    mapping(bytes32 => mapping(address=> uint)) private totalIssued;
 
     /**** Get Methods ****/
 
