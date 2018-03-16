@@ -1,9 +1,5 @@
 pragma solidity ^0.4.17;
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// DO MAIN CONTRACTS EVER NEED TO CHANGE OWNERSHIP OR CAN WE JUST IMPLEMENT A SIMPLE onlyOwner MODIFIER?
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// SEE initiateSubscription NOTE
+// v1.0
 
 import "../aux/Mortal.sol";
 import "../bondage/BondageInterface.sol";
@@ -29,8 +25,6 @@ contract Arbiter is Mortal {
         address subscriber,                    // Subscriber from the subscription
         SubscriptionTerminator terminator      // Which terminated the contract
     ); 
-
-    uint256 decimals = 10 ** 16; // 1/100th of TOK
     
     ArbiterStorage stor;
     BondageInterface bondage;
@@ -60,13 +54,8 @@ contract Arbiter is Mortal {
         // Can't reinitiate a currently active contract
         require(stor.getDots(provider_address, msg.sender, endpoint) == 0);
 
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // SHOULD WE CHECK FOR AN ALREADY INITIATED SUBSCRIPTION, OR WHAT DO WE DO IN THAT SCENARIO
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
         // Escrow the necessary amount of dots
         bondage.escrowDots(msg.sender, provider_address, endpoint, blocks);
-
         
         // Initiate the subscription struct
         stor.setSubscription(

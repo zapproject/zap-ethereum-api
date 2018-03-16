@@ -1,8 +1,5 @@
 pragma solidity ^0.4.17;
-
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// DO WE WANT TO IMPLEMENT INDEXED EVENTS IN OUR CONTRACTS?
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// v1.0
 
 import "../aux/Mortal.sol";
 import "../aux/Client.sol";
@@ -30,7 +27,6 @@ contract Dispatch is Mortal {
     }
 
     /// @notice Reinitialize bondage instance after upgrade
-    /// Won't work if upgraded Registry contract affects utilized interface
     function setBondageAddress(address bondageAddress) public onlyOwner {
             bondage = BondageInterface(bondageAddress);
     }
@@ -48,7 +44,7 @@ contract Dispatch is Mortal {
         returns (uint256 id)
     {
 
-        uint dots = bondage.getDots(subscriber, provider, endpoint);
+        uint256 dots = bondage.getDots(subscriber, provider, endpoint);
 
         if(dots >= 1){
             //enough dots
@@ -60,7 +56,7 @@ contract Dispatch is Mortal {
 
     }
 
-    /// @notice Transfer dots from ZapBondage escrow to data provider's Holder object under its own address
+    /// @notice Transfer dots from Bondage escrow to data provider's Holder object under its own address
     /// @dev Called upon data-provider request fulfillment
     function fulfillQuery(uint256 id) internal returns (bool) {
 

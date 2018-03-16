@@ -22,6 +22,8 @@ contract DispatchStorage is Ownable {
     //mapping of unique ids to query objects
     mapping (uint256 => Query) private queries;
 
+    //
+
     /**** Get Methods ****/
     function getProvider(uint256 id) external view returns (address) {
         return queries[id].provider;

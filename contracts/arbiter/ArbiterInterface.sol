@@ -1,4 +1,5 @@
 pragma solidity ^0.4.17;
+// v1.0
 
 // Make sure to implement a setArbiterAddress fx in contracts that use this interface to support upgrades
 
