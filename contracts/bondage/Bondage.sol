@@ -133,6 +133,27 @@ contract Bondage is Mortal {
         return false;
     }
 
+    /// @dev Calculate quantity of tokens required for specified amount of dots
+    /// for endpoint defined by specifier and data provider defined by oracleAddress
+    function calcTokForDots(
+        address oracleAddress,
+        bytes32 specifier,
+        uint numDots       
+    ) 
+        public
+        view
+        returns (uint256 numTok)
+    {
+        for (uint256 i = 0; i < numDots; i++) {
+            numTok += currentCostOfDot(                
+                oracleAddress,
+                specifier,
+                getDotsIssued(oracleAddress, specifier) + i
+            );
+        }
+        return numTok;
+    }
+
     /// @dev Calculate amount of dots which could be purchased with given (numTok) TOK tokens (max is 1000)
     /// for endpoint specified by specifier and data-provider address specified by oracleAddress
     function calcTok(

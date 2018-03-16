@@ -8,6 +8,7 @@ interface BondageInterface {
     function unbond(address, bytes32, uint256) public returns (uint256);
     function escrowDots(address, address, bytes32, uint256) public returns (bool);
     function releaseDots(address, address, bytes32, uint256) public returns (bool);
+    function calcTokForDots(address, bytes32, uint256) public view returns (uint256);
     function calcTok(address, bytes32, uint256) public view returns (uint256, uint256);
     function currentCostOfDot(address, bytes32, uint256) public view returns (uint256);
     function getDotsIssued(address, bytes32) public view returns (uint256);

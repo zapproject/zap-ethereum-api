@@ -37,18 +37,18 @@ contract('Bondage', function (accounts) {
     const mul = 2;
     
     const tokensForOwner = new BigNumber("1500e18");
-    const tokensForProvider = new BigNumber("5000e18");
+    const tokensForSubscriber = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
 
-    async function prepareProvider(thisTest, provider = "yes", curve = "yes", account = oracle, type = curveLinear) {
-        if (provider == "yes") await thisTest.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
-        if (curve == "yes") await thisTest.registry.initiateProviderCurve(specifier, type, start, mul, { from: account });
+    async function prepareProvider(provider = true, curve = true, account = oracle, type = curveLinear) {
+        if (provider) await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
+        if (curve) await this.registry.initiateProviderCurve(specifier, type, start, mul, { from: account });
     }
 
-    async function prepareToken(thisTest) {
-        await thisTest.token.allocate(owner, tokensForOwner, { from: owner });
-        await thisTest.token.allocate(subscriber, tokensForProvider, { from: owner });
-        await thisTest.token.approve(thisTest.bondage.address, approveTokens, {from: subscriber});
+    async function prepareTokens() {
+        await this.token.allocate(owner, tokensForOwner, { from: owner });
+        await this.token.allocate(subscriber, tokensForSubscriber, { from: owner });
+        //await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
     }
 
     beforeEach(async function deployContracts() {
@@ -57,75 +57,94 @@ contract('Bondage', function (accounts) {
         this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await TheToken.new();
+
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.registry.address, this.currentTest.token.address, CurrentCost.address);  //CONSTRUCTOR
+        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.registry.address, this.currentTest.token.address);
         this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
     });
 
     it("BONDAGE_1 - bond() - Check bond function", async function () {
-x
-        prepareProvider(this.test);
-        prepareToken(this.test);
 
-        await this.test.bondage.bond(oracle, specifier, 100, {from: subscriber});       
+        prepareProvider.call(this.test);      
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+            
+        await this.test.bondage.bond(oracle, specifier, 100, {from: subscriber});
     });
-
+/*
     it("BONDAGE_2 - bond() - Check that we can't bond oracle with unregistered provider", async function () {
 
-        prepareProvider(this.test, "no", "no");
-        prepareToken(this.test);
+        //prepareProvider.call(this.test, false, false);
+
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        
         
         res = await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
-        expect(res).to.be.eventually.rejectedWith(EVMRevert);
+        //expect(res).to.be.eventually.rejectedWith(EVMRevert);
     });
 
     it("BONDAGE_3 - bond() - Check that we can't bond oracle with uninitialized curve", async function () {
 
-        prepareProvider(this.test, "yes", "no");
-        prepareToken(this.test);
+        //prepareProvider.call(this.test, true, false);
+        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         
         res = await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
         expect(res).to.eventually.be.rejectedWith(EVMRevert);
     });
-
+*/
     it("BONDAGE_4 - unbond() - Check unbond function", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
         await this.test.bondage.unbond(oracle, specifier, 500, {from: subscriber});
     });
 
-    it("BONDAGE_5 - calcTokForDots() - Check tok for dots calculatnig", async function () {
+    it("BONDAGE_5 - calcTokForDots() - Check tok for dots calculating", async function () {
     
-        prepareProvider(this.test, account = accounts[5], type = curveLinear);
+        //prepareProvider.call(this.test, true, true, accounts[5], curveLinear);
+        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: accounts[5] });
+        await this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: accounts[5] });
+        
+
         const jsLinearTok = Utils.calculateTokWithLinearCurve(5, start, mul);
         const res1 = await this.test.bondage.calcTokForDots.call(accounts[5], specifier, 5);
         const ethLinearTok = parseInt(res1.valueOf());
 
         expect(jsLinearTok).to.be.equal(ethLinearTok);
 
-        prepareProvider(this.test, account = accounts[6], type = curveExponential);
+        //prepareProvider.call(this.test, true, true, accounts[6], curveExponential);
+        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: accounts[6] });
+        await this.test.registry.initiateProviderCurve(specifier, curveExponential, start, mul, { from: accounts[6] });
+        
         const jsExponentialTok = Utils.calculateTokWithExponentialCurve(5, start, mul);
-        const res2 = await this.test.bondage.calcTokForDots.call(accounts[6],specifier, 5);
+        const res2 = await this.test.bondage.calcTokForDots.call(accounts[6], specifier, 5);
         const ethExponentialTok = parseInt(res2.valueOf());
 
         expect(jsExponentialTok).to.be.equal(ethExponentialTok);
 
-        prepareProvider(this.test, account = accounts[7], type = curveLogarithmic);
+        //prepareProvider.call(this.test, true, true, accounts[7], curveLogarithmic);
+        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: accounts[7] });
+        await this.test.registry.initiateProviderCurve(specifier, curveLogarithmic, start, mul, { from: accounts[7] });
+        
         const jsLogarithmicTok = Utils.calculateTokWithLogarithmicCurve(5, start, mul);
         const res3 = await this.test.bondage.calcTokForDots.call(accounts[7], specifier, 5);
         const ethLogarithmicTok = parseInt(res3.valueOf());
 
         expect(jsLogarithmicTok).to.be.equal(ethLogarithmicTok);
     });
-
+/*
     it("BONDAGE_6 - calcTokForDots() - Check that function throw error if curve not intialized", async function () {
 
-        prepareProvider(this.test, "yes", "no");
+        //prepareProvider.call(this.test, true, false);
+        await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
         
         res = await this.test.bondage.calcTokForDots.call(accounts[5], specifier, 5);
         expect(res).to.eventually.be.rejectedWith(EVMRevert);
@@ -133,9 +152,9 @@ x
 
     it("BONDAGE_7 - calcTok() - Check calcTok function", async function () {
 
-        prepareProvider(this.test);
+        prepareProvider.call(this.test);
 
-        // TODO: it will not perfomed right way if numTok is 25, should be investigated
+        // TODO: it will not be perfomed right way if numTok is 25, should be investigated
         const res1 = await this.test.bondage.calcTok.call(oracle, specifier, 26, { from: subscriber });
         const ethTok = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
@@ -143,19 +162,20 @@ x
         expect(ethDots).to.be.equal(5);
         expect(ethTok).to.be.equal(25);
     });
-
+/*
     it("BONDAGE_8 - calcTok() - Check calcTok function throw error if curve not initialized", async function () {
 
-        prepareProvider(this.test, "yes", "no");
+        //prepareProvider.call(this.test, true, false);
+        await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
 
-        // TODO: it will not perfomed right way if numTok is 25, should be investigated
+        // TODO: it will not be perfomed right way if numTok is 25, should be investigated
         res = await this.test.bondage.calcTok.call(oracle, specifier, 26)
         expect(res).to.eventually.be.rejectedWith(EVMRevert);
     });
-
+*/
     it("BONDAGE_9 - calcTok() - Check calcTok function return 0 dots if numTok is 0", async function () {
 
-        prepareProvider(this.test);
+        prepareProvider.call(this.test);
 
         // TODO: it will not perfomed right way if numTok is 25, should be investigated
         const res1 = await this.test.bondage.calcTok.call(oracle, specifier, 0);
@@ -168,7 +188,7 @@ x
 
     it("BONDAGE_10 - calcTok() - Check calcTok function return maximum dots and maximum tok if numTok is more than 100 dots cost", async function () {
 
-        prepareProvider(this.test);
+        prepareProvider.call(this.test);
 
         const jsLinearTok = Utils.calculateTokWithLinearCurve(101, start, mul);
         const jsLinearTokWillUsed = Utils.calculateTokWithLinearCurve(100, start, mul);
@@ -184,11 +204,12 @@ x
 
     it("BONDAGE_11 - getDots() - Check received dots getting", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
-        await this.test.bondage.bond(specifier, 26, oracle, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
 
         const res = await this.test.bondage.getDots.call(subscriber, oracle, specifier, { from: subscriber });
         const receivedDots = parseInt(res.valueOf());
@@ -198,8 +219,9 @@ x
 
     it("BONDAGE_12 - getDots() - Check that number of dots of unbonded provider is 0", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         const res = await this.test.bondage.getDots.call(subscriber, oracle, specifier, { from: subscriber });
         const receivedDots = parseInt(res.valueOf());
@@ -207,7 +229,7 @@ x
         expect(receivedDots).to.be.equal(0);
     });
 
-/*THESE PASS WHEN VISIBILITY IS CHANGED TO PUBLIC, MAKE SURE TO REMOVE PUBLIC VISIBILITY WHEN DONE TESTING
+/*THESE PASS WHEN xAddress VARIABLE VISIBILITY IS CHANGED TO PUBLIC, MAKE SURE TO REMOVE PUBLIC VISIBILITY WHEN DONE TESTING
 
     it("BONDAGE_13 - setArbiterAddress() - Check that arbiter address was set", async function () {
 
@@ -253,8 +275,9 @@ x
 
     it("BONDAGE_17 - getTokBound() - Check received tok getting", async function () {
         
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -267,8 +290,9 @@ x
 
     it("BONDAGE_18 - getTokBound() - Check that received tok of unbonded provider is 0", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         const res = await this.test.bondage.getTokBound.call(oracle, specifier, { from: subscriber });
         const receivedTok = parseInt(res.valueOf());
@@ -278,8 +302,9 @@ x
 
     it("BONDAGE_19 - escrowDots() - Check that operator can escrow dots", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -293,7 +318,7 @@ x
         const oracleDotsRes = await this.test.bondage.getDots.call(subscriber, oracle, specifier, { from: subscriber });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
-        const escrowDotsRes = await this.test.bondage.pendingEscrow.call(subscriber, oracle, specifier);
+        const escrowDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
         expect(oracleDots).to.be.equal(dots - dotsForEscrow);
@@ -302,8 +327,9 @@ x
 
     it("BONDAGE_20 - escrowDots() - Check that not operator can't escrow dots", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -317,7 +343,7 @@ x
         const oracleDotsRes = await this.test.bondage.getDots.call(subscriber, oracle, specifier, { from: subscriber });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
-        const escrowDotsRes = await this.test.bondage.pendingEscrow.call(subscriber, oracle, specifier);
+        const escrowDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
         expect(oracleDots).to.be.equal(dots);
@@ -326,8 +352,9 @@ x
 
     it("BONDAGE_21 - escrowDots() - Check that operator can't escrow dots from oracle that haven't got enough dots", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 0, {from: subscriber});
@@ -341,7 +368,7 @@ x
         const oracleDotsRes = await this.test.bondage.getDots.call(subscriber, oracle, specifier, { from: subscriber });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
-        const escrowDotsRes = await this.test.bondage.pendingEscrow.call(subscriber, oracle, specifier);
+        const escrowDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
         expect(oracleDots).to.be.equal(0);
@@ -350,8 +377,9 @@ x
 
     it("BONDAGE_22 - releaseDots() - Check that operator can release dots", async function () {
     
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -368,7 +396,7 @@ x
         const oracleDotsRes = await this.test.bondage.getDots.call(subscriber, oracle, specifier,);
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
-        const pendingDotsRes = await this.test.bondage.pendingEscrow.call(subscriber, oracle, specifier);
+        const pendingDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
         const pendingDots = parseInt(pendingDotsRes.valueOf());
 
         const releaseRes = await this.test.bondage.getDots.call(oracle, oracle, specifier, { from: oracle });
@@ -381,8 +409,9 @@ x
 
     it("BONDAGE_23 - releaseDots() - Check that operator can release dots if trying to release more dots than escrowed", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -399,7 +428,7 @@ x
         const oracleDotsRes = await this.test.bondage.getDots.call(subscriber, oracle, specifier, { from: subscriber });
         const oracleDots = parseInt(oracleDotsRes.valueOf());
 
-        const escrowDotsRes = await this.test.bondage.pendingEscrow.call(subscriber, oracle, specifier);
+        const escrowDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
         const releaseRes = await this.test.bondage.getDots.call(oracle, oracle, specifier, { from: oracle });
@@ -411,22 +440,25 @@ x
         expect(releaseDots).to.be.equal(0);
     });
 
-    it("BONDAGE_23 - getDotsIssued() - Check that issued dots will increase with every bond", async function () {
+    it("BONDAGE_24 - getDotsIssued() - Check that issued dots will increase with every bond", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 14, {from: subscriber});
 
-        const issuedDots = await this.test.bondage.getDotsIssued.call(subscriber, oracle, specifier);
+        const issuedDots = await this.test.bondage.getDotsIssued.call(oracle, specifier);
         expect(parseInt(issuedDots.valueOf())).to.be.equal(6);
     });
 
-    it("BONDAGE_24 - getDotsIssued() - Check that issued dots will decrease with every unbond", async function () {
+    it("BONDAGE_25 - getDotsIssued() - Check that issued dots will decrease with every unbond", async function () {
 
-        prepareProvider(this.test);
-        prepareToken(this.test);
+        prepareProvider.call(this.test);
+        prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -434,7 +466,7 @@ x
 
         await this.test.bondage.unbond(oracle, specifier, 1, {from: subscriber});
 
-        const issuedDots = await this.test.bondage.getDotsIssued.call(subscriber, oracle, specifier);
+        const issuedDots = await this.test.bondage.getDotsIssued.call(oracle, specifier);
         expect(parseInt(issuedDots.valueOf())).to.be.equal(5);
     });
 
