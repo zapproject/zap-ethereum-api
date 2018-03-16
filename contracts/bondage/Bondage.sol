@@ -1,14 +1,11 @@
 pragma solidity ^0.4.17;
+// v1.0
 
-//calcTok should be called calcDots?
+/* ************************************************************************
+/* MAKE SURE TO CALL setArbiterAddress & setDispatchAddress UPON DEPLOYMENT
+/* ************************************************************************/
 
-// bond works right now bc commented out following issues
-// RUNNING THROUGH ALL OF GAS in calcTok (see infinite for loop)
-// require(token.transferFrom ...) reverting in _bond 
-// require(curveType != RegistryInterface.CurveType.None) reverting in _currentCostOfDot (see CurrentCost.sol)
-// ^^ this last issue only is a problem w/js tests, can get to run in truffle console.
-
-// MAKE SURE TO CALL setArbiterAddress & setDispatchAddress UPON DEPLOYMENT
+// unbond reverting on low values
 
 /* Test Case for truffle dev – 
 owner = web3.eth.accounts[0]
@@ -28,16 +25,16 @@ bondStor.transferOwnership(Bondage.address)
 
 token = TheToken.at(TheToken.address)
 tokensForOwner = new web3.BigNumber("1500e18")
-tokensForProvider = new web3.BigNumber("5000e18")
+tokensForSubscriber = new web3.BigNumber("5000e18")
 approveTokens = new web3.BigNumber("1000e18")
 token.allocate(owner, tokensForOwner, { from: owner })
-token.allocate(haddr, tokensForProvider, { from: owner })
+token.allocate(haddr, tokensForSubscriber, { from: owner })
 token.approve(Bondage.address, approveTokens, {from: haddr})
+bond.bond(oaddr,spec,500, {from: haddr})
 */
 
 import "../aux/Mortal.sol";
 import "../aux/ERC20.sol";
-import "../aux/CurrentCostInterface.sol";
 import "../registry/RegistryInterface.sol";
 import "./BondageStorage.sol";
 
@@ -46,7 +43,6 @@ contract Bondage is Mortal {
     BondageStorage stor;
     RegistryInterface registry;
     ERC20 token;
-    CurrentCostInterface currentCost;
     uint256 public decimals = 10 ** 18;
 
     address arbiterAddress;
@@ -59,21 +55,15 @@ contract Bondage is Mortal {
     }
 
     /// @dev Initialize Token and Registry Contracts
-    function Bondage(address storageAddress, address registryAddress, address tokenAddress, address currentCostAddress) public {
+    function Bondage(address storageAddress, address registryAddress, address tokenAddress) public {
         stor = BondageStorage(storageAddress);
-        token = ERC20(tokenAddress);
-        setCurrentCostAddress(currentCostAddress);
+        token = ERC20(tokenAddress); 
         setRegistryAddress(registryAddress);
     }
 
     /// @notice Reinitialize registry instance after upgrade
     function setRegistryAddress(address registryAddress) public onlyOwner {
         registry = RegistryInterface(registryAddress);
-    }
-
-    /// @notice Upgrade currentCostOfDot function
-    function setCurrentCostAddress(address currentCostAddress) public onlyOwner {
-        currentCost = CurrentCostInterface(currentCostAddress);
     }
 
     /// @dev Set Arbiter address
@@ -97,11 +87,6 @@ contract Bondage is Mortal {
     /// @return total TOK unbound from oracle
     function unbond(address oracleAddress, bytes32 specifier, uint256 numDots) public returns (uint256) {
         return _unbond(msg.sender, oracleAddress, specifier, numDots);
-    }
-
-    /// @return total TOK held by contract
-    function getTokBound(address oracleAddress, bytes32 endpoint) public view returns (uint256) {
-        return stor.getNumTok(oracleAddress, endpoint);
     }
 
     /// @dev Move numDots dots from provider-requester to bondage according to 
@@ -142,35 +127,13 @@ contract Bondage is Mortal {
     {
         if (numDots <= stor.getNumEscrow(holderAddress, oracleAddress, specifier)) {
             stor.updateEscrow(holderAddress, oracleAddress, specifier, numDots, "sub");
-            initializeProvider(holderAddress, oracleAddress);
             stor.updateBondValue(holderAddress, oracleAddress, specifier, numDots, "add");
             return true;
         }
         return false;
     }
 
-    /// @dev Calculate quantity of TOK token required for specified amount of dots
-    /// for endpoint defined by specifier and data provider defined by oracleAddress
-    function calcTokForDots(
-        address oracleAddress,
-        bytes32 specifier,
-        uint256 numDots
-    ) 
-        public
-        view
-        returns (uint256 numTok)
-    {
-        for (uint256 i = 0; i < numDots; i++) {
-            numTok += currentCostOfDot(
-                oracleAddress,
-                specifier,
-                getDotsIssued(oracleAddress, specifier) + i
-            );
-        }
-        return numTok;
-    }
-
-    /// @dev Calculate amount of dots which could be purchased with given (numTok) TOK tokens 
+    /// @dev Calculate amount of dots which could be purchased with given (numTok) TOK tokens (max is 1000)
     /// for endpoint specified by specifier and data-provider address specified by oracleAddress
     function calcTok(
         address oracleAddress,
@@ -182,9 +145,10 @@ contract Bondage is Mortal {
         returns (uint256 totalDotCost, uint256 numDots) 
     {
         uint256 infinity = decimals;
-        uint256 dotCost = 0;
+        uint256 dotCost;
+        if (numTok > 1000) numTok = 1000;
 
-        for (numDots; numDots < 10/*infinity*/; numDots++) {
+        for (numDots; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
                 specifier,
@@ -201,9 +165,6 @@ contract Bondage is Mortal {
         return (totalDotCost, numDots);
     }
 
-    /// @dev Get the current cost of a dot.
-    /// Endpoint specified by specifier.
-    /// Data-provider specified by oracleAddress,
     function currentCostOfDot(
         address oracleAddress,
         bytes32 specifier,
@@ -213,7 +174,23 @@ contract Bondage is Mortal {
         view
         returns (uint256 cost)
     {
-        return currentCost._currentCostOfDot(registry, oracleAddress, specifier, totalBound);
+        RegistryInterface.CurveType curveType;
+        uint256 curveStart;
+        uint256 curveMultiplier;
+        (curveType, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
+
+        require(curveType != RegistryInterface.CurveType.None);
+
+        if (curveType == RegistryInterface.CurveType.Linear) {
+            cost = curveMultiplier * totalBound + curveStart;
+        } else if (curveType == RegistryInterface.CurveType.Exponential) {
+            cost = curveMultiplier * (totalBound ** 2) + curveStart;
+        } else if (curveType == RegistryInterface.CurveType.Logarithmic) {
+            if (totalBound == 0)
+                totalBound = 1;
+            cost = curveMultiplier * fastlog2(totalBound) + curveStart;
+        }
+        return cost;
     }
 
     function getDotsIssued(
@@ -239,6 +216,11 @@ contract Bondage is Mortal {
         return stor.getBoundDots(holderAddress, oracleAddress, specifier);
     }
 
+    /// @return total TOK held by contract
+    function getTokBound(address oracleAddress, bytes32 endpoint) public view returns (uint256) {
+        return stor.getNumTok(oracleAddress, endpoint);
+    }
+
     function _bond(
         address holderAddress,
         address oracleAddress,
@@ -253,7 +235,7 @@ contract Bondage is Mortal {
         (numTok, numDots) = calcTok(oracleAddress, specifier, numTok);
 
         // User must have approved contract to transfer workingTOK
-        //require(token.transferFrom(msg.sender, this, numTok * decimals));
+        require(token.transferFrom(msg.sender, this, numTok * decimals));
 
         stor.updateBondValue(holderAddress, oracleAddress, specifier, numDots, "add");        
         stor.updateTotalIssued(oracleAddress, specifier, numDots, "add");
@@ -274,10 +256,9 @@ contract Bondage is Mortal {
         //currentDots
         uint256 bondValue = stor.getBondValue(holderAddress, oracleAddress, specifier);
         if (bondValue >= numDots && numDots > 0) {
-            uint256 subTotal = 0;
+            uint256 subTotal;
 
-            for (uint256 i = 0; i < numDots; i++) {
-                subTotal += 1;
+            for (subTotal; subTotal < numDots; subTotal++) {
 
                 numTok += currentCostOfDot(
                     oracleAddress,
@@ -285,7 +266,6 @@ contract Bondage is Mortal {
                     getDotsIssued(oracleAddress, specifier) - 1
                 );     
             }       
-
             stor.updateTotalBound(oracleAddress, specifier, numTok, "sub");
             stor.updateTotalIssued(oracleAddress, specifier, numDots, "sub");
             stor.updateBondValue(holderAddress, oracleAddress, specifier, subTotal, "sub");
@@ -301,6 +281,38 @@ contract Bondage is Mortal {
         if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
             stor.setProviderInitialized(holderAddress, oracleAddress);
             stor.addHolderOracle(holderAddress, oracleAddress);
+        }
+    }
+
+    //log based 2 taylor series in assembly
+    function fastlog2(uint256 x) private pure returns (uint256 y) {
+        assembly {
+            let arg := x
+            x := sub(x, 1)
+            x := or(x, div(x, 0x02))
+            x := or(x, div(x, 0x04))
+            x := or(x, div(x, 0x10))
+            x := or(x, div(x, 0x100))
+            x := or(x, div(x, 0x10000))
+            x := or(x, div(x, 0x100000000))
+            x := or(x, div(x, 0x10000000000000000))
+            x := or(x, div(x, 0x100000000000000000000000000000000))
+            x := add(x, 1)
+            let m := mload(0x40)
+            mstore(m, 0xf8f9cbfae6cc78fbefe7cdc3a1793dfcf4f0e8bbd8cec470b6a28a7a5a3e1efd)
+            mstore(add(m, 0x20), 0xf5ecf1b3e9debc68e1d9cfabc5997135bfb7a7a3938b7b606b5b4b3f2f1f0ffe)
+            mstore(add(m, 0x40), 0xf6e4ed9ff2d6b458eadcdf97bd91692de2d4da8fd2d0ac50c6ae9a8272523616)
+            mstore(add(m, 0x60), 0xc8c0b887b0a8a4489c948c7f847c6125746c645c544c444038302820181008ff)
+            mstore(add(m, 0x80), 0xf7cae577eec2a03cf3bad76fb589591debb2dd67e0aa9834bea6925f6a4a2e0e)
+            mstore(add(m, 0xa0), 0xe39ed557db96902cd38ed14fad815115c786af479b7e83247363534337271707)
+            mstore(add(m, 0xc0), 0xc976c13bb96e881cb166a933a55e490d9d56952b8d4e801485467d2362422606)
+            mstore(add(m, 0xe0), 0x753a6d1b65325d0c552a4d1345224105391a310b29122104190a110309020100)
+            mstore(0x40, add(m, 0x100))
+            let magic := 0x818283848586878898a8b8c8d8e8f929395969799a9b9d9e9faaeb6bedeeff
+            let shift := 0x100000000000000000000000000000000000000000000000000000000000000
+            let a := div(mul(x, magic), shift)
+            y := div(mload(add(m, sub(255, a))), shift)
+            y := add(y, mul(256, gt(arg, 0x8000000000000000000000000000000000000000000000000000000000000000)))
         }
     }
 }

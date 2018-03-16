@@ -4,7 +4,6 @@ pragma solidity ^0.4.17;
 /* ******************************************************************
 /* MAKE SURE TO transferOwnership TO Bondage Contract UPON DEPLOYMENT
 /* ******************************************************************/
-// CHANGE PUBLIC TO EXTERNAL AFTER DEBUGGING!!!!!!!!!!!!!!!!!!!!!!!!!
 
 import "../aux/Ownable.sol";
 
@@ -34,45 +33,45 @@ contract BondageStorage is Ownable {
 
     /**** Get Methods ****/
 
-    function isProviderInitialized(address holderAddress, address oracleAddress) public view returns (bool) {
+    function isProviderInitialized(address holderAddress, address oracleAddress) external view returns (bool) {
         return holders[holderAddress].initialized[oracleAddress];
     }
 
-    function getBondValue(address holderAddress, address oracleAddress, bytes32 specifier) public view returns (uint) {
+    function getBondValue(address holderAddress, address oracleAddress, bytes32 specifier) external view returns (uint) {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
 
-    function getNumEscrow(address holderAddress, address oracleAddress, bytes32 specifier) public view returns (uint) {
+    function getNumEscrow(address holderAddress, address oracleAddress, bytes32 specifier) external view returns (uint) {
         return pendingEscrow[holderAddress][oracleAddress][specifier];
     }
 
-    function getNumTok(address oracleAddress, bytes32 endpoint) public view returns (uint) {
+    function getNumTok(address oracleAddress, bytes32 endpoint) external view returns (uint) {
         return totalBound[endpoint][oracleAddress];
     }
 
-    function getTotalDots(address oracleAddress, bytes32 specifier) public view returns (uint) {
+    function getTotalDots(address oracleAddress, bytes32 specifier) external view returns (uint) {
         return totalIssued[specifier][oracleAddress];
     }
 
-    function getBoundDots(address holderAddress, address oracleAddress, bytes32 specifier) public view returns (uint) {
+    function getBoundDots(address holderAddress, address oracleAddress, bytes32 specifier) external view returns (uint) {
         return holders[holderAddress].bonds[specifier][oracleAddress];
     }
 
-    function getIndexSize(address holderAddress) public view returns (uint) {
+    function getIndexSize(address holderAddress) external view returns (uint) {
         return holders[holderAddress].oracleList.length;
     }
 
-    function getOracleAddress(address holderAddress, uint256 index) public view returns (address) {
+    function getOracleAddress(address holderAddress, uint256 index) external view returns (address) {
         return holders[holderAddress].oracleList[index];
     }    
 
 	/**** Set Methods ****/
 
-    function addHolderOracle(address holderAddress, address oracleAddress) public onlyOwner {
+    function addHolderOracle(address holderAddress, address oracleAddress) external onlyOwner {
         holders[holderAddress].oracleList.push(oracleAddress);
     }
 
-    function setProviderInitialized(address holderAddress, address oracleAddress) public onlyOwner {
+    function setProviderInitialized(address holderAddress, address oracleAddress) external onlyOwner {
         holders[holderAddress].initialized[oracleAddress] = true;
     }
 
@@ -83,7 +82,7 @@ contract BondageStorage is Ownable {
         uint256 numDots,
         string op
     )
-        public
+        external
         onlyOwner      
     {
         if (keccak256(op) == keccak256("sub"))
@@ -100,7 +99,7 @@ contract BondageStorage is Ownable {
         uint256 numDots,
         string op
     )
-        public
+        external
         //onlyOwner      
     {
         if (keccak256(op) == keccak256("sub"))
@@ -116,7 +115,7 @@ contract BondageStorage is Ownable {
         uint256 numDots,
         string op
     )
-        public
+        external
         onlyOwner       
     {
         if (keccak256(op) == keccak256("sub"))
@@ -132,7 +131,7 @@ contract BondageStorage is Ownable {
         uint256 numDots,
         string op
     )
-        public
+        external
         onlyOwner      
     {
         if (keccak256(op) == keccak256("sub"))
