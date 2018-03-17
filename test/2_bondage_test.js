@@ -14,7 +14,6 @@ const BondageStorage = artifacts.require("BondageStorage");
 const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
 const TheToken = artifacts.require("TheToken");
-const CurrentCost = artifacts.require("CurrentCost");
 const Dispatch = artifacts.require("Dispatch");
 const Arbiter = artifacts.require("Arbiter");
 
@@ -177,7 +176,7 @@ contract('Bondage', function (accounts) {
 
         prepareProvider.call(this.test);
 
-        // TODO: it will not perfomed right way if numTok is 25, should be investigated
+        // TODO: it will not be perfomed right way if numTok is 25, should be investigated
         const res1 = await this.test.bondage.calcTok.call(oracle, specifier, 0);
         const ethTok = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
@@ -193,7 +192,7 @@ contract('Bondage', function (accounts) {
         const jsLinearTok = Utils.calculateTokWithLinearCurve(101, start, mul);
         const jsLinearTokWillUsed = Utils.calculateTokWithLinearCurve(100, start, mul);
 
-        // TODO: it will not perfomed right way if numTok is 25, should be investigated
+        // TODO: it will not be perfomed right way if numTok is 25, should be investigated
         const res1 = await this.test.bondage.calcTok.call(oracle, specifier, jsLinearTok);
         const ethTok = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
@@ -470,4 +469,47 @@ contract('Bondage', function (accounts) {
         expect(parseInt(issuedDots.valueOf())).to.be.equal(5);
     });
 
+    it("BONDAGE_26 - currentCostOfDot() - Check current dot cost calculations", async function () {
+
+        //prepareProvider.call(this.test, true, true, accounts[5], curveLinear);
+        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: accounts[5] });
+        await this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: accounts[5] });
+
+        //prepareProvider.call(this.test, true, true, accounts[6], curveExponential);
+        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: accounts[6] });
+        await this.test.registry.initiateProviderCurve(specifier, curveExponential, start, mul, { from: accounts[6] });
+
+        //prepareProvider.call(this.test, true, true, accounts[7], curveLogarithmic);
+        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: accounts[7] });
+        await this.test.registry.initiateProviderCurve(specifier, curveLogarithmic, start, mul, { from: accounts[7] });
+
+        const dotNumber = 99;
+        const linearDotCost = mul * dotNumber + start
+        const expDotCost = mul * Math.pow(dotNumber, 2) + start;
+        const logDotCost = Math.ceil(mul * Math.log2(dotNumber) + start);
+
+        const res1 = await this.test.bondage.currentCostOfDot.call(accounts[5], specifier, dotNumber);
+        const ethLinearRes = parseInt(res1.valueOf());
+
+        const res2 = await this.test.bondage.currentCostOfDot.call(accounts[6], specifier, dotNumber);
+        const ethExpRes = parseInt(res2.valueOf());
+
+        const res3 = await this.test.bondage.currentCostOfDot.call(accounts[7], specifier, dotNumber);
+        const ethLogrRes = parseInt(res3.valueOf());
+
+        expect(ethLinearRes).to.be.equal(linearDotCost);
+        expect(ethExpRes).to.be.equal(expDotCost);
+        expect(ethLogrRes).to.be.equal(logDotCost);
+    });
+/* ONLY PASSES WHEN VISIBILITY OF fastlog2 IS PUBLIC
+    it("BONDAGE_27 - fastlog2() - Check log2 calculations", async function () {
+        async function checkLog(value) {
+            let jsResult = Math.ceil(Math.log2(value));
+            let res = await this.bondage.fastlog2.call(value, { from: owner });
+            let ethResult = parseInt(res.valueOf());
+            expect(jsResult).to.be.equal(ethResult);
+        }
+        for (var i = 1; i <= 100; i++) checkLog.call(this.test, i);
+    });
+*/
 });
