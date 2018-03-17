@@ -78,13 +78,47 @@ contract Arbiter is Mortal {
         );
     }
 
+    /// @dev Finish the data feed from the provider
+    function endSubscriptionProvider(
+        address provider_address,
+        address subscriber_address,
+        bytes32 endpoint
+    )
+        public 
+    {
+        // Emit an event on success about who ended the contract
+        if (endSubscription(provider_address, subscriber_address, endpoint))
+            LogDataSubscriptionEnd(
+                msg.sender, 
+                subscriber_address, 
+                SubscriptionTerminator.Provider
+            );
+    }
+
+    /// @dev Finish the data feed from the subscriber
+    function endSubscriptionSubscriber(
+        address provider_address,
+        address subscriber_address,
+        bytes32 endpoint
+    )
+        public 
+    {
+        // Emit an event on success about who ended the contract
+        if (endSubscription(provider_address, subscriber_address, endpoint))
+            LogDataSubscriptionEnd(
+                provider_address,
+                msg.sender,
+                SubscriptionTerminator.Subscriber
+            );
+    }
+
     /// @dev Finish the data feed
     function endSubscription(        
         address provider_address,
         address subscriber_address,
         bytes32 endpoint
     )
-        public
+        private
         returns (bool)
     {
         uint256 dots = stor.getDots(provider_address, subscriber_address, endpoint);
@@ -124,38 +158,4 @@ contract Arbiter is Mortal {
         stor.setDots(provider_address, subscriber_address, endpoint, 0);
         return true;
     }
-
-    /// @dev Finish the data feed from the provider
-    function endSubscriptionProvider(
-        address provider_address,
-        address subscriber_address,
-        bytes32 endpoint
-    )
-        public 
-    {
-        // Emit an event on success about who ended the contract
-        if (endSubscription(provider_address, subscriber_address, endpoint))
-            LogDataSubscriptionEnd(
-                msg.sender, 
-                subscriber_address, 
-                SubscriptionTerminator.Provider
-            );
-    }
-
-    /// @dev Finish the data feed from the subscriber
-    function endSubscriptionSubscriber(
-        address provider_address,
-        address subscriber_address,
-        bytes32 endpoint
-    )
-        public 
-    {
-        // Emit an event on success about who ended the contract
-        if (endSubscription(provider_address, subscriber_address, endpoint))
-            LogDataSubscriptionEnd(
-                provider_address,
-                msg.sender,
-                SubscriptionTerminator.Subscriber
-            );
-    }    
 }
