@@ -15,8 +15,8 @@ contract RegistryStorage is Ownable {
     // curve data structure representing dot(access token) prices as function of supply
     struct Curve {
         CurveType Type;
-        uint256 Start;
-        uint256 Multiplier;
+        uint128 Start;
+        uint128 Multiplier;
     }
 
     // fundamental account type for the platform
@@ -51,7 +51,7 @@ contract RegistryStorage is Ownable {
     function getCurve(address provider, bytes32 specifier)
         external
         view
-        returns (CurveType Type, uint256 Start, uint256 Multiplier)
+        returns (CurveType Type, uint128 Start, uint128 Multiplier)
     {
         Curve memory curve = oracles[provider].curves[specifier];
 
@@ -79,21 +79,21 @@ contract RegistryStorage is Ownable {
     function setEndpointParameters(
         address origin,
         bytes32 specifier,
-        bytes32[] endpoint_parameters
+        bytes32[] endpoint_params
     )
         external
         onlyOwner
 
     {
-        oracles[origin].endpoint_params[specifier] = endpoint_parameters;
+        oracles[origin].endpoint_params[specifier] = endpoint_params;
     }
 
 	function setCurve(
         address origin,
         bytes32 specifier,
         CurveType curveType,
-        uint256 curveStart,
-        uint256 curveMultiplier
+        uint128 curveStart,
+        uint128 curveMultiplier
     ) 
         external
         onlyOwner

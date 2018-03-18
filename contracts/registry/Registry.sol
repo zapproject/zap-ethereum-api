@@ -57,8 +57,8 @@ contract Registry is Mortal {
     function initiateProviderCurve(
         bytes32 specifier,
         RegistryStorage.CurveType curveType,
-        uint256 curveStart,
-        uint256 curveMultiplier
+        uint128 curveStart,
+        uint128 curveMultiplier
     )
         public
     {
@@ -114,8 +114,8 @@ contract Registry is Mortal {
         view
         returns (
             RegistryStorage.CurveType curveType,
-            uint256 curveStart,
-            uint256 curveMultiplier
+            uint128 curveStart,
+            uint128 curveMultiplier
         )
     {
         return stor.getCurve(provider, specifier);
@@ -124,23 +124,23 @@ contract Registry is Mortal {
     function getNextProvider(uint256 index)
         public
         view        
-        returns (uint256 nextIndex, address oracleAddress, uint256 public_key, string title)
+        returns (uint256 nextIndex, address oracle_address, uint256 public_key, string title)
     {
         uint256 len = stor.getOracleIndexSize();
         if (index < len) {
-            oracleAddress = stor.getOracleAddress(index);
+            oracle_address = stor.getOracleAddress(index);
             if (index + 1 < len)
                 return (
                     index + 1, 
-                    oracleAddress, 
-                    getProviderPublicKey(oracleAddress), 
-                    getProviderTitle(oracleAddress)
+                    oracle_address, 
+                    getProviderPublicKey(oracle_address), 
+                    getProviderTitle(oracle_address)
                 );            
             return (
                 0, 
-                oracleAddress, 
-                getProviderPublicKey(oracleAddress), 
-                getProviderTitle(oracleAddress)
+                oracle_address, 
+                getProviderPublicKey(oracle_address), 
+                getProviderTitle(oracle_address)
             );                            
         }
         return (0,0x0,0,"");
