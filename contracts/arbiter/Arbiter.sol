@@ -91,15 +91,14 @@ contract Arbiter is Mortal {
     }
 
     /// @dev Finish the data feed from the provider
-    function endSubscriptionProvider(
-        address providerAddress,
+    function endSubscriptionProvider(        
         address subscriberAddress,
         bytes32 endpoint
     )
         public 
     {
         // Emit an event on success about who ended the contract
-        if (endSubscription(providerAddress, subscriberAddress, endpoint))
+        if (endSubscription(msg.sender, subscriberAddress, endpoint))
             LogDataSubscriptionEnd(
                 msg.sender, 
                 subscriberAddress, 
@@ -110,13 +109,12 @@ contract Arbiter is Mortal {
     /// @dev Finish the data feed from the subscriber
     function endSubscriptionSubscriber(
         address providerAddress,
-        address subscriberAddress,
         bytes32 endpoint
     )
         public 
     {
         // Emit an event on success about who ended the contract
-        if (endSubscription(providerAddress, subscriberAddress, endpoint))
+        if (endSubscription(providerAddress, msg.sender, endpoint))
             LogDataSubscriptionEnd(
                 providerAddress,
                 msg.sender,
