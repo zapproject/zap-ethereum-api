@@ -5,34 +5,6 @@ pragma solidity ^0.4.17;
 /* MAKE SURE TO CALL setArbiterAddress & setDispatchAddress UPON DEPLOYMENT
 /* ************************************************************************/
 
-// unbond reverting on low values
-
-/* Test Case for truffle dev – 
-owner = web3.eth.accounts[0]
-haddr = web3.eth.accounts[1]
-oaddr = web3.eth.accounts[2]
-
-reg = Registry.at(Registry.address)
-regStor = RegistryStorage.at(RegistryStorage.address)
-regStor.transferOwnership(Registry.address)
-spec = "test-line"
-reg.initiateProvider(999,"ESPN News",spec,["Sport1","Sport2"],{from: oaddr})
-reg.initiateProviderCurve(spec, 1, 1, 2, {from: oaddr})
-
-bond = Bondage.at(Bondage.address)
-bondStor = BondageStorage.at(BondageStorage.address)
-bondStor.transferOwnership(Bondage.address)
-
-token = TheToken.at(TheToken.address)
-tokensForOwner = new web3.BigNumber("1500e18")
-tokensForSubscriber = new web3.BigNumber("5000e18")
-approveTokens = new web3.BigNumber("1000e18")
-token.allocate(owner, tokensForOwner, { from: owner })
-token.allocate(haddr, tokensForSubscriber, { from: owner })
-token.approve(Bondage.address, approveTokens, {from: haddr})
-bond.bond(oaddr,spec,500, {from: haddr})
-*/
-
 import "../aux/Mortal.sol";
 import "../aux/ERC20.sol";
 import "../registry/RegistryInterface.sol";
@@ -196,8 +168,8 @@ contract Bondage is Mortal {
         returns (uint256 cost)
     {
         RegistryInterface.CurveType curveType;
-        uint256 curveStart;
-        uint256 curveMultiplier;
+        uint128 curveStart;
+        uint128 curveMultiplier;
         (curveType, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
 
         require(curveType != RegistryInterface.CurveType.None);
@@ -250,10 +222,14 @@ contract Bondage is Mortal {
     )
         private
         returns (uint256 numDots) 
-    {
-        initializeProvider(holderAddress, oracleAddress);
-
+    {   
+        // This also checks if oracle is registered w/an initialized curve
         (numTok, numDots) = calcTok(oracleAddress, specifier, numTok);
+
+        if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
+            stor.setProviderInitialized(holderAddress, oracleAddress);
+            stor.addHolderOracle(holderAddress, oracleAddress);
+        }
 
         // User must have approved contract to transfer workingTOK
         require(token.transferFrom(msg.sender, this, numTok * decimals));
@@ -295,14 +271,6 @@ contract Bondage is Mortal {
                 return numTok;
         }
         return 0;
-    }
-
-    /// @dev Initialize uninitialized provider
-    function initializeProvider(address holderAddress, address oracleAddress) private {
-        if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
-            stor.setProviderInitialized(holderAddress, oracleAddress);
-            stor.addHolderOracle(holderAddress, oracleAddress);
-        }
     }
 
     //log based 2 taylor series in assembly
