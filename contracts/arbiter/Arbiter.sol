@@ -1,6 +1,13 @@
 pragma solidity ^0.4.17;
 // v1.0
 
+/* Test Case for truffle dev – 
+blocks = 100
+arbiter = Arbiter.at(Arbiter.address)
+arbStor = ArbiterStorage.at(ArbiterStorage.address)
+arbStor.transferOwnership(Arbiter.address)
+*/
+
 import "../aux/Mortal.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
@@ -40,11 +47,11 @@ contract Arbiter is Mortal {
     }
 
     function initiateSubscription(
-        address provider_address,  // Provider address
+        address providerAddress,   // Provider address
         bytes32[] endpoint_params, // Endpoint specific params
         bytes32 endpoint,          // Endpoint specifier
         uint256 public_key,        // Public key of the purchaser
-        uint256 blocks             // Number of blocks subscribed, 1block=1dot
+        uint64 blocks              // Number of blocks subscribed, 1block=1dot
     ) 
         public 
     {   
@@ -52,24 +59,24 @@ contract Arbiter is Mortal {
         require(blocks > 0);
 
         // Can't reinitiate a currently active contract
-        require(stor.getDots(provider_address, msg.sender, endpoint) == 0);
+        require(stor.getDots(providerAddress, msg.sender, endpoint) == 0);
 
         // Escrow the necessary amount of dots
-        bondage.escrowDots(msg.sender, provider_address, endpoint, blocks);
+        bondage.escrowDots(msg.sender, providerAddress, endpoint, blocks);
         
         // Initiate the subscription struct
         stor.setSubscription(
-            provider_address,
+            providerAddress,
             msg.sender,
             endpoint,
             blocks,
-            block.number,
-            block.number + blocks
+            uint96(block.number),
+            uint96(block.number) + uint96(blocks)
         );
 
         // Emit the event
         LogDataPurchase(
-            provider_address,
+            providerAddress,
             msg.sender,
             public_key,
             blocks,
@@ -78,35 +85,47 @@ contract Arbiter is Mortal {
         );
     }
 
+    function getSubscription(address providerAddress, address subscriberAddress, bytes32 endpoint)
+        public
+        view
+        returns (uint64 dots, uint96 blockStart, uint96 preBlockEnd)
+    {
+        return (
+            stor.getDots(providerAddress, subscriberAddress, endpoint),
+            stor.getBlockStart(providerAddress, subscriberAddress, endpoint),
+            stor.getPreBlockEnd(providerAddress, subscriberAddress, endpoint)
+        );
+    }
+
     /// @dev Finish the data feed from the provider
     function endSubscriptionProvider(
-        address provider_address,
-        address subscriber_address,
+        address providerAddress,
+        address subscriberAddress,
         bytes32 endpoint
     )
         public 
     {
         // Emit an event on success about who ended the contract
-        if (endSubscription(provider_address, subscriber_address, endpoint))
+        if (endSubscription(providerAddress, subscriberAddress, endpoint))
             LogDataSubscriptionEnd(
                 msg.sender, 
-                subscriber_address, 
+                subscriberAddress, 
                 SubscriptionTerminator.Provider
             );
     }
 
     /// @dev Finish the data feed from the subscriber
     function endSubscriptionSubscriber(
-        address provider_address,
-        address subscriber_address,
+        address providerAddress,
+        address subscriberAddress,
         bytes32 endpoint
     )
         public 
     {
         // Emit an event on success about who ended the contract
-        if (endSubscription(provider_address, subscriber_address, endpoint))
+        if (endSubscription(providerAddress, subscriberAddress, endpoint))
             LogDataSubscriptionEnd(
-                provider_address,
+                providerAddress,
                 msg.sender,
                 SubscriptionTerminator.Subscriber
             );
@@ -114,15 +133,15 @@ contract Arbiter is Mortal {
 
     /// @dev Finish the data feed
     function endSubscription(        
-        address provider_address,
-        address subscriber_address,
+        address providerAddress,
+        address subscriberAddress,
         bytes32 endpoint
     )
         private
         returns (bool)
     {
-        uint256 dots = stor.getDots(provider_address, subscriber_address, endpoint);
-        uint256 preblockend = stor.getPreblockend(provider_address, subscriber_address, endpoint);
+        uint256 dots = stor.getDots(providerAddress, subscriberAddress, endpoint);
+        uint256 preblockend = stor.getPreBlockEnd(providerAddress, subscriberAddress, endpoint);
         // Make sure the subscriber has a subscription
         require(dots > 0);
 
@@ -133,29 +152,29 @@ contract Arbiter is Mortal {
 
             // Transfer the earned dots to the provider
             bondage.releaseDots(
-                subscriber_address,
-                provider_address,
+                subscriberAddress,
+                providerAddress,
                 endpoint,
                 earnedDots
             );
             //  Transfer the returned dots to the subscriber
             bondage.releaseDots(
-                subscriber_address,
-                subscriber_address,
+                subscriberAddress,
+                subscriberAddress,
                 endpoint,
                 returnedDots
             );
         } else {
             // Transfer all the dots
             bondage.releaseDots(
-                subscriber_address,
-                provider_address,
+                subscriberAddress,
+                providerAddress,
                 endpoint,
                 dots
             );
         }
         // Kill the subscription
-        stor.setDots(provider_address, subscriber_address, endpoint, 0);
+        stor.setDots(providerAddress, subscriberAddress, endpoint, 0);
         return true;
     }
 }

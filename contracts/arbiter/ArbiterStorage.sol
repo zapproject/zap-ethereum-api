@@ -11,9 +11,9 @@ contract ArbiterStorage is Ownable {
 
     // Each subscription is represented as the following
     struct Subscription {
-        uint256 dots;          // Cost in dots
-        uint256 blockstart;    // Block number subscription was initiated
-        uint256 preblockend;   // Precalculated block end
+        uint64 dots;          // Cost in dots
+        uint96 blockStart;    // Block number subscription was initiated
+        uint96 preBlockEnd;   // Precalculated block end
     }
     
     // provider_address => subscriber_address => endpoint => Subscription
@@ -28,33 +28,33 @@ contract ArbiterStorage is Ownable {
     )
         external
         view
-        returns (uint256)
+        returns (uint64)
     {
         return subscriptions[provider_address][subscriber_address][endpoint].dots;
     }
 
-    function getBlockstart(
+    function getBlockStart(
         address provider_address,
         address subscriber_address,
         bytes32 endpoint
     )
         external
         view
-        returns (uint256)
+        returns (uint96)
     {
-        return subscriptions[provider_address][subscriber_address][endpoint].blockstart;
+        return subscriptions[provider_address][subscriber_address][endpoint].blockStart;
     }
 
-    function getPreblockend(
+    function getPreBlockEnd(
         address provider_address,
         address subscriber_address,
         bytes32 endpoint
     )
         external
         view
-        returns (uint256)
+        returns (uint96)
     {
-        return subscriptions[provider_address][subscriber_address][endpoint].preblockend;
+        return subscriptions[provider_address][subscriber_address][endpoint].preBlockEnd;
     }
 
 	/**** Set Methods ****/
@@ -63,7 +63,7 @@ contract ArbiterStorage is Ownable {
         address provider_address,
         address subscriber_address,
         bytes32 endpoint,
-        uint256 value
+        uint64 value
     )
         external
     {
@@ -74,16 +74,16 @@ contract ArbiterStorage is Ownable {
         address provider_address,
         address subscriber_address,
         bytes32 endpoint,
-        uint256 dots,
-        uint256 blockstart,
-        uint256 preblockend
+        uint64 dots,
+        uint96 blockStart,
+        uint96 preBlockEnd
     )
         external
     {
         subscriptions[provider_address][subscriber_address][endpoint] = Subscription(
             dots,
-            blockstart,
-            preblockend
+            blockStart,
+            preBlockEnd
         );
     }
 }
