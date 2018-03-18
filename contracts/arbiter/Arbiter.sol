@@ -1,13 +1,6 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-/* Test Case for truffle dev – 
-blocks = 100
-arbiter = Arbiter.at(Arbiter.address)
-arbStor = ArbiterStorage.at(ArbiterStorage.address)
-arbStor.transferOwnership(Arbiter.address)
-*/
-
 import "../aux/Mortal.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
@@ -174,7 +167,7 @@ contract Arbiter is Mortal {
             );
         }
         // Kill the subscription
-        stor.setDots(providerAddress, subscriberAddress, endpoint, 0);
+        stor.deleteSubscription(providerAddress, subscriberAddress, endpoint);
         return true;
-    }
+    }    
 }

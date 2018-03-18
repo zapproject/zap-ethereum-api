@@ -58,17 +58,6 @@ contract ArbiterStorage is Ownable {
     }
 
 	/**** Set Methods ****/
-    
-    function setDots(
-        address provider_address,
-        address subscriber_address,
-        bytes32 endpoint,
-        uint64 value
-    )
-        external
-    {
-        subscriptions[provider_address][subscriber_address][endpoint].dots = value;
-    }
 
     function setSubscription(
         address provider_address,
@@ -85,5 +74,17 @@ contract ArbiterStorage is Ownable {
             blockStart,
             preBlockEnd
         );
+    }
+
+    /**** Delete Methods ****/
+
+    function deleteSubscription(
+        address provider_address,
+        address subscriber_address,
+        bytes32 endpoint
+    )
+        external
+    {
+        delete subscriptions[provider_address][subscriber_address][endpoint];
     }
 }
