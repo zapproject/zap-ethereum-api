@@ -32,8 +32,12 @@ contract BondageStorage is Ownable {
 
     /**** Get Methods ****/
 
+    function isProviderInitialized(address holderAddress, address oracleAddress) public view returns (bool) {
+        return holders[holderAddress].initialized[oracleAddress];
+    }
+
     function getBondValue(address holderAddress, address oracleAddress, bytes32 specifier) external view returns (uint) {
-        return holders[holderAddress].bonds[specifier][oracleAddress];
+        return holders[holderAddress].bonds[oracleAddress][specifier];
     }
 
     function getNumEscrow(address holderAddress, address oracleAddress, bytes32 specifier) external view returns (uint) {
@@ -41,15 +45,15 @@ contract BondageStorage is Ownable {
     }
 
     function getNumTok(address oracleAddress, bytes32 endpoint) external view returns (uint) {
-        return totalBound[endpoint][oracleAddress];
+        return totalBound[oracleAddress][endpoint];
     }
 
     function getTotalDots(address oracleAddress, bytes32 specifier) external view returns (uint) {
-        return totalIssued[specifier][oracleAddress];
+        return totalIssued[oracleAddress][specifier];
     }
 
     function getBoundDots(address holderAddress, address oracleAddress, bytes32 specifier) external view returns (uint) {
-        return holders[holderAddress].bonds[specifier][oracleAddress];
+        return holders[holderAddress].bonds[oracleAddress][specifier];
     }
 
     function getIndexSize(address holderAddress) external view returns (uint) {
