@@ -470,7 +470,10 @@ contract('Bondage', function (accounts) {
         expect(parseInt(issuedDots.valueOf())).to.be.equal(5);
     });
 
-    it("BONDAGE_26 - currentCostOfDot() - Check current dot cost calculations", async function () {
+/*
+contract("CurrentCost").......
+
+    it("CurrentCost_1 - currentCostOfDot() - Check current dot cost calculations", async function () {
 
         //prepareProvider.call(this.test, true, true, accounts[5], curveLinear);
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: accounts[5] });
@@ -503,14 +506,15 @@ contract('Bondage', function (accounts) {
         expect(ethLogrRes).to.be.equal(logDotCost);
     });
 /* ONLY PASSES WHEN VISIBILITY OF fastlog2 IS PUBLIC
-    it("BONDAGE_27 - fastlog2() - Check log2 calculations", async function () {
+    it("CurrentCost_2 - fastlog2() - Check log2 calculations", async function () {
         async function checkLog(value) {
             let jsResult = Math.ceil(Math.log2(value));
             let res = await this.bondage.fastlog2.call(value, { from: owner });
             let ethResult = parseInt(res.valueOf());
             expect(jsResult).to.be.equal(ethResult);
         }
-        for (var i = 1; i <= 100; i++) checkLog.call(this.test, i);
+        for (var i = 0; i <= 100; i++) checkLog.call(this.test, i);
     });
 */
+
 });

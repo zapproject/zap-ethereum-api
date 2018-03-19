@@ -8,12 +8,14 @@ pragma solidity ^0.4.17;
 import "../aux/Mortal.sol";
 import "../aux/ERC20.sol";
 import "../registry/RegistryInterface.sol";
+import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 
 contract Bondage is Mortal {
 
     BondageStorage stor;
     RegistryInterface registry;
+    CurrentCostInterface currentCost;
     ERC20 token;
     uint256 public decimals = 10 ** 18;
 
@@ -26,13 +28,15 @@ contract Bondage is Mortal {
             _;
     }
 
-    /// @dev Initialize Token and Registry Contracts
-    function Bondage(address storageAddress, address registryAddress, address tokenAddress) public {
+    /// @dev Initialize Storage, Token, and Registry Contracts
+    function Bondage(address storageAddress, address registryAddress, address tokenAddress, address currentCostAddress) public {
         stor = BondageStorage(storageAddress);
         token = ERC20(tokenAddress); 
         setRegistryAddress(registryAddress);
+        setCurrentCostAddress(currentCostAddress);
     }
 
+    /// @dev Set Registry address
     /// @notice Reinitialize registry instance after upgrade
     function setRegistryAddress(address registryAddress) public onlyOwner {
         registry = RegistryInterface(registryAddress);
@@ -48,6 +52,11 @@ contract Bondage is Mortal {
     /// @notice This needs to be called upon deployment and after Dispatch upgrade
     function setDispatchAddress(address _dispatchAddress) public onlyOwner {
         dispatchAddress = _dispatchAddress;
+    }
+
+    /// @notice Upgrade currentCostOfDot function
+    function setCurrentCostAddress(address currentCostAddress) public onlyOwner {
+        currentCost = CurrentCostInterface(currentCostAddress);
     }
 
     /// @notice Will bond `numTok` to `registry.getProviderTitle(oracleAddress)`
@@ -84,7 +93,7 @@ contract Bondage is Mortal {
     }
 
     /// @dev Transfer N dots from fromAddress to destAddress. 
-    /// Called only by the DisptachContract or ArbiterContract.
+    /// Called only by Disptach or Arbiter Contracts
     /// In smart contract endpoint, occurs per satisfied request. 
     /// In socket endpoint called on termination of subscription.
     function releaseDots(
@@ -93,7 +102,7 @@ contract Bondage is Mortal {
         bytes32 specifier,
         uint256 numDots
     )
-        public 
+        external
         operatorOnly 
         returns (bool success)
     {
@@ -158,6 +167,9 @@ contract Bondage is Mortal {
         return (totalDotCost, numDots);
     }
 
+    /// @dev Get the current cost of a dot.
+    /// @param specifier endpoint
+    /// @param oracleAddress data-provider
     function currentCostOfDot(
         address oracleAddress,
         bytes32 specifier,
@@ -167,23 +179,7 @@ contract Bondage is Mortal {
         view
         returns (uint256 cost)
     {
-        RegistryInterface.CurveType curveType;
-        uint128 curveStart;
-        uint128 curveMultiplier;
-        (curveType, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
-
-        require(curveType != RegistryInterface.CurveType.None);
-
-        if (curveType == RegistryInterface.CurveType.Linear) {
-            cost = curveMultiplier * totalBound + curveStart;
-        } else if (curveType == RegistryInterface.CurveType.Exponential) {
-            cost = curveMultiplier * (totalBound ** 2) + curveStart;
-        } else if (curveType == RegistryInterface.CurveType.Logarithmic) {
-            if (totalBound == 0)
-                totalBound = 1;
-            cost = curveMultiplier * fastlog2(totalBound) + curveStart;
-        }
-        return cost;
+        return currentCost._currentCostOfDot(registry, oracleAddress, specifier, totalBound);
     }
 
     function getDotsIssued(
