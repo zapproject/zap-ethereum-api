@@ -61,13 +61,13 @@ contract Bondage is Mortal {
 
     /// @notice Will bond `numTok` to `registry.getProviderTitle(oracleAddress)`
     /// @return total TOK bound to oracle
-    function bond(address oracleAddress, bytes32 specifier, uint256 numTok) public returns (uint256) {
-        return _bond(msg.sender, oracleAddress, specifier, numTok);
+    function bond(address oracleAddress, bytes32 endpoint, uint256 numTok) public returns (uint256) {
+        return _bond(msg.sender, oracleAddress, endpoint, numTok);
     }
 
     /// @return total TOK unbound from oracle
-    function unbond(address oracleAddress, bytes32 specifier, uint256 numDots) public returns (uint256) {
-        return _unbond(msg.sender, oracleAddress, specifier, numDots);
+    function unbond(address oracleAddress, bytes32 endpoint, uint256 numDots) public returns (uint256) {
+        return _unbond(msg.sender, oracleAddress, endpoint, numDots);
     }
 
     /// @dev Move numDots dots from provider-requester to bondage according to 
@@ -75,18 +75,18 @@ contract Bondage is Mortal {
     function escrowDots(        
         address holderAddress,
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 numDots
     )
-        public
+        external
         operatorOnly        
         returns (bool success)
     {
 
-        uint256 currentDots = getDots(holderAddress, oracleAddress, specifier);
+        uint256 currentDots = getDots(holderAddress, oracleAddress, endpoint);
         if (currentDots >= numDots) {
-            stor.updateBondValue(holderAddress, oracleAddress, specifier, numDots, "sub");
-            stor.updateEscrow(holderAddress, oracleAddress, specifier, numDots, "add");
+            stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
+            stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
             return true;
         }
         return false;
@@ -99,26 +99,26 @@ contract Bondage is Mortal {
     function releaseDots(
         address holderAddress,
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 numDots
     )
         external
         operatorOnly 
         returns (bool success)
     {
-        if (numDots <= stor.getNumEscrow(holderAddress, oracleAddress, specifier)) {
-            stor.updateEscrow(holderAddress, oracleAddress, specifier, numDots, "sub");
-            stor.updateBondValue(holderAddress, oracleAddress, specifier, numDots, "add");
+        if (numDots <= stor.getNumEscrow(holderAddress, oracleAddress, endpoint)) {
+            stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
+            stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");
             return true;
         }
         return false;
     }
 
     /// @dev Calculate quantity of tokens required for specified amount of dots
-    /// for endpoint defined by specifier and data provider defined by oracleAddress
+    /// for endpoint defined by endpoint and data provider defined by oracleAddress
     function calcTokForDots(
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 numDots       
     ) 
         public
@@ -128,18 +128,18 @@ contract Bondage is Mortal {
         for (uint256 i = 0; i < numDots; i++) {
             numTok += currentCostOfDot(                
                 oracleAddress,
-                specifier,
-                getDotsIssued(oracleAddress, specifier) + i
+                endpoint,
+                getDotsIssued(oracleAddress, endpoint) + i
             );
         }
         return numTok;
     }
 
     /// @dev Calculate amount of dots which could be purchased with given (numTok) TOK tokens (max is 1000)
-    /// for endpoint specified by specifier and data-provider address specified by oracleAddress
+    /// for endpoint specified by endpoint and data-provider address specified by oracleAddress
     function calcTok(
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 numTok
     )
         public
@@ -153,8 +153,8 @@ contract Bondage is Mortal {
         for (numDots; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
-                specifier,
-                getDotsIssued(oracleAddress, specifier) + numDots
+                endpoint,
+                getDotsIssued(oracleAddress, endpoint) + numDots
             );
 
             if (numTok >= dotCost) {
@@ -168,41 +168,41 @@ contract Bondage is Mortal {
     }
 
     /// @dev Get the current cost of a dot.
-    /// @param specifier endpoint
+    /// @param endpoint specifier
     /// @param oracleAddress data-provider
     function currentCostOfDot(
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 totalBound
     )
         public
         view
         returns (uint256 cost)
     {
-        return currentCost._currentCostOfDot(registry, oracleAddress, specifier, totalBound);
+        return currentCost._currentCostOfDot(registry, oracleAddress, endpoint, totalBound);
     }
 
     function getDotsIssued(
         address oracleAddress,
-        bytes32 specifier        
+        bytes32 endpoint        
     )        
         public
         view
         returns (uint256 dots)
     {
-        return stor.getTotalDots(oracleAddress, specifier);
+        return stor.getTotalDots(oracleAddress, endpoint);
     }
 
     function getDots(        
         address holderAddress,
         address oracleAddress,
-        bytes32 specifier
+        bytes32 endpoint
     )
         public
         view        
         returns (uint256 dots)
     {
-        return stor.getBoundDots(holderAddress, oracleAddress, specifier);
+        return stor.getBoundDots(holderAddress, oracleAddress, endpoint);
     }
 
     /// @return total TOK held by contract
@@ -213,14 +213,14 @@ contract Bondage is Mortal {
     function _bond(
         address holderAddress,
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 numTok        
     )
         private
         returns (uint256 numDots) 
     {   
         // This also checks if oracle is registered w/an initialized curve
-        (numTok, numDots) = calcTok(oracleAddress, specifier, numTok);
+        (numTok, numDots) = calcTok(oracleAddress, endpoint, numTok);
 
         if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
             stor.setProviderInitialized(holderAddress, oracleAddress);
@@ -230,9 +230,9 @@ contract Bondage is Mortal {
         // User must have approved contract to transfer workingTOK
         require(token.transferFrom(msg.sender, this, numTok * decimals));
 
-        stor.updateBondValue(holderAddress, oracleAddress, specifier, numDots, "add");        
-        stor.updateTotalIssued(oracleAddress, specifier, numDots, "add");
-        stor.updateTotalBound(oracleAddress, specifier, numTok, "add");
+        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");        
+        stor.updateTotalIssued(oracleAddress, endpoint, numDots, "add");
+        stor.updateTotalBound(oracleAddress, endpoint, numTok, "add");
 
         return numDots;
     }
@@ -240,14 +240,14 @@ contract Bondage is Mortal {
     function _unbond(        
         address holderAddress,
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 numDots
     )
         private
         returns (uint256 numTok)
     {
         //currentDots
-        uint256 bondValue = stor.getBondValue(holderAddress, oracleAddress, specifier);
+        uint256 bondValue = stor.getBondValue(holderAddress, oracleAddress, endpoint);
         if (bondValue >= numDots && numDots > 0) {
             uint256 subTotal;
 
@@ -255,13 +255,13 @@ contract Bondage is Mortal {
 
                 numTok += currentCostOfDot(
                     oracleAddress,
-                    specifier,
-                    getDotsIssued(oracleAddress, specifier) - 1
+                    endpoint,
+                    getDotsIssued(oracleAddress, endpoint) - 1
                 );     
             }       
-            stor.updateTotalBound(oracleAddress, specifier, numTok, "sub");
-            stor.updateTotalIssued(oracleAddress, specifier, numDots, "sub");
-            stor.updateBondValue(holderAddress, oracleAddress, specifier, subTotal, "sub");
+            stor.updateTotalBound(oracleAddress, endpoint, numTok, "sub");
+            stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
+            stor.updateBondValue(holderAddress, oracleAddress, endpoint, subTotal, "sub");
 
             if(token.transfer(holderAddress, numTok * decimals))
                 return numTok;

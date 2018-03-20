@@ -40,20 +40,20 @@ contract RegistryStorage is Ownable {
         return oracles[provider].title;
     }
 
-    function getEndpointIndexSize(address provider, bytes32 specifier) external view returns (uint256) {
-        return oracles[provider].endpoint_params[specifier].length;
+    function getEndpointIndexSize(address provider, bytes32 endpoint) external view returns (uint256) {
+        return oracles[provider].endpoint_params[endpoint].length;
     }    
 
-    function getEndPointParam(address provider, bytes32 specifier, uint256 index) external view returns (bytes32) {
-        return oracles[provider].endpoint_params[specifier][index];
+    function getEndPointParam(address provider, bytes32 endpoint, uint256 index) external view returns (bytes32) {
+        return oracles[provider].endpoint_params[endpoint][index];
     }
 
-    function getCurve(address provider, bytes32 specifier)
+    function getCurve(address provider, bytes32 endpoint)
         external
         view
         returns (CurveType Type, uint128 Start, uint128 Multiplier)
     {
-        Curve memory curve = oracles[provider].curves[specifier];
+        Curve memory curve = oracles[provider].curves[endpoint];
 
         return (curve.Type, curve.Start, curve.Multiplier);
     }
@@ -78,19 +78,19 @@ contract RegistryStorage is Ownable {
 
     function setEndpointParameters(
         address origin,
-        bytes32 specifier,
+        bytes32 endpoint,
         bytes32[] endpoint_params
     )
         external
         onlyOwner
 
     {
-        oracles[origin].endpoint_params[specifier] = endpoint_params;
+        oracles[origin].endpoint_params[endpoint] = endpoint_params;
     }
 
     function setCurve(
         address origin,
-        bytes32 specifier,
+        bytes32 endpoint,
         CurveType curveType,
         uint128 curveStart,
         uint128 curveMultiplier
@@ -99,8 +99,6 @@ contract RegistryStorage is Ownable {
         onlyOwner
 
     {
-        oracles[origin].curves[specifier].Type = curveType;
-        oracles[origin].curves[specifier].Start = curveStart;
-        oracles[origin].curves[specifier].Multiplier = curveMultiplier;
+        oracles[origin].curves[endpoint] = Curve(curveType, curveStart, curveMultiplier);
     }
 }

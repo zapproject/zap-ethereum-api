@@ -16,12 +16,12 @@ contract Registry is Mortal {
     /// If no address->Oracle mapping exists, Oracle object is created
     /// @param public_key unique id for provider. used for encyrpted key swap for subscription endpoints
     /// @param title name
-    /// @param endpoint_specifier end
+    /// @param endpoint specifier 
     /// @param endpoint_params endpoint specific params
     function initiateProvider(
         uint256 public_key,
         bytes32 title, 
-        bytes32 endpoint_specifier,
+        bytes32 endpoint,
         bytes32[] endpoint_params
     )
         public
@@ -29,8 +29,8 @@ contract Registry is Mortal {
     {
         if(getProviderPublicKey(msg.sender) == 0) {
             stor.createOracle(msg.sender, public_key, title);
-            if(endpoint_specifier != 0)
-                setEndpointParams(endpoint_specifier, endpoint_params);
+            if(endpoint != 0)
+                setEndpointParams(endpoint, endpoint_params);
 
             stor.addOracle(msg.sender);
             return true;
@@ -41,13 +41,13 @@ contract Registry is Mortal {
     }
 
     /// @dev Initiates an endpoint specific provider curve
-    /// If oracle[specfifier] is uninitialized, Curve is mapped to specifier
-    /// @param specifier specifier of endpoint. currently "smart_contract" or "socket_subscription"
+    /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
+    /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
     /// @param curveType dot-cost vs oracle-specific dot-supply
     /// @param curveStart y-offset of cost( always initial cost )
     /// @param curveMultiplier coefficient to curveType
     function initiateProviderCurve(
-        bytes32 specifier,
+        bytes32 endpoint,
         RegistryStorage.CurveType curveType,
         uint128 curveStart,
         uint128 curveMultiplier
@@ -62,14 +62,14 @@ contract Registry is Mortal {
 
         // Can't reset their curve
         RegistryStorage.CurveType cType;
-        (cType,) = stor.getCurve(msg.sender, specifier);
+        (cType,) = stor.getCurve(msg.sender, endpoint);
         require(cType == RegistryStorage.CurveType.None);
 
-        stor.setCurve(msg.sender, specifier, curveType, curveStart, curveMultiplier);
+        stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
     }
 
-    function setEndpointParams(bytes32 specifier, bytes32[] endpoint_params) public {
-        stor.setEndpointParameters(msg.sender, specifier, endpoint_params);
+    function setEndpointParams(bytes32 endpoint, bytes32[] endpoint_params) public {
+        stor.setEndpointParameters(msg.sender, endpoint, endpoint_params);
     }
 
     /// @return public key
@@ -83,14 +83,14 @@ contract Registry is Mortal {
     }
 
     /// @return endpoint-specific parameter
-    function getNextEndpointParam(address provider, bytes32 specifier, uint256 index)
+    function getNextEndpointParam(address provider, bytes32 endpoint, uint256 index)
         public
         view
         returns (uint256 nextIndex, bytes32 endpoint_param)
     {
-        uint256 len = stor.getEndpointIndexSize(provider, specifier);
+        uint256 len = stor.getEndpointIndexSize(provider, endpoint);
         if (index < len) {
-            endpoint_param = stor.getEndPointParam(provider, specifier, index);
+            endpoint_param = stor.getEndPointParam(provider, endpoint, index);
             if (index + 1 < len) return (index + 1, endpoint_param);
             return (0, endpoint_param);
         }
@@ -100,7 +100,7 @@ contract Registry is Mortal {
     /// @dev Get curve paramaters from oracle
     function getProviderCurve(
         address provider,
-        bytes32 specifier
+        bytes32 endpoint
     )        
         public
         view
@@ -110,7 +110,7 @@ contract Registry is Mortal {
             uint128 curveMultiplier
         )
     {
-        return stor.getCurve(provider, specifier);
+        return stor.getCurve(provider, endpoint);
     }
 
     function getNextProvider(uint256 index)

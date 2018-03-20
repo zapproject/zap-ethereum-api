@@ -25,7 +25,7 @@ contract BondageStorage is Ownable {
     //holder => (oracle_address => (endpoint => numEscrow)))
     mapping(address => mapping(address => mapping(bytes32 => uint256))) private pendingEscrow;
 
-    //oracleAddress=>(=>numTOK)
+    //oracleAddress=>(=>numTok)
     mapping(address => mapping(bytes32 => uint)) private totalBound;
 
     //oracleAddress=>(endpoint=>numDots)
