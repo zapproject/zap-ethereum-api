@@ -10,9 +10,9 @@ contract Dispatch is Mortal {
 
     //event data provider is listening for, containing all relevant request parameters
     event LogIncoming(
-        uint256 id,
-        address provider,
-        address recipient,
+        uint256 indexed id,
+        address indexed provider,
+        address indexed recipient,
         string query,
         bytes32 endpoint,
         bytes32[] endpoint_params
@@ -35,7 +35,6 @@ contract Dispatch is Mortal {
     /// @dev Called by user contract
     function query(
         address provider,           // data provider address
-        address subscriber,         // user contract address(dot-holder)
         string query,               // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
         bytes32[] endpoint_params   // endpoint-specific params
@@ -43,13 +42,13 @@ contract Dispatch is Mortal {
         external
         returns (uint256 id)
     {
-        uint256 dots = bondage.getDots(subscriber, provider, endpoint);
+        uint256 dots = bondage.getDots(msg.sender, provider, endpoint);
 
-        if(dots >= 1){
+        if(dots >= 1) {
             //enough dots
-            bondage.escrowDots(subscriber, provider, endpoint, 1);
+            bondage.escrowDots(msg.sender, provider, endpoint, 1);
             id = uint256(keccak256(block.number, now, query, msg.sender));
-            stor.createQuery(id, provider, subscriber, endpoint);
+            stor.createQuery(id, provider, msg.sender, endpoint);
             LogIncoming(id, provider, msg.sender, query, endpoint, endpoint_params);
         }
     }

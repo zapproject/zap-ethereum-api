@@ -21,9 +21,9 @@ contract Arbiter is Mortal {
 
     // Called when a data subscription is ended by either provider or terminator
     event LogDataSubscriptionEnd(
-        address provider,                      // Provider from the subscription
-        address subscriber,                    // Subscriber from the subscription
-        SubscriptionTerminator terminator      // Which terminated the contract
+        address indexed provider,                      // Provider from the subscription
+        address indexed subscriber,                    // Subscriber from the subscription
+        SubscriptionTerminator indexed terminator      // Which terminated the contract
     ); 
     
     ArbiterStorage stor;
