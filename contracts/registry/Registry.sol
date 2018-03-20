@@ -6,6 +6,12 @@ import "./RegistryStorage.sol";
 
 contract Registry is Mortal {  
 
+    event LogNewProvider(
+        address indexed provider,
+        uint256 indexed public_key,
+        bytes32 indexed title
+    );
+
     RegistryStorage stor;
 
     function Registry(address storageAddress) public {
@@ -25,7 +31,7 @@ contract Registry is Mortal {
         bytes32[] endpoint_params
     )
         public
-        returns (bool success)
+        returns (bool)
     {
         if(getProviderPublicKey(msg.sender) == 0) {
             stor.createOracle(msg.sender, public_key, title);
@@ -33,11 +39,10 @@ contract Registry is Mortal {
                 setEndpointParams(endpoint, endpoint_params);
 
             stor.addOracle(msg.sender);
+            LogNewProvider(msg.sender, public_key, title);
             return true;
         }
-        else {
-            return false;            
-        }
+        return false;
     }
 
     /// @dev Initiates an endpoint specific provider curve
@@ -53,19 +58,19 @@ contract Registry is Mortal {
         uint128 curveMultiplier
     )
         public
+        returns (bool)
     {
-        // Must have previously initiated themselves
-        require(stor.getPublicKey(msg.sender) != 0);
-
-        // Can't use None
-        require(curveType != RegistryStorage.CurveType.None);
-
-        // Can't reset their curve
         RegistryStorage.CurveType cType;
         (cType,) = stor.getCurve(msg.sender, endpoint);
-        require(cType == RegistryStorage.CurveType.None);
 
-        stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
+        if (stor.getPublicKey(msg.sender) != 0                   // Provider must be initiated
+            && curveType != RegistryStorage.CurveType.None       // Can't use None
+            && cType == RegistryStorage.CurveType.None           // Can't reset their curve
+        ) {
+            stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
+            return true;
+        }
+        return false;
     }
 
     function setEndpointParams(bytes32 endpoint, bytes32[] endpoint_params) public {
