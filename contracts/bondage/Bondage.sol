@@ -72,6 +72,7 @@ contract Bondage is Mortal {
 
     /// @dev Move numDots dots from provider-requester to bondage according to 
     /// data-provider address, holder address, and endpoint specifier (ala 'smart_contract')
+    /// Called only by Disptach or Arbiter Contracts
     function escrowDots(        
         address holderAddress,
         address oracleAddress,
@@ -82,7 +83,6 @@ contract Bondage is Mortal {
         operatorOnly        
         returns (bool success)
     {
-
         uint256 currentDots = getDots(holderAddress, oracleAddress, endpoint);
         if (currentDots >= numDots) {
             stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");

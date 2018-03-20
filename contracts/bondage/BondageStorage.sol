@@ -26,37 +26,37 @@ contract BondageStorage is Ownable {
     mapping(address => mapping(address => mapping(bytes32 => uint256))) private pendingEscrow;
 
     //oracleAddress=>(=>numTok)
-    mapping(address => mapping(bytes32 => uint)) private totalBound;
+    mapping(address => mapping(bytes32 => uint256)) private totalBound;
 
     //oracleAddress=>(endpoint=>numDots)
-    mapping(address => mapping(bytes32 => uint)) private totalIssued;
+    mapping(address => mapping(bytes32 => uint256)) private totalIssued;
 
     /**** Get Methods ****/
     function isProviderInitialized(address holder_address, address oracle_address) external view returns (bool) {
         return holders[holder_address].initialized[oracle_address];
     }
 
-    function getBondValue(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint) {
+    function getBondValue(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint256) {
         return holders[holder_address].bonds[endpoint][oracle_address];
     }
 
-    function getNumEscrow(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint) {
+    function getNumEscrow(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint256) {
         return pendingEscrow[holder_address][oracle_address][endpoint];
     }
 
-    function getNumTok(address oracle_address, bytes32 endpoint) external view returns (uint) {
+    function getNumTok(address oracle_address, bytes32 endpoint) external view returns (uint256) {
         return totalBound[oracle_address][endpoint];
     }
 
-    function getTotalDots(address oracle_address, bytes32 endpoint) external view returns (uint) {
+    function getTotalDots(address oracle_address, bytes32 endpoint) external view returns (uint256) {
         return totalIssued[oracle_address][endpoint];
     }
 
-    function getBoundDots(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint) {
+    function getBoundDots(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint256) {
         return holders[holder_address].bonds[endpoint][oracle_address];
     }
 
-    function getIndexSize(address holder_address) external view returns (uint) {
+    function getIndexSize(address holder_address) external view returns (uint256) {
         return holders[holder_address].oracleList.length;
     }
 
