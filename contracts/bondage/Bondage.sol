@@ -119,7 +119,7 @@ contract Bondage is Mortal {
     function calcTokForDots(
         address oracleAddress,
         bytes32 specifier,
-        uint numDots       
+        uint256 numDots       
     ) 
         public
         view

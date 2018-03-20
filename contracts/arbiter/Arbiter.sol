@@ -13,7 +13,7 @@ contract Arbiter is Mortal {
         uint256 public_key,        // Public key of the subscriber
         uint256 amount,            // Amount (in 1/100 TOK) of ethereum sent
         bytes32[] endpoint_params, // Endpoint specific(nonce,encrypted_uuid),
-        bytes32 endpoint
+        bytes32 endpoint           // Endpoint specifier
     );
 
     // Used to specify who is the terminator of a contract
@@ -41,8 +41,8 @@ contract Arbiter is Mortal {
 
     function initiateSubscription(
         address providerAddress,   // Provider address
-        bytes32[] endpoint_params, // Endpoint specific params
         bytes32 endpoint,          // Endpoint specifier
+        bytes32[] endpoint_params, // Endpoint specific params
         uint256 public_key,        // Public key of the purchaser
         uint64 blocks              // Number of blocks subscribed, 1block=1dot
     ) 

@@ -28,14 +28,14 @@ contract Dispatch is Mortal {
 
     /// @notice Reinitialize bondage instance after upgrade
     function setBondageAddress(address bondageAddress) public onlyOwner {
-            bondage = BondageInterface(bondageAddress);
+        bondage = BondageInterface(bondageAddress);
     }
 
     /// @notice Escrow dot for oracle request
     /// @dev Called by user contract
     function query(
         address provider,           // data provider address
-        address subscriber,         // user contract address( dot-holder)
+        address subscriber,         // user contract address(dot-holder)
         string query,               // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
         bytes32[] endpoint_params   // endpoint-specific params
@@ -43,7 +43,6 @@ contract Dispatch is Mortal {
         external
         returns (uint256 id)
     {
-
         uint256 dots = bondage.getDots(subscriber, provider, endpoint);
 
         if(dots >= 1){
@@ -53,15 +52,13 @@ contract Dispatch is Mortal {
             stor.createQuery(id, provider, subscriber, endpoint);
             LogIncoming(id, provider, msg.sender, query, endpoint, endpoint_params);
         }
-
     }
 
     /// @notice Transfer dots from Bondage escrow to data provider's Holder object under its own address
     /// @dev Called upon data-provider request fulfillment
     function fulfillQuery(uint256 id) internal returns (bool) {
 
-        if (stor.getStatus(id) != DispatchStorage.Status.Pending)
-            revert();
+        require(stor.getStatus(id) == DispatchStorage.Status.Pending);
 
         bondage.releaseDots(
             stor.getSubscriber(id),
@@ -147,4 +144,4 @@ contract Dispatch is Mortal {
 /* with data provider address set as self's address.
 /* 
 /* callback is called in User Contract 
-/* */
+/*/

@@ -9,7 +9,7 @@ import "../aux/Mortal.sol";
 
 contract RegistryStorage is Ownable {
 
-	// curve types representing dot(access token) prices as function of supply
+    // curve types representing dot(access token) prices as function of supply
     enum CurveType { None, Linear, Exponential, Logarithmic }
 
     // curve data structure representing dot(access token) prices as function of supply
@@ -66,11 +66,11 @@ contract RegistryStorage is Ownable {
         return oracleIndex[index];
     }
 
-	/**** Set Methods ****/
+    /**** Set Methods ****/
 
-	function createOracle(address origin, uint256 public_key, bytes32 title) external onlyOwner {
+    function createOracle(address origin, uint256 public_key, bytes32 title) external onlyOwner {
         oracles[origin] = Oracle(public_key, title);
-	}
+    }
 
     function addOracle(address origin) external onlyOwner {
         oracleIndex.push(origin);
@@ -88,7 +88,7 @@ contract RegistryStorage is Ownable {
         oracles[origin].endpoint_params[specifier] = endpoint_params;
     }
 
-	function setCurve(
+    function setCurve(
         address origin,
         bytes32 specifier,
         CurveType curveType,
@@ -99,6 +99,8 @@ contract RegistryStorage is Ownable {
         onlyOwner
 
     {
-        oracles[origin].curves[specifier] = Curve(curveType, curveStart, curveMultiplier);		
-	}
+        oracles[origin].curves[specifier].Type = curveType;
+        oracles[origin].curves[specifier].Start = curveStart;
+        oracles[origin].curves[specifier].Multiplier = curveMultiplier;
+    }
 }

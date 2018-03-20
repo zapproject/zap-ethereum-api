@@ -1,14 +1,6 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-// getProviderRouteKeys and setEndpointParams FAILING, HAVE TO REWRITE TEST CASES (work in truffle console)
-
-// FINISH NatSpec DOCS FOR ALL CONTRACTS
-//////https://github.com/ethereum/wiki/wiki/NatSpec-Determination
-///Consider using @notice tag to utilize dynamic expressions
-///https://github.com/ethereum/wiki/wiki/Ethereum-Natural-Specification-Format#dynamic-expressions
-///https://ethereum.gitbooks.io/frontier-guide/content/natspec.html
-
 import "./../aux/Mortal.sol";
 import "./RegistryStorage.sol";
 
