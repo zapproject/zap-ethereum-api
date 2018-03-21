@@ -21,30 +21,30 @@ exports.fetchPureArray = function (res, parseFunc) {
     return arr;
 }
 
-exports.calculateZapWithLinearCurve = function (dotsRequired, startValue, multiplier) {
-    let zap = 0;
+exports.calculateTokWithLinearCurve = function (dotsRequired, startValue, multiplier) {
+    let tok = 0;
     for (let i = 0; i < dotsRequired; i++) {
-        zap += multiplier * i + startValue
+        tok += multiplier * i + startValue
     }
-    return zap;
+    return tok;
 }
 
-exports.calculateZapWithExponentialCurve = function (dotsRequired, startValue, multiplier) {
-    let zap = 0;
+exports.calculateTokWithExponentialCurve = function (dotsRequired, startValue, multiplier) {
+    let tok = 0;
     for (let i = 0; i < dotsRequired; i++) {
-        zap += multiplier * Math.pow(i, 2) + startValue;
+        tok += multiplier * Math.pow(i, 2) + startValue;
     }
-    return zap;
+    return tok;
 }
 
-exports.calculateZapWithLogarithmicCurve = function (dotsRequired, startValue, multiplier) {
-    let zap = 0;
+exports.calculateTokWithLogarithmicCurve = function (dotsRequired, startValue, multiplier) {
+    let tok = 0;
     for (let i = 0; i < dotsRequired; i++) {
         let totalBound = i;
         if (totalBound == 0) {
             totalBound = 1;
         }
-        zap += multiplier * Math.log2(totalBound) + startValue;
+        tok += multiplier * Math.log2(totalBound) + startValue;
     }
-    return Math.ceil(zap);
+    return Math.ceil(tok);
 }
