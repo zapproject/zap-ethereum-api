@@ -5,7 +5,7 @@ const expect = require('chai')
     .use(require('chai-bignumber')(BigNumber))
     .expect;
 
-import EVMRevert from './helpers/EVMRevert';
+// import EVMRevert from './helpers/EVMRevert';
 
 
 const ZapFaucet = artifacts.require("ZapFaucet");
