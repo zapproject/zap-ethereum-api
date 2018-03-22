@@ -8,14 +8,14 @@ contract Registry is Mortal {
 
     event LogNewProvider(
         address indexed provider,
-        uint256 indexed publicKey,
-        bytes32 indexed title
+        bytes32 indexed title,
+        bytes32 indexed endpoint
     );
 
     event LogNewCurve(
         address indexed provider,
         bytes32 indexed endpoint,
-        RegistryStorage.CurveType curveType,
+        RegistryStorage.CurveType indexed curveType,
         uint128 curveStart,
         uint128 curveMultiplier
     );
@@ -47,7 +47,7 @@ contract Registry is Mortal {
                 setEndpointParams(endpoint, endpointParams);
 
             stor.addOracle(msg.sender);
-            LogNewProvider(msg.sender, publicKey, title);
+            LogNewProvider(msg.sender, title, endpoint);
             return true;
         }
         return false;
