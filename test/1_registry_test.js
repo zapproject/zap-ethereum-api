@@ -1,4 +1,4 @@
-//import EVMRevert from './helpers/EVMRevert';
+import EVMRevert from './helpers/EVMRevert';
 
 const BigNumber = web3.BigNumber;
 
@@ -17,7 +17,7 @@ function hex2a(hexx) {
     var str = '';
     for (var i = 2; i < hex.length; i += 2) {
         let hexValue = hex.substr(i, 2);
-        if (hexValue != "00")
+        if (hexValue != "00" && hexValue != "0x")
             str += String.fromCharCode(parseInt(hexValue, 16));
     }
     return str;
@@ -62,8 +62,8 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner });
     });
 /*
-    it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
-        expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+    it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {   
+        await expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if curve type is none", async function () {
@@ -72,15 +72,16 @@ contract('Registry', async (accounts) => {
         expect(this.test.registry.initiateProviderCurve(specifier, curveNone, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 */
-    it("REGISTRY_6 - getProviderRouteKeys() - Check that we can get provider route keys", async function () {
+    it("REGISTRY_6 - getNextEndpointParam() - Check that we can get provider route keys", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
-        const receivedRouteKeys = await this.test.registry.getProviderRouteKeys.call(owner, specifier);
-        expect(Utils.fetchPureArray(receivedRouteKeys, hex2a)).to.have.deep.members(params);
+        const receivedParam1 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);
+        const receivedParam2 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 1);
+        expect(Utils.fetchPureArray([receivedParam1.valueOf(), receivedParam2.valueOf()], hex2a)).to.have.deep.members(params);
     });
 
-    it("REGISTRY_7 - getProviderRouteKeys() - Check that route keys of uninitialized provider are empty", async function () {        
-        const res = await this.test.registry.getProviderRouteKeys.call(owner, specifier);
+    it("REGISTRY_7 - getNextEndpointParam() - Check that route keys of uninitialized provider are empty", async function () {        
+        const res = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);
         
         // can not use chai, because it can not compare empty arrays
         assert(res, []);
@@ -143,9 +144,14 @@ contract('Registry', async (accounts) => {
 
         await this.test.registry.setEndpointParams(specifier, newParams, { from: owner });
 
-        const res = await this.test.registry.getProviderRouteKeys.call(owner, specifier);
+        const p1 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);
+        const p2 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 1);
+        const p3 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 2);
+        const p4 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 3);
+        const p5 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 4);
+        const p6 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 5);
 
-        expect(Utils.fetchPureArray(res, hex2a)).to.have.deep.members(newParams);
+        expect(Utils.fetchPureArray([p1.valueOf(), p2.valueOf(), p3.valueOf(), p4.valueOf(), p5.valueOf(), p6.valueOf()], hex2a)).to.have.deep.members(newParams);
     });
 
     it("REGISTRY_15 - getNextProvider() - Check that we can iterate through providers", async function () {
