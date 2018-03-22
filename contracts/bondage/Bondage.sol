@@ -17,7 +17,7 @@ contract Bondage is Mortal {
     RegistryInterface registry;
     CurrentCostInterface currentCost;
     ERC20 token;
-    uint256 public decimals = 10 ** 18;
+    uint256 decimals = 10 ** 18;
 
     address arbiterAddress;
     address dispatchAddress;
@@ -108,7 +108,7 @@ contract Bondage is Mortal {
     {
         if (numDots <= stor.getNumEscrow(holderAddress, oracleAddress, endpoint)) {
             stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
-            stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");
+            stor.updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
             return true;
         }
         return false;
@@ -121,7 +121,7 @@ contract Bondage is Mortal {
         bytes32 endpoint,
         uint256 numDots       
     ) 
-        public
+        external
         view
         returns (uint256 numTok)
     {
@@ -249,16 +249,20 @@ contract Bondage is Mortal {
         //currentDots
         uint256 bondValue = stor.getBondValue(holderAddress, oracleAddress, endpoint);
         if (bondValue >= numDots && numDots > 0) {
-            uint256 subTotal;
+
+            uint256 subTotal = 1;
+            uint256 dotsIssued;
 
             for (subTotal; subTotal < numDots; subTotal++) {
+
+                dotsIssued = getDotsIssued(oracleAddress, endpoint) - subTotal;
 
                 numTok += currentCostOfDot(
                     oracleAddress,
                     endpoint,
-                    getDotsIssued(oracleAddress, endpoint) - 1
-                );     
-            }       
+                    dotsIssued
+                ); 
+            }    
             stor.updateTotalBound(oracleAddress, endpoint, numTok, "sub");
             stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
             stor.updateBondValue(holderAddress, oracleAddress, endpoint, subTotal, "sub");
