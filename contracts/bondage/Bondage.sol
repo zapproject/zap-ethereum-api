@@ -13,14 +13,16 @@ import "./BondageStorage.sol";
 
 contract Bondage is Mortal {
 
-    BondageStorage stor;
-    RegistryInterface registry;
-    CurrentCostInterface currentCost;
-    ERC20 token;
+    BondageStorage private stor;
+    RegistryInterface private registry;
+    CurrentCostInterface private currentCost;
+    ERC20 private token;
     uint256 decimals = 10 ** 18;
 
-    address arbiterAddress;
-    address dispatchAddress;
+    address private storageAddress;
+    address private registryAddress;
+    address private arbiterAddress;
+    address private dispatchAddress;
 
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
     modifier operatorOnly {
@@ -29,18 +31,18 @@ contract Bondage is Mortal {
     }
 
     /// @dev Initialize Storage, Token, and Registry Contracts
-    function Bondage(address storageAddress, address registryAddress, address tokenAddress, address currentCostAddress) public {
+    function Bondage(address _storageAddress, address _registryAddress, address tokenAddress, address currentCostAddress) public {
+        storageAddress = _storageAddress;
         stor = BondageStorage(storageAddress);
         token = ERC20(tokenAddress); 
-        setRegistryAddress(registryAddress);
+        setRegistryAddress(_registryAddress);
         setCurrentCostAddress(currentCostAddress);
     }
-
-    /// @dev Set Registry address
-    /// @notice Reinitialize registry instance after upgrade
-    function setRegistryAddress(address registryAddress) public onlyOwner {
-        registry = RegistryInterface(registryAddress);
-    }
+    
+    function getStorageAddress() public view returns (address) { return storageAddress; }
+    function getRegistryAddress() public view returns (address) { return registryAddress; }
+    function getArbiterAddress() public view returns (address) { return arbiterAddress; }
+    function getDispatchAddress() public view returns (address) { return dispatchAddress; }
 
     /// @dev Set Arbiter address
     /// @notice This needs to be called upon deployment and after Arbiter upgrade
@@ -54,6 +56,14 @@ contract Bondage is Mortal {
         dispatchAddress = _dispatchAddress;
     }
 
+    /// @dev Set Registry address
+    /// @notice Reinitialize registry instance after upgrade
+    function setRegistryAddress(address _registryAddress) public onlyOwner {
+        registryAddress = _registryAddress;
+        registry = RegistryInterface(registryAddress);
+    }
+
+    /// @dev Set CurrentCost address
     /// @notice Upgrade currentCostOfDot function
     function setCurrentCostAddress(address currentCostAddress) public onlyOwner {
         currentCost = CurrentCostInterface(currentCostAddress);

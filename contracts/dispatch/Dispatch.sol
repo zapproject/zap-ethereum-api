@@ -18,16 +18,24 @@ contract Dispatch is Mortal {
         bytes32[] endpointParams
     );
     
-    DispatchStorage stor;
-    BondageInterface bondage;
+    DispatchStorage private stor;
+    BondageInterface private bondage;
 
-    function Dispatch(address storageAddress, address bondageAddress) public {
+    address private storageAddress;
+    address private bondageAddress;
+
+    function Dispatch(address _storageAddress, address _bondageAddress) public {
+        storageAddress = _storageAddress;
         stor = DispatchStorage(storageAddress);
-        setBondageAddress(bondageAddress);
+        setBondageAddress(_bondageAddress);
     }
 
+    function getStorageAddress() public view returns (address) { return storageAddress; }
+    function getBondageAddress() public view returns (address) { return bondageAddress; }
+
     /// @notice Reinitialize bondage instance after upgrade
-    function setBondageAddress(address bondageAddress) public onlyOwner {
+    function setBondageAddress(address _bondageAddress) public onlyOwner {
+        bondageAddress = _bondageAddress;
         bondage = BondageInterface(bondageAddress);
     }
 

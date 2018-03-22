@@ -16,26 +16,34 @@ contract Arbiter is Mortal {
         bytes32 endpoint                   // Endpoint specifier
     );
 
-    // Used to specify who is the terminator of a contract
-    enum SubscriptionTerminator { Provider, Subscriber }
-
     // Called when a data subscription is ended by either provider or terminator
     event LogDataSubscriptionEnd(
         address indexed provider,                      // Provider from the subscription
         address indexed subscriber,                    // Subscriber from the subscription
         SubscriptionTerminator indexed terminator      // Which terminated the contract
     ); 
-    
-    ArbiterStorage stor;
-    BondageInterface bondage;
 
-    function Arbiter(address storageAddress, address bondageAddress) public {
+    // Used to specify who is the terminator of a contract
+    enum SubscriptionTerminator { Provider, Subscriber }
+    
+    ArbiterStorage private stor;
+    BondageInterface private bondage;
+
+    address private storageAddress;
+    address private bondageAddress;
+
+    function Arbiter(address _storageAddress, address _bondageAddress) public {
+        storageAddress = _storageAddress;
         stor = ArbiterStorage(storageAddress);
-        setBondageAddress(bondageAddress);
+        setBondageAddress(_bondageAddress);
     }
 
+    function getStorageAddress() public view returns (address) { return storageAddress; }
+    function getBondageAddress() public view returns (address) { return bondageAddress; }
+
     /// @notice Reinitialize bondage instance after upgrade
-    function setBondageAddress(address bondageAddress) public onlyOwner {
+    function setBondageAddress(address _bondageAddress) public onlyOwner {
+        bondageAddress = _bondageAddress;
         bondage = BondageInterface(bondageAddress);
     }
 
