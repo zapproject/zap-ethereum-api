@@ -13,6 +13,11 @@ contract Registry is Mortal {
     );
 
     event LogNewCurve(
+        address indexed provider,
+        bytes32 indexed endpoint,
+        RegistryStorage.CurveType curveType,
+        uint128 curveStart,
+        uint128 curveMultiplier
     );
 
     RegistryStorage stor;
@@ -71,6 +76,13 @@ contract Registry is Mortal {
             && cType == RegistryStorage.CurveType.None           // Can't reset their curve
         ) {
             stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
+            LogNewCurve(
+        msg.sender,
+        endpoint,
+        curveType,
+        curveStart,
+        curveMultiplier
+    );
             return true;
         }
         return false;
