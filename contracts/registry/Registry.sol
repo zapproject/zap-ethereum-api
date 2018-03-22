@@ -12,6 +12,9 @@ contract Registry is Mortal {
         bytes32 indexed title
     );
 
+    event LogNewCurve(
+    );
+
     RegistryStorage stor;
 
     function Registry(address storageAddress) public {
