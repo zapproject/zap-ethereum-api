@@ -146,11 +146,11 @@ contract('Bondage', function (accounts) {
         await expect(this.test.bondage.calcTokForDots.call(oracle, specifier, 5)).to.eventually.be.rejectedWith(EVMRevert);
     });
 /*
-    it("BONDAGE_7 - calcTok() - Check calcTok function", async function () {
+    it("BONDAGE_7 - calcBondRate()) - Check calcBondRate function", async function () {
 
         prepareProvider.call(this.test);
         
-        const res1 = await this.test.bondage.calcTok.call(oracle, specifier, 26);
+        const res1 = await this.test.bondage.calcBondRate.call(oracle, specifier, 26);
         const ethTok = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
 
@@ -158,19 +158,19 @@ contract('Bondage', function (accounts) {
         expect(ethTok).to.be.equal(25);
     });
 */
-    it("BONDAGE_8 - calcTok() - Check calcTok function throw error if curve not initialized", async function () {
+    it("BONDAGE_8 - calcBondRate()) - Check calcBondRate function throw error if curve not initialized", async function () {
 
         //prepareProvider.call(this.test, true, false);
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
 
-        await expect(this.test.bondage.calcTok.call(oracle, specifier, 26)).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.bondage.calcBondRate.call(oracle, specifier, 26)).to.eventually.be.rejectedWith(EVMRevert);
     });
 /*
-    it("BONDAGE_9 - calcTok() - Check calcTok function return 0 dots if numTok is 0", async function () {
+    it("BONDAGE_9 - calcBondRate()) - Check calcBondRate function return 0 dots if numTok is 0", async function () {
 
         prepareProvider.call(this.test);
 
-        const res1 = await this.test.bondage.calcTok.call(oracle, specifier, 0);
+        const res1 = await this.test.bondage.calcBondRate.call(oracle, specifier, 0);
         const ethTok = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
 
@@ -178,14 +178,14 @@ contract('Bondage', function (accounts) {
         expect(ethTok).to.be.equal(0);
     });
 
-    it("BONDAGE_10 - calcTok() - Check calcTok function return maximum dots and maximum tok if numTok is more than 1000", async function () {
+    it("BONDAGE_10 - calcBondRate()) - Check calcBondRate function return maximum dots and maximum tok if numTok is more than 1000", async function () {
 
         prepareProvider.call(this.test);
 
         const jsLinearTok = Utils.calculateTokWithLinearCurve(1001, start, mul);
         const jsLinearTokWillUsed = Utils.calculateTokWithLinearCurve(1000, start, mul);
 
-        const res1 = await this.test.bondage.calcTok.call(oracle, specifier, jsLinearTok);
+        const res1 = await this.test.bondage.calcBondRate.call(oracle, specifier, jsLinearTok);
         const ethTok = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
 

@@ -137,14 +137,14 @@ contract Bondage is Mortal {
 
     /// @dev Calculate amount of dots which could be purchased with given (numTok) TOK tokens (max is 1000)
     /// for endpoint specified by endpoint and data-provider address specified by oracleAddress
-    function calcTok(
+    function calcBondRate(
         address oracleAddress,
         bytes32 endpoint,
         uint256 numTok
     )
         public
         view
-        returns (uint256 totalDotCost, uint256 numDots) 
+        returns (uint256 maxNumTok, uint256 numDots) 
     {
         uint256 infinity = decimals;
         uint256 dotCost;
@@ -159,12 +159,12 @@ contract Bondage is Mortal {
 
             if (numTok >= dotCost) {
                 numTok -= dotCost;
-                totalDotCost += dotCost;
+                maxNumTok += dotCost;
             } else {
                 break;
             }
         }
-        return (totalDotCost, numDots);
+        return (maxNumTok, numDots);
     }
 
     /// @dev Get the current cost of a dot.
@@ -220,7 +220,7 @@ contract Bondage is Mortal {
         returns (uint256 numDots) 
     {   
         // This also checks if oracle is registered w/an initialized curve
-        (numTok, numDots) = calcTok(oracleAddress, endpoint, numTok);
+        (numTok, numDots) = calcBondRate(oracleAddress, endpoint, numTok);
 
         if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
             stor.setProviderInitialized(holderAddress, oracleAddress);
