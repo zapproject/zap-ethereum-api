@@ -15,7 +15,7 @@ contract Dispatch is Mortal {
         address indexed recipient,
         string query,
         bytes32 endpoint,
-        bytes32[] endpoint_params
+        bytes32[] endpointParams
     );
     
     DispatchStorage stor;
@@ -37,7 +37,7 @@ contract Dispatch is Mortal {
         address provider,           // data provider address
         string query,               // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
-        bytes32[] endpoint_params   // endpoint-specific params
+        bytes32[] endpointParams   // endpoint-specific params
     )
         external
         returns (uint256 id)
@@ -49,7 +49,7 @@ contract Dispatch is Mortal {
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
             id = uint256(keccak256(block.number, now, query, msg.sender));
             stor.createQuery(id, provider, msg.sender, endpoint);
-            LogIncoming(id, provider, msg.sender, query, endpoint, endpoint_params);
+            LogIncoming(id, provider, msg.sender, query, endpoint, endpointParams);
         }
     }
 

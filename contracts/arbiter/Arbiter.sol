@@ -8,12 +8,12 @@ import "./ArbiterStorage.sol";
 contract Arbiter is Mortal {
     // Called when a data purchase is initiated
     event LogDataPurchase(
-        address provider,          // Etheruem address of the provider
-        address subscriber,        // Ethereum address of the subscriber
-        uint256 public_key,        // Public key of the subscriber
-        uint256 amount,            // Amount (in 1/100 TOK) of ethereum sent
-        bytes32[] endpoint_params, // Endpoint specific(nonce,encrypted_uuid),
-        bytes32 endpoint           // Endpoint specifier
+        address indexed provider,          // Etheruem address of the provider
+        address indexed subscriber,        // Ethereum address of the subscriber
+        uint256 publicKey,                 // Public key of the subscriber
+        uint256 indexed amount,            // Amount (in 1/100 TOK) of ethereum sent
+        bytes32[] endpointParams,         // Endpoint specific(nonce,encrypted_uuid),
+        bytes32 endpoint                   // Endpoint specifier
     );
 
     // Used to specify who is the terminator of a contract
@@ -42,8 +42,8 @@ contract Arbiter is Mortal {
     function initiateSubscription(
         address providerAddress,   // Provider address
         bytes32 endpoint,          // Endpoint specifier
-        bytes32[] endpoint_params, // Endpoint specific params
-        uint256 public_key,        // Public key of the purchaser
+        bytes32[] endpointParams, // Endpoint specific params
+        uint256 publicKey,        // Public key of the purchaser
         uint64 blocks              // Number of blocks subscribed, 1block=1dot
     ) 
         public 
@@ -71,9 +71,9 @@ contract Arbiter is Mortal {
         LogDataPurchase(
             providerAddress,
             msg.sender,
-            public_key,
+            publicKey,
             blocks,
-            endpoint_params,
+            endpointParams,
             endpoint
         );
     }

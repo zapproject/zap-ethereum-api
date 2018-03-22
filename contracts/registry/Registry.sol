@@ -8,7 +8,7 @@ contract Registry is Mortal {
 
     event LogNewProvider(
         address indexed provider,
-        uint256 indexed public_key,
+        uint256 indexed publicKey,
         bytes32 indexed title
     );
 
@@ -28,26 +28,26 @@ contract Registry is Mortal {
 
     /// @dev Initiates a provider.
     /// If no address->Oracle mapping exists, Oracle object is created
-    /// @param public_key unique id for provider. used for encyrpted key swap for subscription endpoints
+    /// @param publicKey unique id for provider. used for encyrpted key swap for subscription endpoints
     /// @param title name
     /// @param endpoint specifier 
-    /// @param endpoint_params endpoint specific params
+    /// @param endpointParams endpoint specific params
     function initiateProvider(
-        uint256 public_key,
+        uint256 publicKey,
         bytes32 title, 
         bytes32 endpoint,
-        bytes32[] endpoint_params
+        bytes32[] endpointParams
     )
         public
         returns (bool)
     {
         if(getProviderPublicKey(msg.sender) == 0) {
-            stor.createOracle(msg.sender, public_key, title);
+            stor.createOracle(msg.sender, publicKey, title);
             if(endpoint != 0)
-                setEndpointParams(endpoint, endpoint_params);
+                setEndpointParams(endpoint, endpointParams);
 
             stor.addOracle(msg.sender);
-            LogNewProvider(msg.sender, public_key, title);
+            LogNewProvider(msg.sender, publicKey, title);
             return true;
         }
         return false;
@@ -76,20 +76,14 @@ contract Registry is Mortal {
             && cType == RegistryStorage.CurveType.None           // Can't reset their curve
         ) {
             stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
-            LogNewCurve(
-        msg.sender,
-        endpoint,
-        curveType,
-        curveStart,
-        curveMultiplier
-    );
+            LogNewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
             return true;
         }
         return false;
     }
 
-    function setEndpointParams(bytes32 endpoint, bytes32[] endpoint_params) public {
-        stor.setEndpointParameters(msg.sender, endpoint, endpoint_params);
+    function setEndpointParams(bytes32 endpoint, bytes32[] endpointParams) public {
+        stor.setEndpointParameters(msg.sender, endpoint, endpointParams);
     }
 
     /// @return public key
@@ -106,13 +100,13 @@ contract Registry is Mortal {
     function getNextEndpointParam(address provider, bytes32 endpoint, uint256 index)
         public
         view
-        returns (uint256 nextIndex, bytes32 endpoint_param)
+        returns (uint256 nextIndex, bytes32 endpointParam)
     {
         uint256 len = stor.getEndpointIndexSize(provider, endpoint);
         if (index < len) {
-            endpoint_param = stor.getEndPointParam(provider, endpoint, index);
-            if (index + 1 < len) return (index + 1, endpoint_param);
-            return (0, endpoint_param);
+            endpointParam = stor.getEndPointParam(provider, endpoint, index);
+            if (index + 1 < len) return (index + 1, endpointParam);
+            return (0, endpointParam);
         }
         return(0,0);
     }
@@ -136,23 +130,23 @@ contract Registry is Mortal {
     function getNextProvider(uint256 index)
         public
         view        
-        returns (uint256 nextIndex, address oracle_address, uint256 public_key, string title)
+        returns (uint256 nextIndex, address oracleAddress, uint256 publicKey, string title)
     {
         uint256 len = stor.getOracleIndexSize();
         if (index < len) {
-            oracle_address = stor.getOracleAddress(index);
+            oracleAddress = stor.getOracleAddress(index);
             if (index + 1 < len)
                 return (
                     index + 1, 
-                    oracle_address, 
-                    getProviderPublicKey(oracle_address), 
-                    getProviderTitle(oracle_address)
+                    oracleAddress, 
+                    getProviderPublicKey(oracleAddress), 
+                    getProviderTitle(oracleAddress)
                 );            
             return (
                 0, 
-                oracle_address, 
-                getProviderPublicKey(oracle_address), 
-                getProviderTitle(oracle_address)
+                oracleAddress, 
+                getProviderPublicKey(oracleAddress), 
+                getProviderTitle(oracleAddress)
             );                            
         }
         return (0,0x0,0,"");

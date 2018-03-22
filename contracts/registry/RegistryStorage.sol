@@ -21,9 +21,9 @@ contract RegistryStorage is Ownable {
 
     // fundamental account type for the platform
     struct Oracle {
-        uint256 public_key;                              // Public key of the data provider
+        uint256 publicKey;                               // Public key of the data provider
         bytes32 title;                                   // Tags (csv)
-        mapping(bytes32 => bytes32[]) endpoint_params;   // Endpoint specific parameters
+        mapping(bytes32 => bytes32[]) endpointParams;    // Endpoint specific parameters
         mapping(bytes32 => Curve) curves;                // Price vs Supply (contract endpoint)
     }
 
@@ -33,7 +33,7 @@ contract RegistryStorage is Ownable {
     /**** Get Methods ****/
 
     function getPublicKey(address provider) external view returns (uint256) {
-        return oracles[provider].public_key;
+        return oracles[provider].publicKey;
     }
 
     function getTitle(address provider) external view returns (bytes32) {
@@ -41,11 +41,11 @@ contract RegistryStorage is Ownable {
     }
 
     function getEndpointIndexSize(address provider, bytes32 endpoint) external view returns (uint256) {
-        return oracles[provider].endpoint_params[endpoint].length;
+        return oracles[provider].endpointParams[endpoint].length;
     }    
 
     function getEndPointParam(address provider, bytes32 endpoint, uint256 index) external view returns (bytes32) {
-        return oracles[provider].endpoint_params[endpoint][index];
+        return oracles[provider].endpointParams[endpoint][index];
     }
 
     function getCurve(address provider, bytes32 endpoint)
@@ -68,8 +68,8 @@ contract RegistryStorage is Ownable {
 
     /**** Set Methods ****/
 
-    function createOracle(address origin, uint256 public_key, bytes32 title) external onlyOwner {
-        oracles[origin] = Oracle(public_key, title);
+    function createOracle(address origin, uint256 publicKey, bytes32 title) external onlyOwner {
+        oracles[origin] = Oracle(publicKey, title);
     }
 
     function addOracle(address origin) external onlyOwner {
@@ -79,13 +79,13 @@ contract RegistryStorage is Ownable {
     function setEndpointParameters(
         address origin,
         bytes32 endpoint,
-        bytes32[] endpoint_params
+        bytes32[] endpointParams
     )
         external
         onlyOwner
 
     {
-        oracles[origin].endpoint_params[endpoint] = endpoint_params;
+        oracles[origin].endpointParams[endpoint] = endpointParams;
     }
 
     function setCurve(
