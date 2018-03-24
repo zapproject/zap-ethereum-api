@@ -49,12 +49,7 @@ contract('Registry', async (accounts) => {
         const newTitle = "test-test"
 
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
-        await this.test.registry.initiateProvider(newPublicKey, newTitle, specifier, params, { from: owner });
-
-        const receivedTitle = await this.test.registry.getProviderTitle.call(owner);
-        const receivedPublickKey = await this.test.registry.getProviderPublicKey.call(owner);
-        expect(receivedTitle).to.be.equal(title);
-        expect(receivedPublickKey.valueOf()).to.be.equal(publicKey.toString());
+        await expect(this.test.registry.initiateProvider(newPublicKey, newTitle, specifier, params, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_3 - initiateProviderCurve() - Check that we can initiate provider curve", async function () {

@@ -113,12 +113,10 @@ contract Bondage is Mortal {
         returns (bool success)
     {
         uint256 currentDots = getDots(holderAddress, oracleAddress, endpoint);
-        if (currentDots >= numDots) {
-            stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
-            stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
-            return true;
-        }
-        return false;
+        require(currentDots >= numDots);
+        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
+        stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
+        return true;
     }
 
     /// @dev Transfer N dots from fromAddress to destAddress. 
@@ -135,12 +133,10 @@ contract Bondage is Mortal {
         operatorOnly 
         returns (bool success)
     {
-        if (numDots <= stor.getNumEscrow(holderAddress, oracleAddress, endpoint)) {
-            stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
-            stor.updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
-            return true;
-        }
-        return false;
+        require(numDots <= stor.getNumEscrow(holderAddress, oracleAddress, endpoint));
+        stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
+        stor.updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
+        return true;
     }
 
     /// @dev Calculate quantity of tokens required for specified amount of dots

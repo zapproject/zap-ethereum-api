@@ -46,16 +46,12 @@ contract Registry is Mortal {
         public
         returns (bool)
     {
-        if(getProviderPublicKey(msg.sender) == 0) {
-            stor.createOracle(msg.sender, publicKey, title);
-            if(endpoint != 0)
-                setEndpointParams(endpoint, endpointParams);
-
-            stor.addOracle(msg.sender);
-            LogNewProvider(msg.sender, title, endpoint);
-            return true;
-        }
-        return false;
+        require(getProviderPublicKey(msg.sender) == 0);
+        stor.createOracle(msg.sender, publicKey, title);
+        if(endpoint != 0) setEndpointParams(endpoint, endpointParams);
+        stor.addOracle(msg.sender);
+        LogNewProvider(msg.sender, title, endpoint);
+        return true;
     }
 
     /// @dev Initiates an endpoint specific provider curve
@@ -73,18 +69,18 @@ contract Registry is Mortal {
         public
         returns (bool)
     {
+        // Provider must be initiated
+        require(stor.getPublicKey(msg.sender) != 0);
+        // Can't use None
+        require(curveType != RegistryStorage.CurveType.None);
+        // Can't reset their curve
         RegistryStorage.CurveType cType;
         (cType,) = stor.getCurve(msg.sender, endpoint);
+        require(cType == RegistryStorage.CurveType.None);
+        stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
 
-        if (stor.getPublicKey(msg.sender) != 0                   // Provider must be initiated
-            && curveType != RegistryStorage.CurveType.None       // Can't use None
-            && cType == RegistryStorage.CurveType.None           // Can't reset their curve
-        ) {
-            stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
-            LogNewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
-            return true;
-        }
-        return false;
+        LogNewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
+        return true;
     }
 
     function setEndpointParams(bytes32 endpoint, bytes32[] endpointParams) public {
