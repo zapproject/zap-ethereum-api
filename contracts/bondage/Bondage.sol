@@ -69,7 +69,7 @@ contract Bondage is Mortal {
         currentCost = CurrentCostInterface(currentCostAddress);
     }
 
-    /// @notice Will bond `numTok` to `registry.getProviderTitle(oracleAddress)`
+    /// @dev Will bond to an oracle
     /// @return total TOK bound to oracle
     function bond(address oracleAddress, bytes32 endpoint, uint256 numTok) public returns (uint256) {
         return _bond(msg.sender, oracleAddress, endpoint, numTok);
@@ -78,6 +78,25 @@ contract Bondage is Mortal {
     /// @return total TOK unbound from oracle
     function unbond(address oracleAddress, bytes32 endpoint, uint256 numDots) public returns (uint256) {
         return _unbond(msg.sender, oracleAddress, endpoint, numDots);
+    }
+
+    /// @dev Will bond to an oracle on behalf of some holder
+    /// @return total TOK bound to oracle
+    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numTok) public returns (uint256) {
+        require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
+        stor.setDelegate(holderAddress, oracleAddress, msg.sender);
+        return _bond(holderAddress, oracleAddress, endpoint, numTok);
+    }
+
+    /// @return total TOK unbound from oracle
+    function delegateUnbond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) public returns (uint256) {
+        require(stor.getDelegate(holderAddress, oracleAddress) == msg.sender);
+        return _unbond(holderAddress, oracleAddress, endpoint, numDots);
+    }
+
+    /// @dev Will reset delegate 
+    function resetDelegate(address oracleAddress) public {
+        stor.deleteDelegate(msg.sender, oracleAddress);
     }
 
     /// @dev Move numDots dots from provider-requester to bondage according to 

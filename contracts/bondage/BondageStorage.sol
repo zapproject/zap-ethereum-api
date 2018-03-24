@@ -18,11 +18,13 @@ contract BondageStorage is Ownable {
         mapping(address => bool) initialized;
         //for traversing
         address[] oracleList;
+        //provider address => delegate address
+        mapping(address => address) delegates;
     }
 
     mapping(address => Holder) private holders;
 
-    //holder => (oracle_address => (endpoint => numEscrow)))
+    //holder => (oracleAddress => (endpoint => numEscrow)))
     mapping(address => mapping(address => mapping(bytes32 => uint256))) private pendingEscrow;
 
     //oracleAddress=>(=>numTok)
@@ -32,50 +34,58 @@ contract BondageStorage is Ownable {
     mapping(address => mapping(bytes32 => uint256)) private totalIssued;
 
     /**** Get Methods ****/
-    function isProviderInitialized(address holder_address, address oracle_address) external view returns (bool) {
-        return holders[holder_address].initialized[oracle_address];
+    function isProviderInitialized(address holderAddress, address oracleAddress) external view returns (bool) {
+        return holders[holderAddress].initialized[oracleAddress];
     }
 
-    function getBondValue(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint256) {
-        return holders[holder_address].bonds[endpoint][oracle_address];
+    function getBondValue(address holderAddress, address oracleAddress, bytes32 endpoint) external view returns (uint256) {
+        return holders[holderAddress].bonds[endpoint][oracleAddress];
     }
 
-    function getNumEscrow(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint256) {
-        return pendingEscrow[holder_address][oracle_address][endpoint];
+    function getNumEscrow(address holderAddress, address oracleAddress, bytes32 endpoint) external view returns (uint256) {
+        return pendingEscrow[holderAddress][oracleAddress][endpoint];
     }
 
-    function getNumTok(address oracle_address, bytes32 endpoint) external view returns (uint256) {
-        return totalBound[oracle_address][endpoint];
+    function getNumTok(address oracleAddress, bytes32 endpoint) external view returns (uint256) {
+        return totalBound[oracleAddress][endpoint];
     }
 
-    function getTotalDots(address oracle_address, bytes32 endpoint) external view returns (uint256) {
-        return totalIssued[oracle_address][endpoint];
+    function getTotalDots(address oracleAddress, bytes32 endpoint) external view returns (uint256) {
+        return totalIssued[oracleAddress][endpoint];
     }
 
-    function getBoundDots(address holder_address, address oracle_address, bytes32 endpoint) external view returns (uint256) {
-        return holders[holder_address].bonds[endpoint][oracle_address];
+    function getBoundDots(address holderAddress, address oracleAddress, bytes32 endpoint) external view returns (uint256) {
+        return holders[holderAddress].bonds[endpoint][oracleAddress];
     }
 
-    function getIndexSize(address holder_address) external view returns (uint256) {
-        return holders[holder_address].oracleList.length;
+    function getIndexSize(address holderAddress) external view returns (uint256) {
+        return holders[holderAddress].oracleList.length;
     }
 
-    function getOracleAddress(address holder_address, uint256 index) external view returns (address) {
-        return holders[holder_address].oracleList[index];
-    }    
-
-	/**** Set Methods ****/
-    function addHolderOracle(address holder_address, address oracle_address) external onlyOwner {
-        holders[holder_address].oracleList.push(oracle_address);
+    function getOracleAddress(address holderAddress, uint256 index) external view returns (address) {
+        return holders[holderAddress].oracleList[index];
     }
 
-    function setProviderInitialized(address holder_address, address oracle_address) external onlyOwner {
-        holders[holder_address].initialized[oracle_address] = true;
+    function getDelegate(address holderAddress, address oracleAddress) external view returns (address) {
+        return holders[holderAddress].delegates[oracleAddress];
+    }
+
+    /**** Set Methods ****/
+    function addHolderOracle(address holderAddress, address oracleAddress) external onlyOwner {
+        holders[holderAddress].oracleList.push(oracleAddress);
+    }
+
+    function setProviderInitialized(address holderAddress, address oracleAddress) external onlyOwner {
+        holders[holderAddress].initialized[oracleAddress] = true;
+    }
+
+    function setDelegate(address holderAddress, address oracleAddress, address delegateAddress) external onlyOwner {
+        holders[holderAddress].delegates[oracleAddress] = delegateAddress;
     }
 
     function updateEscrow(
-        address holder_address,
-        address oracle_address,
+        address holderAddress,
+        address oracleAddress,
         bytes32 endpoint,
         uint256 numDots,
         string op
@@ -84,15 +94,15 @@ contract BondageStorage is Ownable {
         onlyOwner      
     {
         if (keccak256(op) == keccak256("sub"))
-            pendingEscrow[holder_address][oracle_address][endpoint] -= numDots;
+            pendingEscrow[holderAddress][oracleAddress][endpoint] -= numDots;
         else {
-            pendingEscrow[holder_address][oracle_address][endpoint] += numDots;
+            pendingEscrow[holderAddress][oracleAddress][endpoint] += numDots;
         }
     }
 
     function updateBondValue(
-        address holder_address,
-        address oracle_address,
+        address holderAddress,
+        address oracleAddress,
         bytes32 endpoint,
         uint256 numDots,
         string op
@@ -101,14 +111,14 @@ contract BondageStorage is Ownable {
         onlyOwner      
     {
         if (keccak256(op) == keccak256("sub"))
-            holders[holder_address].bonds[endpoint][oracle_address] -= numDots;
+            holders[holderAddress].bonds[endpoint][oracleAddress] -= numDots;
         else {
-            holders[holder_address].bonds[endpoint][oracle_address] += numDots;
+            holders[holderAddress].bonds[endpoint][oracleAddress] += numDots;
         }
     }
 
     function updateTotalBound(        
-        address oracle_address,
+        address oracleAddress,
         bytes32 endpoint,
         uint256 numDots,
         string op
@@ -117,14 +127,14 @@ contract BondageStorage is Ownable {
         onlyOwner       
     {
         if (keccak256(op) == keccak256("sub"))
-            totalBound[oracle_address][endpoint] -= numDots;
+            totalBound[oracleAddress][endpoint] -= numDots;
         else {
-            totalBound[oracle_address][endpoint] += numDots;
+            totalBound[oracleAddress][endpoint] += numDots;
         }
     }
 
     function updateTotalIssued(
-        address oracle_address,
+        address oracleAddress,
         bytes32 endpoint,
         uint256 numDots,
         string op
@@ -133,9 +143,14 @@ contract BondageStorage is Ownable {
         onlyOwner      
     {
         if (keccak256(op) == keccak256("sub"))
-            totalIssued[oracle_address][endpoint] -= numDots;
+            totalIssued[oracleAddress][endpoint] -= numDots;
         else {
-            totalIssued[oracle_address][endpoint] += numDots;
+            totalIssued[oracleAddress][endpoint] += numDots;
         }
+    }
+
+    /**** Delete Methods ****/
+    function deleteDelegate(address holderAddress, address oracleAddress) external onlyOwner {
+        delete holders[holderAddress].delegates[oracleAddress];
     }
 }
