@@ -1,8 +1,6 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-// Make sure to implement a setBondageAddress fx in contracts that use this interface to support upgrades
-
 interface BondageInterface {
     function bond(address, bytes32, uint256) external returns(uint256);
     function unbond(address, bytes32, uint256) external returns (uint256);
