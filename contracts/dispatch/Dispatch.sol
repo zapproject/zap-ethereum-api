@@ -3,8 +3,8 @@ pragma solidity ^0.4.17;
 
 import "../aux/Mortal.sol";
 import "../aux/Client.sol";
-import "../addressSpace/AddressSpace.sol";
-import "../addressSpace/AddressSpacePointer.sol";
+import "../aux/addressSpace/AddressSpace.sol";
+import "../aux/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 
@@ -35,9 +35,9 @@ contract Dispatch is Mortal {
         bondage = BondageInterface(bondageAddress);
     }
 
-    function upgradeContract() public onlyOwner {
-        addresses = AddressSpace(pointer.addresses());
-        bondage = BondageInterface(addresses.bondage());
+    function updateContract() external onlyOwner {
+        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
+        if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
     }
 
     /// @notice Escrow dot for oracle request

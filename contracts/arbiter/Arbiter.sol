@@ -2,8 +2,8 @@ pragma solidity ^0.4.17;
 // v1.0
 
 import "../aux/Mortal.sol";
-import "../addressSpace/AddressSpace.sol";
-import "../addressSpace/AddressSpacePointer.sol";
+import "../aux/addressSpace/AddressSpace.sol";
+import "../aux/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 
@@ -34,7 +34,7 @@ contract Arbiter is Mortal {
     AddressSpacePointer pointer;
     AddressSpace addresses;
 
-    address private storageAddress;
+    address public storageAddress;
 
     function Arbiter(address pointerAddress, address _storageAddress, address bondageAddress) public {
         pointer = AddressSpacePointer(pointerAddress);
@@ -43,9 +43,9 @@ contract Arbiter is Mortal {
         bondage = BondageInterface(bondageAddress);
     }
 
-    function upgradeContract() public onlyOwner {
-        addresses = AddressSpace(pointer.addresses());
-        bondage = BondageInterface(addresses.bondage());
+    function updateContract() external onlyOwner {
+        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
+        if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
     }
 
     function initiateSubscription(

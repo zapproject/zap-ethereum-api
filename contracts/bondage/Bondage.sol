@@ -1,14 +1,10 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-/* ************************************************************************
-/* MAKE SURE TO CALL setArbiterAddress & setDispatchAddress UPON DEPLOYMENT
-/* ************************************************************************/
-
 import "../aux/Mortal.sol";
 import "../aux/ERC20.sol";
-import "../addressSpace/AddressSpace.sol";
-import "../addressSpace/AddressSpacePointer.sol";
+import "../aux/addressSpace/AddressSpace.sol";
+import "../aux/addressSpace/AddressSpacePointer.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 
@@ -41,11 +37,11 @@ contract Bondage is Mortal {
         currentCost = CurrentCostInterface(currentCostAddress);
     }
 
-    function upgradeContract() public onlyOwner {
-        addresses = AddressSpace(pointer.addresses());
-        currentCost = CurrentCostInterface(addresses.currentCost());
-        arbiterAddress = addresses.arbiter();
-        dispatchAddress = addresses.dispatch();
+    function updateContract() external onlyOwner {
+        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
+        if (currentCost != addresses.currentCost()) currentCost = CurrentCostInterface(addresses.currentCost());
+        if (arbiterAddress != addresses.arbiter()) arbiterAddress = addresses.arbiter();
+        if (dispatchAddress != addresses.dispatch()) dispatchAddress = addresses.dispatch();
     }
 
     /// @dev Will bond to an oracle

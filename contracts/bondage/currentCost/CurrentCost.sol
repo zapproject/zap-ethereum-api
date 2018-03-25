@@ -1,9 +1,9 @@
 pragma solidity ^0.4.17;
 
 import "../../aux/Mortal.sol";
+import "../../aux/addressSpace/AddressSpace.sol";
+import "../../aux/addressSpace/AddressSpacePointer.sol";
 import "../../registry/RegistryInterface.sol";
-import "../../addressSpace/AddressSpace.sol";
-import "../../addressSpace/AddressSpacePointer.sol";
 
 contract CurrentCost is Mortal {
 
@@ -16,9 +16,9 @@ contract CurrentCost is Mortal {
        registry = RegistryInterface(registryAddress);
     }
 
-    function upgradeContract() public onlyOwner {
-        addresses = AddressSpace(pointer.addresses());
-        registry = RegistryInterface(addresses.registry());
+    function updateContract() external onlyOwner {
+        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
+        if (registry != addresses.registry()) registry = RegistryInterface(addresses.registry());
     }
 
     function _currentCostOfDot(
