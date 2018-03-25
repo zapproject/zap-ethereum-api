@@ -1,10 +1,6 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-/* ******************************************************************
-/* MAKE SURE TO transferOwnership TO Bondage Contract UPON DEPLOYMENT
-/* ******************************************************************/
-
 import "../aux/Ownable.sol";
 
 contract BondageStorage is Ownable {

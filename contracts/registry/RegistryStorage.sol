@@ -1,10 +1,6 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-/* ******************************************************************
-/* MAKE SURE TO transferOwnership TO Registry Contract UPON DEPLOYMENT
-/* ******************************************************************/
-
 import "../aux/Mortal.sol";
 
 contract RegistryStorage is Ownable {

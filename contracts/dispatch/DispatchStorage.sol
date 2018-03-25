@@ -1,10 +1,6 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-/* ******************************************************************
-/* MAKE SURE TO transferOwnership TO Dispatch Contract UPON DEPLOYMENT
-/* ******************************************************************/
-
 import "../aux/Ownable.sol";
 
 contract DispatchStorage is Ownable {
