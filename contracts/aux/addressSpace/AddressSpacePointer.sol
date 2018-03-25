@@ -1,7 +1,7 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-import "../aux/Ownable.sol";
+import "../Ownable.sol";
 
 contract AddressSpacePointer is Ownable {
 	address public addresses;

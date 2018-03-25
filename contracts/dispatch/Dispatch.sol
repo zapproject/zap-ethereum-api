@@ -2,13 +2,14 @@ pragma solidity ^0.4.17;
 // v1.0
 
 import "../aux/Mortal.sol";
+import "../aux/update/Updatable.sol";
 import "../aux/Client.sol";
 import "../aux/addressSpace/AddressSpace.sol";
 import "../aux/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 
-contract Dispatch is Mortal { 
+contract Dispatch is Mortal, Updatable { 
 
     //event data provider is listening for, containing all relevant request parameters
     event LogIncoming(
@@ -35,7 +36,7 @@ contract Dispatch is Mortal {
         bondage = BondageInterface(bondageAddress);
     }
 
-    function updateContract() external onlyOwner {
+    function updateContract() external {
         if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
         if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
     }

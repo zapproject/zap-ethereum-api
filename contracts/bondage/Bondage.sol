@@ -2,13 +2,14 @@ pragma solidity ^0.4.17;
 // v1.0
 
 import "../aux/Mortal.sol";
+import "../aux/update/Updatable.sol";
 import "../aux/ERC20.sol";
 import "../aux/addressSpace/AddressSpace.sol";
 import "../aux/addressSpace/AddressSpacePointer.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 
-contract Bondage is Mortal {
+contract Bondage is Mortal, Updatable {
 
     BondageStorage stor;
     CurrentCostInterface currentCost;
@@ -37,7 +38,8 @@ contract Bondage is Mortal {
         currentCost = CurrentCostInterface(currentCostAddress);
     }
 
-    function updateContract() external onlyOwner {
+    // Called on deployment to initialize arbiterAddress and dispatchAddress
+    function updateContract() external {
         if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
         if (currentCost != addresses.currentCost()) currentCost = CurrentCostInterface(addresses.currentCost());
         if (arbiterAddress != addresses.arbiter()) arbiterAddress = addresses.arbiter();

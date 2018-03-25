@@ -1,7 +1,7 @@
 pragma solidity ^0.4.17;
 // v1.0
 
-import "../aux/Mortal.sol";
+import "../Mortal.sol";
 
 contract AddressSpace is Mortal {
 
