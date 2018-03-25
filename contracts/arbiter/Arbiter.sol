@@ -2,6 +2,8 @@ pragma solidity ^0.4.17;
 // v1.0
 
 import "../aux/Mortal.sol";
+import "../addressSpace/AddressSpace.sol";
+import "../addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 
@@ -12,7 +14,7 @@ contract Arbiter is Mortal {
         address indexed subscriber,        // Ethereum address of the subscriber
         uint256 publicKey,                 // Public key of the subscriber
         uint256 indexed amount,            // Amount (in 1/100 TOK) of ethereum sent
-        bytes32[] endpointParams,         // Endpoint specific(nonce,encrypted_uuid),
+        bytes32[] endpointParams,          // Endpoint specific(nonce,encrypted_uuid),
         bytes32 endpoint                   // Endpoint specifier
     );
 
@@ -26,25 +28,24 @@ contract Arbiter is Mortal {
     // Used to specify who is the terminator of a contract
     enum SubscriptionTerminator { Provider, Subscriber }
     
-    ArbiterStorage private stor;
-    BondageInterface private bondage;
+    ArbiterStorage stor;
+    BondageInterface bondage;
+
+    AddressSpacePointer pointer;
+    AddressSpace addresses;
 
     address private storageAddress;
-    address private bondageAddress;
 
-    function Arbiter(address _storageAddress, address _bondageAddress) public {
+    function Arbiter(address pointerAddress, address _storageAddress, address bondageAddress) public {
+        pointer = AddressSpacePointer(pointerAddress);
         storageAddress = _storageAddress;
         stor = ArbiterStorage(storageAddress);
-        setBondageAddress(_bondageAddress);
+        bondage = BondageInterface(bondageAddress);
     }
 
-    function getStorageAddress() public view returns (address) { return storageAddress; }
-    function getBondageAddress() public view returns (address) { return bondageAddress; }
-
-    /// @notice Reinitialize bondage instance after upgrade
-    function setBondageAddress(address _bondageAddress) public onlyOwner {
-        bondageAddress = _bondageAddress;
-        bondage = BondageInterface(bondageAddress);
+    function upgradeContract() public onlyOwner {
+        addresses = AddressSpace(pointer.addresses());
+        bondage = BondageInterface(addresses.bondage());
     }
 
     function initiateSubscription(

@@ -20,16 +20,14 @@ contract Registry is Mortal {
         uint128 curveMultiplier
     );
 
-    RegistryStorage private stor;
+    RegistryStorage stor;
 
-    address private storageAddress;
+    address public storageAddress;
 
     function Registry(address _storageAddress) public {
         storageAddress = _storageAddress;
         stor = RegistryStorage(_storageAddress);
     }
-
-    function getStorageAddress() public view returns (address) { return storageAddress; }
 
     /// @dev Initiates a provider.
     /// If no address->Oracle mapping exists, Oracle object is created

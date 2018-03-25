@@ -1,13 +1,29 @@
 pragma solidity ^0.4.17;
 
+import "../../aux/Mortal.sol";
 import "../../registry/RegistryInterface.sol";
+import "../../addressSpace/AddressSpace.sol";
+import "../../addressSpace/AddressSpacePointer.sol";
 
-contract CurrentCost {
+contract CurrentCost is Mortal {
+
+    AddressSpacePointer pointer;
+    AddressSpace addresses;
+    RegistryInterface registry;
+
+    function CurrentCost(address pointerAddress, address registryAddress) public {
+       pointer = AddressSpacePointer(pointerAddress);
+       registry = RegistryInterface(registryAddress);
+    }
+
+    function upgradeContract() public onlyOwner {
+        addresses = AddressSpace(pointer.addresses());
+        registry = RegistryInterface(addresses.registry());
+    }
 
     function _currentCostOfDot(
-        RegistryInterface registry,
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 totalBound
     )
         public
@@ -17,7 +33,7 @@ contract CurrentCost {
         RegistryInterface.CurveType curveType;
         uint128 curveStart;
         uint128 curveMultiplier;
-        (curveType, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
+        (curveType, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, endpoint);
 
         require(curveType != RegistryInterface.CurveType.None);
 

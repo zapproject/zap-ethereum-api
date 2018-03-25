@@ -17,6 +17,7 @@ const TheToken = artifacts.require("TheToken");
 const Dispatch = artifacts.require("Dispatch");
 const Arbiter = artifacts.require("Arbiter");
 const Cost = artifacts.require("CurrentCost");
+const Addresses = artifacts.require("AddressSpacePointer");
 
 contract('Bondage', function (accounts) {
     const owner = accounts[0];
@@ -58,8 +59,10 @@ contract('Bondage', function (accounts) {
 
         this.currentTest.token = await TheToken.new();
 
+        this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
+
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.registry.address, this.currentTest.token.address, Cost.address);
+        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
         this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
     });
@@ -299,7 +302,6 @@ contract('Bondage', function (accounts) {
         const dots = 5;
         const dotsForEscrow = 2;
 
-        await this.test.bondage.setDispatchAddress(accounts[3], { from: owner });
         await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
 
         const oracleDotsRes = await this.test.bondage.getDots.call(subscriber, oracle, specifier, { from: subscriber });
@@ -376,7 +378,6 @@ contract('Bondage', function (accounts) {
 
         const forRelease = accounts[8];
 
-        await this.test.bondage.setDispatchAddress(accounts[3], { from: owner });
         await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
         await this.test.bondage.releaseDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
 
@@ -408,7 +409,6 @@ contract('Bondage', function (accounts) {
 
         const forRelease = accounts[8];
 
-        await this.test.bondage.setDispatchAddress(accounts[3], { from: owner });
         await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
         await this.test.bondage.releaseDots(subscriber, oracle, specifier, dotsForEscrow + 2, { from: accounts[3] });
 

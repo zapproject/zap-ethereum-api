@@ -7,22 +7,24 @@ pragma solidity ^0.4.17;
 
 import "../aux/Mortal.sol";
 import "../aux/ERC20.sol";
-import "../registry/RegistryInterface.sol";
+import "../addressSpace/AddressSpace.sol";
+import "../addressSpace/AddressSpacePointer.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 
 contract Bondage is Mortal {
 
-    BondageStorage private stor;
-    RegistryInterface private registry;
-    CurrentCostInterface private currentCost;
-    ERC20 private token;
+    BondageStorage stor;
+    CurrentCostInterface currentCost;
+    ERC20 token;
     uint256 decimals = 10 ** 18;
 
-    address private storageAddress;
-    address private registryAddress;
-    address private arbiterAddress;
-    address private dispatchAddress;
+    AddressSpacePointer pointer;
+    AddressSpace addresses;
+
+    address public storageAddress;
+    address arbiterAddress;
+    address dispatchAddress;
 
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
     modifier operatorOnly {
@@ -30,43 +32,20 @@ contract Bondage is Mortal {
             _;
     }
 
-    /// @dev Initialize Storage, Token, and Registry Contracts
-    function Bondage(address _storageAddress, address _registryAddress, address tokenAddress, address currentCostAddress) public {
+    /// @dev Initialize Storage, Token, anc CurrentCost Contracts
+    function Bondage(address pointerAddress, address _storageAddress, address tokenAddress, address currentCostAddress) public {
+        pointer = AddressSpacePointer(pointerAddress);
         storageAddress = _storageAddress;
         stor = BondageStorage(storageAddress);
         token = ERC20(tokenAddress); 
-        setRegistryAddress(_registryAddress);
-        setCurrentCostAddress(currentCostAddress);
-    }
-    
-    function getStorageAddress() public view returns (address) { return storageAddress; }
-    function getRegistryAddress() public view returns (address) { return registryAddress; }
-    function getArbiterAddress() public view returns (address) { return arbiterAddress; }
-    function getDispatchAddress() public view returns (address) { return dispatchAddress; }
-
-    /// @dev Set Arbiter address
-    /// @notice This needs to be called upon deployment and after Arbiter upgrade
-    function setArbiterAddress(address _arbiterAddress) public onlyOwner {
-        arbiterAddress = _arbiterAddress;
-    }
-    
-    /// @dev Set Dispatch address
-    /// @notice This needs to be called upon deployment and after Dispatch upgrade
-    function setDispatchAddress(address _dispatchAddress) public onlyOwner {
-        dispatchAddress = _dispatchAddress;
-    }
-
-    /// @dev Set Registry address
-    /// @notice Reinitialize registry instance after upgrade
-    function setRegistryAddress(address _registryAddress) public onlyOwner {
-        registryAddress = _registryAddress;
-        registry = RegistryInterface(registryAddress);
-    }
-
-    /// @dev Set CurrentCost address
-    /// @notice Upgrade currentCostOfDot function
-    function setCurrentCostAddress(address currentCostAddress) public onlyOwner {
         currentCost = CurrentCostInterface(currentCostAddress);
+    }
+
+    function upgradeContract() public onlyOwner {
+        addresses = AddressSpace(pointer.addresses());
+        currentCost = CurrentCostInterface(addresses.currentCost());
+        arbiterAddress = addresses.arbiter();
+        dispatchAddress = addresses.dispatch();
     }
 
     /// @dev Will bond to an oracle
@@ -204,7 +183,7 @@ contract Bondage is Mortal {
         view
         returns (uint256 cost)
     {
-        return currentCost._currentCostOfDot(registry, oracleAddress, endpoint, totalBound);
+        return currentCost._currentCostOfDot(oracleAddress, endpoint, totalBound);
     }
 
     function getDotsIssued(

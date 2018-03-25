@@ -3,6 +3,8 @@ pragma solidity ^0.4.17;
 
 import "../aux/Mortal.sol";
 import "../aux/Client.sol";
+import "../addressSpace/AddressSpace.sol";
+import "../addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 
@@ -18,25 +20,24 @@ contract Dispatch is Mortal {
         bytes32[] endpointParams
     );
     
-    DispatchStorage private stor;
-    BondageInterface private bondage;
+    DispatchStorage stor;
+    BondageInterface bondage;
 
-    address private storageAddress;
-    address private bondageAddress;
+    AddressSpacePointer pointer;
+    AddressSpace addresses;
 
-    function Dispatch(address _storageAddress, address _bondageAddress) public {
+    address public storageAddress;
+
+    function Dispatch(address pointerAddress, address _storageAddress, address bondageAddress) public {
+        pointer = AddressSpacePointer(pointerAddress);
         storageAddress = _storageAddress;
         stor = DispatchStorage(storageAddress);
-        setBondageAddress(_bondageAddress);
+        bondage = BondageInterface(bondageAddress);
     }
 
-    function getStorageAddress() public view returns (address) { return storageAddress; }
-    function getBondageAddress() public view returns (address) { return bondageAddress; }
-
-    /// @notice Reinitialize bondage instance after upgrade
-    function setBondageAddress(address _bondageAddress) public onlyOwner {
-        bondageAddress = _bondageAddress;
-        bondage = BondageInterface(bondageAddress);
+    function upgradeContract() public onlyOwner {
+        addresses = AddressSpace(pointer.addresses());
+        bondage = BondageInterface(addresses.bondage());
     }
 
     /// @notice Escrow dot for oracle request
@@ -45,7 +46,7 @@ contract Dispatch is Mortal {
         address provider,           // data provider address
         string query,               // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
-        bytes32[] endpointParams   // endpoint-specific params
+        bytes32[] endpointParams    // endpoint-specific params
     )
         external
         returns (uint256 id)

@@ -17,6 +17,7 @@ const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
 const TheToken = artifacts.require("TheToken");
 const Cost = artifacts.require("CurrentCost");
+const Addresses = artifacts.require("AddressSpacePointer");
 
 function fetchPureArray(res, parseFunc) {
     let arr = [];
@@ -104,17 +105,18 @@ contract('Dispatch', function (accounts) {
         this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await TheToken.new();
-        this.currentTest.currCost = await Cost.new();
+        
+        this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
 
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.registry.address, this.currentTest.token.address, this.currentTest.currCost.address);
+        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
         this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
         this.currentTest.dispStor = await DispatchStorage.new();
-        this.currentTest.dispatch = await Dispatch.new(this.currentTest.dispStor.address, this.currentTest.bondage.address);
+        this.currentTest.dispatch = await Dispatch.new(Addresses.address, this.currentTest.dispStor.address, this.currentTest.bondage.address);
         this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
     });
-
+/*
     it("DISPATCH_1 - setBondageAddress() - Check bondage address can be reset by owner", async function () {
 
         await this.test.dispatch.setBondageAddress(0x0);
@@ -127,7 +129,7 @@ contract('Dispatch', function (accounts) {
         await expect(this.test.dispatch.setBondageAddress(0x0, {from: subscriber})).to.eventually.be.rejectedWith(EVMRevert);
     });
 
-    /*it("DISPATCH_3 - query() - Check query function", async function () {
+    it("DISPATCH_3 - query() - Check query function", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         
