@@ -10,7 +10,7 @@ import "./ArbiterStorage.sol";
 
 contract Arbiter is Mortal, Updatable {
     // Called when a data purchase is initiated
-    event LogDataPurchase(
+    event DataPurchase(
         address indexed provider,          // Etheruem address of the provider
         address indexed subscriber,        // Ethereum address of the subscriber
         uint256 publicKey,                 // Public key of the subscriber
@@ -20,7 +20,7 @@ contract Arbiter is Mortal, Updatable {
     );
 
     // Called when a data subscription is ended by either provider or terminator
-    event LogDataSubscriptionEnd(
+    event DataSubscriptionEnd(
         address indexed provider,                      // Provider from the subscription
         address indexed subscriber,                    // Subscriber from the subscription
         SubscriptionTerminator indexed terminator      // Which terminated the contract
@@ -52,8 +52,8 @@ contract Arbiter is Mortal, Updatable {
     function initiateSubscription(
         address providerAddress,   // Provider address
         bytes32 endpoint,          // Endpoint specifier
-        bytes32[] endpointParams, // Endpoint specific params
-        uint256 publicKey,        // Public key of the purchaser
+        bytes32[] endpointParams,  // Endpoint specific params
+        uint256 publicKey,         // Public key of the purchaser
         uint64 blocks              // Number of blocks subscribed, 1block=1dot
     ) 
         public 
@@ -78,7 +78,7 @@ contract Arbiter is Mortal, Updatable {
         );
 
         // Emit the event
-        LogDataPurchase(
+        emit DataPurchase(
             providerAddress,
             msg.sender,
             publicKey,
@@ -109,7 +109,7 @@ contract Arbiter is Mortal, Updatable {
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(msg.sender, subscriberAddress, endpoint))
-            LogDataSubscriptionEnd(
+            emit DataSubscriptionEnd(
                 msg.sender, 
                 subscriberAddress, 
                 SubscriptionTerminator.Provider
@@ -125,7 +125,7 @@ contract Arbiter is Mortal, Updatable {
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(providerAddress, msg.sender, endpoint))
-            LogDataSubscriptionEnd(
+            emit DataSubscriptionEnd(
                 providerAddress,
                 msg.sender,
                 SubscriptionTerminator.Subscriber

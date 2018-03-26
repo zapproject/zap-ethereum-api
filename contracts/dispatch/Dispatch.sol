@@ -12,7 +12,7 @@ import "./DispatchStorage.sol";
 contract Dispatch is Mortal, Updatable { 
 
     //event data provider is listening for, containing all relevant request parameters
-    event LogIncoming(
+    event Incoming(
         uint256 indexed id,
         address indexed provider,
         address indexed recipient,
@@ -45,7 +45,7 @@ contract Dispatch is Mortal, Updatable {
     /// @dev Called by user contract
     function query(
         address provider,           // data provider address
-        string query,               // query string
+        string userQuery,           // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
         bytes32[] endpointParams    // endpoint-specific params
     )
@@ -57,9 +57,9 @@ contract Dispatch is Mortal, Updatable {
         if(dots >= 1) {
             //enough dots
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
-            id = uint256(keccak256(block.number, now, query, msg.sender));
+            id = uint256(keccak256(block.number, now, userQuery, msg.sender));
             stor.createQuery(id, provider, msg.sender, endpoint);
-            LogIncoming(id, provider, msg.sender, query, endpoint, endpointParams);
+            emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
         }
     }
 

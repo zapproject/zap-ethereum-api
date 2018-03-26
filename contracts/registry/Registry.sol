@@ -6,13 +6,13 @@ import "./RegistryStorage.sol";
 
 contract Registry is Mortal {  
 
-    event LogNewProvider(
+    event NewProvider(
         address indexed provider,
         bytes32 indexed title,
         bytes32 indexed endpoint
     );
 
-    event LogNewCurve(
+    event NewCurve(
         address indexed provider,
         bytes32 indexed endpoint,
         RegistryStorage.CurveType indexed curveType,
@@ -48,7 +48,7 @@ contract Registry is Mortal {
         stor.createOracle(msg.sender, publicKey, title);
         if(endpoint != 0) setEndpointParams(endpoint, endpointParams);
         stor.addOracle(msg.sender);
-        LogNewProvider(msg.sender, title, endpoint);
+        emit NewProvider(msg.sender, title, endpoint);
         return true;
     }
 
@@ -77,7 +77,7 @@ contract Registry is Mortal {
         require(cType == RegistryStorage.CurveType.None);
         stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
 
-        LogNewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
+        emit NewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
         return true;
     }
 

@@ -27,9 +27,9 @@ contract AddressSpace is Mortal {
         setCurrentCostAddress(_currentCost);
     }
 
-    function setRegistryAddress(address _registry) public onlyOwner { registry = _registry; }
-    function setBondageAddress(address _bondage) public onlyOwner { bondage = _bondage; }
-    function setArbiterAddress(address _arbiter) public onlyOwner { arbiter = _arbiter; }
-    function setDispatchAddress(address _dispatch) public onlyOwner { dispatch = _dispatch; }
-    function setCurrentCostAddress(address _currentCost) public onlyOwner { currentCost = _currentCost; }
+    function setRegistryAddress(address _registry) external onlyOwner { registry = _registry; }
+    function setBondageAddress(address _bondage) external onlyOwner { bondage = _bondage; }
+    function setArbiterAddress(address _arbiter) external onlyOwner { arbiter = _arbiter; }
+    function setDispatchAddress(address _dispatch) external onlyOwner { dispatch = _dispatch; }
+    function setCurrentCostAddress(address _currentCost) external onlyOwner { currentCost = _currentCost; }
 }
