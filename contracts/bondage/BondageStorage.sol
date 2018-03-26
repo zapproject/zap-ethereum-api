@@ -101,12 +101,12 @@ contract BondageStorage is Ownable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots,
-        string op
+        bytes32 op
     )
         external
         onlyOwner      
     {
-        if (keccak256(op) == keccak256("sub"))
+        if (op == "sub")
             holders[holderAddress].bonds[endpoint][oracleAddress] -= numDots;
         else {
             holders[holderAddress].bonds[endpoint][oracleAddress] += numDots;
@@ -117,12 +117,12 @@ contract BondageStorage is Ownable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots,
-        string op
+        bytes32 op
     )
         external
         onlyOwner       
     {
-        if (keccak256(op) == keccak256("sub"))
+        if (op == "sub")
             totalBound[oracleAddress][endpoint] -= numDots;
         else {
             totalBound[oracleAddress][endpoint] += numDots;
@@ -133,12 +133,12 @@ contract BondageStorage is Ownable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots,
-        string op
+        bytes32 op
     )
         external
         onlyOwner      
     {
-        if (keccak256(op) == keccak256("sub"))
+        if (op == "sub")
             totalIssued[oracleAddress][endpoint] -= numDots;
         else {
             totalIssued[oracleAddress][endpoint] += numDots;
