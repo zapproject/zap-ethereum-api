@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.21;
 
 contract Client1 {
     function callback(uint256 id, string response1) external;
