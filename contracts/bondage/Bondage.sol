@@ -11,6 +11,11 @@ import "./BondageStorage.sol";
 
 contract Bondage is Mortal, Updatable {
 
+    event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numTok);
+    event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
+    event Escrowed(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
+    event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
+
     BondageStorage stor;
     CurrentCostInterface currentCost;
     ERC20 token;
@@ -48,27 +53,31 @@ contract Bondage is Mortal, Updatable {
 
     /// @dev Will bond to an oracle
     /// @return total TOK bound to oracle
-    function bond(address oracleAddress, bytes32 endpoint, uint256 numTok) public returns (uint256) {
-        return _bond(msg.sender, oracleAddress, endpoint, numTok);
+    function bond(address oracleAddress, bytes32 endpoint, uint256 numTok) public returns (uint256 bound) {
+        bound = _bond(msg.sender, oracleAddress, endpoint, numTok);
+        emit Bound(msg.sender, oracleAddress, endpoint, numTok);
     }
 
     /// @return total TOK unbound from oracle
-    function unbond(address oracleAddress, bytes32 endpoint, uint256 numDots) public returns (uint256) {
-        return _unbond(msg.sender, oracleAddress, endpoint, numDots);
-    }
+    function unbond(address oracleAddress, bytes32 endpoint, uint256 numDots) public returns (uint256 unbound) {
+        unbound = _unbond(msg.sender, oracleAddress, endpoint, numDots);
+        emit Unbound(msg.sender, oracleAddress, endpoint, numDots);
+    }        
 
     /// @dev Will bond to an oracle on behalf of some holder
     /// @return total TOK bound to oracle
-    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numTok) public returns (uint256) {
+    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numTok) public returns (uint256 bound) {
         require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
         stor.setDelegate(holderAddress, oracleAddress, msg.sender);
-        return _bond(holderAddress, oracleAddress, endpoint, numTok);
+        bound = _bond(holderAddress, oracleAddress, endpoint, numTok);
+        emit Bound(holderAddress, oracleAddress, endpoint, numTok);
     }
 
     /// @return total TOK unbound from oracle
-    function delegateUnbond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) public returns (uint256) {
+    function delegateUnbond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) public returns (uint256 unbound) {
         require(stor.getDelegate(holderAddress, oracleAddress) == msg.sender);
-        return _unbond(holderAddress, oracleAddress, endpoint, numDots);
+        unbound = _unbond(holderAddress, oracleAddress, endpoint, numDots);
+        emit Unbound(holderAddress, oracleAddress, endpoint, numDots);
     }
 
     /// @dev Will reset delegate 
@@ -93,6 +102,7 @@ contract Bondage is Mortal, Updatable {
         require(currentDots >= numDots);
         stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
         stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
+        emit Escrowed(holderAddress, oracleAddress, endpoint, numDots);
         return true;
     }
 
@@ -113,6 +123,7 @@ contract Bondage is Mortal, Updatable {
         require(numDots <= stor.getNumEscrow(holderAddress, oracleAddress, endpoint));
         stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
         stor.updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
+        emit Released(holderAddress, oracleAddress, endpoint, numDots);
         return true;
     }
 
