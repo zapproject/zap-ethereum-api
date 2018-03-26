@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.19;
 // v1.0
 
 // Technically an abstract contract, not interface (solidity compiler devs are working to fix this right now)
