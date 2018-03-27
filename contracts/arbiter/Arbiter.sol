@@ -1,10 +1,10 @@
 pragma solidity ^0.4.21;
 // v1.0
 
-import "../aux/Mortal.sol";
-import "../aux/update/Updatable.sol";
-import "../aux/addressSpace/AddressSpace.sol";
-import "../aux/addressSpace/AddressSpacePointer.sol";
+import "../lib/Mortal.sol";
+import "../lib/update/Updatable.sol";
+import "../lib/addressSpace/AddressSpace.sol";
+import "../lib/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 

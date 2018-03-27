@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 // v1.0
 
-import "../aux/Ownable.sol";
+import "../lib/Ownable.sol";
 
 contract BondageStorage is Ownable {
 

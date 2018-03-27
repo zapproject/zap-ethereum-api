@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 // v1.0
 
-import "./../aux/Mortal.sol";
+import "./../lib/Mortal.sol";
 import "./RegistryStorage.sol";
 
 contract Registry is Mortal {  
@@ -29,7 +29,7 @@ contract Registry is Mortal {
         stor = RegistryStorage(_storageAddress);
     }
 
-    /// @dev Initiates a provider.
+    /// @dev initiates a provider.
     /// If no address->Oracle mapping exists, Oracle object is created
     /// @param publicKey unique id for provider. used for encyrpted key swap for subscription endpoints
     /// @param title name
@@ -52,7 +52,7 @@ contract Registry is Mortal {
         return true;
     }
 
-    /// @dev Initiates an endpoint specific provider curve
+    /// @dev initiates an endpoint specific provider curve
     /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
     /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
     /// @param curveType dot-cost vs oracle-specific dot-supply
@@ -110,7 +110,7 @@ contract Registry is Mortal {
         return(0,0);
     }
 
-    /// @dev Get curve paramaters from oracle
+    /// @dev get curve paramaters from oracle
     function getProviderCurve(
         address provider,
         bytes32 endpoint
