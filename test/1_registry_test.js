@@ -56,7 +56,7 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner });
     });
-/*
+
     it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {   
         await expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
@@ -66,7 +66,7 @@ contract('Registry', async (accounts) => {
 
         expect(this.test.registry.initiateProviderCurve(specifier, curveNone, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
-*/
+
     it("REGISTRY_6 - getNextEndpointParam() - Check that we can get provider route keys", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
