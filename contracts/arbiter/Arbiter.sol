@@ -77,7 +77,6 @@ contract Arbiter is Mortal, Updatable {
             uint96(block.number) + uint96(blocks)
         );
 
-        // Emit the event
         emit DataPurchase(
             providerAddress,
             msg.sender,

@@ -4,7 +4,7 @@ pragma solidity ^0.4.21;
 import "./../lib/Mortal.sol";
 import "./RegistryStorage.sol";
 
-contract Registry is Mortal {  
+contract Registry is Mortal {
 
     event NewProvider(
         address indexed provider,
@@ -128,7 +128,7 @@ contract Registry is Mortal {
 
     function getNextProvider(uint256 index)
         public
-        view        
+        view
         returns (uint256 nextIndex, address oracleAddress, uint256 publicKey, bytes32 title)
     {
         uint256 len = stor.getOracleIndexSize();
@@ -146,7 +146,7 @@ contract Registry is Mortal {
                 oracleAddress, 
                 getProviderPublicKey(oracleAddress), 
                 getProviderTitle(oracleAddress)
-            );                            
+            );
         }
         return (0,0x0,0,"");
     }

@@ -11,7 +11,6 @@ const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
 
 const Utils = require("./helpers/utils.js");
-
 function hex2a(hexx) { 
     var hex = hexx.toString(); //force conversion
     var str = '';
@@ -76,7 +75,7 @@ contract('Registry', async (accounts) => {
     });
 
     it("REGISTRY_7 - getNextEndpointParam() - Check that route keys of uninitialized provider are empty", async function () {        
-        const res = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);
+        const res = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);>>>>>>> master
         
         // can not use chai, because it can not compare empty arrays
         assert(res, []);

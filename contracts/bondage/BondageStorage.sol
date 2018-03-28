@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 // v1.0
 
-import "../lib/Ownable.sol";
+import "../lib/Ownable.sol"
 
 contract BondageStorage is Ownable {
 
@@ -15,7 +15,7 @@ contract BondageStorage is Ownable {
         //for traversing
         address[] oracleList;
         //provider address => delegate address
-        mapping(address => address) delegates;
+        mapping(address => address) delegates
     }
 
     mapping(address => Holder) private holders;
@@ -54,7 +54,7 @@ contract BondageStorage is Ownable {
         return holders[holderAddress].bonds[endpoint][oracleAddress];
     }
 
-    function getIndexSize(address holderAddress) external view returns (uint256) {
+    function getIndexSize(address holderAddress) external view returns (uint256) 
         return holders[holderAddress].oracleList.length;
     }
 
@@ -66,7 +66,7 @@ contract BondageStorage is Ownable {
         return holders[holderAddress].delegates[oracleAddress];
     }
 
-    /**** Set Methods ****/
+    /**** Set Methods ****
     function addHolderOracle(address holderAddress, address oracleAddress) external onlyOwner {
         holders[holderAddress].oracleList.push(oracleAddress);
     }
@@ -82,7 +82,7 @@ contract BondageStorage is Ownable {
     function updateEscrow(
         address holderAddress,
         address oracleAddress,
-        bytes32 endpoint,
+        bytes32 endpoint
         uint256 numDots,
         string op
     )
@@ -92,7 +92,7 @@ contract BondageStorage is Ownable {
         if (keccak256(op) == keccak256("sub"))
             pendingEscrow[holderAddress][oracleAddress][endpoint] -= numDots;
         else {
-            pendingEscrow[holderAddress][oracleAddress][endpoint] += numDots;
+            pendingEscrow[holderAddress][oracleAddress][endpoint] += numDots
         }
     }
 
@@ -109,7 +109,7 @@ contract BondageStorage is Ownable {
         if (op == "sub")
             holders[holderAddress].bonds[endpoint][oracleAddress] -= numDots;
         else {
-            holders[holderAddress].bonds[endpoint][oracleAddress] += numDots;
+            holders[holderAddress].bonds[endpoint][oracleAddress] += numDots
         }
     }
 

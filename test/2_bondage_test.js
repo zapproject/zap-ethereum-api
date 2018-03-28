@@ -180,7 +180,6 @@ contract('Bondage', function (accounts) {
         expect(ethDots).to.be.equal(0);
         expect(ethTok).to.be.equal(0);
     });
-
     it("BONDAGE_10 - calcBondRate()) - Check calcBondRate function return maximum dots and maximum tok if numTok is more than 1000", async function () {
 
         prepareProvider.call(this.test);
@@ -222,7 +221,6 @@ contract('Bondage', function (accounts) {
 
         expect(receivedDots).to.be.equal(0);
     });
-
 
     it("BONDAGE_13 - getTokBound() - Check received tok getting", async function () {
         
@@ -369,7 +367,7 @@ contract('Bondage', function (accounts) {
         const dotsForEscrow = 2;
 
         const forRelease = accounts[8];
-
+        
         await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
         await this.test.bondage.releaseDots(subscriber, oracle, specifier, dotsForEscrow + 2, { from: accounts[3] });
 
@@ -464,5 +462,4 @@ contract("CurrentCost").......
         for (var i = 0; i <= 100; i++) checkLog.call(this.test, i);
     });
 */
-
 });
