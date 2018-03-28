@@ -1,11 +1,7 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.21;
 // v1.0
 
-/* ******************************************************************
-/* MAKE SURE TO transferOwnership TO Arbiter Contract UPON DEPLOYMENT
-/* ******************************************************************/ 
-
-import "../aux/Ownable.sol";
+import "../lib/Ownable.sol";
 
 contract ArbiterStorage is Ownable {
 
@@ -16,52 +12,52 @@ contract ArbiterStorage is Ownable {
         uint96 preBlockEnd;   // Precalculated block end
     }
     
-    // provider_address => subscriber_address => endpoint => Subscription
+    // providerAddress => subscriberAddress => endpoint => Subscription
     mapping(address => mapping(address => mapping(bytes32 => Subscription))) private subscriptions;
 
     /**** Get Methods ****/
 
     function getDots(
-        address provider_address,
-        address subscriber_address,
+        address providerAddress,
+        address subscriberAddress,
         bytes32 endpoint
     )
         external
         view
         returns (uint64)
     {
-        return subscriptions[provider_address][subscriber_address][endpoint].dots;
+        return subscriptions[providerAddress][subscriberAddress][endpoint].dots;
     }
 
     function getBlockStart(
-        address provider_address,
-        address subscriber_address,
+        address providerAddress,
+        address subscriberAddress,
         bytes32 endpoint
     )
         external
         view
         returns (uint96)
     {
-        return subscriptions[provider_address][subscriber_address][endpoint].blockStart;
+        return subscriptions[providerAddress][subscriberAddress][endpoint].blockStart;
     }
 
     function getPreBlockEnd(
-        address provider_address,
-        address subscriber_address,
+        address providerAddress,
+        address subscriberAddress,
         bytes32 endpoint
     )
         external
         view
         returns (uint96)
     {
-        return subscriptions[provider_address][subscriber_address][endpoint].preBlockEnd;
+        return subscriptions[providerAddress][subscriberAddress][endpoint].preBlockEnd;
     }
 
 	/**** Set Methods ****/
 
     function setSubscription(
-        address provider_address,
-        address subscriber_address,
+        address providerAddress,
+        address subscriberAddress,
         bytes32 endpoint,
         uint64 dots,
         uint96 blockStart,
@@ -69,7 +65,7 @@ contract ArbiterStorage is Ownable {
     )
         external
     {
-        subscriptions[provider_address][subscriber_address][endpoint] = Subscription(
+        subscriptions[providerAddress][subscriberAddress][endpoint] = Subscription(
             dots,
             blockStart,
             preBlockEnd
@@ -79,12 +75,12 @@ contract ArbiterStorage is Ownable {
     /**** Delete Methods ****/
 
     function deleteSubscription(
-        address provider_address,
-        address subscriber_address,
+        address providerAddress,
+        address subscriberAddress,
         bytes32 endpoint
     )
         external
     {
-        delete subscriptions[provider_address][subscriber_address][endpoint];
+        delete subscriptions[providerAddress][subscriberAddress][endpoint];
     }
 }

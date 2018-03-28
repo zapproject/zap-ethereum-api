@@ -1,49 +1,59 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.21;
 // v1.0
 
-import "../aux/Mortal.sol";
+import "../lib/Mortal.sol";
+import "../lib/update/Updatable.sol";
+import "../lib/addressSpace/AddressSpace.sol";
+import "../lib/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 
-contract Arbiter is Mortal {
+contract Arbiter is Mortal, Updatable {
     // Called when a data purchase is initiated
-    event LogDataPurchase(
-        address provider,          // Etheruem address of the provider
-        address subscriber,        // Ethereum address of the subscriber
-        uint256 public_key,        // Public key of the subscriber
-        uint256 amount,            // Amount (in 1/100 TOK) of ethereum sent
-        bytes32[] endpoint_params, // Endpoint specific(nonce,encrypted_uuid),
-        bytes32 endpoint
+    event DataPurchase(
+        address indexed provider,          // Etheruem address of the provider
+        address indexed subscriber,        // Ethereum address of the subscriber
+        uint256 publicKey,                 // Public key of the subscriber
+        uint256 indexed amount,            // Amount (in 1/100 TOK) of ethereum sent
+        bytes32[] endpointParams,          // Endpoint specific(nonce,encrypted_uuid),
+        bytes32 endpoint                   // Endpoint specifier
     );
+
+    // Called when a data subscription is ended by either provider or terminator
+    event DataSubscriptionEnd(
+        address indexed provider,                      // Provider from the subscription
+        address indexed subscriber,                    // Subscriber from the subscription
+        SubscriptionTerminator indexed terminator      // Which terminated the contract
+    ); 
 
     // Used to specify who is the terminator of a contract
     enum SubscriptionTerminator { Provider, Subscriber }
-
-    // Called when a data subscription is ended by either provider or terminator
-    event LogDataSubscriptionEnd(
-        address provider,                      // Provider from the subscription
-        address subscriber,                    // Subscriber from the subscription
-        SubscriptionTerminator terminator      // Which terminated the contract
-    ); 
     
     ArbiterStorage stor;
     BondageInterface bondage;
 
-    function Arbiter(address storageAddress, address bondageAddress) public {
+    AddressSpacePointer pointer;
+    AddressSpace addresses;
+
+    address public storageAddress;
+
+    function Arbiter(address pointerAddress, address _storageAddress, address bondageAddress) public {
+        pointer = AddressSpacePointer(pointerAddress);
+        storageAddress = _storageAddress;
         stor = ArbiterStorage(storageAddress);
-        setBondageAddress(bondageAddress);
+        bondage = BondageInterface(bondageAddress);
     }
 
-    /// @notice Reinitialize bondage instance after upgrade
-    function setBondageAddress(address bondageAddress) public onlyOwner {
-        bondage = BondageInterface(bondageAddress);
+    function updateContract() external {
+        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
+        if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
     }
 
     function initiateSubscription(
         address providerAddress,   // Provider address
-        bytes32[] endpoint_params, // Endpoint specific params
         bytes32 endpoint,          // Endpoint specifier
-        uint256 public_key,        // Public key of the purchaser
+        bytes32[] endpointParams,  // Endpoint specific params
+        uint256 publicKey,         // Public key of the purchaser
         uint64 blocks              // Number of blocks subscribed, 1block=1dot
     ) 
         public 
@@ -67,13 +77,12 @@ contract Arbiter is Mortal {
             uint96(block.number) + uint96(blocks)
         );
 
-        // Emit the event
-        LogDataPurchase(
+        emit DataPurchase(
             providerAddress,
             msg.sender,
-            public_key,
+            publicKey,
             blocks,
-            endpoint_params,
+            endpointParams,
             endpoint
         );
     }
@@ -99,7 +108,7 @@ contract Arbiter is Mortal {
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(msg.sender, subscriberAddress, endpoint))
-            LogDataSubscriptionEnd(
+            emit DataSubscriptionEnd(
                 msg.sender, 
                 subscriberAddress, 
                 SubscriptionTerminator.Provider
@@ -115,7 +124,7 @@ contract Arbiter is Mortal {
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(providerAddress, msg.sender, endpoint))
-            LogDataSubscriptionEnd(
+            emit DataSubscriptionEnd(
                 providerAddress,
                 msg.sender,
                 SubscriptionTerminator.Subscriber

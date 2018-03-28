@@ -1,67 +1,73 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.21;
 // v1.0
 
-import "../aux/Mortal.sol";
-import "../aux/Client.sol";
+import "../lib/Mortal.sol";
+import "../lib/update/Updatable.sol";
+import "../lib/Client.sol";
+import "../lib/addressSpace/AddressSpace.sol";
+import "../lib/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 
-contract Dispatch is Mortal { 
+contract Dispatch is Mortal, Updatable { 
 
     //event data provider is listening for, containing all relevant request parameters
-    event LogIncoming(
-        uint256 id,
-        address provider,
-        address recipient,
+    event Incoming(
+        uint256 indexed id,
+        address indexed provider,
+        address indexed recipient,
         string query,
         bytes32 endpoint,
-        bytes32[] endpoint_params
+        bytes32[] endpointParams
     );
     
     DispatchStorage stor;
     BondageInterface bondage;
 
-    function Dispatch(address storageAddress, address bondageAddress) public {
+    AddressSpacePointer pointer;
+    AddressSpace addresses;
+
+    address public storageAddress;
+
+    function Dispatch(address pointerAddress, address _storageAddress, address bondageAddress) public {
+        pointer = AddressSpacePointer(pointerAddress);
+        storageAddress = _storageAddress;
         stor = DispatchStorage(storageAddress);
-        setBondageAddress(bondageAddress);
+        bondage = BondageInterface(bondageAddress);
     }
 
-    /// @notice Reinitialize bondage instance after upgrade
-    function setBondageAddress(address bondageAddress) public onlyOwner {
-            bondage = BondageInterface(bondageAddress);
+    function updateContract() external {
+        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
+        if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
     }
 
     /// @notice Escrow dot for oracle request
     /// @dev Called by user contract
     function query(
         address provider,           // data provider address
-        address subscriber,         // user contract address( dot-holder)
-        string query,               // query string
+        string userQuery,           // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
-        bytes32[] endpoint_params   // endpoint-specific params
+        bytes32[] endpointParams    // endpoint-specific params
     )
         external
         returns (uint256 id)
     {
+        uint256 dots = bondage.getDots(msg.sender, provider, endpoint);
 
-        uint256 dots = bondage.getDots(subscriber, provider, endpoint);
-
-        if(dots >= 1){
+        if(dots >= 1) {
             //enough dots
-            bondage.escrowDots(subscriber, provider, endpoint, 1);
-            id = uint256(keccak256(block.number, now, query, msg.sender));
-            stor.createQuery(id, provider, subscriber, endpoint);
-            LogIncoming(id, provider, msg.sender, query, endpoint, endpoint_params);
+            bondage.escrowDots(msg.sender, provider, endpoint, 1);
+            id = uint256(keccak256(block.number, now, userQuery, msg.sender));
+            stor.createQuery(id, provider, msg.sender, endpoint);
+            emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
         }
-
     }
 
     /// @notice Transfer dots from Bondage escrow to data provider's Holder object under its own address
     /// @dev Called upon data-provider request fulfillment
     function fulfillQuery(uint256 id) internal returns (bool) {
 
-        if (stor.getStatus(id) != DispatchStorage.Status.Pending)
-            revert();
+        require(stor.getStatus(id) == DispatchStorage.Status.Pending);
 
         bondage.releaseDots(
             stor.getSubscriber(id),
@@ -147,4 +153,4 @@ contract Dispatch is Mortal {
 /* with data provider address set as self's address.
 /* 
 /* callback is called in User Contract 
-/* */
+/*/
