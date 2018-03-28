@@ -99,7 +99,7 @@ contract Bondage is Mortal, Updatable {
         returns (bool success)
     {
         uint256 currentDots = getDots(holderAddress, oracleAddress, endpoint);
-        require(currentDots >= numDots);
+        if (numDots > currentDots) numDots == currentDots; 
         stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
         stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
         emit Escrowed(holderAddress, oracleAddress, endpoint, numDots);
@@ -120,7 +120,8 @@ contract Bondage is Mortal, Updatable {
         operatorOnly 
         returns (bool success)
     {
-        require(numDots <= stor.getNumEscrow(holderAddress, oracleAddress, endpoint));
+        uint256 numEscrowed = stor.getNumEscrow(holderAddress, oracleAddress, endpoint);
+        if (numDots > numEscrowed) numDots == numEscrowed;
         stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
         stor.updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
         emit Released(holderAddress, oracleAddress, endpoint, numDots);
