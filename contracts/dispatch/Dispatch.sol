@@ -92,6 +92,7 @@ contract Dispatch is Mortal, Updatable {
         if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
         Client1(stor.getSubscriber(id)).callback(id, response);
+        return true;
     }
 
     /// @dev Parameter-count specific method called by data provider in response
@@ -106,6 +107,7 @@ contract Dispatch is Mortal, Updatable {
         if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
         Client2(stor.getSubscriber(id)).callback(id, response1, response2);
+        return true;
     }
 
     /// @dev Parameter-count specific method called by data provider in response
@@ -121,6 +123,7 @@ contract Dispatch is Mortal, Updatable {
         if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
         Client3(stor.getSubscriber(id)).callback(id, response1, response2, response3);
+        return true;
     }
 
     /// @dev Parameter-count specific method called by data provider in response
@@ -137,6 +140,7 @@ contract Dispatch is Mortal, Updatable {
         if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
         Client4(stor.getSubscriber(id)).callback(id, response1, response2, response3, response4);
+        return true;
     }
 }
 
