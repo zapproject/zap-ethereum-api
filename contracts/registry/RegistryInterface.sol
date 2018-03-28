@@ -9,8 +9,8 @@ contract RegistryInterface {
     function initiateProviderCurve(bytes32, CurveType, uint128, uint128) external;
     function setEndpointParams(bytes32, bytes32[]) external;
     function getProviderexternalKey(address) external view returns (uint256);
-    function getProviderTitle(address) external view returns (string);
+    function getProviderTitle(address) external view returns (bytes32);
 	function getNextRouteKey(address, bytes32, uint256) external view returns (uint256, bytes32);
     function getProviderCurve(address, bytes32) external view returns (CurveType, uint128, uint128);
-    function getNextProvider(uint256) external view returns (uint256, address, uint256, string);
+    function getNextProvider(uint256) external view returns (uint256, address, uint256, bytes32);
 }

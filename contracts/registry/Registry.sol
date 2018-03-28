@@ -91,8 +91,8 @@ contract Registry is Mortal {
     }
 
     /// @return oracle name
-    function getProviderTitle(address provider) public view returns (string) {
-        return bytes32ToStr(stor.getTitle(provider));
+    function getProviderTitle(address provider) public view returns (bytes32) {
+        return stor.getTitle(provider);
     }
 
     /// @return endpoint-specific parameter
@@ -129,7 +129,7 @@ contract Registry is Mortal {
     function getNextProvider(uint256 index)
         public
         view        
-        returns (uint256 nextIndex, address oracleAddress, uint256 publicKey, string title)
+        returns (uint256 nextIndex, address oracleAddress, uint256 publicKey, bytes32 title)
     {
         uint256 len = stor.getOracleIndexSize();
         if (index < len) {
@@ -149,13 +149,5 @@ contract Registry is Mortal {
             );                            
         }
         return (0,0x0,0,"");
-    }
-
-    function bytes32ToStr(bytes32 _bytes32) private pure returns (string) {
-        bytes memory bytesArray = new bytes(32);
-
-        for (uint256 i; i < 32; i++)
-            bytesArray[i] = _bytes32[i];
-        return string(bytesArray);
     }
 }
