@@ -1,6 +1,5 @@
-pragma solidity ^0.4.17;
-
-// Make sure to implement a setDispatchAddress fx in contracts that use this interface to support upgrades
+pragma solidity ^0.4.21;
+// v1.0
 
 interface DispatchInterface {
     function query(address, address,  string, bytes32, bytes32[]) external returns (uint256);

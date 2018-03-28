@@ -1,9 +1,9 @@
-pragma solidity ^0.4.17;
-
-// Make sure to implement a setArbiterAddress fx in contracts that use this interface to support upgrades
+pragma solidity ^0.4.21;
+// v1.0
 
 interface ArbiterInterface {
-    function initiateSubscription(address, bytes32[], bytes32, uint256, uint256) external;
+    function initiateSubscription(address, bytes32[], bytes32, uint256, uint64) external;
+    function getSubscription(address, address, bytes32) external view returns (uint64, uint96, uint96);
     function endSubscriptionProvider(address, address, bytes32) external;
     function endSubscriptionSubscriber(address, address, bytes32) external;
 }

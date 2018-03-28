@@ -1,29 +1,42 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.21;
 
-import "../registry/RegistryInterface.sol";
+import "../../lib/Mortal.sol";
+import "../../lib/update/Updatable.sol";
+import "../../lib/addressSpace/AddressSpace.sol";
+import "../../lib/addressSpace/AddressSpacePointer.sol";
+import "../../registry/RegistryInterface.sol";
 
-contract CurrentCost {
+contract CurrentCost is Mortal, Updatable {
+
+    AddressSpacePointer pointer;
+    AddressSpace addresses;
+    RegistryInterface registry;
+
+    function CurrentCost(address pointerAddress, address registryAddress) public {
+       pointer = AddressSpacePointer(pointerAddress);
+       registry = RegistryInterface(registryAddress);
+    }
+
+    function updateContract() external {
+        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
+        if (registry != addresses.registry()) registry = RegistryInterface(addresses.registry());
+    }
 
     function _currentCostOfDot(
-        RegistryInterface registry,
         address oracleAddress,
-        bytes32 specifier,
+        bytes32 endpoint,
         uint256 totalBound
     )
         public
         view
-        returns (uint256 _cost)
+        returns (uint256 cost)
     {
         RegistryInterface.CurveType curveType;
-        uint256 curveStart;
-        uint256 curveMultiplier;
-        (curveType, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, specifier);
+        uint128 curveStart;
+        uint128 curveMultiplier;
+        (curveType, curveStart, curveMultiplier) = registry.getProviderCurve(oracleAddress, endpoint);
 
-
-        
         require(curveType != RegistryInterface.CurveType.None);
-
-        uint256 cost;
 
         if (curveType == RegistryInterface.CurveType.Linear) {
             cost = curveMultiplier * totalBound + curveStart;
@@ -68,5 +81,4 @@ contract CurrentCost {
             y := add(y, mul(256, gt(arg, 0x8000000000000000000000000000000000000000000000000000000000000000)))
         }
     }
-
 }
