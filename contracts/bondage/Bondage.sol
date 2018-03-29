@@ -25,8 +25,8 @@ contract Bondage is Mortal, Updatable {
     AddressSpace addresses;
 
     address public storageAddress;
-    address arbiterAddress;
-    address dispatchAddress;
+    address public arbiterAddress;
+    address public dispatchAddress;
 
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
     modifier operatorOnly {
@@ -44,7 +44,7 @@ contract Bondage is Mortal, Updatable {
     }
 
     // Called on deployment to initialize arbiterAddress and dispatchAddress
-    function updateContract() external {
+    function updateContract() external onlyOwner {
         if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
         if (currentCost != addresses.currentCost()) currentCost = CurrentCostInterface(addresses.currentCost());
         if (arbiterAddress != addresses.arbiter()) arbiterAddress = addresses.arbiter();
@@ -99,10 +99,11 @@ contract Bondage is Mortal, Updatable {
         returns (bool success)
     {
         uint256 currentDots = getDots(holderAddress, oracleAddress, endpoint);
-        if (numDots > currentDots) numDots == currentDots; 
-        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
-        stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
-        emit Escrowed(holderAddress, oracleAddress, endpoint, numDots);
+        uint256 dotsToEscrow = numDots;
+        if (numDots > currentDots) dotsToEscrow = currentDots; 
+        stor.updateBondValue(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
+        stor.updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "add");
+        emit Escrowed(holderAddress, oracleAddress, endpoint, dotsToEscrow);
         return true;
     }
 
@@ -121,10 +122,11 @@ contract Bondage is Mortal, Updatable {
         returns (bool success)
     {
         uint256 numEscrowed = stor.getNumEscrow(holderAddress, oracleAddress, endpoint);
-        if (numDots > numEscrowed) numDots == numEscrowed;
-        stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
-        stor.updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
-        emit Released(holderAddress, oracleAddress, endpoint, numDots);
+        uint256 dotsToEscrow = numDots;
+        if (numDots > numEscrowed) dotsToEscrow = numEscrowed;
+        stor.updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
+        stor.updateBondValue(oracleAddress, oracleAddress, endpoint, dotsToEscrow, "add");
+        emit Released(holderAddress, oracleAddress, endpoint, dotsToEscrow);
         return true;
     }
 
