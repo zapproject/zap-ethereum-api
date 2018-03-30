@@ -18,7 +18,6 @@ const TheToken = artifacts.require("TheToken");
 const Dispatch = artifacts.require("Dispatch");
 const Arbiter = artifacts.require("Arbiter");
 const Cost = artifacts.require("CurrentCost");
-const AddressesSpace = artifacts.require("AddressSpace");
 const Addresses = artifacts.require("AddressSpacePointer");
 
 contract('Bondage', function (accounts) {
@@ -57,27 +56,16 @@ contract('Bondage', function (accounts) {
     beforeEach(async function deployContracts() {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await TheToken.new();
-       
-        this.currentTest.addrSpace = await AddressesSpace.new(
-            "0x0",
-            "0x0",
-            "0x0",
-            "0x0",
-            "0x0"
-        );
-        this.currentTest.addrPointer = await Addresses.new();
-        await this.currentTest.addrPointer.setAddressSpace(this.currentTest.addrSpace.address);
 
-        this.currentTest.cost = await Cost.new(this.currentTest.addrPointer.address ,this.currentTest.registry.address);
-        this.currentTest.addrSpace.setCurrentCostAddress(this.currentTest.cost.address);
-        this.currentTest.addrSpace.setArbiterAddress(accounts[3]);
+        this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
 
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.addrPointer.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
-        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+
     });
 
     it("BONDAGE_1 - bond() - Check bond function", async function () {
@@ -541,23 +529,16 @@ contract('CurrentCost', function (accounts) {
     beforeEach(async function deployContracts() {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await TheToken.new();
-       
-        this.currentTest.addrSpace = await AddressesSpace.new(
-            "0x0",
-            "0x0",
-            "0x0",
-            "0x0",
-            "0x0"
-        );
-        this.currentTest.addrPointer = await Addresses.new();
-        await this.currentTest.addrPointer.setAddressSpace(this.currentTest.addrSpace.address);
 
-        this.currentTest.cost = await Cost.new(this.currentTest.addrPointer.address ,this.currentTest.registry.address);
-        this.currentTest.addrSpace.setCurrentCostAddress(this.currentTest.cost.address);
-        this.currentTest.addrSpace.setArbiterAddress(accounts[3]);
+        this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
+
+        this.currentTest.bondStor = await BondageStorage.new();
+        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+
     });
 
     it("CURRENT_COST_1 - _currentCostOfDot() - Check current cost for linear function", async function () {
