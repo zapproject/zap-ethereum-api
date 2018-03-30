@@ -25,8 +25,8 @@ contract Bondage is Mortal, Updatable {
     AddressSpace addresses;
 
     address public storageAddress;
-    address public arbiterAddress;
-    address public dispatchAddress;
+    address arbiterAddress;
+    address dispatchAddress;
 
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
     modifier operatorOnly {
@@ -44,7 +44,7 @@ contract Bondage is Mortal, Updatable {
     }
 
     // Called on deployment to initialize arbiterAddress and dispatchAddress
-    function updateContract() external onlyOwner {
+    function updateContract() external {
         if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
         if (currentCost != addresses.currentCost()) currentCost = CurrentCostInterface(addresses.currentCost());
         if (arbiterAddress != addresses.arbiter()) arbiterAddress = addresses.arbiter();
