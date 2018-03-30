@@ -159,4 +159,32 @@ contract('Arbiter', function (accounts) {
 
         await expect(this.test.arbiter.endSubscriptionSubscriber(oracle, specifier, {from: subscriber})).to.eventually.be.rejectedWith(EVMRevert);
     });
+
+    it("ARBITER_8 - endSubscriptionSubscriber() - Check that only subscriber can end subscription by subscriber", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
+
+        await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
+
+        let res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
+        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+
+        await expect(this.test.arbiter.endSubscriptionSubscriber(oracle, specifier, {from: accounts[7]})).to.eventually.be.rejectedWith(EVMRevert);
+    });
+
+    it("ARBITER_9 - endSubscriptionProvider() - Check that only provider can end subscription by provider", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
+
+        await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
+
+        let res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
+        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+
+        await expect(this.test.arbiter.endSubscriptionProvider(subscriber, specifier, {from: accounts[7]})).to.eventually.be.rejectedWith(EVMRevert);
+    });
 });
