@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 // v1.0
 
 import "./../lib/Mortal.sol";
@@ -48,7 +48,7 @@ contract Registry is Mortal {
         stor.createOracle(msg.sender, publicKey, title);
         if(endpoint != 0) setEndpointParams(endpoint, endpointParams);
         stor.addOracle(msg.sender);
-        emit NewProvider(msg.sender, title, endpoint);
+         NewProvider(msg.sender, title, endpoint);
         return true;
     }
 
@@ -77,7 +77,7 @@ contract Registry is Mortal {
         require(cType == RegistryStorage.CurveType.None);
         stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
 
-        emit NewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
+         NewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
         return true;
     }
 

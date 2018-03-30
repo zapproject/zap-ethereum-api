@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 // v1.0
 
 import "../lib/Mortal.sol";
@@ -59,7 +59,7 @@ contract Dispatch is Mortal, Updatable {
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
             id = uint256(keccak256(block.number, now, userQuery, msg.sender));
             stor.createQuery(id, provider, msg.sender, endpoint);
-            emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
+             Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
         }
     }
 
@@ -148,7 +148,7 @@ contract Dispatch is Mortal, Updatable {
 /* For use in example contract, see TestSubscriber.sol
 /*
 /* When User Contract calls ZapDispatch.query(),
-/* 1 oracle specific dot is escrowed by ZapBondage and Incoming event is emitted.
+/* 1 oracle specific dot is escrowed by ZapBondage and Incoming event is ted.
 /*
 /* When provider's client hears an Incoming event containing provider's address and responds,
 /* the provider calls a ZapDispatch.respondX function corresponding to number of response params.

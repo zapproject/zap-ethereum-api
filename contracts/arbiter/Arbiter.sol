@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.19;
 // v1.0
 
 import "../lib/Mortal.sol";
@@ -77,7 +77,7 @@ contract Arbiter is Mortal, Updatable {
             uint96(block.number) + uint96(blocks)
         );
 
-        emit DataPurchase(
+         DataPurchase(
             providerAddress,
             msg.sender,
             publicKey,
@@ -108,7 +108,7 @@ contract Arbiter is Mortal, Updatable {
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(msg.sender, subscriberAddress, endpoint))
-            emit DataSubscriptionEnd(
+             DataSubscriptionEnd(
                 msg.sender, 
                 subscriberAddress, 
                 SubscriptionTerminator.Provider
@@ -124,7 +124,7 @@ contract Arbiter is Mortal, Updatable {
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(providerAddress, msg.sender, endpoint))
-            emit DataSubscriptionEnd(
+             DataSubscriptionEnd(
                 providerAddress,
                 msg.sender,
                 SubscriptionTerminator.Subscriber
