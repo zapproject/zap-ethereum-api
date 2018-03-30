@@ -12,3 +12,4 @@ contract RegistryInterface {
 	function getNextRouteKey(address, bytes32, uint256) public view returns (uint256, bytes32);
     function getProviderCurve(address, bytes32) public view returns (CurveType, uint256, uint256);
     function getNextProvider(uint256) public view returns (uint256, address, uint256, string);
+}
