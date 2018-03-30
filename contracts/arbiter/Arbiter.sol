@@ -77,7 +77,7 @@ contract Arbiter is Mortal, Updatable {
             uint96(block.number) + uint96(blocks)
         );
 
-         DataPurchase(
+        DataPurchase(
             providerAddress,
             msg.sender,
             publicKey,

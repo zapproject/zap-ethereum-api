@@ -11,13 +11,15 @@ const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
 
 const Utils = require("./helpers/utils.js");
+
 function hex2a(hexx) { 
     var hex = hexx.toString(); //force conversion
     var str = '';
     for (var i = 2; i < hex.length; i += 2) {
         let hexValue = hex.substr(i, 2);
-        if (hexValue != "00" && hexValue != "0x")
+        if (hexValue != "00" && hexValue != "0x") {
             str += String.fromCharCode(parseInt(hexValue, 16));
+        }
     }
     return str;
 }
@@ -56,8 +58,8 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner });
     });
 
-    it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {   
-        await expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+    it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
+        expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if curve type is none", async function () {
@@ -75,7 +77,7 @@ contract('Registry', async (accounts) => {
     });
 
     it("REGISTRY_7 - getNextEndpointParam() - Check that route keys of uninitialized provider are empty", async function () {        
-        const res = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);>>>>>>> master
+        const res = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);
         
         // can not use chai, because it can not compare empty arrays
         assert(res, []);

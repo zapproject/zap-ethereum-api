@@ -55,13 +55,13 @@ contract Bondage is Mortal, Updatable {
     /// @return total TOK bound to oracle
     function bond(address oracleAddress, bytes32 endpoint, uint256 numTok) external returns (uint256 bound) {
         bound = _bond(msg.sender, oracleAddress, endpoint, numTok);
-         Bound(msg.sender, oracleAddress, endpoint, numTok);
+        Bound(msg.sender, oracleAddress, endpoint, numTok);
     }
 
     /// @return total TOK unbound from oracle
     function unbond(address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
         unbound = _unbond(msg.sender, oracleAddress, endpoint, numDots);
-         Unbound(msg.sender, oracleAddress, endpoint, numDots);
+        Unbound(msg.sender, oracleAddress, endpoint, numDots);
     }        
 
     /// @dev will bond to an oracle on behalf of some holder
@@ -70,14 +70,14 @@ contract Bondage is Mortal, Updatable {
         require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
         stor.setDelegate(holderAddress, oracleAddress, msg.sender);
         bound = _bond(holderAddress, oracleAddress, endpoint, numTok);
-         Bound(holderAddress, oracleAddress, endpoint, numTok);
+        Bound(holderAddress, oracleAddress, endpoint, numTok);
     }
 
     /// @return total TOK unbound from oracle
     function delegateUnbond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
         require(stor.getDelegate(holderAddress, oracleAddress) == msg.sender);
         unbound = _unbond(holderAddress, oracleAddress, endpoint, numDots);
-         Unbound(holderAddress, oracleAddress, endpoint, numDots);
+        Unbound(holderAddress, oracleAddress, endpoint, numDots);
     }
 
     /// @dev will reset delegate 
@@ -99,10 +99,11 @@ contract Bondage is Mortal, Updatable {
         returns (bool success)
     {
         uint256 currentDots = getDots(holderAddress, oracleAddress, endpoint);
-        if (numDots > currentDots) numDots == currentDots; 
-        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
-        stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
-         Escrowed(holderAddress, oracleAddress, endpoint, numDots);
+        uint256 dotsToEscrow = numDots;
+        if (numDots > currentDots) dotsToEscrow = currentDots; 
+        stor.updateBondValue(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
+        stor.updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "add");
+        Escrowed(holderAddress, oracleAddress, endpoint, dotsToEscrow);
         return true;
     }
 
@@ -121,10 +122,11 @@ contract Bondage is Mortal, Updatable {
         returns (bool success)
     {
         uint256 numEscrowed = stor.getNumEscrow(holderAddress, oracleAddress, endpoint);
-        if (numDots > numEscrowed) numDots == numEscrowed;
-        stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
-        stor.updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
-         Released(holderAddress, oracleAddress, endpoint, numDots);
+        uint256 dotsToEscrow = numDots;
+        if (numDots > numEscrowed) dotsToEscrow = numEscrowed;
+        stor.updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
+        stor.updateBondValue(oracleAddress, oracleAddress, endpoint, dotsToEscrow, "add");
+        Released(holderAddress, oracleAddress, endpoint, dotsToEscrow);
         return true;
     }
 

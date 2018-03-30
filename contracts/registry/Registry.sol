@@ -48,7 +48,7 @@ contract Registry is Mortal {
         stor.createOracle(msg.sender, publicKey, title);
         if(endpoint != 0) setEndpointParams(endpoint, endpointParams);
         stor.addOracle(msg.sender);
-         NewProvider(msg.sender, title, endpoint);
+        NewProvider(msg.sender, title, endpoint);
         return true;
     }
 
@@ -76,8 +76,7 @@ contract Registry is Mortal {
         (cType,) = stor.getCurve(msg.sender, endpoint);
         require(cType == RegistryStorage.CurveType.None);
         stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
-
-         NewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
+        NewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
         return true;
     }
 
@@ -129,7 +128,7 @@ contract Registry is Mortal {
     function getNextProvider(uint256 index)
         public
         view
-        returns (uint256 nextIndex, address oracleAddress, uint256 publicKey, bytes32 title)
+        returns (uint256 nextIndex, address oracleAddress, uint256 publicKey, bytes32 title)      
     {
         uint256 len = stor.getOracleIndexSize();
         if (index < len) {

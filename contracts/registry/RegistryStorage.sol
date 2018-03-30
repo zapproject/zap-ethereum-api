@@ -1,5 +1,4 @@
 pragma solidity ^0.4.19;
-// v1.0
 
 import "../lib/Mortal.sol";
 
@@ -95,6 +94,16 @@ contract RegistryStorage is Ownable {
         onlyOwner
 
     {
+<<<<<<< HEAD
         oracles[origin].curves[endpoint] = Curve(curveType, curveStart, curveMultiplier);
     }
 }
+||||||| merged common ancestors
+        oracles[origin].curves[specifier] = Curve(curveType, curveStart, curveMultiplier);		
+	}
+}
+=======
+        oracles[origin].curves[endpoint] = Curve(curveType, curveStart, curveMultiplier);
+    }
+}
+>>>>>>> origin/audit01

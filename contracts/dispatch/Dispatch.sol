@@ -56,10 +56,22 @@ contract Dispatch is Mortal, Updatable {
 
         if(dots >= 1) {
             //enough dots
+<<<<<<< HEAD
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
             id = uint256(keccak256(block.number, now, userQuery, msg.sender));
             stor.createQuery(id, provider, msg.sender, endpoint);
              Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
+||||||| merged common ancestors
+            bondage.escrowDots(subscriber, provider, endpoint, 1);
+            id = uint256(keccak256(block.number, now, query, msg.sender));
+            stor.createQuery(id, provider, subscriber, endpoint);
+            LogIncoming(id, provider, msg.sender, query, endpoint, endpoint_params);
+=======
+            bondage.escrowDots(msg.sender, provider, endpoint, 1);
+            id = uint256(keccak256(block.number, now, userQuery, msg.sender));
+            stor.createQuery(id, provider, msg.sender, endpoint);
+            emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
+>>>>>>> origin/audit01
         }
     }
 
