@@ -11,6 +11,9 @@ var Dispatch = artifacts.require("./Dispatch.sol");
 var TheToken = artifacts.require("./TheToken.sol");
 var CurrentCost = artifacts.require("./CurrentCost.sol");
 var Update = artifacts.require("./Update.sol");
+var Faucet = artifacts.require("./Faucet.sol");
+
+var owner = "0x0";
 
 module.exports = function(deployer) {
   deployer.deploy([RegistryStorage, BondageStorage, ArbiterStorage, DispatchStorage, AddressSpacePointer])
@@ -31,6 +34,9 @@ module.exports = function(deployer) {
   })
   .then (() => {
     return deployer.deploy(AddressSpace, Registry.address, Bondage.address, Arbiter.address, Dispatch.address, CurrentCost.address);
+  })
+  .then (() => {
+    return deployer.deploy(Faucet, TheToken.address, owner);
   })
   .then (() => {
     AddressSpacePointer.deployed().then(instance => instance.setAddressSpace(AddressSpace.address));

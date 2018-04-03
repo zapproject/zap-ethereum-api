@@ -1,6 +1,7 @@
 require('babel-register');
 require('babel-polyfill');
 
+
 module.exports = {
     networks: {
         development: {
@@ -21,6 +22,13 @@ module.exports = {
             host: "localhost",
             port: 7545,
             network_id: "*" 
+        },
+        "testRpc": {
+            host: "127.0.0.1",
+            port: 7545,
+            network_id: 5777, 
+            gas: "7500000",
+            gasPrice: "4000000000"
         }
     }
 };
