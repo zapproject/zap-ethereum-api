@@ -6,7 +6,6 @@ import "../lib/update/Updatable.sol";
 import "../lib/Client.sol";
 import "../lib/addressSpace/AddressSpace.sol";
 import "../lib/addressSpace/AddressSpacePointer.sol";
-import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 
 contract Dispatch is Mortal, Updatable { 
@@ -29,16 +28,15 @@ contract Dispatch is Mortal, Updatable {
 
     address public storageAddress;
 
-    function Dispatch(address pointerAddress, address _storageAddress, address bondageAddress) public {
+    function Dispatch(address pointerAddress, address _storageAddress) public {
         pointer = AddressSpacePointer(pointerAddress);
         storageAddress = _storageAddress;
         stor = DispatchStorage(storageAddress);
-        bondage = BondageInterface(bondageAddress);
     }
 
     function updateContract() external {
         if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
+        bondage = addresses.instantiateBondage(bondage);
     }
 
     /// @notice Escrow dot for oracle request

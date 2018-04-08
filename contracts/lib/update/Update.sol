@@ -25,16 +25,18 @@ contract Update is Mortal {
         currentCost = UpdatableContract(addresses.currentCost());
     }
 
+    // Update all UpdatableContracts in the Dapp (called upon deployment as well to initialize abstract contracts)
     function updateContracts() external {
         if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
+     /*
         if (bondage != addresses.bondage()) bondage = UpdatableContract(addresses.bondage());
         if (arbiter != addresses.arbiter()) arbiter = UpdatableContract(addresses.arbiter());
         if (dispatch != addresses.dispatch()) dispatch = UpdatableContract(addresses.dispatch());
         if (currentCost != addresses.currentCost()) currentCost = UpdatableContract(addresses.currentCost());
-
+    */
+        currentCost.updateContract();
         bondage.updateContract();
         arbiter.updateContract();
-        dispatch.updateContract();
-        currentCost.updateContract();
+        dispatch.updateContract();        
     }
 }

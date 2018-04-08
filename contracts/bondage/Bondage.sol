@@ -17,7 +17,7 @@ contract Bondage is Mortal, Updatable {
     event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
 
     BondageStorage stor;
-    CurrentCostInterface currentCost;
+    CurrentCostInterface public currentCost;
     ERC20 token;
     uint256 decimals = 10 ** 18;
 
@@ -35,20 +35,19 @@ contract Bondage is Mortal, Updatable {
     }
 
     /// @dev Initialize Storage, Token, anc CurrentCost Contracts
-    function Bondage(address pointerAddress, address _storageAddress, address tokenAddress, address currentCostAddress) public {
-        pointer = AddressSpacePointer(pointerAddress);
+    function Bondage(address pointerAddress, address _storageAddress, address tokenAddress) public {
         storageAddress = _storageAddress;
         stor = BondageStorage(storageAddress);
-        token = ERC20(tokenAddress); 
-        currentCost = CurrentCostInterface(currentCostAddress);
+        token = ERC20(tokenAddress);
+        pointer = AddressSpacePointer(pointerAddress);
     }
 
     // Called on deployment to initialize arbiterAddress and dispatchAddress
     function updateContract() external {
-        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (currentCost != addresses.currentCost()) currentCost = CurrentCostInterface(addresses.currentCost());
+        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());        
         if (arbiterAddress != addresses.arbiter()) arbiterAddress = addresses.arbiter();
         if (dispatchAddress != addresses.dispatch()) dispatchAddress = addresses.dispatch();
+        currentCost = addresses.instantiateCurrentCost(currentCost);
     }
 
     /// @dev will bond to an oracle

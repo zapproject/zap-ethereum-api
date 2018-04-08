@@ -56,14 +56,14 @@ contract('Arbiter', function (accounts) {
 
         this.currentTest.token = await TheToken.new();
 
-        this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
+        this.currentTest.cost = await Cost.new(Addresses.address);
         
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address);
         this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
         this.currentTest.arbStor = await ArbiterStorage.new();
-        this.currentTest.arbiter = await Arbiter.new(Addresses.address, this.currentTest.arbStor.address, this.currentTest.bondage.address);
+        this.currentTest.arbiter = await Arbiter.new(Addresses.address, this.currentTest.arbStor.address);
         this.currentTest.arbStor.transferOwnership(this.currentTest.arbiter.address);
     });
 

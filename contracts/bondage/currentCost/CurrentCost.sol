@@ -12,14 +12,13 @@ contract CurrentCost is Mortal, Updatable {
     AddressSpace addresses;
     RegistryInterface registry;
 
-    function CurrentCost(address pointerAddress, address registryAddress) public {
+    function CurrentCost(address pointerAddress) public {
        pointer = AddressSpacePointer(pointerAddress);
-       registry = RegistryInterface(registryAddress);
     }
 
     function updateContract() external {
         if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (registry != addresses.registry()) registry = RegistryInterface(addresses.registry());
+        registry = addresses.instantiateRegistry(registry);
     }
 
     function _currentCostOfDot(
@@ -27,7 +26,7 @@ contract CurrentCost is Mortal, Updatable {
         bytes32 endpoint,
         uint256 totalBound
     )
-        public
+        external
         view
         returns (uint256 cost)
     {
@@ -43,9 +42,8 @@ contract CurrentCost is Mortal, Updatable {
         } else if (curveType == RegistryInterface.CurveType.Exponential) {
             cost = curveMultiplier * (totalBound ** 2) + curveStart;
         } else if (curveType == RegistryInterface.CurveType.Logarithmic) {
-            if (totalBound == 0)
-                totalBound = 1;
-            cost = curveMultiplier * fastlog2(totalBound) + curveStart;
+            if (totalBound == 0) uint8 _totalBound = 1;
+            cost = curveMultiplier * fastlog2(_totalBound) + curveStart;
         }
         return cost;
     }

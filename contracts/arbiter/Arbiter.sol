@@ -5,7 +5,6 @@ import "../lib/Mortal.sol";
 import "../lib/update/Updatable.sol";
 import "../lib/addressSpace/AddressSpace.sol";
 import "../lib/addressSpace/AddressSpacePointer.sol";
-import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 
 contract Arbiter is Mortal, Updatable {
@@ -37,16 +36,15 @@ contract Arbiter is Mortal, Updatable {
 
     address public storageAddress;
 
-    function Arbiter(address pointerAddress, address _storageAddress, address bondageAddress) public {
+    function Arbiter(address pointerAddress, address _storageAddress) public {
         pointer = AddressSpacePointer(pointerAddress);
         storageAddress = _storageAddress;
         stor = ArbiterStorage(storageAddress);
-        bondage = BondageInterface(bondageAddress);
     }
 
     function updateContract() external {
         if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
+        bondage = addresses.instantiateBondage(bondage);
     }
 
     function initiateSubscription(

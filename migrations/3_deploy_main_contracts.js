@@ -18,16 +18,16 @@ module.exports = function(deployer) {
     return deployer.deploy(Registry, RegistryStorage.address);
   })
   .then (() => {
-    return deployer.deploy(CurrentCost, AddressSpacePointer.address, Registry.address);
+    return deployer.deploy(CurrentCost, AddressSpacePointer.address);
   })
   .then (() => {
-    return deployer.deploy(Bondage, AddressSpacePointer.address, BondageStorage.address, TheToken.address, CurrentCost.address);
+    return deployer.deploy(Bondage, AddressSpacePointer.address, BondageStorage.address, TheToken.address);
   })
   .then (() => {
-    return deployer.deploy(Arbiter, AddressSpacePointer.address, ArbiterStorage.address, Bondage.address);
+    return deployer.deploy(Arbiter, AddressSpacePointer.address, ArbiterStorage.address);
   })
   .then (() => {
-    return deployer.deploy(Dispatch, AddressSpacePointer.address, DispatchStorage.address, Bondage.address);
+    return deployer.deploy(Dispatch, AddressSpacePointer.address, DispatchStorage.address);
   })
   .then (() => {
     return deployer.deploy(AddressSpace, Registry.address, Bondage.address, Arbiter.address, Dispatch.address, CurrentCost.address);
@@ -36,11 +36,13 @@ module.exports = function(deployer) {
     AddressSpacePointer.deployed().then(instance => instance.setAddressSpace(AddressSpace.address));
   })
   .then (() => {
-    Bondage.deployed().then(instance => instance.updateContract());
+    return deployer.deploy(Update, AddressSpacePointer.address);
+  })
+  .then (() => {
     RegistryStorage.deployed().then(instance => instance.transferOwnership(Registry.address));
     BondageStorage.deployed().then(instance => instance.transferOwnership(Bondage.address));
     ArbiterStorage.deployed().then(instance => instance.transferOwnership(Arbiter.address));
     DispatchStorage.deployed().then(instance => instance.transferOwnership(Dispatch.address));
-    return deployer.deploy(Update, AddressSpacePointer.address);
+    Update.deployed().then(instance => instance.updateContracts());
   });
 };
