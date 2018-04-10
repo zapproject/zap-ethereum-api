@@ -1,9 +1,9 @@
 pragma solidity ^0.4.19;
 // v1.0
 
-import "../Mortal.sol";
+import "../Destructible.sol";
 
-contract AddressSpace is Mortal {
+contract AddressSpace is Destructible {
 
     address public registry;
     address public bondage;

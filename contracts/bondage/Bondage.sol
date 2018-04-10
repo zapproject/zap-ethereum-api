@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 // v1.0
 
-import "../lib/Mortal.sol";
+import "../lib/Destructible.sol";
 import "../lib/update/Updatable.sol";
 import "../lib/ERC20.sol";
 import "../lib/addressSpace/AddressSpace.sol";
@@ -9,7 +9,7 @@ import "../lib/addressSpace/AddressSpacePointer.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 
-contract Bondage is Mortal, Updatable {
+contract Bondage is Destructible, Updatable {
 
     event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numTok);
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);

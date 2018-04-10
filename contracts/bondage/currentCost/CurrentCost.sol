@@ -1,12 +1,12 @@
 pragma solidity ^0.4.19;
 
-import "../../lib/Mortal.sol";
+import "../../lib/Destructible.sol";
 import "../../lib/update/Updatable.sol";
 import "../../lib/addressSpace/AddressSpace.sol";
 import "../../lib/addressSpace/AddressSpacePointer.sol";
 import "../../registry/RegistryInterface.sol";
 
-contract CurrentCost is Mortal, Updatable {
+contract CurrentCost is Destructible, Updatable {
 
     AddressSpacePointer pointer;
     AddressSpace addresses;

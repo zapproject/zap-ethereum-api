@@ -1,10 +1,10 @@
 pragma solidity ^0.4.19;
 // v1.0
 
-import "./../lib/Mortal.sol";
+import "./../lib/Destructible.sol";
 import "./RegistryStorage.sol";
 
-contract Registry is Mortal {
+contract Registry is Destructible {
 
     event NewProvider(
         address indexed provider,

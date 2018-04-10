@@ -1,12 +1,12 @@
 pragma solidity ^0.4.19;
 
-import "..//Mortal.sol";
+import "..//Destructible.sol";
 import "../addressSpace/AddressSpace.sol";
 import "../addressSpace/AddressSpacePointer.sol";
 
 interface UpdatableContract { function updateContract() external; }
 
-contract Update is Mortal {
+contract Update is Destructible {
 
     AddressSpacePointer pointer;
     AddressSpace addresses;

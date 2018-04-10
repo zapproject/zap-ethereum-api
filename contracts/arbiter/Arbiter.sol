@@ -1,14 +1,14 @@
 pragma solidity ^0.4.19;
 // v1.0
 
-import "../lib/Mortal.sol";
+import "../lib/Destructible.sol";
 import "../lib/update/Updatable.sol";
 import "../lib/addressSpace/AddressSpace.sol";
 import "../lib/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 
-contract Arbiter is Mortal, Updatable {
+contract Arbiter is Destructible, Updatable {
     // Called when a data purchase is initiated
     event DataPurchase(
         address indexed provider,          // Etheruem address of the provider

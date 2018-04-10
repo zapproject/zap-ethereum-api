@@ -1,7 +1,7 @@
 pragma solidity ^0.4.19;
 // v1.0
 
-import "../lib/Mortal.sol";
+import "../lib/Destructible.sol";
 import "../lib/update/Updatable.sol";
 import "../lib/Client.sol";
 import "../lib/addressSpace/AddressSpace.sol";
@@ -9,7 +9,7 @@ import "../lib/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 
-contract Dispatch is Mortal, Updatable { 
+contract Dispatch is Destructible, Updatable { 
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(
