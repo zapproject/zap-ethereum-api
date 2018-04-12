@@ -88,7 +88,7 @@ contract BondageStorage is Ownable {
         external
         onlyOwner      
     {
-        if (keccak256(op) == keccak256("sub"))
+        if (op == "sub")
             pendingEscrow[holderAddress][oracleAddress][endpoint] -= numDots;
         else {
             pendingEscrow[holderAddress][oracleAddress][endpoint] += numDots;
@@ -105,7 +105,7 @@ contract BondageStorage is Ownable {
         external
         onlyOwner      
     {
-        if (op == "sub")
+        if (op == "sub") 
             holders[holderAddress].bonds[endpoint][oracleAddress] -= numDots;
         else {
             holders[holderAddress].bonds[endpoint][oracleAddress] += numDots;

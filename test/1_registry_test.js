@@ -159,15 +159,15 @@ contract('Registry', async (accounts) => {
 
         let index = 0;
         let res = await this.test.registry.getNextProvider(index);
-        expect(res[3].valueOf()).to.be.equal(title);
+        expect(hex2a(res[3].valueOf())).to.be.equal(title);
         index = parseInt(res[0].valueOf());
         
         res = await this.test.registry.getNextProvider(index);
-        expect(res[3].valueOf()).to.be.equal(title + "1");
+        expect(hex2a(res[3].valueOf())).to.be.equal(title + "1");
         index = parseInt(res[0].valueOf());
 
         res = await this.test.registry.getNextProvider(index);
-        expect(res[3].valueOf()).to.be.equal(title + "2");
+        expect(hex2a(res[3].valueOf())).to.be.equal(title + "2");
         index = parseInt(res[0].valueOf());
         
         expect(index).to.be.equal(0);
