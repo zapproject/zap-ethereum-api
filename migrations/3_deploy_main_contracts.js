@@ -36,7 +36,6 @@ module.exports = function(deployer) {
     AddressSpacePointer.deployed().then(instance => instance.setAddressSpace(AddressSpace.address));
   })
   .then (() => {
-    Bondage.deployed().then(instance => instance.updateContract());
     RegistryStorage.deployed().then(instance => instance.transferOwnership(Registry.address));
     BondageStorage.deployed().then(instance => instance.transferOwnership(Bondage.address));
     ArbiterStorage.deployed().then(instance => instance.transferOwnership(Arbiter.address));
