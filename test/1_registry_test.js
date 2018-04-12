@@ -82,19 +82,21 @@ contract('Registry', async (accounts) => {
         // can not use chai, because it can not compare empty arrays
         assert(res, []);
     });
-/*
+
     it("REGISTRY_8 - getProviderTitle() - Check that we can get provider title", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
         const receivedTitle = await this.test.registry.getProviderTitle.call(owner);
 
-        expect(receivedTitle.valueOf()).to.be.equal(title);
+        expect(hex2a(receivedTitle.valueOf())).to.be.equal(title);
     });
 
     it("REGISTRY_9 - getProviderTitle() - Check that title of uninitialized provider is empty", async function () {
-        expect(this.test.registry.getProviderTitle.call(owner)).to.eventually.be.equal('');
+        const receivedTitle = await this.test.registry.getProviderTitle.call(owner);        
+
+        expect(hex2a(receivedTitle.valueOf())).to.be.equal('');
     });
-*/
+
     it("REGISTRY_10 - getProviderPublicKey() - Check that we can get provider public key", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
