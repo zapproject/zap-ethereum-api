@@ -63,7 +63,7 @@ contract('Bondage', function (accounts) {
         this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
 
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.addrPointer.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
         await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
 
