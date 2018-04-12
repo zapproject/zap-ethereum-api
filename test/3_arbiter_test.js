@@ -15,7 +15,7 @@ const Bondage = artifacts.require("Bondage");
 const BondageStorage = artifacts.require("BondageStorage");
 const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
-const TheToken = artifacts.require("TheToken");
+const ZapToken = artifacts.require("ZapToken");
 const Cost = artifacts.require("CurrentCost");
 const Addresses = artifacts.require("AddressSpacePointer");
 
@@ -54,7 +54,7 @@ contract('Arbiter', function (accounts) {
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
         this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
-        this.currentTest.token = await TheToken.new();
+        this.currentTest.token = await ZapToken.new();
 
         this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
         

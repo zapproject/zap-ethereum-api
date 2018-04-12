@@ -8,7 +8,7 @@ var ArbiterStorage = artifacts.require("./ArbiterStorage.sol");
 var Arbiter = artifacts.require("./Arbiter.sol");
 var DispatchStorage = artifacts.require("./DispatchStorage.sol");
 var Dispatch = artifacts.require("./Dispatch.sol");
-var TheToken = artifacts.require("./TheToken.sol");
+var ZapToken = artifacts.require("./ZapToken.sol");
 var CurrentCost = artifacts.require("./CurrentCost.sol");
 var Update = artifacts.require("./Update.sol");
 
@@ -21,7 +21,7 @@ module.exports = function(deployer) {
     return deployer.deploy(CurrentCost, AddressSpacePointer.address, Registry.address);
   })
   .then (() => {
-    return deployer.deploy(Bondage, AddressSpacePointer.address, BondageStorage.address, TheToken.address, CurrentCost.address);
+    return deployer.deploy(Bondage, AddressSpacePointer.address, BondageStorage.address, ZapToken.address, CurrentCost.address);
   })
   .then (() => {
     return deployer.deploy(Arbiter, AddressSpacePointer.address, ArbiterStorage.address, Bondage.address);

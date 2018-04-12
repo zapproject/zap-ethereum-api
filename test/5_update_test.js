@@ -13,7 +13,7 @@ const Bondage = artifacts.require("Bondage");
 const BondageStorage = artifacts.require("BondageStorage");
 const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
-const TheToken = artifacts.require("TheToken");
+const ZapToken = artifacts.require("ZapToken");
 const Dispatch = artifacts.require("Dispatch");
 const DispatchStorage = artifacts.require("DispatchStorage");
 const Arbiter = artifacts.require("Arbiter");
@@ -32,7 +32,7 @@ contract('Registry', async (accounts) => {
         this.currentTest.addrPtr.setAddressSpace(this.currentTest.addrSpace.address);
 
         // Token
-        this.currentTest.token = await TheToken.new();
+        this.currentTest.token = await ZapToken.new();
 
         // Registry
         this.currentTest.regStor = await RegistryStorage.new();

@@ -1,5 +1,5 @@
-var TheToken = artifacts.require("./TheToken.sol");
+var ZapToken = artifacts.require("./ZapToken.sol");
 
 module.exports = function(deployer) {
-    deployer.deploy(TheToken);
+    deployer.deploy(ZapToken);
 };
