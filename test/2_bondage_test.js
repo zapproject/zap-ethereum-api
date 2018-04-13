@@ -19,6 +19,7 @@ const Dispatch = artifacts.require("Dispatch");
 const Arbiter = artifacts.require("Arbiter");
 const Cost = artifacts.require("CurrentCost");
 const Addresses = artifacts.require("AddressSpacePointer");
+const AddresSpace = artifacts.require("AddressSpace");
 
 contract('Bondage', function (accounts) {
     const owner = accounts[0];
@@ -51,6 +52,16 @@ contract('Bondage', function (accounts) {
         await this.token.allocate(owner, tokensForOwner, { from: owner });
         await this.token.allocate(allocAddress, tokensForSubscriber, { from: owner });
         //await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
+    }
+
+    async function initTestArbiterAddress() {
+        const addressSpacePointer = await web3.eth.contract(Addresses.abi).at(Addresses.address);
+        const addressSpaceAddress = await addressSpacePointer.addresses.call();
+        const addressSpace = await web3.eth.contract(AddresSpace.abi).at(addressSpaceAddress.valueOf());
+        await addressSpace.setArbiterAddress(accounts[3], {from: owner});
+        await addressSpace.setCurrentCostAddress(this.cost.address, {from: owner});
+        
+        await this.bondage.updateContract();
     }
 
     beforeEach(async function deployContracts() {
@@ -258,8 +269,8 @@ contract('Bondage', function (accounts) {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
-        
-        await this.test.bondage.updateContract();
+
+        await initTestArbiterAddress.call(this.test);
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -309,7 +320,7 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-        await this.test.bondage.updateContract();
+        await initTestArbiterAddress.call(this.test);
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 0, {from: subscriber});
@@ -336,7 +347,7 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-        await this.test.bondage.updateContract();
+        await initTestArbiterAddress.call(this.test);
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -369,7 +380,7 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-        await this.test.bondage.updateContract();
+        await initTestArbiterAddress.call(this.test);
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
