@@ -25,7 +25,7 @@ contract Bondage is Destructible, Updatable {
     AddressSpace addresses;
 
     address public storageAddress;
-    address arbiterAddress;
+    address public arbiterAddress;
     address dispatchAddress;
 
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
