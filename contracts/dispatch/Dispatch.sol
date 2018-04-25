@@ -69,6 +69,8 @@ contract Dispatch is Destructible, Updatable {
 
         require(stor.getStatus(id) == DispatchStorage.Status.Pending);
 
+        stor.setFulfilled(id);
+
         bondage.releaseDots(
             stor.getSubscriber(id),
             stor.getProvider(id),
@@ -76,7 +78,6 @@ contract Dispatch is Destructible, Updatable {
             1
         );
 
-        stor.setFulfilled(id);
         return true;
     }
 
