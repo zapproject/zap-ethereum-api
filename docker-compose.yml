@@ -1,0 +1,42 @@
+version: '3'
+networks: # private network of our services
+    etherium-network:
+
+services:
+  nodejs:
+    image: "node:${DOCKER_NODE_VER:-8-alpine}"
+    networks:
+      etherium-network:
+        aliases:
+          - nodejs # private host-name in of our network
+    container_name: nodejs
+
+    volumes:
+      - "${PROJECT_SRC:-.}/:/src"
+    working_dir: /src
+    tty: true # interactive mode
+    stdin_open: true # interactive mode
+    command:
+      - 'top'
+    entrypoint:
+      - /bin/sh
+      - -c
+
+  bootstrap:
+    image: "parity/parity:${DOCKER_PARITY_VER:-v1.7.7}"
+    restart: on-failure
+    container_name: bootstrap
+    networks:
+      etherium-network:
+        aliases:
+          - bootstrap # private host-name in of our network
+
+    volumes:
+      - "./parity-assets/config.toml:/root/.local/share/io.parity.ethereum/config.toml:ro"
+      - "./parity-assets/parity-genesis.json:/root/.local/share/io.parity.ethereum/parity-genesis.json:ro"
+      - "./parity-assets/reserved-peers.txt:/root/.local/share/io.parity.ethereum/reserved-peers.txt:ro"
+      - "./parity-assets/password:/root/.local/share/io.parity.ethereum/password:ro"
+      - "./parity-assets/keys:/root/.local/share/io.parity.ethereum/keys:rw"
+      - "/etc/localtime:/etc/localtime:ro"
+
+    command: --config /root/.local/share/io.parity.ethereum/config.toml --unsafe-expose --node-key 091bd6067cb4612df85d9c1ff85cc47f259ced4d4cd99816b14f35650f59c322
