@@ -14,7 +14,7 @@ contract Arbiter is Destructible, Updatable {
         address indexed provider,          // Etheruem address of the provider
         address indexed subscriber,        // Ethereum address of the subscriber
         uint256 publicKey,                 // Public key of the subscriber
-        uint256 indexed amount,            // Amount (in 1/100 TOK) of ethereum sent
+        uint256 indexed amount,            // Amount (in 1/100 ZAP) of ethereum sent
         bytes32[] endpointParams,          // Endpoint specific(nonce,encrypted_uuid),
         bytes32 endpoint                   // Endpoint specifier
     );
