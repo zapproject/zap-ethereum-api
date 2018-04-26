@@ -1,4 +1,3 @@
-// TODO: FIX BONDAGESTORAGE RELEASE FUNCTION!!!!!!!
 import EVMRevert from './helpers/EVMRevert';
 
 const BigNumber = web3.BigNumber;
@@ -18,8 +17,6 @@ const ZapToken = artifacts.require("ZapToken");
 const Dispatch = artifacts.require("Dispatch");
 const Arbiter = artifacts.require("Arbiter");
 const Cost = artifacts.require("CurrentCost");
-const Addresses = artifacts.require("AddressSpacePointer");
-const AddresSpace = artifacts.require("AddressSpace");
 
 contract('Bondage', function (accounts) {
     const owner = accounts[0];
@@ -54,16 +51,6 @@ contract('Bondage', function (accounts) {
         //await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
     }
 
-    async function initTestArbiterAddress() {
-        const addressSpacePointer = await web3.eth.contract(Addresses.abi).at(Addresses.address);
-        const addressSpaceAddress = await addressSpacePointer.addresses.call();
-        const addressSpace = await web3.eth.contract(AddresSpace.abi).at(addressSpaceAddress.valueOf());
-        await addressSpace.setArbiterAddress(accounts[3], {from: owner});
-        await addressSpace.setCurrentCostAddress(this.cost.address, {from: owner});
-        
-        await this.bondage.updateContract();
-    }
-
     beforeEach(async function deployContracts() {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
@@ -71,10 +58,10 @@ contract('Bondage', function (accounts) {
 
         this.currentTest.token = await ZapToken.new();
 
-        this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
+        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
 
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
         await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
 
@@ -270,7 +257,7 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
 
-        await initTestArbiterAddress.call(this.test);
+        await this.test.bondage.setArbiterAddress(accounts[3], {from: owner});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -302,7 +289,7 @@ contract('Bondage', function (accounts) {
         const dots = 5;
         const dotsForEscrow = 2;
 
-        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
+        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[2] });
         
         const subscriberDotsRes = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier, { from: subscriber });
         const subscriberDots = parseInt(subscriberDotsRes.valueOf());
@@ -320,7 +307,7 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-        await initTestArbiterAddress.call(this.test);
+        await this.test.bondage.setArbiterAddress(accounts[3], {from: owner});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 0, {from: subscriber});
@@ -347,7 +334,7 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-        await initTestArbiterAddress.call(this.test);
+        await this.test.bondage.setArbiterAddress(accounts[3], {from: owner});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -380,7 +367,7 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-        await initTestArbiterAddress.call(this.test);
+        await this.test.bondage.setArbiterAddress(accounts[3], {from: owner});
 
         // we get 5 dots with current linear curve (start = 1, mul = 2)
         await this.test.bondage.bond(oracle, specifier, 26, {from: subscriber});
@@ -545,10 +532,10 @@ contract('CurrentCost', function (accounts) {
 
         this.currentTest.token = await ZapToken.new();
 
-        this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
+        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
 
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
         this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
     });

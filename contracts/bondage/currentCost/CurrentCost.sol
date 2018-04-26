@@ -1,25 +1,14 @@
 pragma solidity ^0.4.19;
 
 import "../../lib/Destructible.sol";
-import "../../lib/update/Updatable.sol";
-import "../../lib/addressSpace/AddressSpace.sol";
-import "../../lib/addressSpace/AddressSpacePointer.sol";
 import "../../registry/RegistryInterface.sol";
 
-contract CurrentCost is Destructible, Updatable {
+contract CurrentCost is Destructible {
 
-    AddressSpacePointer pointer;
-    AddressSpace addresses;
     RegistryInterface registry;
 
-    function CurrentCost(address pointerAddress, address registryAddress) public {
-       pointer = AddressSpacePointer(pointerAddress);
+    function CurrentCost(address registryAddress) public {
        registry = RegistryInterface(registryAddress);
-    }
-
-    function updateContract() external {
-        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (registry != addresses.registry()) registry = RegistryInterface(addresses.registry());
     }
 
     function _currentCostOfDot(

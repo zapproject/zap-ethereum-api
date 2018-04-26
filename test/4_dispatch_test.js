@@ -19,8 +19,6 @@ const RegistryStorage = artifacts.require("RegistryStorage");
 const ZapToken = artifacts.require("ZapToken");
 const Cost = artifacts.require("CurrentCost");
 const Subscriber = artifacts.require("Subscriber");
-const Addresses = artifacts.require("AddressSpacePointer");
-
 
 function showReceivedEvents(res) {
     for (var i = 0; i < bondRes.logs.length; i++) {
@@ -60,7 +58,6 @@ function getParamsFromIncomingEvent(logs) {
     }
     return false;
 }
-
 
 contract('Dispatch', function (accounts) {
     const owner = accounts[0];
@@ -106,14 +103,14 @@ contract('Dispatch', function (accounts) {
 
         this.currentTest.token = await ZapToken.new();
 
-        this.currentTest.cost = await Cost.new(Addresses.address ,this.currentTest.registry.address);
+        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
 
         this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
         this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
         this.currentTest.dispStor = await DispatchStorage.new();
-        this.currentTest.dispatch = await Dispatch.new(Addresses.address, this.currentTest.dispStor.address, this.currentTest.bondage.address);
+        this.currentTest.dispatch = await Dispatch.new(this.currentTest.dispStor.address, this.currentTest.bondage.address);
         this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
 
         this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address);

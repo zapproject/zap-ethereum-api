@@ -2,14 +2,11 @@ pragma solidity ^0.4.19;
 // v1.0
 
 import "../lib/Destructible.sol";
-import "../lib/update/Updatable.sol";
 import "../lib/ERC20.sol";
-import "../lib/addressSpace/AddressSpace.sol";
-import "../lib/addressSpace/AddressSpacePointer.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 
-contract Bondage is Destructible, Updatable {
+contract Bondage is Destructible {
 
     event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numZap);
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
@@ -20,9 +17,6 @@ contract Bondage is Destructible, Updatable {
     CurrentCostInterface currentCost;
     ERC20 token;
     uint256 decimals = 10 ** 18;
-
-    AddressSpacePointer pointer;
-    AddressSpace addresses;
 
     address public storageAddress;
     address arbiterAddress;
@@ -35,20 +29,27 @@ contract Bondage is Destructible, Updatable {
     }
 
     /// @dev Initialize Storage, Token, anc CurrentCost Contracts
-    function Bondage(address pointerAddress, address _storageAddress, address tokenAddress, address currentCostAddress) public {
-        pointer = AddressSpacePointer(pointerAddress);
-        storageAddress = _storageAddress;
+    function Bondage(address storageAddress, address tokenAddress, address currentCostAddress) public {
         stor = BondageStorage(storageAddress);
         token = ERC20(tokenAddress); 
         currentCost = CurrentCostInterface(currentCostAddress);
     }
 
-    // Called on deployment to initialize arbiterAddress and dispatchAddress
-    function updateContract() external {
-        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (currentCost != addresses.currentCost()) currentCost = CurrentCostInterface(addresses.currentCost());
-        if (arbiterAddress != addresses.arbiter()) arbiterAddress = addresses.arbiter();
-        if (dispatchAddress != addresses.dispatch()) dispatchAddress = addresses.dispatch();
+    /// @dev Set Arbiter address
+    /// @notice This needs to be called upon deployment and after Arbiter update
+    function setArbiterAddress(address _arbiterAddress) external onlyOwner {
+        arbiterAddress = _arbiterAddress;
+    }
+    
+    /// @dev Set Dispatch address
+    /// @notice This needs to be called upon deployment and after Dispatch update
+    function setDispatchAddress(address _dispatchAddress) external onlyOwner {
+        dispatchAddress = _dispatchAddress;
+    }
+
+    /// @notice Upgdate currentCostOfDot function (barring no interface change)
+    function setCurrentCostAddress(address currentCostAddress) public onlyOwner {
+        currentCost = CurrentCostInterface(currentCostAddress);
     }
 
     /// @dev will bond to an oracle
