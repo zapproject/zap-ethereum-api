@@ -31,7 +31,7 @@ module.exports = {
             host: "172.18.0.3",
             port: 8545,
             network_id: "*",
-            from: "0x800ce51198c95280f2627a330e730bc96f704178"
+            from: "010e49e47cbb34e67c072702ed6f4d8b273f751f"// must first account in accounts[] array inside tests
     	}, 
         metamask_ropsten: {
             provider: new HDWalletProvider(pk, "https://ropsten.infura.io/8PB8Cnu6sYpZu5VVtEDl"),

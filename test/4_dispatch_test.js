@@ -102,7 +102,7 @@ contract('Dispatch', function (accounts) {
     beforeEach(async function deployContracts() {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await ZapToken.new();
 
@@ -110,11 +110,11 @@ contract('Dispatch', function (accounts) {
 
         this.currentTest.bondStor = await BondageStorage.new();
         this.currentTest.bondage = await Bondage.new(Addresses.address, this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
-        this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
         this.currentTest.dispStor = await DispatchStorage.new();
         this.currentTest.dispatch = await Dispatch.new(Addresses.address, this.currentTest.dispStor.address, this.currentTest.bondage.address);
-        this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
+        await this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
 
         this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address);
     });
@@ -170,13 +170,13 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
         await this.test.dispatch.respond1(data.id, "pum-tum-pum", { from: provider })
 
         logs = await subscriberEvents.get();
-        expect(isEventReceived(logs, "Result1")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
 
         const q = await this.test.dispStor.getStatus.call(data.id, { from: owner });
         await expect(parseInt(q.valueOf())).to.be.equal(1);
@@ -204,7 +204,7 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
 
@@ -233,13 +233,13 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
         await this.test.dispatch.respond2(data.id, "pum-tum-pum", "hi", { from: provider });
 
         logs = await subscriberEvents.get();
-        expect(isEventReceived(logs, "Result2")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Result2")).to.be.equal(true);
 
         const q = await this.test.dispStor.getStatus.call(data.id, { from: owner });
         await expect(parseInt(q.valueOf())).to.be.equal(1);
@@ -267,7 +267,7 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
 
@@ -296,13 +296,13 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
         await this.test.dispatch.respond3(data.id, "pum", "tum", "pum", { from: provider });
 
         logs = await subscriberEvents.get();
-        expect(isEventReceived(logs, "Result3")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Result3")).to.be.equal(true);
 
         const q = await this.test.dispStor.getStatus.call(data.id, { from: owner });
         await expect(parseInt(q.valueOf())).to.be.equal(1);
@@ -330,7 +330,7 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
 
@@ -360,13 +360,13 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
         await this.test.dispatch.respond4(data.id, "1", "2", "4", "8", { from: provider });
 
         logs = await subscriberEvents.get();
-        expect(isEventReceived(logs, "Result4")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Result4")).to.be.equal(true);
 
         const q = await this.test.dispStor.getStatus.call(data.id, { from: owner });
         await expect(parseInt(q.valueOf())).to.be.equal(1);
@@ -394,7 +394,7 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         const data = getParamsFromIncomingEvent(logs);
 

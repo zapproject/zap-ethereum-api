@@ -25,7 +25,7 @@ function hex2a(hexx) {
 }
 
 contract('Registry', async (accounts) => {
-    const owner = /*accounts[0]*/ "0x800ce51198c95280f2627a330e730bc96f704178";
+    const owner = accounts[0];
     const publicKey = 111;
     const title = "test";
     const specifier = "test-linear-specifier";
@@ -154,9 +154,9 @@ contract('Registry', async (accounts) => {
     it("REGISTRY_15 - getNextProvider() - Check that we can iterate through providers", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
-        await this.test.registry.initiateProvider(publicKey + 1, title + "1", specifier + "1", params, { from: /*accounts[1]*/ "0x81eaf903c952447fd27b11db1604f4da6deda0ed" });
+        await this.test.registry.initiateProvider(publicKey + 1, title + "1", specifier + "1", params, { from: accounts[1] });
 
-        await this.test.registry.initiateProvider(publicKey + 2, title + "2", specifier + "2", params, { from: /*accounts[2]*/ "0x07a6aea0328e908140670628d67b6133c121f1c7" });
+        await this.test.registry.initiateProvider(publicKey + 2, title + "2", specifier + "2", params, { from: accounts[2] });
 
         let index = 0;
         let res = await this.test.registry.getNextProvider(index);

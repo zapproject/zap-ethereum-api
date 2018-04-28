@@ -29,7 +29,7 @@ contract('Registry', async (accounts) => {
     beforeEach(async function deployContracts() {
         this.currentTest.addrSpace = await AddressesSpace.new("0x0", "0x0", "0x0", "0x0", "0x0");
         this.currentTest.addrPtr = await AddressesPointer.new();
-        this.currentTest.addrPtr.setAddressSpace(this.currentTest.addrSpace.address);
+        await this.currentTest.addrPtr.setAddressSpace(this.currentTest.addrSpace.address);
 
         // Token
         this.currentTest.token = await ZapToken.new();
