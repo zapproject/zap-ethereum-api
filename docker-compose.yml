@@ -4,7 +4,7 @@ networks: # private network of our services
 
 services:
   nodejs:
-    image: "node:${DOCKER_NODE_VER:-8-alpine}"
+    image: "node:${DOCKER_NODE_VER:-9-alpine}"
     networks:
       etherium-network:
         aliases:
@@ -23,7 +23,7 @@ services:
       - -c
 
   bootstrap:
-    image: "parity/parity:${DOCKER_PARITY_VER:-v1.7.7}"
+    image: "parity/parity:${DOCKER_PARITY_VER:-v1.9.6}"
     restart: on-failure
     container_name: bootstrap
     networks:
