@@ -8,10 +8,10 @@ interface BondageInterface {
     function resetDelegate(address) external;
     function escrowDots(address, address, bytes32, uint256) external returns (bool);
     function releaseDots(address, address, bytes32, uint256) external returns (bool);
-    function calcTokForDots(address, bytes32, uint256) external view returns (uint256);
-    function calcTok(address, bytes32, uint256) external view returns (uint256, uint256);
+    function calcZapForDots(address, bytes32, uint256) external view returns (uint256);
+    function calcBondRate(address, bytes32, uint256) external view returns (uint256, uint256);
     function currentCostOfDot(address, bytes32, uint256) external view returns (uint256);
     function getDotsIssued(address, bytes32) external view returns (uint256);
     function getDots(address, address, bytes32) external view returns (uint256);
-    function getTokBound(address, bytes32) external view returns (uint256);
+    function getZapBound(address, bytes32) external view returns (uint256);
 }

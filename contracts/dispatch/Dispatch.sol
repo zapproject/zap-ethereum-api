@@ -2,43 +2,36 @@ pragma solidity ^0.4.19;
 // v1.0
 
 import "../lib/Destructible.sol";
-import "../lib/update/Updatable.sol";
 import "../lib/Client.sol";
-import "../lib/addressSpace/AddressSpace.sol";
-import "../lib/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 
-contract Dispatch is Destructible, Updatable { 
+contract Dispatch is Destructible { 
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(
         uint256 indexed id,
         address indexed provider,
-        address indexed recipient,
+        address indexed subscriber,
         string query,
         bytes32 endpoint,
         bytes32[] endpointParams
+    );
+
+    event FulfillQuery(
+        address indexed subscriber,
+        address indexed provider,
+        bytes32 indexed endpoint
     );
     
     DispatchStorage stor;
     BondageInterface bondage;
 
-    AddressSpacePointer pointer;
-    AddressSpace addresses;
-
     address public storageAddress;
 
-    function Dispatch(address pointerAddress, address _storageAddress, address bondageAddress) public {
-        pointer = AddressSpacePointer(pointerAddress);
-        storageAddress = _storageAddress;
+    function Dispatch(address storageAddress, address bondageAddress) public {
         stor = DispatchStorage(storageAddress);
         bondage = BondageInterface(bondageAddress);
-    }
-
-    function updateContract() external {
-        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
     }
 
     /// @notice Escrow dot for oracle request
@@ -69,14 +62,16 @@ contract Dispatch is Destructible, Updatable {
 
         require(stor.getStatus(id) == DispatchStorage.Status.Pending);
 
-        bondage.releaseDots(
-            stor.getSubscriber(id),
-            stor.getProvider(id),
-            stor.getEndpoint(id),
-            1
-        );
+        address subscriber = stor.getSubscriber(id);
+        address provider = stor.getProvider(id);
+        bytes32 endpoint = stor.getEndpoint(id);
 
         stor.setFulfilled(id);
+
+        bondage.releaseDots(subscriber, provider, endpoint, 1);
+
+        FulfillQuery(subscriber, provider, endpoint);
+
         return true;
     }
 

@@ -4,7 +4,7 @@ import "../lib/Ownable.sol";
 
 contract BondageStorage is Ownable {
 
-    // Data structure for holder of TOK bond to data provider.
+    // Data structure for holder of ZAP bond to data provider.
     // Currently ONLY "smart_contract" or "socket_subscription"
     struct Holder {
         //endpoint specifer* => (provider address => bond value)
@@ -22,7 +22,7 @@ contract BondageStorage is Ownable {
     //holder => (oracleAddress => (endpoint => numEscrow)))
     mapping(address => mapping(address => mapping(bytes32 => uint256))) private pendingEscrow;
 
-    //oracleAddress=>(=>numTok)
+    //oracleAddress=>(endpoint=>numZap)
     mapping(address => mapping(bytes32 => uint256)) private totalBound;
 
     //oracleAddress=>(endpoint=>numDots)
@@ -41,11 +41,11 @@ contract BondageStorage is Ownable {
         return pendingEscrow[holderAddress][oracleAddress][endpoint];
     }
 
-    function getNumTok(address oracleAddress, bytes32 endpoint) external view returns (uint256) {
+    function getNumZap(address oracleAddress, bytes32 endpoint) external view returns (uint256) {
         return totalBound[oracleAddress][endpoint];
     }
 
-    function getTotalDots(address oracleAddress, bytes32 endpoint) external view returns (uint256) {
+    function getDotsIssued(address oracleAddress, bytes32 endpoint) external view returns (uint256) {
         return totalIssued[oracleAddress][endpoint];
     }
 

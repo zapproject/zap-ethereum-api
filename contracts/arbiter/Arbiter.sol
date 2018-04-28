@@ -2,19 +2,16 @@ pragma solidity ^0.4.19;
 // v1.0
 
 import "../lib/Destructible.sol";
-import "../lib/update/Updatable.sol";
-import "../lib/addressSpace/AddressSpace.sol";
-import "../lib/addressSpace/AddressSpacePointer.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 
-contract Arbiter is Destructible, Updatable {
+contract Arbiter is Destructible {
     // Called when a data purchase is initiated
     event DataPurchase(
         address indexed provider,          // Etheruem address of the provider
         address indexed subscriber,        // Ethereum address of the subscriber
         uint256 publicKey,                 // Public key of the subscriber
-        uint256 indexed amount,            // Amount (in 1/100 TOK) of ethereum sent
+        uint256 indexed amount,            // Amount (in 1/100 ZAP) of ethereum sent
         bytes32[] endpointParams,          // Endpoint specific(nonce,encrypted_uuid),
         bytes32 endpoint                   // Endpoint specifier
     );
@@ -32,21 +29,9 @@ contract Arbiter is Destructible, Updatable {
     ArbiterStorage stor;
     BondageInterface bondage;
 
-    AddressSpacePointer pointer;
-    AddressSpace addresses;
-
-    address public storageAddress;
-
-    function Arbiter(address pointerAddress, address _storageAddress, address bondageAddress) public {
-        pointer = AddressSpacePointer(pointerAddress);
-        storageAddress = _storageAddress;
+    function Arbiter(address storageAddress, address bondageAddress) public {
         stor = ArbiterStorage(storageAddress);
         bondage = BondageInterface(bondageAddress);
-    }
-
-    function updateContract() external {
-        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (bondage != addresses.bondage()) bondage = BondageInterface(addresses.bondage());
     }
 
     function initiateSubscription(

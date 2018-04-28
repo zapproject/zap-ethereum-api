@@ -2,16 +2,13 @@ pragma solidity ^0.4.19;
 // v1.0
 
 import "../lib/Destructible.sol";
-import "../lib/update/Updatable.sol";
 import "../lib/ERC20.sol";
-import "../lib/addressSpace/AddressSpace.sol";
-import "../lib/addressSpace/AddressSpacePointer.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 
-contract Bondage is Destructible, Updatable {
+contract Bondage is Destructible {
 
-    event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numTok);
+    event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numZap);
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Escrowed(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
@@ -20,9 +17,6 @@ contract Bondage is Destructible, Updatable {
     CurrentCostInterface currentCost;
     ERC20 token;
     uint256 decimals = 10 ** 18;
-
-    AddressSpacePointer pointer;
-    AddressSpace addresses;
 
     address public storageAddress;
     address arbiterAddress;
@@ -35,45 +29,52 @@ contract Bondage is Destructible, Updatable {
     }
 
     /// @dev Initialize Storage, Token, anc CurrentCost Contracts
-    function Bondage(address pointerAddress, address _storageAddress, address tokenAddress, address currentCostAddress) public {
-        pointer = AddressSpacePointer(pointerAddress);
-        storageAddress = _storageAddress;
+    function Bondage(address storageAddress, address tokenAddress, address currentCostAddress) public {
         stor = BondageStorage(storageAddress);
         token = ERC20(tokenAddress); 
         currentCost = CurrentCostInterface(currentCostAddress);
     }
 
-    // Called on deployment to initialize arbiterAddress and dispatchAddress
-    function updateContract() external {
-        if (addresses != pointer.addresses()) addresses = AddressSpace(pointer.addresses());
-        if (currentCost != addresses.currentCost()) currentCost = CurrentCostInterface(addresses.currentCost());
-        if (arbiterAddress != addresses.arbiter()) arbiterAddress = addresses.arbiter();
-        if (dispatchAddress != addresses.dispatch()) dispatchAddress = addresses.dispatch();
+    /// @dev Set Arbiter address
+    /// @notice This needs to be called upon deployment and after Arbiter update
+    function setArbiterAddress(address _arbiterAddress) external onlyOwner {
+        arbiterAddress = _arbiterAddress;
+    }
+    
+    /// @dev Set Dispatch address
+    /// @notice This needs to be called upon deployment and after Dispatch update
+    function setDispatchAddress(address _dispatchAddress) external onlyOwner {
+        dispatchAddress = _dispatchAddress;
+    }
+
+    /// @notice Upgdate currentCostOfDot function (barring no interface change)
+    function setCurrentCostAddress(address currentCostAddress) public onlyOwner {
+        currentCost = CurrentCostInterface(currentCostAddress);
     }
 
     /// @dev will bond to an oracle
-    /// @return total TOK bound to oracle
-    function bond(address oracleAddress, bytes32 endpoint, uint256 numTok) external returns (uint256 bound) {
-        bound = _bond(msg.sender, oracleAddress, endpoint, numTok);
-        Bound(msg.sender, oracleAddress, endpoint, numTok);
+    /// @return total ZAP bound to oracle
+    function bond(address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 bound) {
+        bound = _bond(msg.sender, oracleAddress, endpoint, numZap);
+        Bound(msg.sender, oracleAddress, endpoint, numZap);
     }
 
-    /// @return total TOK unbound from oracle
+    /// @return total ZAP unbound from oracle
     function unbond(address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
         unbound = _unbond(msg.sender, oracleAddress, endpoint, numDots);
         Unbound(msg.sender, oracleAddress, endpoint, numDots);
     }        
 
     /// @dev will bond to an oracle on behalf of some holder
-    /// @return total TOK bound to oracle
-    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numTok) external returns (uint256 bound) {
+    /// @return total ZAP bound to oracle
+    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 bound) {
         require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
         stor.setDelegate(holderAddress, oracleAddress, msg.sender);
-        bound = _bond(holderAddress, oracleAddress, endpoint, numTok);
-        Bound(holderAddress, oracleAddress, endpoint, numTok);
+        bound = _bond(holderAddress, oracleAddress, endpoint, numZap);
+        Bound(holderAddress, oracleAddress, endpoint, numZap);
     }
 
-    /// @return total TOK unbound from oracle
+    /// @return total ZAP unbound from oracle
     function delegateUnbond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
         require(stor.getDelegate(holderAddress, oracleAddress) == msg.sender);
         unbound = _unbond(holderAddress, oracleAddress, endpoint, numDots);
@@ -98,7 +99,7 @@ contract Bondage is Destructible, Updatable {
         operatorOnly        
         returns (bool success)
     {
-        uint256 currentDots = getDots(holderAddress, oracleAddress, endpoint);
+        uint256 currentDots = getBoundDots(holderAddress, oracleAddress, endpoint);
         uint256 dotsToEscrow = numDots;
         if (numDots > currentDots) dotsToEscrow = currentDots; 
         stor.updateBondValue(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
@@ -132,39 +133,39 @@ contract Bondage is Destructible, Updatable {
 
     /// @dev Calculate quantity of tokens required for specified amount of dots
     /// for endpoint defined by endpoint and data provider defined by oracleAddress
-    function calcTokForDots(
+    function calcZapForDots(
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots       
     ) 
         external
         view
-        returns (uint256 numTok)
+        returns (uint256 numZap)
     {
         for (uint256 i = 0; i < numDots; i++) {
-            numTok += currentCostOfDot(                
+            numZap += currentCostOfDot(                
                 oracleAddress,
                 endpoint,
                 getDotsIssued(oracleAddress, endpoint) + i
             );
         }
-        return numTok;
+        return numZap;
     }
 
-    /// @dev Calculate amount of dots which could be purchased with given (numTok) TOK tokens (max is 1000)
+    /// @dev Calculate amount of dots which could be purchased with given (numZap) ZAP tokens (max is 1000)
     /// for endpoint specified by endpoint and data-provider address specified by oracleAddress
     function calcBondRate(
         address oracleAddress,
         bytes32 endpoint,
-        uint256 numTok
+        uint256 numZap
     )
         public
         view
-        returns (uint256 maxNumTok, uint256 numDots) 
+        returns (uint256 maxNumZap, uint256 numDots) 
     {
         uint256 infinity = decimals;
         uint256 dotCost;
-        if (numTok > 1000) numTok = 1000;
+        if (numZap > 1000) numZap = 1000;
 
         for (numDots; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
@@ -173,14 +174,14 @@ contract Bondage is Destructible, Updatable {
                 getDotsIssued(oracleAddress, endpoint) + numDots
             );
 
-            if (numTok >= dotCost) {
-                numTok -= dotCost;
-                maxNumTok += dotCost;
+            if (numZap >= dotCost) {
+                numZap -= dotCost;
+                maxNumZap += dotCost;
             } else {
                 break;
             }
         }
-        return (maxNumTok, numDots);
+        return (maxNumZap, numDots);
     }
 
     /// @dev Get the current cost of a dot.
@@ -206,10 +207,10 @@ contract Bondage is Destructible, Updatable {
         view
         returns (uint256 dots)
     {
-        return stor.getTotalDots(oracleAddress, endpoint);
+        return stor.getDotsIssued(oracleAddress, endpoint);
     }
 
-    function getDots(        
+    function getBoundDots(        
         address holderAddress,
         address oracleAddress,
         bytes32 endpoint
@@ -221,34 +222,34 @@ contract Bondage is Destructible, Updatable {
         return stor.getBoundDots(holderAddress, oracleAddress, endpoint);
     }
 
-    /// @return total TOK held by contract
-    function getTokBound(address oracleAddress, bytes32 endpoint) public view returns (uint256) {
-        return stor.getNumTok(oracleAddress, endpoint);
+    /// @return total ZAP held by contract
+    function getZapBound(address oracleAddress, bytes32 endpoint) public view returns (uint256) {
+        return stor.getNumZap(oracleAddress, endpoint);
     }
 
     function _bond(
         address holderAddress,
         address oracleAddress,
         bytes32 endpoint,
-        uint256 numTok        
+        uint256 numZap        
     )
         private
         returns (uint256 numDots) 
     {   
         // This also checks if oracle is registered w/an initialized curve
-        (numTok, numDots) = calcBondRate(oracleAddress, endpoint, numTok);
+        (numZap, numDots) = calcBondRate(oracleAddress, endpoint, numZap);
 
         if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
             stor.setProviderInitialized(holderAddress, oracleAddress);
             stor.addHolderOracle(holderAddress, oracleAddress);
         }
 
-        // User must have approved contract to transfer workingTOK
-        require(token.transferFrom(msg.sender, this, numTok * decimals));
+        // User must have approved contract to transfer working ZAP
+        require(token.transferFrom(msg.sender, this, numZap * decimals));
 
         stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");        
         stor.updateTotalIssued(oracleAddress, endpoint, numDots, "add");
-        stor.updateTotalBound(oracleAddress, endpoint, numTok, "add");
+        stor.updateTotalBound(oracleAddress, endpoint, numZap, "add");
 
         return numDots;
     }
@@ -260,7 +261,7 @@ contract Bondage is Destructible, Updatable {
         uint256 numDots
     )
         private
-        returns (uint256 numTok)
+        returns (uint256 numZap)
     {
         //currentDots
         uint256 bondValue = stor.getBondValue(holderAddress, oracleAddress, endpoint);
@@ -273,18 +274,18 @@ contract Bondage is Destructible, Updatable {
 
                 dotsIssued = getDotsIssued(oracleAddress, endpoint) - subTotal;
 
-                numTok += currentCostOfDot(
+                numZap += currentCostOfDot(
                     oracleAddress,
                     endpoint,
                     dotsIssued
                 ); 
             }    
-            stor.updateTotalBound(oracleAddress, endpoint, numTok, "sub");
+            stor.updateTotalBound(oracleAddress, endpoint, numZap, "sub");
             stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
             stor.updateBondValue(holderAddress, oracleAddress, endpoint, subTotal, "sub");
 
-            if(token.transfer(holderAddress, numTok * decimals))
-                return numTok;
+            if(token.transfer(holderAddress, numZap * decimals))
+                return numZap;
         }
         return 0;
     }
