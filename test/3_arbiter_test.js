@@ -51,7 +51,7 @@ contract('Arbiter', function (accounts) {
     beforeEach(async function deployContracts() {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await ZapToken.new();
 
@@ -98,7 +98,7 @@ contract('Arbiter', function (accounts) {
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
 
         const res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
 
         await expect(this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 5, {from: subscriber})).to.eventually.be.rejectedWith(EVMRevert);
     });

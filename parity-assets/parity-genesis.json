@@ -1,0 +1,55 @@
+{
+  "name": "DevelopmentNetwork",
+  "engine": {
+    "instantSeal": null
+  },
+  "params": {
+    "accountStartNonce": "0x0",
+        "gasLimitBoundDivisor": "0x400",
+        "maximumExtraDataSize": "0x20",
+        "minGasLimit": "0x1",
+        "networkID" : "211211",
+	"eip150Transition": "0x0",
+        "eip160Transition": "0x0",
+        "eip161abcTransition": "0x0",
+        "eip161dTransition": "0x0",
+        "eip649Reward": "0x29A2241AF62C0000",
+        "eip100bTransition": "0x0",
+        "eip649Transition": "0x0",
+        "eip98Transition": "0xffffffffffffffff",
+        "eip140Transition": "0x0",
+        "eip211Transition": "0x0",
+        "eip214Transition": "0x0",
+        "eip155Transition": "0x0",
+        "eip658Transition": "0x0"
+
+  },
+  "genesis": {
+    "seal": {
+            "generic": "0x0"
+        },
+        "difficulty": "0x20000",
+        "author": "0x0000000000000000000000000000000000000000",
+        "timestamp": "0x00",
+        "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "extraData": "0x",
+        "gasLimit": "0xF32EA0"
+  },
+  "accounts": {
+    "0000000000000000000000000000000000000001": { "balance": "1", "builtin": { "name": "ecrecover", "pricing": { "linear": { "base": 3000, "word": 0 } } } },
+    "0000000000000000000000000000000000000002": { "balance": "1", "builtin": { "name": "sha256", "pricing": { "linear": { "base": 60, "word": 12 } } } },
+    "0000000000000000000000000000000000000003": { "balance": "1", "builtin": { "name": "ripemd160", "pricing": { "linear": { "base": 600, "word": 120 } } } },
+    "0000000000000000000000000000000000000004": { "balance": "1", "builtin": { "name": "identity", "pricing": { "linear": { "base": 15, "word": 3 } } } },
+    "0x00a329c0648769a73afac7f9381e08fb43dbea72": { "balance": "1606938044258990275541962092341162602522202993782792835301376" },
+    "9e65c373a97793e8d36cb8316ecbe79940110f90": {"balance": "1000000000000000000000"},
+    "4fc95b48a473f59c83a4aaefaad2a588a865d013": {"balance": "1000000000000000000000"},
+    "4ca7393cf5575fdefd8402f16920a33870fc9ef0": {"balance": "1000000000000000000000"},
+    "800ce51198c95280f2627a330e730bc96f704178": {"balance": "1000000000000000000000"},
+    "f85d84c5ef6dfd25e9a2f23941a93a05b41ffd7d": {"balance": "1000000000000000000000"},
+    "010e49e47cbb34e67c072702ed6f4d8b273f751f": {"balance": "1000000000000000000000"},
+    "67efd57c71232438cb405ce8917e259b8d14ea7e": {"balance": "1000000000000000000000"},
+    "4929d7de115ff73fe19fcf8ace73a2bececc9eb0": {"balance": "1000000000000000000000"},
+    "07a6aea0328e908140670628d67b6133c121f1c7": {"balance": "1000000000000000000000"},
+    "81eaf903c952447fd27b11db1604f4da6deda0ed": {"balance": "1000000000000000000000"}
+  }
+}

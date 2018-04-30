@@ -1,0 +1,35 @@
+[parity]
+chain = "/root/.local/share/io.parity.ethereum/parity-genesis.json"
+
+[network]
+id = 211211
+reserved_only = true
+reserved_peers = "/root/.local/share/io.parity.ethereum/reserved-peers.txt"
+
+[mining]
+reseal_min_period = 0
+
+[ui]
+force = true
+disable = false
+port = 8180
+interface = "0.0.0.0"
+
+[rpc]
+port = 8545
+interface = "0.0.0.0"
+apis = ["web3","eth","net","personal","parity","parity_set","traces","rpc","parity_accounts"]
+hosts = ["none"]
+
+[ipc]
+# Only selected APIs will be exposed over this interface.
+apis = ["web3", "eth", "pubsub", "net", "parity", "parity_pubsub", "parity_accounts", "traces", "rpc", "secretstore", "parity_set", "signer", "personal"]
+
+[account]
+unlock = ["9e65c373a97793e8d36cb8316ecbe79940110f90", "4fc95b48a473f59c83a4aaefaad2a588a865d013", "4ca7393cf5575fdefd8402f16920a33870fc9ef0", "800ce51198c95280f2627a330e730bc96f704178", "f85d84c5ef6dfd25e9a2f23941a93a05b41ffd7d", "010e49e47cbb34e67c072702ed6f4d8b273f751f", "67efd57c71232438cb405ce8917e259b8d14ea7e", "4929d7de115ff73fe19fcf8ace73a2bececc9eb0", "07a6aea0328e908140670628d67b6133c121f1c7", "81eaf903c952447fd27b11db1604f4da6deda0ed"]
+password = ["/root/.local/share/io.parity.ethereum/password"]
+
+[websockets]
+port = 8546
+interface = "0.0.0.0"
+hosts = ["none"]
