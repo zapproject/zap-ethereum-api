@@ -38,7 +38,7 @@ contract('Registry', async (accounts) => {
     beforeEach(async function deployContracts() {
         this.currentTest.stor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.stor.address);
-        await this.currentTest.stor.transferOwnership(this.currentTest.registry.address);
+        this.currentTest.stor.transferOwnership(this.currentTest.registry.address);
     });
 
     it("REGISTRY_1 - initiateProvider() - Check that we can initiate provider", async function () {
@@ -59,13 +59,13 @@ contract('Registry', async (accounts) => {
     });
 
     it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
-        await expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if curve type is none", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
-        await expect(this.test.registry.initiateProviderCurve(specifier, curveNone, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        expect(this.test.registry.initiateProviderCurve(specifier, curveNone, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_6 - getNextEndpointParam() - Check that we can get provider route keys", async function () {
@@ -73,7 +73,7 @@ contract('Registry', async (accounts) => {
 
         const receivedParam1 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);
         const receivedParam2 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 1);
-        await expect(Utils.fetchPureArray([receivedParam1.valueOf(), receivedParam2.valueOf()], hex2a)).to.have.deep.members(params);
+        expect(Utils.fetchPureArray([receivedParam1.valueOf(), receivedParam2.valueOf()], hex2a)).to.have.deep.members(params);
     });
 
     it("REGISTRY_7 - getNextEndpointParam() - Check that route keys of uninitialized provider are empty", async function () {        
@@ -88,13 +88,13 @@ contract('Registry', async (accounts) => {
 
         const receivedTitle = await this.test.registry.getProviderTitle.call(owner);
 
-        await expect(hex2a(receivedTitle.valueOf())).to.be.equal(title);
+        expect(hex2a(receivedTitle.valueOf())).to.be.equal(title);
     });
 
     it("REGISTRY_9 - getProviderTitle() - Check that title of uninitialized provider is empty", async function () {
         const receivedTitle = await this.test.registry.getProviderTitle.call(owner);        
 
-        await expect(hex2a(receivedTitle.valueOf())).to.be.equal('');
+        expect(hex2a(receivedTitle.valueOf())).to.be.equal('');
     });
 
     it("REGISTRY_10 - getProviderPublicKey() - Check that we can get provider public key", async function () {
@@ -102,13 +102,13 @@ contract('Registry', async (accounts) => {
 
         const receivedPublicKey = await this.test.registry.getProviderPublicKey.call(owner);
 
-        await expect(receivedPublicKey.valueOf()).to.be.equal(publicKey.toString());
+        expect(receivedPublicKey.valueOf()).to.be.equal(publicKey.toString());
     });
 
     it("REGISTRY_11 - getProviderPublicKey() -  Check that public key of uninitialized provider is equal to 0", async function () {
         const res = await this.test.registry.getProviderPublicKey.call(owner);
        
-        await expect(res.valueOf()).to.be.equal('0');
+        expect(res.valueOf()).to.be.equal('0');
     });
 
     it("REGISTRY_12 - getProviderCurve() - Check that we can get provider curve", async function () {
@@ -118,20 +118,21 @@ contract('Registry', async (accounts) => {
         const res = await this.test.registry.getProviderCurve.call(owner, specifier, { from: owner });
         const arr = Utils.fetchPureArray(res, parseInt);
 
-        await expect(arr[0].valueOf()).to.be.an('number').equal(curveLinear);
-        await expect(arr[1].valueOf()).to.be.an('number').equal(start);
-        await expect(arr[2].valueOf()).to.be.an('number').equal(mul);
+        expect(arr[0].valueOf()).to.be.an('number').equal(curveLinear);
+        expect(arr[1].valueOf()).to.be.an('number').equal(start);
+        expect(arr[2].valueOf()).to.be.an('number').equal(mul);
     });
 
     it("REGISTRY_13 - getProviderCurve() - Check that uninitialized provider curve is empty", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
         const res = await this.test.registry.getProviderCurve.call(owner, specifier, { from: owner });
+
         const arr = Utils.fetchPureArray(res, parseInt);
 
-        await expect(arr[0].valueOf()).to.be.an('number').equal(0);
-        await expect(arr[1].valueOf()).to.be.an('number').equal(0);
-        await expect(arr[2].valueOf()).to.be.an('number').equal(0);
+        expect(arr[0].valueOf()).to.be.an('number').equal(0);
+        expect(arr[1].valueOf()).to.be.an('number').equal(0);
+        expect(arr[2].valueOf()).to.be.an('number').equal(0);
     });
 
     it("REGISTRY_14 - setEndpointParams() - Check that we can set endpoint params", async function () {
@@ -148,7 +149,7 @@ contract('Registry', async (accounts) => {
         const p5 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 4);
         const p6 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 5);
 
-        await expect(Utils.fetchPureArray([p1.valueOf(), p2.valueOf(), p3.valueOf(), p4.valueOf(), p5.valueOf(), p6.valueOf()], hex2a)).to.have.deep.members(newParams);
+        expect(Utils.fetchPureArray([p1.valueOf(), p2.valueOf(), p3.valueOf(), p4.valueOf(), p5.valueOf(), p6.valueOf()], hex2a)).to.have.deep.members(newParams);
     });
 
     it("REGISTRY_15 - getNextProvider() - Check that we can iterate through providers", async function () {
@@ -160,17 +161,17 @@ contract('Registry', async (accounts) => {
 
         let index = 0;
         let res = await this.test.registry.getNextProvider(index);
-        await expect(hex2a(res[3].valueOf())).to.be.equal(title);
+        expect(hex2a(res[3].valueOf())).to.be.equal(title);
         index = parseInt(res[0].valueOf());
         
         res = await this.test.registry.getNextProvider(index);
-        await expect(hex2a(res[3].valueOf())).to.be.equal(title + "1");
+        expect(hex2a(res[3].valueOf())).to.be.equal(title + "1");
         index = parseInt(res[0].valueOf());
 
         res = await this.test.registry.getNextProvider(index);
-        await expect(hex2a(res[3].valueOf())).to.be.equal(title + "2");
+        expect(hex2a(res[3].valueOf())).to.be.equal(title + "2");
         index = parseInt(res[0].valueOf());
         
-        await expect(index).to.be.equal(0);
+        expect(index).to.be.equal(0);
     }); 
 });
