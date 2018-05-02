@@ -67,7 +67,7 @@ contract('Bondage', function (accounts) {
     beforeEach(async function deployContracts() {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await ZapToken.new();
 
