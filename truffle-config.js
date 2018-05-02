@@ -32,12 +32,6 @@ module.exports = {
             port: 8545,
             network_id: "*",
             from: "0x010e49e47cbb34e67c072702ed6f4d8b273f751f"// must be first account in accounts[] array inside tests
-    	}, 
-        metamask_ropsten: {
-            provider: new HDWalletProvider(pk, "https://ropsten.infura.io/8PB8Cnu6sYpZu5VVtEDl"),
-           //from: "0x00D6e29C51FFeAbE5ad1468f34780EbC494Ac513",
-            network_id: 3,
-            gas: 4612388
-        }
-   }
+    	}
+    }
 };
