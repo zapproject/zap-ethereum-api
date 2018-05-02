@@ -51,7 +51,7 @@ contract('Arbiter', function (accounts) {
     beforeEach(async function deployContracts() {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await ZapToken.new();
 
@@ -59,11 +59,11 @@ contract('Arbiter', function (accounts) {
         
         this.currentTest.bondStor = await BondageStorage.new();
         this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
-        this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
 
         this.currentTest.arbStor = await ArbiterStorage.new();
         this.currentTest.arbiter = await Arbiter.new(this.currentTest.arbStor.address, this.currentTest.bondage.address);
-        this.currentTest.arbStor.transferOwnership(this.currentTest.arbiter.address);
+        await this.currentTest.arbStor.transferOwnership(this.currentTest.arbiter.address);
     });
 
     it("ARBITER_1 - initiateSubscription() - Check subscription", async function () {
@@ -98,7 +98,7 @@ contract('Arbiter', function (accounts) {
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
 
         const res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
 
         await expect(this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 5, {from: subscriber})).to.eventually.be.rejectedWith(EVMRevert);
     });

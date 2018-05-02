@@ -1,10 +1,10 @@
-version: '3'
+ version: '3'
 networks: # private network of our services
     etherium-network:
 
 services:
   nodejs:
-    image: "node:${DOCKER_NODE_VER:-9-alpine}"
+    image: "node:${DOCKER_NODE_VER:-9-alpine}" # must be 9 or bigger for truffle framework
     networks:
       etherium-network:
         aliases:

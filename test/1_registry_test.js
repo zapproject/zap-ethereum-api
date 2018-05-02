@@ -13,9 +13,9 @@ const RegistryStorage = artifacts.require("RegistryStorage");
 const Utils = require("./helpers/utils.js");
 
 function hex2a(hexx) { 
-    var hex = hexx.toString(); //force conversion
-    var str = '';
-    for (var i = 2; i < hex.length; i += 2) {
+    let hex = hexx.toString(); //force conversion
+    let str = '';
+    for (let i = 2; i < hex.length; i += 2) {
         let hexValue = hex.substr(i, 2);
         if (hexValue != "00" && hexValue != "0x") {
             str += String.fromCharCode(parseInt(hexValue, 16));
@@ -38,7 +38,7 @@ contract('Registry', async (accounts) => {
     beforeEach(async function deployContracts() {
         this.currentTest.stor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.stor.address);
-        this.currentTest.stor.transferOwnership(this.currentTest.registry.address);
+        await this.currentTest.stor.transferOwnership(this.currentTest.registry.address);
     });
 
     it("REGISTRY_1 - initiateProvider() - Check that we can initiate provider", async function () {
@@ -47,7 +47,7 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_2 - initiateProvider() - Check that we can't change provider info if it was initated", async function () {        
         const newPublicKey = 222;
-        const newTitle = "test-test"
+        const newTitle = "test-test";
 
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
         await expect(this.test.registry.initiateProvider(newPublicKey, newTitle, specifier, params, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
@@ -59,13 +59,13 @@ contract('Registry', async (accounts) => {
     });
 
     it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
-        expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if curve type is none", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
-        expect(this.test.registry.initiateProviderCurve(specifier, curveNone, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.registry.initiateProviderCurve(specifier, curveNone, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_6 - getNextEndpointParam() - Check that we can get provider route keys", async function () {
@@ -73,7 +73,7 @@ contract('Registry', async (accounts) => {
 
         const receivedParam1 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);
         const receivedParam2 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 1);
-        expect(Utils.fetchPureArray([receivedParam1.valueOf(), receivedParam2.valueOf()], hex2a)).to.have.deep.members(params);
+        await expect(Utils.fetchPureArray([receivedParam1.valueOf(), receivedParam2.valueOf()], hex2a)).to.have.deep.members(params);
     });
 
     it("REGISTRY_7 - getNextEndpointParam() - Check that route keys of uninitialized provider are empty", async function () {        
@@ -88,13 +88,13 @@ contract('Registry', async (accounts) => {
 
         const receivedTitle = await this.test.registry.getProviderTitle.call(owner);
 
-        expect(hex2a(receivedTitle.valueOf())).to.be.equal(title);
+        await expect(hex2a(receivedTitle.valueOf())).to.be.equal(title);
     });
 
     it("REGISTRY_9 - getProviderTitle() - Check that title of uninitialized provider is empty", async function () {
-        const receivedTitle = await this.test.registry.getProviderTitle.call(owner);        
+        const receivedTitle = await this.test.registry.getProviderTitle.call(owner);
 
-        expect(hex2a(receivedTitle.valueOf())).to.be.equal('');
+        await expect(hex2a(receivedTitle.valueOf())).to.be.equal('');
     });
 
     it("REGISTRY_10 - getProviderPublicKey() - Check that we can get provider public key", async function () {
@@ -102,13 +102,13 @@ contract('Registry', async (accounts) => {
 
         const receivedPublicKey = await this.test.registry.getProviderPublicKey.call(owner);
 
-        expect(receivedPublicKey.valueOf()).to.be.equal(publicKey.toString());
+        await expect(receivedPublicKey.valueOf()).to.be.equal(publicKey.toString());
     });
 
     it("REGISTRY_11 - getProviderPublicKey() -  Check that public key of uninitialized provider is equal to 0", async function () {
         const res = await this.test.registry.getProviderPublicKey.call(owner);
-       
-        expect(res.valueOf()).to.be.equal('0');
+
+        await expect(res.valueOf()).to.be.equal('0');
     });
 
     it("REGISTRY_12 - getProviderCurve() - Check that we can get provider curve", async function () {
@@ -118,9 +118,9 @@ contract('Registry', async (accounts) => {
         const res = await this.test.registry.getProviderCurve.call(owner, specifier, { from: owner });
         const arr = Utils.fetchPureArray(res, parseInt);
 
-        expect(arr[0].valueOf()).to.be.an('number').equal(curveLinear);
-        expect(arr[1].valueOf()).to.be.an('number').equal(start);
-        expect(arr[2].valueOf()).to.be.an('number').equal(mul);
+        await expect(arr[0].valueOf()).to.be.an('number').equal(curveLinear);
+        await expect(arr[1].valueOf()).to.be.an('number').equal(start);
+        await expect(arr[2].valueOf()).to.be.an('number').equal(mul);
     });
 
     it("REGISTRY_13 - getProviderCurve() - Check that uninitialized provider curve is empty", async function () {
@@ -130,9 +130,9 @@ contract('Registry', async (accounts) => {
 
         const arr = Utils.fetchPureArray(res, parseInt);
 
-        expect(arr[0].valueOf()).to.be.an('number').equal(0);
-        expect(arr[1].valueOf()).to.be.an('number').equal(0);
-        expect(arr[2].valueOf()).to.be.an('number').equal(0);
+        await expect(arr[0].valueOf()).to.be.an('number').equal(0);
+        await expect(arr[1].valueOf()).to.be.an('number').equal(0);
+        await expect(arr[2].valueOf()).to.be.an('number').equal(0);
     });
 
     it("REGISTRY_14 - setEndpointParams() - Check that we can set endpoint params", async function () {
@@ -149,7 +149,7 @@ contract('Registry', async (accounts) => {
         const p5 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 4);
         const p6 = await this.test.registry.getNextEndpointParam.call(owner, specifier, 5);
 
-        expect(Utils.fetchPureArray([p1.valueOf(), p2.valueOf(), p3.valueOf(), p4.valueOf(), p5.valueOf(), p6.valueOf()], hex2a)).to.have.deep.members(newParams);
+        await expect(Utils.fetchPureArray([p1.valueOf(), p2.valueOf(), p3.valueOf(), p4.valueOf(), p5.valueOf(), p6.valueOf()], hex2a)).to.have.deep.members(newParams);
     });
 
     it("REGISTRY_15 - getNextProvider() - Check that we can iterate through providers", async function () {
@@ -161,17 +161,17 @@ contract('Registry', async (accounts) => {
 
         let index = 0;
         let res = await this.test.registry.getNextProvider(index);
-        expect(hex2a(res[3].valueOf())).to.be.equal(title);
+        await expect(hex2a(res[3].valueOf())).to.be.equal(title);
         index = parseInt(res[0].valueOf());
         
         res = await this.test.registry.getNextProvider(index);
-        expect(hex2a(res[3].valueOf())).to.be.equal(title + "1");
+        await expect(hex2a(res[3].valueOf())).to.be.equal(title + "1");
         index = parseInt(res[0].valueOf());
 
         res = await this.test.registry.getNextProvider(index);
-        expect(hex2a(res[3].valueOf())).to.be.equal(title + "2");
+        await expect(hex2a(res[3].valueOf())).to.be.equal(title + "2");
         index = parseInt(res[0].valueOf());
-        
-        expect(index).to.be.equal(0);
+
+        await expect(index).to.be.equal(0);
     }); 
 });

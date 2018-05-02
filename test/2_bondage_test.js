@@ -54,7 +54,7 @@ contract('Bondage', function (accounts) {
     beforeEach(async function deployContracts() {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
 
         this.currentTest.token = await ZapToken.new();
 
@@ -545,12 +545,12 @@ contract('CurrentCost', function (accounts) {
         await prepareProvider.call(this.test, true, true, oracle, curveLinear);
 
         const dotNumber = 27;
-        const linearDotCost = mul * dotNumber + start
+        const linearDotCost = mul * dotNumber + start;
 
         const res1 = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
         const ethLinearRes = parseInt(res1.valueOf());
 
-        expect(ethLinearRes).to.be.equal(linearDotCost);
+        await expect(ethLinearRes).to.be.equal(linearDotCost);
     });
 
     it("CURRENT_COST_2 - _currentCostOfDot() - Check current cost for exponential function", async function () {
@@ -563,7 +563,7 @@ contract('CurrentCost', function (accounts) {
         const res2 = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
         const ethExpRes = parseInt(res2.valueOf());
 
-        expect(ethExpRes).to.be.equal(expDotCost);
+        await expect(ethExpRes).to.be.equal(expDotCost);
     });
 
     it("CURRENT_COST_3 - _currentCostOfDot() - Check current cost for logarithmic function", async function () {
@@ -576,7 +576,7 @@ contract('CurrentCost', function (accounts) {
         const res3 = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
         const ethLogrRes = parseInt(res3.valueOf());
 
-        expect(ethLogrRes).to.be.equal(logDotCost);
+        await expect(ethLogrRes).to.be.equal(logDotCost);
     }); 
 
 /* ONLY PASSES WHEN VISIBILITY OF fastlog2 IS PUBLIC
