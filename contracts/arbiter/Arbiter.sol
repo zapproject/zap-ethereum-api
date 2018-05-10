@@ -25,14 +25,22 @@ contract Arbiter is Destructible {
 
     // Used to specify who is the terminator of a contract
     enum SubscriptionTerminator { Provider, Subscriber }
-    
+
     ArbiterStorage stor;
     BondageInterface bondage;
+
+    address public storageAddress;
+    address public bondageAddress;
 
     function Arbiter(address storageAddress, address bondageAddress) public {
         stor = ArbiterStorage(storageAddress);
         bondage = BondageInterface(bondageAddress);
     }
+
+    /// @notice Upgdate bondage function (barring no interface change)
+    function setBondage(address currentCostAddress) public onlyOwner {
+        bondage = BondageInterface(bondageAddress);
+    }    
 
     function initiateSubscription(
         address providerAddress,   // Provider address

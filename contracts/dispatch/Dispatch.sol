@@ -28,11 +28,17 @@ contract Dispatch is Destructible {
     BondageInterface bondage;
 
     address public storageAddress;
+    address public bondageAddress;
 
     function Dispatch(address storageAddress, address bondageAddress) public {
         stor = DispatchStorage(storageAddress);
         bondage = BondageInterface(bondageAddress);
     }
+
+    /// @notice Upgdate bondage function (barring no interface change)
+    function setBondage(address currentCostAddress) public onlyOwner {
+        bondage = BondageInterface(bondageAddress);
+    }    
 
     /// @notice Escrow dot for oracle request
     /// @dev Called by user contract

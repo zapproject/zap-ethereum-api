@@ -19,8 +19,8 @@ contract Bondage is Destructible {
     uint256 decimals = 10 ** 18;
 
     address public storageAddress;
-    address arbiterAddress;
-    address dispatchAddress;
+    address public arbiterAddress;
+    address public dispatchAddress;
 
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
     modifier operatorOnly {
