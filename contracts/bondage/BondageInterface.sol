@@ -12,6 +12,6 @@ interface BondageInterface {
     function calcBondRate(address, bytes32, uint256) external view returns (uint256, uint256);
     function currentCostOfDot(address, bytes32, uint256) external view returns (uint256);
     function getDotsIssued(address, bytes32) external view returns (uint256);
-    function getDots(address, address, bytes32) external view returns (uint256);
+    function getBoundDots(address, address, bytes32) external view returns (uint256);
     function getZapBound(address, bytes32) external view returns (uint256);
 }
