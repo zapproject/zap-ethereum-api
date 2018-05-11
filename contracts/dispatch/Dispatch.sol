@@ -51,7 +51,7 @@ contract Dispatch is Destructible {
         external
         returns (uint256 id)
     {
-        uint256 dots = bondage.getDots(msg.sender, provider, endpoint);
+        uint256 dots = bondage.getBoundDots(msg.sender, provider, endpoint);
 
         if(dots >= 1) {
             //enough dots
