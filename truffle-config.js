@@ -27,11 +27,17 @@ module.exports = {
             port: 7545,
             network_id: "*" 
         },
-	    docker: {
-            host: "172.18.0.3",
+	docker: {
+            host: "bootstrap",
             port: 8545,
             network_id: "*",
             from: "0x010e49e47cbb34e67c072702ed6f4d8b273f751f"// must be first account in accounts[] array inside tests
-    	}
+    	},
+        "docker-local": {
+            host: "127.0.0.1",
+            port: 8545,
+            network_id: "*",
+            from: "0x010e49e47cbb34e67c072702ed6f4d8b273f751f"// must be first account in accounts[] array inside tests
+        }
     }
 };
