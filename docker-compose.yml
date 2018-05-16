@@ -1,4 +1,4 @@
- version: '3'
+version: '3'
 networks: # private network of our services
     etherium-network:
 
@@ -14,13 +14,6 @@ services:
     volumes:
       - "${PROJECT_SRC:-.}/:/src"
     working_dir: /src
-    tty: true # interactive mode
-    stdin_open: true # interactive mode
-    command:
-      - 'top'
-    entrypoint:
-      - /bin/sh
-      - -c
 
   bootstrap:
     image: "parity/parity:${DOCKER_PARITY_VER:-v1.9.6}"
@@ -30,13 +23,17 @@ services:
       etherium-network:
         aliases:
           - bootstrap # private host-name in of our network
-
     volumes:
       - "./parity-assets/config.toml:/root/.local/share/io.parity.ethereum/config.toml:ro"
       - "./parity-assets/parity-genesis.json:/root/.local/share/io.parity.ethereum/parity-genesis.json:ro"
       - "./parity-assets/reserved-peers.txt:/root/.local/share/io.parity.ethereum/reserved-peers.txt:ro"
       - "./parity-assets/password:/root/.local/share/io.parity.ethereum/password:ro"
       - "./parity-assets/keys:/root/.local/share/io.parity.ethereum/keys:rw"
-      - "/etc/localtime:/etc/localtime:ro"
-
-    command: --config /root/.local/share/io.parity.ethereum/config.toml --unsafe-expose --node-key 091bd6067cb4612df85d9c1ff85cc47f259ced4d4cd99816b14f35650f59c322
+      - "${LOCALTIME_PATH:-/etc/localtime}:/etc/localtime:ro"
+    command: --config /root/.local/share/io.parity.ethereum/config.toml --jsonrpc-cors all --unsafe-expose --node-key 091bd6067cb4612df85d9c1ff85cc47f259ced4d4cd99816b14f35650f59c322
+    ports:
+      - "30303:30303"
+      - "30303:30303/udp"
+      - "8545:8545"
+      - "8546:8546"
+      - "8180:8180"

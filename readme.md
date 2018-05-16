@@ -10,6 +10,12 @@ To run tests
  - Start development blockchain: truffle develop
  - Start all tests: test
  - Start specified test file: test filename.js
+ 
+To run docker-compose with parity private network
+- Create .env file from .env.example with correct path to yours host localtime file.
+- Run `docker-compose up`  
+- Parity UI: `http://127.0.0.1:8180`
+- Parity Ethereum RPC: `http://127.0.0.1:8545`
 
 Software versions
  - Solidity v0.4.17
