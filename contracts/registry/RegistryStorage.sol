@@ -1,25 +1,16 @@
 pragma solidity ^0.4.19;
 
 import "../lib/Destructible.sol";
+import "../lib/PiecewiseStorage.sol";
 
 contract RegistryStorage is Ownable {
-
-    // curve types representing dot(access token) prices as function of supply
-    enum CurveType { None, Linear, Exponential, Logarithmic }
-
-    // curve data structure representing dot(access token) prices as function of supply
-    struct Curve {
-        CurveType Type;
-        uint128 Start;
-        uint128 Multiplier;
-    }
 
     // fundamental account type for the platform
     struct Oracle {
         uint256 publicKey;                               // Public key of the data provider
         bytes32 title;                                   // Tags (csv)
         mapping(bytes32 => bytes32[]) endpointParams;    // Endpoint specific parameters
-        mapping(bytes32 => Curve) curves;                // Price vs Supply (contract endpoint)
+        mapping(bytes32 => PiecewiseStorage.PiecewiseFunction) curves; // Price vs Supply (contract endpoint)
     }
 
     mapping(address => Oracle) private oracles;
@@ -43,14 +34,45 @@ contract RegistryStorage is Ownable {
         return oracles[provider].endpointParams[endpoint][index];
     }
 
+    function getCurveUnset(address provider, bytes32 endpoint) returns (bool) {
+        return oracles[provider].curves[endpoint].pieces.length == 0; 
+    }
+
     function getCurve(address provider, bytes32 endpoint)
         external
         view
-        returns (CurveType Type, uint128 Start, uint128 Multiplier)
+        returns (int[], int[], int[], uint[], uint[], uint[])
     {
-        Curve memory curve = oracles[provider].curves[endpoint];
+        PiecewiseStorage.PiecewiseFunction memory curve = oracles[provider].curves[endpoint];
 
-        return (curve.Type, curve.Start, curve.Multiplier);
+        uint[] memory starts = new uint[](curve.pieces.length);
+        uint[] memory ends = new uint[](curve.pieces.length);
+
+        uint numTerms;
+        uint pStart = 0;
+        for ( uint i = 0; i < curve.dividers.length; i++ ) {
+            
+            uint pEnd = i;
+            numTerms += pEnd - pStart +1;
+        } 
+
+        int[] memory coef = new int[](numTerms);
+        int[] memory power = new int[](numTerms);
+        int[] memory fn = new int[](numTerms);
+
+        for ( i = 0; i < curve.pieces.length; i++ ){
+
+            for ( uint j = 0; j < curve.pieces[i].poly.terms.length; j++ ) {
+                coef[j] = curve.pieces[i].poly.terms[j].coef;
+                power[j] = curve.pieces[i].poly.terms[j].power;
+                fn[j] = curve.pieces[i].poly.terms[j].fn;
+           }
+
+           starts[i] = curve.pieces[i].start;
+           ends[i] = curve.pieces[i].end;
+        }
+    
+        return (coef, power, fn, starts, ends, curve.dividers);
     }
 
     function getOracleIndexSize() external view returns (uint256) {
@@ -83,17 +105,23 @@ contract RegistryStorage is Ownable {
         oracles[origin].endpointParams[endpoint] = endpointParams;
     }
 
+
     function setCurve(
         address origin,
         bytes32 endpoint,
-        CurveType curveType,
-        uint128 curveStart,
-        uint128 curveMultiplier
+        int[] coef,
+        int[] power,
+        int[] fn,
+        uint[] starts,
+        uint[] ends,
+        uint[] dividers
     ) 
         external
         onlyOwner
-
     {
-        oracles[origin].curves[endpoint] = Curve(curveType, curveStart, curveMultiplier);
+        oracles[origin].curves[endpoint] = PiecewiseStorage.decodeCurve(coef, power, fn, starts, ends, dividers);
     }
+
+
+
 }

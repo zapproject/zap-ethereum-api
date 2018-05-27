@@ -15,9 +15,12 @@ contract Registry is Destructible {
     event NewCurve(
         address indexed provider,
         bytes32 indexed endpoint,
-        RegistryStorage.CurveType indexed curveType,
-        uint128 curveStart,
-        uint128 curveMultiplier
+        int[] coef,
+        int[] power,
+        int[] fn,
+        uint[] starts,
+        uint[] ends,
+        uint[] dividers
     );
 
     RegistryStorage stor;
@@ -55,28 +58,32 @@ contract Registry is Destructible {
     /// @dev initiates an endpoint specific provider curve
     /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
     /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
-    /// @param curveType dot-cost vs oracle-specific dot-supply
-    /// @param curveStart y-offset of cost( always initial cost )
-    /// @param curveMultiplier coefficient to curveType
+    /// @param coef flattened array of all coefficients across all polynomial terms 
+    /// @param power flattened array of all powers across all polynomial terms 
+    /// @param fn flattened array of all function indices across all polynomial terms
+    /// @param starts array of starting points for piecewise function pieces 
+    /// @param ends array of ending points for piecewise function pieces 
+    /// @param dividers array of indices, each specifying range of indices in coef,power,fn belonging to each piece 
     function initiateProviderCurve(
         bytes32 endpoint,
-        RegistryStorage.CurveType curveType,
-        uint128 curveStart,
-        uint128 curveMultiplier
+        int[] coef,
+        int[] power,
+        int[] fn,
+        uint[] starts,
+        uint[] ends,
+        uint[] dividers
     )
         public
         returns (bool)
     {
         // Provider must be initiated
         require(stor.getPublicKey(msg.sender) != 0);
-        // Can't use None
-        require(curveType != RegistryStorage.CurveType.None);
         // Can't reset their curve
-        RegistryStorage.CurveType cType;
-        (cType,) = stor.getCurve(msg.sender, endpoint);
-        require(cType == RegistryStorage.CurveType.None);
-        stor.setCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
-        NewCurve(msg.sender, endpoint, curveType, curveStart, curveMultiplier);
+        require(stor.getCurveUnset(msg.sender, endpoint));
+
+        stor.setCurve(msg.sender, endpoint, coef, power, fn, starts, ends, dividers);
+        NewCurve(msg.sender,  endpoint, coef, power, fn, starts, ends, dividers);
+
         return true;
     }
 
@@ -117,9 +124,12 @@ contract Registry is Destructible {
         public
         view
         returns (
-            RegistryStorage.CurveType curveType,
-            uint128 curveStart,
-            uint128 curveMultiplier
+            int[] coef, 
+            int[] power, 
+            int[] fn, 
+            uint[] starts, 
+            uint[] ends, 
+            uint[] dividers
         )
     {
         return stor.getCurve(provider, endpoint);
