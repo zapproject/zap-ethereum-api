@@ -31,8 +31,8 @@ contract Bondage is Destructible {
     /// @dev Initialize Storage, Token, anc CurrentCost Contracts
     function Bondage(address storageAddress, address tokenAddress, address currentCostAddress) public {
         stor = BondageStorage(storageAddress);
-        token = ERC20(tokenAddress); 
         currentCost = CurrentCostInterface(currentCostAddress);
+        token = ERC20(tokenAddress); 
     }
 
     /// @dev Set Arbiter address
@@ -64,27 +64,6 @@ contract Bondage is Destructible {
         unbound = _unbond(msg.sender, oracleAddress, endpoint, numDots);
         Unbound(msg.sender, oracleAddress, endpoint, numDots);
     }        
-
-    /// @dev will bond to an oracle on behalf of some holder
-    /// @return total ZAP bound to oracle
-    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 bound) {
-        require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
-        stor.setDelegate(holderAddress, oracleAddress, msg.sender);
-        bound = _bond(holderAddress, oracleAddress, endpoint, numZap);
-        Bound(holderAddress, oracleAddress, endpoint, numZap);
-    }
-
-    /// @return total ZAP unbound from oracle
-    function delegateUnbond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
-        require(stor.getDelegate(holderAddress, oracleAddress) == msg.sender);
-        unbound = _unbond(holderAddress, oracleAddress, endpoint, numDots);
-        Unbound(holderAddress, oracleAddress, endpoint, numDots);
-    }
-
-    /// @dev will reset delegate 
-    function resetDelegate(address oracleAddress) external {
-        stor.deleteDelegate(msg.sender, oracleAddress);
-    }
 
     /// @dev Move numDots dots from provider-requester to bondage according to 
     /// data-provider address, holder address, and endpoint specifier (ala 'smart_contract')
