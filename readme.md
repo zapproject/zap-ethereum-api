@@ -5,7 +5,7 @@ Install project dependencies
  - Install babel: npm install babel-core babel-cli babel-preset-env; npm install babel-polyfill
  - Create file .babelrc in root directory and paste into it: { "presets": ["env"] }
  - Install chai: npm install chai; npm install chai-bignumber; npm install chai-as-promised
- -  ```npm install truffle uuid-parse babel-core babel-cli babel-preset-env babel-polyfill chai chai-bignumber chai-as-promised```
+ - ```npm install truffle uuid-parse babel-core babel-cli babel-preset-env babel-polyfill chai chai-bignumber chai-as-promised```
 
 To run tests
  - Start development blockchain: truffle develop
