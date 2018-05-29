@@ -423,7 +423,7 @@ contract('Bondage', function (accounts) {
         const issuedDots = await this.test.bondage.getDotsIssued.call(oracle, specifier);
         await expect(parseInt(issuedDots.valueOf())).to.be.equal(5);
     });
-
+/*
     it("BONDAGE_22 - delegateBond() - Check that delegate bond can be executed", async function () {
 
         await prepareProvider.call(this.test);      
@@ -488,7 +488,7 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.resetDelegate(oracle, {from: subscriber});
         await expect(this.test.bondage.delegateUnbond(subscriber, oracle, specifier, 500, {from: accounts[4]})).to.eventually.be.rejectedWith(EVMRevert);
     });
-
+*/
 }); 
 
 
