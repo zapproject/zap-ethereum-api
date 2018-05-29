@@ -1,4 +1,5 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.24;
+pragma experimental ABIEncoderV2;
 
 library PiecewiseStorage {
 
@@ -9,7 +10,7 @@ library PiecewiseStorage {
     }
 
     struct PiecewisePolynomial {
-        PiecewiseTerm[] terms;
+        PiecewiseTerm[3] terms;
     }
 
     struct PiecewisePiece {
@@ -19,41 +20,37 @@ library PiecewiseStorage {
     }
 
     struct PiecewiseFunction {
-        PiecewisePiece[] pieces;
-        uint[] dividers;
+        PiecewisePiece[3] pieces;
     }
 
 
     function decodeCurve(int[] coef,
                          int[] power,
                          int[] fn,
-                         uint[] starts,
-                         uint[] ends,
-                         uint[] dividers) internal pure returns (PiecewiseStorage.PiecewiseFunction) {
+                         uint[] parts,
+                         uint[] dividers,
+                         PiecewiseStorage.PiecewiseFunction storage out) internal {
         uint pStart = 0;
 
-        PiecewiseStorage.PiecewisePiece[] memory pieces = new PiecewiseStorage.PiecewisePiece[](dividers.length + 1);
+        // out.pieces = new PiecewiseStorage.PiecewisePiece[](dividers.length + 1);
 
         for ( uint i = 0; i < dividers.length; i++ ) {
-            uint pEnd = dividers[i];
+            // PiecewiseStorage.PiecewiseTerm[] memory terms = new PiecewiseStorage.PiecewiseTerm[](10);
 
-            PiecewiseStorage.PiecewiseTerm[] memory terms = new PiecewiseStorage.PiecewiseTerm[](pEnd - pStart + 1);
+            out.pieces[i].start = parts[2 * i];
+            out.pieces[i].end = parts[(2 * i) + 1];
 
-            for ( uint j = pStart; j < pEnd; j++ ) {
-                terms[j - pStart].coef = coef[j];
-                terms[j - pStart].power = power[j];
-                terms[j - pStart].fn = fn[j];
+            for ( uint j = pStart; j < dividers[i]; j++ ) {
+                out.pieces[i].poly.terms[j - dividers[i]].coef = coef[j];
+                out.pieces[i].poly.terms[j - dividers[i]].power = power[j];
+                out.pieces[i].poly.terms[j - dividers[i]].fn = fn[j];
             }
 
-            PiecewiseStorage.PiecewisePolynomial memory poly = PiecewiseStorage.PiecewisePolynomial(terms);
-            PiecewiseStorage.PiecewisePiece memory piece = PiecewiseStorage.PiecewisePiece(poly, starts[i], ends[i]);
-
-            pieces[i] = piece;
-
-            pStart = pEnd;
+            pStart = dividers[i];
         }
+       
+        // PiecewiseStorage.PiecewiseFunction memory out = PiecewiseStorage.PiecewiseFunction(pieces);
 
-        return PiecewiseStorage.PiecewiseFunction(pieces, dividers);
+        // return pieces;
     }
-
 }

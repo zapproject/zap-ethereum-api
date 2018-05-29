@@ -1,4 +1,5 @@
 pragma solidity ^0.4.19;
+pragma experimental ABIEncoderV2;
 
 import "../lib/Destructible.sol";
 import "../lib/PiecewiseStorage.sol";
@@ -41,38 +42,9 @@ contract RegistryStorage is Ownable {
     function getCurve(address provider, bytes32 endpoint)
         external
         view
-        returns (int[], int[], int[], uint[], uint[], uint[])
+        returns (PiecewiseStorage.PiecewiseFunction curve)
     {
-        PiecewiseStorage.PiecewiseFunction memory curve = oracles[provider].curves[endpoint];
-
-        uint[] memory starts = new uint[](curve.pieces.length);
-        uint[] memory ends = new uint[](curve.pieces.length);
-
-        uint numTerms;
-        uint pStart = 0;
-        for ( uint i = 0; i < curve.dividers.length; i++ ) {
-            
-            uint pEnd = i;
-            numTerms += pEnd - pStart +1;
-        } 
-
-        int[] memory coef = new int[](numTerms);
-        int[] memory power = new int[](numTerms);
-        int[] memory fn = new int[](numTerms);
-
-        for ( i = 0; i < curve.pieces.length; i++ ){
-
-            for ( uint j = 0; j < curve.pieces[i].poly.terms.length; j++ ) {
-                coef[j] = curve.pieces[i].poly.terms[j].coef;
-                power[j] = curve.pieces[i].poly.terms[j].power;
-                fn[j] = curve.pieces[i].poly.terms[j].fn;
-           }
-
-           starts[i] = curve.pieces[i].start;
-           ends[i] = curve.pieces[i].end;
-        }
-    
-        return (coef, power, fn, starts, ends, curve.dividers);
+        return oracles[provider].curves[endpoint];
     }
 
     function getOracleIndexSize() external view returns (uint256) {
@@ -112,16 +84,19 @@ contract RegistryStorage is Ownable {
         int[] coef,
         int[] power,
         int[] fn,
-        uint[] starts,
-        uint[] ends,
+        uint[] parts,
         uint[] dividers
     ) 
         external
         onlyOwner
     {
-        oracles[origin].curves[endpoint] = PiecewiseStorage.decodeCurve(coef, power, fn, starts, ends, dividers);
+        PiecewiseStorage.decodeCurve(
+            coef,
+            power,
+            fn,
+            parts,
+            dividers,
+            oracles[origin].curves[endpoint]
+        );
     }
-
-
-
 }

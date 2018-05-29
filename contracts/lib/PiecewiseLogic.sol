@@ -1,3 +1,4 @@
+pragma experimental ABIEncoderV2;
 import "./PiecewiseStorage.sol";
 
 library PiecewiseLogic {

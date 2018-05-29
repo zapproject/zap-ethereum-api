@@ -1,8 +1,10 @@
 pragma solidity ^0.4.19;
+pragma experimental ABIEncoderV2;
 // v1.0
 
 import "./../lib/Destructible.sol";
 import "./RegistryStorage.sol";
+import "./../lib/PiecewiseStorage.sol";
 
 contract Registry is Destructible {
 
@@ -18,8 +20,7 @@ contract Registry is Destructible {
         int[] coef,
         int[] power,
         int[] fn,
-        uint[] starts,
-        uint[] ends,
+        uint[] parts,
         uint[] dividers
     );
 
@@ -61,16 +62,14 @@ contract Registry is Destructible {
     /// @param coef flattened array of all coefficients across all polynomial terms 
     /// @param power flattened array of all powers across all polynomial terms 
     /// @param fn flattened array of all function indices across all polynomial terms
-    /// @param starts array of starting points for piecewise function pieces 
-    /// @param ends array of ending points for piecewise function pieces 
+    /// @param parts array of starting/ending points for piecewise function pieces 
     /// @param dividers array of indices, each specifying range of indices in coef,power,fn belonging to each piece 
     function initiateProviderCurve(
         bytes32 endpoint,
         int[] coef,
         int[] power,
         int[] fn,
-        uint[] starts,
-        uint[] ends,
+        uint[] parts,
         uint[] dividers
     )
         public
@@ -81,8 +80,8 @@ contract Registry is Destructible {
         // Can't reset their curve
         require(stor.getCurveUnset(msg.sender, endpoint));
 
-        stor.setCurve(msg.sender, endpoint, coef, power, fn, starts, ends, dividers);
-        NewCurve(msg.sender,  endpoint, coef, power, fn, starts, ends, dividers);
+        stor.setCurve(msg.sender, endpoint, coef, power, fn, parts, dividers);
+        NewCurve(msg.sender,  endpoint, coef, power, fn, parts, dividers);
 
         return true;
     }
@@ -123,14 +122,7 @@ contract Registry is Destructible {
     )        
         public
         view
-        returns (
-            int[] coef, 
-            int[] power, 
-            int[] fn, 
-            uint[] starts, 
-            uint[] ends, 
-            uint[] dividers
-        )
+        returns (PiecewiseStorage.PiecewiseFunction)
     {
         return stor.getCurve(provider, endpoint);
     }

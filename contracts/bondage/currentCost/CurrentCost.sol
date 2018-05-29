@@ -1,4 +1,5 @@
 pragma solidity ^0.4.19;
+pragma experimental ABIEncoderV2;
 
 import "../../lib/Destructible.sol";
 import "../../lib/PiecewiseStorage.sol";
@@ -22,10 +23,9 @@ contract CurrentCost is Destructible {
         view
         returns (uint256 cost)
     {
-        return uint256(PiecewiseLogic.evalutePiecewiseFunction(
-            PiecewiseStorage.decodeCurve(
-                registry.getProviderCurve(oracleAddress, endpoint)
-            ),
+        PiecewiseStorage.PiecewiseFunction memory curve = registry.getProviderCurve(oracleAddress, endpoint);
+
+        return uint256(PiecewiseLogic.evalutePiecewiseFunction(curve,
             int(totalBound)
         ));
     }
