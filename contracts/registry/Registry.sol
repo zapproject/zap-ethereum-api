@@ -15,12 +15,12 @@ contract Registry is Destructible {
     event NewCurve(
         address indexed provider,
         bytes32 indexed endpoint,
-        int[] coef,
-        int[] power,
-        int[] fn,
-        uint[] starts,
-        uint[] ends,
-        uint[] dividers
+        int[25] coef,
+        int[25] power,
+        int[25] fn,
+        uint[5] starts,
+        uint[5] ends,
+        uint[5] dividers
     );
 
     RegistryStorage stor;
@@ -66,12 +66,12 @@ contract Registry is Destructible {
     /// @param dividers array of indices, each specifying range of indices in coef,power,fn belonging to each piece 
     function initiateProviderCurve(
         bytes32 endpoint,
-        int[] coef,
-        int[] power,
-        int[] fn,
-        uint[] starts,
-        uint[] ends,
-        uint[] dividers
+        int[25] coef,
+        int[25] power,
+        int[25] fn,
+        uint[5] starts,
+        uint[5] ends,
+        uint[5] dividers
     )
         public
         returns (bool)
@@ -124,15 +124,22 @@ contract Registry is Destructible {
         public
         view
         returns (
-            int[] coef, 
-            int[] power, 
-            int[] fn, 
-            uint[] starts, 
-            uint[] ends, 
-            uint[] dividers
+            int[25] coef,
+            int[25] power,
+            int[25] fn,
+            uint[5] starts,
+            uint[5] ends,
+            uint[5] dividers
         )
     {
-        return stor.getCurve(provider, endpoint);
+        int[25] memory c;
+        int[25] memory p;
+        int[25] memory f;
+        uint[5] memory s;
+        uint[5] memory e;
+        uint[5] memory d;
+        (c, p, f, s, e, d) = stor.getCurve(provider, endpoint);
+        return (c, p, f, s, e, d);
     }
 
     function getNextProvider(uint256 index)

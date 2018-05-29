@@ -9,7 +9,7 @@ library PiecewiseStorage {
     }
 
     struct PiecewisePolynomial {
-        PiecewiseTerm[] terms;
+        PiecewiseTerm[5] terms;
     }
 
     struct PiecewisePiece {
@@ -19,25 +19,25 @@ library PiecewiseStorage {
     }
 
     struct PiecewiseFunction {
-        PiecewisePiece[] pieces;
-        uint[] dividers;
+        PiecewisePiece[5] pieces;
+        uint[5] dividers;
     }
 
 
-    function decodeCurve(int[] coef,
-                         int[] power,
-                         int[] fn,
-                         uint[] starts,
-                         uint[] ends,
-                         uint[] dividers) internal pure returns (PiecewiseStorage.PiecewiseFunction) {
+    function decodeCurve(int[25] coef,
+                         int[25] power,
+                         int[25] fn,
+                         uint[5] starts,
+                         uint[5] ends,
+                         uint[5] dividers) internal pure returns (PiecewiseStorage.PiecewiseFunction) {
         uint pStart = 0;
 
-        PiecewiseStorage.PiecewisePiece[] memory pieces = new PiecewiseStorage.PiecewisePiece[](dividers.length + 1);
+        PiecewiseStorage.PiecewisePiece[5] memory pieces;
 
         for ( uint i = 0; i < dividers.length; i++ ) {
             uint pEnd = dividers[i];
 
-            PiecewiseStorage.PiecewiseTerm[] memory terms = new PiecewiseStorage.PiecewiseTerm[](pEnd - pStart + 1);
+            PiecewiseStorage.PiecewiseTerm[5] memory terms;
 
             for ( uint j = pStart; j < pEnd; j++ ) {
                 terms[j - pStart].coef = coef[j];

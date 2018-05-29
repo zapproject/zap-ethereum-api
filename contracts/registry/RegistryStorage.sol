@@ -41,38 +41,27 @@ contract RegistryStorage is Ownable {
     function getCurve(address provider, bytes32 endpoint)
         external
         view
-        returns (int[], int[], int[], uint[], uint[], uint[])
+        returns (int[25], int[25], int[25], uint[5], uint[5], uint[5])
     {
         PiecewiseStorage.PiecewiseFunction memory curve = oracles[provider].curves[endpoint];
 
-        uint[] memory starts = new uint[](curve.pieces.length);
-        uint[] memory ends = new uint[](curve.pieces.length);
+        uint[5][2] memory startsAndEnds;
 
-        uint numTerms;
-        uint pStart = 0;
-        for ( uint i = 0; i < curve.dividers.length; i++ ) {
-            
-            uint pEnd = i;
-            numTerms += pEnd - pStart +1;
-        } 
+        int[25][3] memory coefPowerFn;
 
-        int[] memory coef = new int[](numTerms);
-        int[] memory power = new int[](numTerms);
-        int[] memory fn = new int[](numTerms);
+        for (uint i = 0; i < curve.pieces.length; i++) {
 
-        for ( i = 0; i < curve.pieces.length; i++ ){
+            for (uint j = 0; j < curve.pieces[i].poly.terms.length; j++) {
+                coefPowerFn[0][j] = curve.pieces[i].poly.terms[j].coef;
+                coefPowerFn[1][j] = curve.pieces[i].poly.terms[j].power;
+                coefPowerFn[2][j] = curve.pieces[i].poly.terms[j].fn;
+            }
 
-            for ( uint j = 0; j < curve.pieces[i].poly.terms.length; j++ ) {
-                coef[j] = curve.pieces[i].poly.terms[j].coef;
-                power[j] = curve.pieces[i].poly.terms[j].power;
-                fn[j] = curve.pieces[i].poly.terms[j].fn;
-           }
-
-           starts[i] = curve.pieces[i].start;
-           ends[i] = curve.pieces[i].end;
+            startsAndEnds[0][i] = curve.pieces[i].start;
+            startsAndEnds[1][i] = curve.pieces[i].end;
         }
-    
-        return (coef, power, fn, starts, ends, curve.dividers);
+
+        return (coefPowerFn[0], coefPowerFn[1], coefPowerFn[2], startsAndEnds[0], startsAndEnds[1], curve.dividers);
     }
 
     function getOracleIndexSize() external view returns (uint256) {
@@ -109,19 +98,26 @@ contract RegistryStorage is Ownable {
     function setCurve(
         address origin,
         bytes32 endpoint,
-        int[] coef,
-        int[] power,
-        int[] fn,
-        uint[] starts,
-        uint[] ends,
-        uint[] dividers
+        int[25] coef,
+        int[25] power,
+        int[25] fn,
+        uint[5] starts,
+        uint[5] ends,
+        uint[5] dividers
     ) 
         external
         onlyOwner
     {
-        oracles[origin].curves[endpoint] = PiecewiseStorage.decodeCurve(coef, power, fn, starts, ends, dividers);
+        PiecewiseStorage.PiecewiseFunction storage pfunc = oracles[origin].curves[endpoint];
+        PiecewiseStorage.PiecewiseFunction memory decoded = PiecewiseStorage.decodeCurve(coef, power, fn, starts, ends, dividers);
+        pfunc.pieces[0] = decoded.pieces[0];
+        pfunc.dividers = decoded.dividers;
     }
 
 
+    // TODO:
+    function writePiecewiseFunction() internal {
+
+    }
 
 }
