@@ -127,6 +127,8 @@ contract RegistryStorage is Ownable {
         oracles[origin].curves[endpoint].isInitialized = true;
     }
 
+    // TODO: rework push and pop functions to have possibility remove and add to any position
+
     function pushFunctionPiece(address origin, bytes32 endpoint, uint start, uint end) external onlyOwner {
         PiecewiseStorage.PiecewiseFunction storage pFunc = oracles[origin].curves[endpoint];
         uint64 currentPiecesLength = pFunc.piecesLength;

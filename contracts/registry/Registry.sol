@@ -49,6 +49,8 @@ contract Registry is Destructible {
         return true;
     }
 
+    // just set isInitialized flag
+    // new push and pop functions should be used to specify params
     function initiateProviderCurve(
         bytes32 endpoint
     )
@@ -71,6 +73,11 @@ contract Registry is Destructible {
         return true;
     }
 
+    function pushCurveFunctionDivider(bytes32 endpoint, uint divider) external returns(bool) {
+        stor.pushFunctionDivider(msg.sender, endpoint, divider);
+        return true;
+    }
+
     function pushCurvePieceTerm(bytes32 endpoint, uint64 pieceNum, int coef, int power, int fn) external returns(bool) {
         stor.pushPieceTerm(msg.sender, endpoint, pieceNum, coef, power, fn);
         return true;
@@ -78,6 +85,11 @@ contract Registry is Destructible {
 
     function popCurveFunctionPiece(bytes32 endpoint) external returns(bool) {
         stor.popFunctionPiece(msg.sender, endpoint);
+        return true;
+    }
+
+    function popCurveFunctionDivider(bytes32 endpoint) external returns(bool) {
+        stor.popFunctionDivider(msg.sender, endpoint);
         return true;
     }
 
