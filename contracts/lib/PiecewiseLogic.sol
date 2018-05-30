@@ -1,4 +1,5 @@
 import "./PiecewiseStorage.sol";
+import "../registry/RegistryInterface.sol";
 
 library PiecewiseLogic {
 
@@ -8,47 +9,58 @@ library PiecewiseLogic {
         TermNone
     }
 
-    function evaluatePiecewiseTerm(PiecewiseStorage.PiecewiseTerm term, int x) private pure returns (int) {
+    function evaluatePiecewiseTerm(int coef, int power, int fn, int x) private pure returns (int) {
         int val = 1;
 
-        if ( term.fn == 0 ) {
+        if ( fn == 0 ) {
             if ( x < 0 ) x = -x;
         }
-        else if ( term.fn == 1 ) {
+        else if ( fn == 1 ) {
             if ( x < 0 ) x = 0;
             else         x = int256(fastlog2(uint256(x)));
         }
 
-        int exp = term.power;
+        int exp = power;
         
         while ( exp > 0 ) {
             val *= x;
             exp--;
         }
 
-        return exp * term.coef;
+        return exp * coef;
     }
 
-    function evaluatePiecewisePolynomial(PiecewiseStorage.PiecewisePolynomial poly, int x) private pure returns (int) {
+    function evaluatePiecewisePolynomial(RegistryInterface reg, address oracle, bytes32 endpoint, uint64 pieceNum, uint64 termsLength, int x) private view returns (int) {
         int sum = 0;
 
-        for ( uint i = 0; i < poly.terms.length; i++ ) {
-            sum += evaluatePiecewiseTerm(poly.terms[i], x);
+        for ( uint64 i = 0; i < termsLength; i++ ) {
+            int coef;
+            int power;
+            int fn;
+            (coef, power, fn) = reg.getCurveTerm(oracle, endpoint, pieceNum, i);
+            sum += evaluatePiecewiseTerm(coef, power, fn, x);
         }
 
         return sum;
     }
 
-    function evalutePiecewiseFunction(PiecewiseStorage.PiecewiseFunction fn, int x) internal pure returns (int) {
+    function evalutePiecewiseFunction(RegistryInterface reg, address oracle, bytes32 endpoint, int x) internal view returns (int) {
         if ( x < 0 ) {
             revert();
         }
 
         uint256 _x = uint256(x);
 
-        for ( uint i = 0; i < fn.pieces.length; i++ ) {
-            if ( fn.pieces[i].start >= _x && _x <= fn.pieces[i].end ) {
-                return evaluatePiecewisePolynomial(fn.pieces[i].poly, x);
+
+
+        uint length = reg.getCurvePiecesLength(oracle, endpoint);
+        for ( uint64 i = 0; i < length; i++ ) {
+            uint start;
+            uint end;
+            uint64 termsLength;
+            (start, end, termsLength) = reg.getCurvePieceInfo(oracle, endpoint, i);
+            if ( start >= _x && _x <= end ) {
+                return evaluatePiecewisePolynomial(reg, oracle, endpoint, i, termsLength, x);
             }
         }
     }

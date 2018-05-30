@@ -14,13 +14,7 @@ contract Registry is Destructible {
 
     event NewCurve(
         address indexed provider,
-        bytes32 indexed endpoint,
-        int[25] coef,
-        int[25] power,
-        int[25] fn,
-        uint[5] starts,
-        uint[5] ends,
-        uint[5] dividers
+        bytes32 indexed endpoint
     );
 
     RegistryStorage stor;
@@ -55,23 +49,8 @@ contract Registry is Destructible {
         return true;
     }
 
-    /// @dev initiates an endpoint specific provider curve
-    /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
-    /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
-    /// @param coef flattened array of all coefficients across all polynomial terms 
-    /// @param power flattened array of all powers across all polynomial terms 
-    /// @param fn flattened array of all function indices across all polynomial terms
-    /// @param starts array of starting points for piecewise function pieces 
-    /// @param ends array of ending points for piecewise function pieces 
-    /// @param dividers array of indices, each specifying range of indices in coef,power,fn belonging to each piece 
     function initiateProviderCurve(
-        bytes32 endpoint,
-        int[25] coef,
-        int[25] power,
-        int[25] fn,
-        uint[5] starts,
-        uint[5] ends,
-        uint[5] dividers
+        bytes32 endpoint
     )
         public
         returns (bool)
@@ -81,9 +60,29 @@ contract Registry is Destructible {
         // Can't reset their curve
         require(stor.getCurveUnset(msg.sender, endpoint));
 
-        stor.setCurve(msg.sender, endpoint, coef, power, fn, starts, ends, dividers);
-        NewCurve(msg.sender,  endpoint, coef, power, fn, starts, ends, dividers);
+        stor.setCurve(msg.sender, endpoint);
+        NewCurve(msg.sender, endpoint);
 
+        return true;
+    }
+
+    function pushCurveFunctionPiece(bytes32 endpoint, uint start, uint end) external returns(bool) {
+        stor.pushFunctionPiece(msg.sender, endpoint, start, end);
+        return true;
+    }
+
+    function pushCurvePieceTerm(bytes32 endpoint, uint64 pieceNum, int coef, int power, int fn) external returns(bool) {
+        stor.pushPieceTerm(msg.sender, endpoint, pieceNum, coef, power, fn);
+        return true;
+    }
+
+    function popCurveFunctionPiece(bytes32 endpoint) external returns(bool) {
+        stor.popFunctionPiece(msg.sender, endpoint);
+        return true;
+    }
+
+    function popCurvePieceTerm(bytes32 endpoint, uint64 pieceNum) external returns(bool) {
+        stor.popPieceTerm(msg.sender, endpoint, pieceNum);
         return true;
     }
 
@@ -116,30 +115,44 @@ contract Registry is Destructible {
         return(0,0);
     }
 
-    /// @dev get curve paramaters from oracle
-    function getProviderCurve(
-        address provider,
-        bytes32 endpoint
-    )        
-        public
+    function getCurvePiecesLength(address provider, bytes32 endpoint)
+        external
         view
-        returns (
-            int[25] coef,
-            int[25] power,
-            int[25] fn,
-            uint[5] starts,
-            uint[5] ends,
-            uint[5] dividers
-        )
+        returns (uint64)
     {
-        int[25] memory c;
-        int[25] memory p;
-        int[25] memory f;
-        uint[5] memory s;
-        uint[5] memory e;
-        uint[5] memory d;
-        (c, p, f, s, e, d) = stor.getCurve(provider, endpoint);
-        return (c, p, f, s, e, d);
+        return stor.getCurvePiecesLength(provider, endpoint);
+    }
+
+    function getCurveDividersLength(address provider, bytes32 endpoint)
+        external
+        view
+        returns (uint64)
+    {
+        return stor.getCurveDividersLength(provider, endpoint);
+    }
+
+    function getCurveDivider(address provider, bytes32 endpoint, uint64 dividerNum)
+        external
+        view
+        returns (uint)
+    {
+        return stor.getCurveDivider(provider, endpoint, dividerNum);
+    }
+
+    function getCurvePieceInfo(address provider, bytes32 endpoint, uint64 pieceNum)
+        external
+        view
+        returns (uint start, uint end, uint64 termsLength)
+    {
+        return stor.getCurvePieceInfo(provider, endpoint, pieceNum);
+    }
+
+    function getCurveTerm(address provider, bytes32 endpoint, uint64 pieceNum, uint64 termNum)
+        external
+        view
+        returns (int coef, int power, int fn)
+    {
+        return stor.getCurveTerm(provider, endpoint, pieceNum, termNum);
     }
 
     function getNextProvider(uint256 index)

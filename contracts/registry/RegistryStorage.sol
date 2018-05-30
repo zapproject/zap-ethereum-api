@@ -34,34 +34,56 @@ contract RegistryStorage is Ownable {
         return oracles[provider].endpointParams[endpoint][index];
     }
 
-    function getCurveUnset(address provider, bytes32 endpoint) returns (bool) {
-        return oracles[provider].curves[endpoint].pieces.length == 0; 
+    function getCurveUnset(address provider, bytes32 endpoint) view returns (bool) {
+        return oracles[provider].curves[endpoint].isInitialized == false;
     }
 
-    function getCurve(address provider, bytes32 endpoint)
+    function getCurvePiecesLength(address provider, bytes32 endpoint)
         external
         view
-        returns (int[25], int[25], int[25], uint[5], uint[5], uint[5])
+        returns (uint64)
     {
-        PiecewiseStorage.PiecewiseFunction memory curve = oracles[provider].curves[endpoint];
+        return oracles[provider].curves[endpoint].piecesLength;
+    }
 
-        uint[5][2] memory startsAndEnds;
+    function getCurveDividersLength(address provider, bytes32 endpoint)
+        external
+        view
+        returns (uint64)
+    {
+        return oracles[provider].curves[endpoint].dividersLength;
+    }
 
-        int[25][3] memory coefPowerFn;
+    function getCurveDivider(address provider, bytes32 endpoint, uint64 dividerNum)
+        external
+        view
+        returns (uint)
+    {
+        return oracles[provider].curves[endpoint].dividers[dividerNum];
+    }
 
-        for (uint i = 0; i < curve.pieces.length; i++) {
+    function getCurvePieceInfo(address provider, bytes32 endpoint, uint64 pieceNum)
+        external
+        view
+        returns (uint start, uint end, uint64 termsLength)
+    {
+        return (
+            oracles[provider].curves[endpoint].pieces[pieceNum].start,
+            oracles[provider].curves[endpoint].pieces[pieceNum].end,
+            oracles[provider].curves[endpoint].pieces[pieceNum].termsLength
+        );
+    }
 
-            for (uint j = 0; j < curve.pieces[i].poly.terms.length; j++) {
-                coefPowerFn[0][j] = curve.pieces[i].poly.terms[j].coef;
-                coefPowerFn[1][j] = curve.pieces[i].poly.terms[j].power;
-                coefPowerFn[2][j] = curve.pieces[i].poly.terms[j].fn;
-            }
-
-            startsAndEnds[0][i] = curve.pieces[i].start;
-            startsAndEnds[1][i] = curve.pieces[i].end;
-        }
-
-        return (coefPowerFn[0], coefPowerFn[1], coefPowerFn[2], startsAndEnds[0], startsAndEnds[1], curve.dividers);
+    function getCurveTerm(address provider, bytes32 endpoint, uint64 pieceNum, uint64 termNum)
+        external
+        view
+        returns (int coef, int power, int fn)
+    {
+        return (
+            oracles[provider].curves[endpoint].pieces[pieceNum].terms[termNum].coef,
+            oracles[provider].curves[endpoint].pieces[pieceNum].terms[termNum].power,
+            oracles[provider].curves[endpoint].pieces[pieceNum].terms[termNum].fn
+        );
     }
 
     function getOracleIndexSize() external view returns (uint256) {
@@ -97,27 +119,59 @@ contract RegistryStorage is Ownable {
 
     function setCurve(
         address origin,
-        bytes32 endpoint,
-        int[25] coef,
-        int[25] power,
-        int[25] fn,
-        uint[5] starts,
-        uint[5] ends,
-        uint[5] dividers
+        bytes32 endpoint
     ) 
         external
         onlyOwner
     {
-        PiecewiseStorage.PiecewiseFunction storage pfunc = oracles[origin].curves[endpoint];
-        PiecewiseStorage.PiecewiseFunction memory decoded = PiecewiseStorage.decodeCurve(coef, power, fn, starts, ends, dividers);
-        pfunc.pieces[0] = decoded.pieces[0];
-        pfunc.dividers = decoded.dividers;
+        oracles[origin].curves[endpoint].isInitialized = true;
     }
 
+    function pushFunctionPiece(address origin, bytes32 endpoint, uint start, uint end) external onlyOwner {
+        PiecewiseStorage.PiecewiseFunction storage pFunc = oracles[origin].curves[endpoint];
+        uint64 currentPiecesLength = pFunc.piecesLength;
+        pFunc.pieces[currentPiecesLength].start = start;
+        pFunc.pieces[currentPiecesLength].end = end;
 
-    // TODO:
-    function writePiecewiseFunction() internal {
-
+        pFunc.piecesLength = pFunc.piecesLength + 1;
     }
 
+    function pushFunctionDivider(address origin, bytes32 endpoint, uint divider) external onlyOwner {
+        PiecewiseStorage.PiecewiseFunction storage pFunc = oracles[origin].curves[endpoint];
+        uint64 currentDividersLength = pFunc.dividersLength;
+        pFunc.dividers[currentDividersLength] = divider;
+
+        pFunc.dividersLength = pFunc.dividersLength + 1;
+    }
+
+    function pushPieceTerm(address origin, bytes32 endpoint, uint64 pieceNum, int coef, int power, int fn) external onlyOwner {
+        PiecewiseStorage.PiecewiseFunction storage pFunc = oracles[origin].curves[endpoint];
+        uint64 termsLength = pFunc.pieces[pieceNum].termsLength;
+        pFunc.pieces[pieceNum].terms[termsLength].coef = coef;
+        pFunc.pieces[pieceNum].terms[termsLength].power = power;
+        pFunc.pieces[pieceNum].terms[termsLength].fn = fn;
+
+        pFunc.pieces[pieceNum].termsLength = pFunc.pieces[pieceNum].termsLength + 1;
+    }
+
+    function popFunctionPiece(address origin, bytes32 endpoint) external onlyOwner {
+        PiecewiseStorage.PiecewiseFunction storage pFunc = oracles[origin].curves[endpoint];
+        require(pFunc.piecesLength > 0);
+
+        pFunc.piecesLength = pFunc.piecesLength - 1;
+    }
+
+    function popFunctionDivider(address origin, bytes32 endpoint) external onlyOwner {
+        PiecewiseStorage.PiecewiseFunction storage pFunc = oracles[origin].curves[endpoint];
+        require(pFunc.dividersLength > 0);
+
+        pFunc.dividersLength = pFunc.dividersLength - 1;
+    }
+
+    function popPieceTerm(address origin, bytes32 endpoint, uint64 pieceNum) external onlyOwner {
+        PiecewiseStorage.PiecewiseFunction storage pFunc = oracles[origin].curves[endpoint];
+        require(pFunc.pieces[pieceNum].termsLength > 0);
+
+        pFunc.pieces[pieceNum].termsLength = pFunc.pieces[pieceNum].termsLength - 1;
+    }
 }
