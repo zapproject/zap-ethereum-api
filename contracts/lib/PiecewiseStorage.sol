@@ -9,27 +9,17 @@ library PiecewiseStorage {
         int fn;
     }
 
-    struct PiecewisePolynomial {
-        PiecewiseTerm[3] terms;
-    }
-
     struct PiecewisePiece {
-        PiecewisePolynomial poly;
+        PiecewiseTerm[3] terms;
         uint start;
         uint end;
     }
 
-    struct PiecewiseFunction {
-        PiecewisePiece[3] pieces;
-    }
 
-
-    function decodeCurve(int[] coef,
-                         int[] power,
-                         int[] fn,
+    function decodeCurve(int[] constants,
                          uint[] parts,
                          uint[] dividers,
-                         PiecewiseStorage.PiecewiseFunction storage out) internal {
+                         PiecewiseStorage.PiecewisePiece[3] storage out) internal {
         uint pStart = 0;
 
         // out.pieces = new PiecewiseStorage.PiecewisePiece[](dividers.length + 1);
@@ -37,13 +27,13 @@ library PiecewiseStorage {
         for ( uint i = 0; i < dividers.length; i++ ) {
             // PiecewiseStorage.PiecewiseTerm[] memory terms = new PiecewiseStorage.PiecewiseTerm[](10);
 
-            out.pieces[i].start = parts[2 * i];
-            out.pieces[i].end = parts[(2 * i) + 1];
+            out[i].start = parts[2 * i];
+            out[i].end = parts[(2 * i) + 1];
 
             for ( uint j = pStart; j < dividers[i]; j++ ) {
-                out.pieces[i].poly.terms[j - dividers[i]].coef = coef[j];
-                out.pieces[i].poly.terms[j - dividers[i]].power = power[j];
-                out.pieces[i].poly.terms[j - dividers[i]].fn = fn[j];
+                out[i].terms[j - dividers[i]].coef  = constants[(3 * j) + 0];
+                out[i].terms[j - dividers[i]].power = constants[(3 * j) + 1];
+                out[i].terms[j - dividers[i]].fn    = constants[(3 * j) + 2];
             }
 
             pStart = dividers[i];

@@ -23,7 +23,7 @@ contract CurrentCost is Destructible {
         view
         returns (uint256 cost)
     {
-        PiecewiseStorage.PiecewiseFunction memory curve = registry.getProviderCurve(oracleAddress, endpoint);
+        PiecewiseStorage.PiecewisePiece[3] memory curve = registry.getProviderCurve(oracleAddress, endpoint);
 
         return uint256(PiecewiseLogic.evalutePiecewiseFunction(curve,
             int(totalBound)

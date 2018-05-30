@@ -17,9 +17,7 @@ contract Registry is Destructible {
     event NewCurve(
         address indexed provider,
         bytes32 indexed endpoint,
-        int[] coef,
-        int[] power,
-        int[] fn,
+        int[] constants,
         uint[] parts,
         uint[] dividers
     );
@@ -59,16 +57,12 @@ contract Registry is Destructible {
     /// @dev initiates an endpoint specific provider curve
     /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
     /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
-    /// @param coef flattened array of all coefficients across all polynomial terms 
-    /// @param power flattened array of all powers across all polynomial terms 
-    /// @param fn flattened array of all function indices across all polynomial terms
+    /// @param constants flattened array of all coefficients/powers/function across all polynomial terms 
     /// @param parts array of starting/ending points for piecewise function pieces 
     /// @param dividers array of indices, each specifying range of indices in coef,power,fn belonging to each piece 
     function initiateProviderCurve(
         bytes32 endpoint,
-        int[] coef,
-        int[] power,
-        int[] fn,
+        int[] constants,
         uint[] parts,
         uint[] dividers
     )
@@ -80,8 +74,8 @@ contract Registry is Destructible {
         // Can't reset their curve
         require(stor.getCurveUnset(msg.sender, endpoint));
 
-        stor.setCurve(msg.sender, endpoint, coef, power, fn, parts, dividers);
-        NewCurve(msg.sender,  endpoint, coef, power, fn, parts, dividers);
+        stor.setCurve(msg.sender, endpoint, constants, parts, dividers);
+        NewCurve(msg.sender,  endpoint, constants, parts, dividers);
 
         return true;
     }
@@ -122,7 +116,7 @@ contract Registry is Destructible {
     )        
         public
         view
-        returns (PiecewiseStorage.PiecewiseFunction)
+        returns (PiecewiseStorage.PiecewisePiece[3])
     {
         return stor.getCurve(provider, endpoint);
     }

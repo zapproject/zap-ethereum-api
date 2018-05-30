@@ -11,7 +11,7 @@ contract RegistryStorage is Ownable {
         uint256 publicKey;                               // Public key of the data provider
         bytes32 title;                                   // Tags (csv)
         mapping(bytes32 => bytes32[]) endpointParams;    // Endpoint specific parameters
-        mapping(bytes32 => PiecewiseStorage.PiecewiseFunction) curves; // Price vs Supply (contract endpoint)
+        mapping(bytes32 => PiecewiseStorage.PiecewisePiece[3]) curves; // Price vs Supply (contract endpoint)
     }
 
     mapping(address => Oracle) private oracles;
@@ -36,15 +36,16 @@ contract RegistryStorage is Ownable {
     }
 
     function getCurveUnset(address provider, bytes32 endpoint) returns (bool) {
-        return oracles[provider].curves[endpoint].pieces.length == 0; 
+        return oracles[provider].curves[endpoint].length == 0; 
     }
 
     function getCurve(address provider, bytes32 endpoint)
         external
         view
-        returns (PiecewiseStorage.PiecewiseFunction curve)
+        returns (PiecewiseStorage.PiecewisePiece[3] curve)
     {
         return oracles[provider].curves[endpoint];
+      
     }
 
     function getOracleIndexSize() external view returns (uint256) {
@@ -81,9 +82,7 @@ contract RegistryStorage is Ownable {
     function setCurve(
         address origin,
         bytes32 endpoint,
-        int[] coef,
-        int[] power,
-        int[] fn,
+        int[] constants,
         uint[] parts,
         uint[] dividers
     ) 
@@ -91,9 +90,7 @@ contract RegistryStorage is Ownable {
         onlyOwner
     {
         PiecewiseStorage.decodeCurve(
-            coef,
-            power,
-            fn,
+            constants,
             parts,
             dividers,
             oracles[origin].curves[endpoint]
