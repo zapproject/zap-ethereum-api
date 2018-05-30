@@ -85,7 +85,7 @@ contract Dispatch is Destructible {
     /// @dev Parameter-count specific method called by data provider in response
     function respond1(
         uint256 id,
-        bytes32 response
+        string response
     )
         external
         returns (bool)
@@ -99,8 +99,8 @@ contract Dispatch is Destructible {
     /// @dev Parameter-count specific method called by data provider in response
     function respond2(
         uint256 id,
-        bytes32 response1,
-        bytes32 response2
+        string response1,
+        string response2
     )
         external
         returns (bool)
@@ -114,9 +114,9 @@ contract Dispatch is Destructible {
     /// @dev Parameter-count specific method called by data provider in response
     function respond3(
         uint256 id,
-        bytes32 response1,
-        bytes32 response2,
-        bytes32 response3
+        string response1,
+        string response2,
+        string response3
     )
         external
         returns (bool)
@@ -130,10 +130,10 @@ contract Dispatch is Destructible {
     /// @dev Parameter-count specific method called by data provider in response
     function respond4(
         uint256 id,
-        bytes32 response1,
-        bytes32 response2,
-        bytes32 response3,
-        bytes32 response4
+        string response1,
+        string response2,
+        string response3,
+        string response4
     )
         external
         returns (bool)

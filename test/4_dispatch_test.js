@@ -114,7 +114,6 @@ contract('Dispatch', function (accounts) {
         await this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
 
         this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address);
-
     });
 
     it("DISPATCH_1 - query() - Check query function", async function () {

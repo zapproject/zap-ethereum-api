@@ -13,6 +13,8 @@ contract BondageStorage is Ownable {
         mapping(address => bool) initialized;
         //for traversing
         address[] oracleList;
+        //provider address => delegate address
+        mapping(address => address) delegates;
     }
 
     mapping(address => Holder) private holders;
@@ -59,6 +61,10 @@ contract BondageStorage is Ownable {
         return holders[holderAddress].oracleList[index];
     }
 
+    function getDelegate(address holderAddress, address oracleAddress) external view returns (address) {
+        return holders[holderAddress].delegates[oracleAddress];
+    }
+
     /**** Set Methods ****/
     function addHolderOracle(address holderAddress, address oracleAddress) external onlyOwner {
         holders[holderAddress].oracleList.push(oracleAddress);
@@ -66,6 +72,10 @@ contract BondageStorage is Ownable {
 
     function setProviderInitialized(address holderAddress, address oracleAddress) external onlyOwner {
         holders[holderAddress].initialized[oracleAddress] = true;
+    }
+
+    function setDelegate(address holderAddress, address oracleAddress, address delegateAddress) external onlyOwner {
+        holders[holderAddress].delegates[oracleAddress] = delegateAddress;
     }
 
     function updateEscrow(
@@ -132,5 +142,10 @@ contract BondageStorage is Ownable {
         else {
             totalIssued[oracleAddress][endpoint] += numDots;
         }
+    }
+
+    /**** Delete Methods ****/
+    function deleteDelegate(address holderAddress, address oracleAddress) external onlyOwner {
+        delete holders[holderAddress].delegates[oracleAddress];
     }
 }
