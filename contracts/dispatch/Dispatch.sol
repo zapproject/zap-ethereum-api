@@ -3,6 +3,7 @@ pragma solidity ^0.4.19;
 
 import "../lib/Destructible.sol";
 import "../lib/Client.sol";
+import "../lib/OnChainProvider.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 
@@ -46,7 +47,8 @@ contract Dispatch is Destructible {
         address provider,           // data provider address
         string userQuery,           // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
-        bytes32[] endpointParams    // endpoint-specific params
+        bytes32[] endpointParams,   // endpoint-specific params
+        bool onchain                // is provider a contract 
     )
         external
         returns (uint256 id)
@@ -57,8 +59,13 @@ contract Dispatch is Destructible {
             //enough dots
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
             id = uint256(keccak256(block.number, now, userQuery, msg.sender));
-            stor.createQuery(id, provider, msg.sender, endpoint);
-            Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
+            stor.createQuery(id, provider, msg.sender, endpoint, userQuery);
+            if(onchain) {
+                OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams); 
+            }
+            else{
+                Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
+            }
         }
     }
 
@@ -156,6 +163,4 @@ contract Dispatch is Destructible {
 /*
 /* Dots are moved from ZapBondage escrow to data-provider's bond Holder struct,
 /* with data provider address set as self's address.
-/* 
-/* callback is called in User Contract 
-/*/
+/*/ 

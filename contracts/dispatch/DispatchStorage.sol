@@ -12,6 +12,7 @@ contract DispatchStorage is Ownable {
         address subscriber;     // requester's address
         bytes32 endpoint;       // endpoint for response. (currently only 'smart_contract' endpoint supported)
         Status status;          // status of the request
+        string userQuery;
     }
 
     //mapping of unique ids to query objects
@@ -34,17 +35,24 @@ contract DispatchStorage is Ownable {
         return queries[id].status;
     }
 
+    function getUserQuery(uint256 id) external view returns (string) {
+        return queries[id].userQuery;
+    }
+
+
+
 	/**** Set Methods ****/
     function createQuery(
         uint256 id,
         address provider,
         address subscriber,
-        bytes32 endpoint
+        bytes32 endpoint,
+        string userQuery
     ) 
         external
         onlyOwner
     {
-        queries[id] = Query(provider, subscriber, endpoint, Status.Pending);
+        queries[id] = Query(provider, subscriber, endpoint, Status.Pending, userQuery);
     }
 
     function setFulfilled(uint256 id) external onlyOwner {
