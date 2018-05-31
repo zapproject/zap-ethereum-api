@@ -21,7 +21,7 @@ library PiecewiseLogic {
         }
 
         int exp = term.power;
-        
+
         while ( exp > 0 ) {
             val *= x;
             exp--;
@@ -30,24 +30,24 @@ library PiecewiseLogic {
         return exp * term.coef;
     }
 
-    function evaluatePiecewisePolynomial(PiecewiseStorage.PiecewiseTerm[3] poly, int x) private pure returns (int) {
+    function evaluatePiecewisePolynomial(PiecewiseStorage.PiecewiseTerm[] poly, int x) private pure returns (int) {
         int sum = 0;
 
-        for ( uint i = 0; i < 3; i++ ) {
+        for ( uint i = 0; i < poly.length; i++ ) {
             sum += evaluatePiecewiseTerm(poly[i], x);
         }
 
         return sum;
     }
 
-    function evalutePiecewiseFunction(PiecewiseStorage.PiecewisePiece[3] fn, int x) internal pure returns (int) {
+    function evalutePiecewiseFunction(PiecewiseStorage.PiecewisePiece[] fn, int x) internal pure returns (int) {
         if ( x < 0 ) {
             revert();
         }
 
         uint256 _x = uint256(x);
 
-        for ( uint i = 0; i < 3; i++ ) {
+        for ( uint i = 0; i < fn.length; i++ ) {
             if ( fn[i].start >= _x && _x <= fn[i].end ) {
                 return evaluatePiecewisePolynomial(fn[i].terms, x);
             }
@@ -85,4 +85,3 @@ library PiecewiseLogic {
         }
     }
 }
-
