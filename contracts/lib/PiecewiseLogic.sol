@@ -27,29 +27,29 @@ library PiecewiseLogic {
             exp--;
         }
 
-        return exp * term.coef;
+        return val * term.coef;
     }
 
-    function evaluatePiecewisePolynomial(PiecewiseStorage.PiecewiseTerm[] poly, int x) private pure returns (int) {
+    function evaluatePiecewisePolynomial(PiecewiseStorage.PiecewiseTerm[] terms, int x) private pure returns (int) {
         int sum = 0;
 
-        for ( uint i = 0; i < poly.length; i++ ) {
-            sum += evaluatePiecewiseTerm(poly[i], x);
+        for ( uint i = 0; i < terms.length; i++ ) {
+            sum += evaluatePiecewiseTerm(terms[i], x);
         }
 
         return sum;
     }
 
-    function evalutePiecewiseFunction(PiecewiseStorage.PiecewisePiece[] fn, int x) internal pure returns (int) {
+    function evalutePiecewiseFunction(PiecewiseStorage.PiecewisePiece[] pieces, int x) internal pure returns (int) {
         if ( x < 0 ) {
             revert();
         }
 
         uint256 _x = uint256(x);
 
-        for ( uint i = 0; i < fn.length; i++ ) {
-            if ( fn[i].start >= _x && _x <= fn[i].end ) {
-                return evaluatePiecewisePolynomial(fn[i].terms, x);
+        for ( uint i = 0; i < pieces.length; i++ ) {
+            if ( pieces[i].start >= _x && _x <= pieces[i].end ) {
+                return evaluatePiecewisePolynomial(pieces[i].terms, x);
             }
         }
     }
