@@ -29,11 +29,11 @@ contract('Registry', async (accounts) => {
     const publicKey = 111;
     const title = "test";
     const specifier = "test-linear-specifier";
-    const curveLinear = Utils.CurveTypes["Linear"];
-    const curveNone = Utils.CurveTypes["None"];
-    const start = 1;
-    const mul = 2;
     const params = ["param1", "param2"];
+
+    const parts= [0,5,5,10];
+    const constants = [2,2,0,1,1,1,10,0,0];
+    const dividers=[2];
 
     beforeEach(async function deployContracts() {
         this.currentTest.stor = await RegistryStorage.new();
@@ -55,17 +55,17 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_3 - initiateProviderCurve() - Check that we can initiate provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner });
     });
 
     it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
-        await expect(this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if curve type is none", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
-        await expect(this.test.registry.initiateProviderCurve(specifier, curveNone, start, mul, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_6 - getNextEndpointParam() - Check that we can get provider route keys", async function () {
@@ -113,11 +113,11 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_12 - getProviderCurve() - Check that we can get provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: owner });
 
+        await this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner });
         const res = await this.test.registry.getProviderCurve.call(owner, specifier, { from: owner });
+        console.log(res);
         const arr = Utils.fetchPureArray(res, parseInt);
-
         await expect(arr[0].valueOf()).to.be.an('number').equal(curveLinear);
         await expect(arr[1].valueOf()).to.be.an('number').equal(start);
         await expect(arr[2].valueOf()).to.be.an('number').equal(mul);

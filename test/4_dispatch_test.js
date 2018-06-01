@@ -18,7 +18,7 @@ const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
 const ZapToken = artifacts.require("ZapToken");
 const Cost = artifacts.require("CurrentCost");
-const Subscriber = artifacts.require("Subscriber");
+// const Subscriber = artifacts.require("Subscriber");
 
 function showReceivedEvents(res) {
     for (let i = 0; i < bondRes.logs.length; i++) {
@@ -113,7 +113,7 @@ contract('Dispatch', function (accounts) {
         this.currentTest.dispatch = await Dispatch.new(this.currentTest.dispStor.address, this.currentTest.bondage.address);
         await this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
 
-        this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address);
+        // this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address);
     });
 
     it("DISPATCH_1 - query() - Check query function", async function () {
