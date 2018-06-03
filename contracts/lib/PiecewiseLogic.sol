@@ -54,16 +54,18 @@ library PiecewiseLogic {
         uint256 _x = uint256(x);
 
         uint pStart = 0;
-        PiecewisePiece[] memory pieces;
+        PiecewisePiece[] memory pieces = new PiecewisePiece[](dividers.length);
         for ( uint i = 0; i < dividers.length; i++ ) {
 
-            pieces[i].start = parts[2 * i];
-            pieces[i].end = parts[(2 * i) + 1];
-            PiecewiseTerm[] memory terms;
+            pieces[i].start = uint256(parts[2 * i]);
+            pieces[i].end = uint256(parts[(2 * i) + 1]);
+            PiecewiseTerm[] memory terms = new PiecewiseTerm[](dividers[i]-pStart);
             for ( uint j = pStart; j < dividers[i]; j++ ) {
-                terms[j - pStart].coef  = constants[(3 * j) + 0];
-                terms[j - pStart].power = constants[(3 * j) + 1];
-                terms[j - pStart].fn    = constants[(3 * j) + 2];
+                int coef = constants[(3*j)];
+                int power = constants[(3*j)+1];
+                int fn = constants[(3*j)+2];
+                PiecewiseTerm memory term = PiecewiseTerm(coef,power,fn);
+                terms[j-pStart] = term;
             }
             pieces[i].terms = terms;
 
@@ -71,12 +73,13 @@ library PiecewiseLogic {
         }
 
         for ( uint y = 0; y < pieces.length; y++ ) {
-            if ( pieces[y].start >= _x && _x <= pieces[y].end ) {
+            if ( pieces[y].start <= _x && _x <= pieces[y].end ) {
                 return evaluatePiecewisePolynomial(pieces[y].terms, x);
             }
             else return 0;
         }
     }
+
 
     function fastlog2(uint256 x) private pure returns (uint256 y) {
         assembly {
