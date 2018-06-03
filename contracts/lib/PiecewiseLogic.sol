@@ -76,8 +76,9 @@ library PiecewiseLogic {
             if ( pieces[y].start <= _x && _x <= pieces[y].end ) {
                 return evaluatePiecewisePolynomial(pieces[y].terms, x);
             }
-            else return 0;
+            else continue;
         }
+        return 0;
     }
 
 

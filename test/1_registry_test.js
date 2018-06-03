@@ -32,7 +32,7 @@ contract('Registry', async (accounts) => {
     const specifier = "test-linear-specifier";
     const params = ["param1", "param2"];
 
-    const parts= [0,5,5,10];
+    const parts= [0,5,5,100];
     const constants = [2,2,0,1,1,1,10,0,0];
     const dividers=[1,3];
 
