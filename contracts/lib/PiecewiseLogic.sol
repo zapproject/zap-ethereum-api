@@ -1,15 +1,27 @@
-pragma experimental ABIEncoderV2;
-import "./PiecewiseStorage.sol";
+pragma solidity ^0.4.19;
 
 library PiecewiseLogic {
 
-    enum PiecewiseTermFunc {
-        TermAbs,
-        TermLog,
-        TermNone
+
+    struct PiecewiseTerm {
+        int coef;
+        int power;
+        int fn;
     }
 
-    function evaluatePiecewiseTerm(PiecewiseStorage.PiecewiseTerm term, int x) private pure returns (int) {
+    struct PiecewisePiece {
+        PiecewiseTerm[] terms;
+        uint start;
+        uint end;
+    }
+    struct PiecewiseFunction{
+        PiecewisePiece[] pieces;
+        int[] constants;
+        uint[] parts;
+        uint[] dividers;
+    }
+
+    function evaluatePiecewiseTerm(PiecewiseTerm term, int x) private pure returns (int) {
         int val = 1;
 
         if ( term.fn == 0 ) {
@@ -30,7 +42,7 @@ library PiecewiseLogic {
         return val * term.coef;
     }
 
-    function evaluatePiecewisePolynomial(PiecewiseStorage.PiecewiseTerm[] terms, int x) private pure returns (int) {
+    function evaluatePiecewisePolynomial(PiecewiseTerm[] terms, int x) private pure returns (int) {
         int sum = 0;
 
         for ( uint i = 0; i < terms.length; i++ ) {
@@ -40,17 +52,34 @@ library PiecewiseLogic {
         return sum;
     }
 
-    function evalutePiecewiseFunction(PiecewiseStorage.PiecewisePiece[] pieces, int x) internal pure returns (int) {
+    function evalutePiecewiseFunction(int[] constants, uint[] parts, uint[] dividers, int x) internal pure returns (int) {
         if ( x < 0 ) {
             revert();
         }
 
         uint256 _x = uint256(x);
 
-        for ( uint i = 0; i < pieces.length; i++ ) {
-            if ( pieces[i].start >= _x && _x <= pieces[i].end ) {
-                return evaluatePiecewisePolynomial(pieces[i].terms, x);
+        uint pStart = 0;
+        PiecewisePiece[] memory pieces;
+        for ( uint i = 0; i < dividers.length; i++ ) {
+
+            pieces[i].start = parts[2 * i];
+            pieces[i].end = parts[(2 * i) + 1];
+
+            for ( uint j = pStart; j < dividers[i]; j++ ) {
+                pieces[i].terms[j - pStart].coef  = constants[(3 * j) + 0];
+                pieces[i].terms[j - pStart].power = constants[(3 * j) + 1];
+                pieces[i].terms[j - pStart].fn    = constants[(3 * j) + 2];
             }
+
+            pStart = dividers[i];
+        }
+
+        for ( uint y = 0; y < pieces.length; y++ ) {
+            if ( pieces[y].start >= _x && _x <= pieces[y].end ) {
+                return evaluatePiecewisePolynomial(pieces[y].terms, x);
+            }
+            else return 0;
         }
     }
 

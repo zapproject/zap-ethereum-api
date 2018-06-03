@@ -1,5 +1,4 @@
 pragma solidity ^0.4.19;
-pragma experimental ABIEncoderV2;
 // v1.0
 
 import "./../lib/Destructible.sol";
@@ -116,17 +115,17 @@ contract Registry is Destructible {
     )
         public
         view
-        returns (PiecewiseStorage.PiecewisePiece[])
+        returns (int[], uint[],uint[])
     {
         return stor.getCurve(provider, endpoint);
     }
 
-    function getPieceLength(address provider, bytes32 endpoint)
+    function getProviderArgsLength(address provider, bytes32 endpoint)
         public
         view
-        returns (uint)
+        returns (uint[])
     {
-        return stor.getPieceLength(provider, endpoint);
+        return stor.getProviderArgsLength(provider, endpoint);
 
     }
 

@@ -1,17 +1,21 @@
 pragma solidity ^0.4.19;
-pragma experimental ABIEncoderV2;
 
 import "../lib/Destructible.sol";
-import "../lib/PiecewiseStorage.sol";
 
 contract RegistryStorage is Ownable {
+
+    struct PiecewisePiece{
+        int[] constants;
+        uint[] parts;
+        uint[] dividers;
+    }
 
     // fundamental account type for the platform
     struct Oracle {
         uint256 publicKey;                               // Public key of the data provider
         bytes32 title;                                   // Tags (csv)
         mapping(bytes32 => bytes32[]) endpointParams;    // Endpoint specific parameters
-        mapping(bytes32 => PiecewiseStorage.PiecewisePiece[]) curves; // Price vs Supply (contract endpoint)
+        mapping(bytes32 => PiecewisePiece) curves; // Price vs Supply (contract endpoint)
     }
 
     mapping(address => Oracle) private oracles;
@@ -28,7 +32,7 @@ contract RegistryStorage is Ownable {
     }
 
     function getEndpointIndexSize(address provider, bytes32 endpoint) external view returns (uint256) {
-        return oracles[provider].endpointParams[endpoint].length;
+        return 1;
     }
 
     function getEndPointParam(address provider, bytes32 endpoint, uint256 index) external view returns (bytes32) {
@@ -36,24 +40,31 @@ contract RegistryStorage is Ownable {
     }
 
     function getCurveUnset(address provider, bytes32 endpoint) returns (bool) {
-        return oracles[provider].curves[endpoint].length == 0;
+        return true;
     }
 
     function getCurve(address provider, bytes32 endpoint)
         external
         view
-        returns (PiecewiseStorage.PiecewisePiece[] curve)
+        returns (int[],uint[],uint[])
     {
-        return oracles[provider].curves[endpoint];
+        PiecewisePiece memory pieces = oracles[provider].curves[endpoint];
+
+        return (pieces.constants, pieces.parts, pieces.dividers);
 
     }
 
-    function getPieceLength(address provider, bytes32 endpoint)
+    function getProviderArgsLength(address provider, bytes32 endpoint)
         external
         view
-        returns (uint)
+        returns (uint[])
     {
-        return oracles[provider].curves[endpoint].length;
+        uint[] memory lens;
+        PiecewisePiece memory func = oracles[provider].curves[endpoint];
+       lens[0] = func.constants.length;
+        lens[1] = func.parts.length;
+        lens[2] = func.dividers.length;
+        return lens;
 
     }
 
@@ -99,11 +110,11 @@ contract RegistryStorage is Ownable {
         external
         onlyOwner
     {
-        PiecewiseStorage.decodeCurve(
-            constants,
-            parts,
-            dividers,
-            oracles[origin].curves[endpoint]
-        );
+
+        PiecewisePiece storage pieces = oracles[origin].curves[endpoint];
+        pieces.constants = constants;
+        pieces.parts = parts;
+        pieces.dividers = dividers;
+
     }
 }

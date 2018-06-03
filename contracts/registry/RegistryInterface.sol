@@ -1,5 +1,4 @@
 pragma solidity ^0.4.19;
-pragma experimental ABIEncoderV2;
 
 import "./../lib/PiecewiseStorage.sol";
 
@@ -13,8 +12,8 @@ contract RegistryInterface {
     function getProviderPublicKey(address) public view returns (uint256);
     function getProviderTitle(address) public view returns (string);
   	function getNextRouteKey(address, bytes32, uint256) public view returns (uint256, bytes32);
-    function getProviderCurve(address, bytes32) public view returns (PiecewiseStorage.PiecewisePiece[]);
+    function getProviderCurve(address, bytes32) public view returns (int[], uint[], uint[]);
     function getNextProvider(uint256) public view returns (uint256, address, uint256, string);
     function getCurveUnset(address, bytes32) public view returns (bool);
-		function getPieceLength(address , bytes32) public view returns (uint);
+		function getProviderArgsLength(address , bytes32) public view returns (uint[]);
 }
