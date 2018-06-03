@@ -32,7 +32,7 @@ contract RegistryStorage is Ownable {
     }
 
     function getEndpointIndexSize(address provider, bytes32 endpoint) external view returns (uint256) {
-        return 1;
+        return oracles[provider].endpointParams[endpoint].length;
     }
 
     function getEndPointParam(address provider, bytes32 endpoint, uint256 index) external view returns (bytes32) {

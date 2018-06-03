@@ -15,5 +15,5 @@ contract RegistryInterface {
     function getProviderCurve(address, bytes32) public view returns (int[], uint[], uint[]);
     function getNextProvider(uint256) public view returns (uint256, address, uint256, string);
     function getCurveUnset(address, bytes32) public view returns (bool);
-		function getProviderArgsLength(address , bytes32) public view returns (uint[]);
+    function getProviderArgsLength(address , bytes32) public view returns (uint[]);
 }

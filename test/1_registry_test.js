@@ -163,7 +163,7 @@ contract('Registry', async (accounts) => {
         let res = await this.test.registry.getNextProvider(index);
         await expect(hex2a(res[3].valueOf())).to.be.equal(title);
         index = parseInt(res[0].valueOf());
-        
+
         res = await this.test.registry.getNextProvider(index);
         await expect(hex2a(res[3].valueOf())).to.be.equal(title + "1");
         index = parseInt(res[0].valueOf());
@@ -173,5 +173,5 @@ contract('Registry', async (accounts) => {
         index = parseInt(res[0].valueOf());
 
         await expect(index).to.be.equal(0);
-    }); 
+    });
 });
