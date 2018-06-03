@@ -14,12 +14,6 @@ library PiecewiseLogic {
         uint start;
         uint end;
     }
-    struct PiecewiseFunction{
-        PiecewisePiece[] pieces;
-        int[] constants;
-        uint[] parts;
-        uint[] dividers;
-    }
 
     function evaluatePiecewiseTerm(PiecewiseTerm term, int x) private pure returns (int) {
         int val = 1;
@@ -65,12 +59,13 @@ library PiecewiseLogic {
 
             pieces[i].start = parts[2 * i];
             pieces[i].end = parts[(2 * i) + 1];
-
+            PiecewiseTerm[] memory terms;
             for ( uint j = pStart; j < dividers[i]; j++ ) {
-                pieces[i].terms[j - pStart].coef  = constants[(3 * j) + 0];
-                pieces[i].terms[j - pStart].power = constants[(3 * j) + 1];
-                pieces[i].terms[j - pStart].fn    = constants[(3 * j) + 2];
+                terms[j - pStart].coef  = constants[(3 * j) + 0];
+                terms[j - pStart].power = constants[(3 * j) + 1];
+                terms[j - pStart].fn    = constants[(3 * j) + 2];
             }
+            pieces[i].terms = terms;
 
             pStart = dividers[i];
         }

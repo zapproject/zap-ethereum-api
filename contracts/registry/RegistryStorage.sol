@@ -57,14 +57,11 @@ contract RegistryStorage is Ownable {
     function getProviderArgsLength(address provider, bytes32 endpoint)
         external
         view
-        returns (uint[])
+        returns (uint,uint,uint)
     {
-        uint[] memory lens;
-        PiecewisePiece memory func = oracles[provider].curves[endpoint];
-       lens[0] = func.constants.length;
-        lens[1] = func.parts.length;
-        lens[2] = func.dividers.length;
-        return lens;
+        return (oracles[provider].curves[endpoint].constants.length,
+        oracles[provider].curves[endpoint].parts.length,
+        oracles[provider].curves[endpoint].dividers.length);
 
     }
 

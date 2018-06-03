@@ -123,7 +123,7 @@ contract Registry is Destructible {
     function getProviderArgsLength(address provider, bytes32 endpoint)
         public
         view
-        returns (uint[])
+        returns (uint, uint,uint)
     {
         return stor.getProviderArgsLength(provider, endpoint);
 

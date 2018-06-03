@@ -22,7 +22,7 @@ contract CurrentCost is Destructible {
         returns (uint256 cost)
     {
         uint[] memory lens = new uint[](3);
-        lens = registry.getProviderArgsLength(oracleAddress,endpoint);
+        (lens[0],lens[1],lens[2]) = registry.getProviderArgsLength(oracleAddress,endpoint);
         int[] memory constants = new int[](lens[0]);
         uint[] memory  parts = new uint[](lens[1]);
         uint[] memory dividers = new uint[](lens[2]);
