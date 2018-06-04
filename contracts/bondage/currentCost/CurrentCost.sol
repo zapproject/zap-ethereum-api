@@ -12,6 +12,11 @@ contract CurrentCost is Destructible {
        registry = RegistryInterface(registryAddress);
     }
 
+    /// @dev calculates current cost of dot
+    /// @param oracleAddress oracle address
+    /// @param endpoint oracle endpoint
+    /// @param number of already bounded dots
+    /// @return cost of next dot
     function _currentCostOfDot(
         address oracleAddress,
         bytes32 endpoint,
