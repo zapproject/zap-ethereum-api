@@ -107,6 +107,8 @@ contract RegistryStorage is Ownable {
         external
         onlyOwner
     {
+        require(dividers[dividers.length-1]==constants.length/3);
+        require((parts.length/2)==dividers.length);
 
         PiecewisePiece storage pieces = oracles[origin].curves[endpoint];
         pieces.constants = constants;
