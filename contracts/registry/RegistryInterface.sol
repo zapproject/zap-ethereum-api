@@ -1,7 +1,4 @@
 pragma solidity ^0.4.19;
-
-import "./../lib/PiecewiseStorage.sol";
-
 // Technically an abstract contract, not interface (solidity compiler devs are working to fix this right now)
 
 contract RegistryInterface {

@@ -166,7 +166,7 @@ contract Bondage is Destructible {
         uint256 infinity = decimals;
         uint256 dotCost;
         if (numZap > 1000) numZap = 1000;
-
+        if (numZap==0) return (0,0);
         for (numDots; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,

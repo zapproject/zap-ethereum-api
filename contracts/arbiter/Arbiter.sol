@@ -42,12 +42,18 @@ contract Arbiter is Destructible {
         bondage = BondageInterface(bondageAddress);
     }    
 
+    /// @dev subscribe to specified number of blocks of provider
+    /// @param providerAddress Provider address
+    /// @param endpoint Endpoint specifier
+    /// @param endpointParams Endpoint specific params
+    /// @param publicKey Public key of the purchaser
+    /// @param blocks Number of blocks subscribed, 1block=1dot
     function initiateSubscription(
-        address providerAddress,   // Provider address
-        bytes32 endpoint,          // Endpoint specifier
-        bytes32[] endpointParams,  // Endpoint specific params
+        address providerAddress,   //
+        bytes32 endpoint,          //
+        bytes32[] endpointParams,  //
         uint256 publicKey,         // Public key of the purchaser
-        uint64 blocks              // Number of blocks subscribed, 1block=1dot
+        uint64 blocks              //
     ) 
         public 
     {   
@@ -80,6 +86,7 @@ contract Arbiter is Destructible {
         );
     }
 
+    /// @dev get subscription info
     function getSubscription(address providerAddress, address subscriberAddress, bytes32 endpoint)
         public
         view
