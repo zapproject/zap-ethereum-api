@@ -44,7 +44,7 @@ contract RegistryStorage is Ownable {
     }
 
     function getCurveUnset(address provider, bytes32 endpoint) returns (bool) {
-        return true;
+        return oracles[provider].curves[endpoint].parts.length==0;
     }
 
     /// @dev get curve constants, parts and dividers arrays
@@ -54,8 +54,9 @@ contract RegistryStorage is Ownable {
         returns (int[],uint[],uint[])
     {
         PiecewisePiece memory pieces = oracles[provider].curves[endpoint];
+        require(pieces.parts.length>0);
 
-        return (pieces.constants, pieces.parts, pieces.dividers);
+    return (pieces.constants, pieces.parts, pieces.dividers);
 
     }
 
