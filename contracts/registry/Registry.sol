@@ -3,7 +3,6 @@ pragma solidity ^0.4.19;
 
 import "./../lib/Destructible.sol";
 import "./RegistryStorage.sol";
-import "./../lib/PiecewiseStorage.sol";
 
 contract Registry is Destructible {
 
