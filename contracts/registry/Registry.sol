@@ -120,6 +120,7 @@ contract Registry is Destructible {
         return stor.getCurve(provider, endpoint);
     }
 
+    /// @dev get length of constants, parts and dividers arrays
     function getProviderArgsLength(address provider, bytes32 endpoint)
         public
         view
@@ -129,6 +130,12 @@ contract Registry is Destructible {
 
     }
 
+    /// @dev get provider info
+    /// @param index index of provider
+    /// @returns nextIndex next provider index
+    /// @returns oracleAddress provider address
+    /// @returns publicKey provider public key
+    /// @returns title provider title
     function getNextProvider(uint256 index)
         public
         view
