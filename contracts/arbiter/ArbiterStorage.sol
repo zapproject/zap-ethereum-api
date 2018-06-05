@@ -16,6 +16,7 @@ contract ArbiterStorage is Ownable {
 
     /**** Get Methods ****/
 
+    /// @dev get subscriber dots remaining for specified provider endpoint
     function getDots(
         address providerAddress,
         address subscriberAddress,
@@ -28,6 +29,7 @@ contract ArbiterStorage is Ownable {
         return subscriptions[providerAddress][subscriberAddress][endpoint].dots;
     }
 
+    /// @dev get first subscription block number
     function getBlockStart(
         address providerAddress,
         address subscriberAddress,
@@ -40,6 +42,7 @@ contract ArbiterStorage is Ownable {
         return subscriptions[providerAddress][subscriberAddress][endpoint].blockStart;
     }
 
+    /// @dev get last subscription block number
     function getPreBlockEnd(
         address providerAddress,
         address subscriberAddress,
@@ -54,6 +57,7 @@ contract ArbiterStorage is Ownable {
 
 	/**** Set Methods ****/
 
+    /// @dev store new subscription
     function setSubscription(
         address providerAddress,
         address subscriberAddress,
@@ -73,6 +77,7 @@ contract ArbiterStorage is Ownable {
 
     /**** Delete Methods ****/
 
+    /// @dev remove subscription
     function deleteSubscription(
         address providerAddress,
         address subscriberAddress,

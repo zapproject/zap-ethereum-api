@@ -23,18 +23,22 @@ contract RegistryStorage is Ownable {
 
     /**** Get Methods ****/
 
+    /// @dev get public key of provider
     function getPublicKey(address provider) external view returns (uint256) {
         return oracles[provider].publicKey;
     }
 
+    /// @dev get title of provider
     function getTitle(address provider) external view returns (bytes32) {
         return oracles[provider].title;
     }
 
+    /// @dev get endpoint params length
     function getEndpointIndexSize(address provider, bytes32 endpoint) external view returns (uint256) {
         return oracles[provider].endpointParams[endpoint].length;
     }
 
+    /// @dev get endpoint param by index
     function getEndPointParam(address provider, bytes32 endpoint, uint256 index) external view returns (bytes32) {
         return oracles[provider].endpointParams[endpoint][index];
     }
@@ -43,6 +47,7 @@ contract RegistryStorage is Ownable {
         return true;
     }
 
+    /// @dev get curve constants, parts and dividers arrays
     function getCurve(address provider, bytes32 endpoint)
         external
         view
@@ -54,6 +59,7 @@ contract RegistryStorage is Ownable {
 
     }
 
+    /// @dev get length of constants, parts and dividers arrays
     function getProviderArgsLength(address provider, bytes32 endpoint)
         external
         view
@@ -65,25 +71,29 @@ contract RegistryStorage is Ownable {
 
     }
 
-
+    /// @dev get overall number of providers
     function getOracleIndexSize() external view returns (uint256) {
         return oracleIndex.length;
     }
 
+    /// @dev get provider address by index
     function getOracleAddress(uint256 index) external view returns (address) {
         return oracleIndex[index];
     }
 
     /**** Set Methods ****/
 
+    ///  @dev add new provider to mapping
     function createOracle(address origin, uint256 publicKey, bytes32 title) external onlyOwner {
         oracles[origin] = Oracle(publicKey, title);
     }
 
+    /// @dev add new provider address to oracles array
     function addOracle(address origin) external onlyOwner {
         oracleIndex.push(origin);
     }
 
+    /// @dev set endpoint params of provider
     function setEndpointParameters(
         address origin,
         bytes32 endpoint,
@@ -97,6 +107,12 @@ contract RegistryStorage is Ownable {
     }
 
 
+    /// @dev initialize new curve for provider
+    /// @param origin address of provider
+    /// @param endpoint endpoint specifier
+    /// @param constants flattened array of all coefficients/powers/function across all polynomial terms, [c0,p0,fn0, c1,p1,fn1 ...]
+    /// @param parts array of starting/ending points for piecewise function pieces [start0,end0,start1,end1...]
+    /// @param dividers array of indices, each specifying range of indices in coef, power, fn belonging to each piece
     function setCurve(
         address origin,
         bytes32 endpoint,
