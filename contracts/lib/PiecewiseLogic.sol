@@ -15,6 +15,10 @@ library PiecewiseLogic {
         uint end;
     }
 
+    /// @dev calculate term
+    /// @param term term to calculate
+    /// @param x currently bound dots
+    /// @returns term result
     function evaluatePiecewiseTerm(PiecewiseTerm term, int x) private pure returns (int) {
         int val = 1;
 
@@ -36,6 +40,10 @@ library PiecewiseLogic {
         return val * term.coef;
     }
 
+    /// @dev calculate all terms for piece
+    /// @param terms array of terms
+    /// @param x currently bound dots
+    /// @returns all terms sum
     function evaluatePiecewisePolynomial(PiecewiseTerm[] terms, int x) private pure returns (int) {
         int sum = 0;
 
@@ -46,6 +54,12 @@ library PiecewiseLogic {
         return sum;
     }
 
+    /// @dev choose needed function piece and calculate it
+    /// @param constants flattened array of all coefficients/powers/function across all polynomial terms, [c0,p0,fn0, c1,p1,fn1 ...]
+    /// @param parts array of starting/ending points for piecewise function pieces [start0,end0,start1,end1...]
+    /// @param dividers array of indices, each specifying range of indices in coef, power, fn belonging to each piece
+    /// @param x currently bound dots
+    /// @returns chosen piece result
     function evalutePiecewiseFunction(int[] constants, uint[] parts, uint[] dividers, int x) internal pure returns (int) {
         if ( x < 0 ) {
             revert();
