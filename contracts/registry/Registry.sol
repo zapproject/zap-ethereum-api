@@ -131,10 +131,10 @@ contract Registry is Destructible {
 
     /// @dev get provider info
     /// @param index index of provider
-    /// @returns nextIndex next provider index
-    /// @returns oracleAddress provider address
-    /// @returns publicKey provider public key
-    /// @returns title provider title
+    /// @return nextIndex next provider index
+    /// @return oracleAddress provider address
+    /// @return publicKey provider public key
+    /// @return title provider title
     function getNextProvider(uint256 index)
         public
         view

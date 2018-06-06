@@ -15,7 +15,7 @@ contract CurrentCost is Destructible {
     /// @dev calculates current cost of dot
     /// @param oracleAddress oracle address
     /// @param endpoint oracle endpoint
-    /// @param number of already bounded dots
+    /// @param totalBound of already bounded dots
     /// @return cost of next dot
     function _currentCostOfDot(
         address oracleAddress,
