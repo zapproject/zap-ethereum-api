@@ -29,17 +29,21 @@ contract('Arbiter', function (accounts) {
     const params = ["param1", "param2"];
 
     const specifier = "test-specifier";
-    const curveLinear = Utils.CurveTypes["Linear"];
-    const start = 1;
-    const mul = 2;
 
+    // test function: 2x^2
+    const piecewiseFunction = {
+        constants: [2, 2, 2],
+        parts: [0, 1000],
+        dividers: [1]
+    };
+    
     const tokensForOwner = new BigNumber("1500e18");
     const tokensForSubscriber = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
 
     async function prepareProvider() {
         await this.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
-        await this.registry.initiateProviderCurve(specifier, curveLinear, start, mul, { from: oracle });
+        await this.registry.initiateProviderCurve(specifier, piecewiseFunction.constants, piecewiseFunction.parts, piecewiseFunction.dividers, { from: oracle });
     }
 
     async function prepareTokens() {
