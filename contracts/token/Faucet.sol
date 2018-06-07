@@ -1,8 +1,8 @@
 pragma solidity ^0.4.18;
 
 contract Token {
-    function transfer(address to, uint256 amount) returns (bool);
-    function balanceOf(address addr) constant returns (uint256);
+    function transfer(address to, uint256 amount) public returns (bool);
+    function balanceOf(address addr) constant public returns (uint256);
 }
             
 contract Faucet {
@@ -19,20 +19,20 @@ contract Faucet {
         _;
     }
            
-    function Faucet(address token, address owner) public {
-        tokenAddress = token;
-        token = Token(token);
-        owner = owner;
+    constructor(address _token, address _owner) public {
+        tokenAddress = _token;
+        token = Token(_token);
+        owner = _owner;
     }
     
     event Log(uint256 n1, uint256 n2);
     
-    function() payable {
+    function() public payable {
         if(msg.value > 0) {
-            Log(msg.value, rate);
+            emit Log(msg.value, rate);
             amt = (msg.value / rate);
             amt = amt * (10 ** 18);
-            Log(amt, token.balanceOf(this));
+            emit Log(amt, token.balanceOf(this));
             if(amt <= token.balanceOf(this))
                 token.transfer(msg.sender, amt);                
         }
@@ -41,9 +41,9 @@ contract Faucet {
         }
     }
   
-    function setOwner(address owner) public ownerOnly {
-        require(owner != address(0));
-        owner = owner;
+    function setOwner(address _owner) public ownerOnly {
+        require(_owner != address(0));
+        owner = _owner;
     }
     
     function withdrawTok() public ownerOnly {
@@ -53,6 +53,6 @@ contract Faucet {
     
     function withdrawEther() public ownerOnly {
         if (owner != msg.sender) revert();
-        owner.send(this.balance);
+        owner.transfer(address(this).balance);
     }   
 }

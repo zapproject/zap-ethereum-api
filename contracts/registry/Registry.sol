@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 // v1.0
 
 import "./../lib/Destructible.sol";
@@ -24,7 +24,7 @@ contract Registry is Destructible {
 
     address public storageAddress;
 
-    function Registry(address _storageAddress) public {
+    constructor(address _storageAddress) public {
         storageAddress = _storageAddress;
         stor = RegistryStorage(_storageAddress);
     }
@@ -48,7 +48,7 @@ contract Registry is Destructible {
         stor.createOracle(msg.sender, publicKey, title);
         if(endpoint != 0) setEndpointParams(endpoint, endpointParams);
         stor.addOracle(msg.sender);
-        NewProvider(msg.sender, title, endpoint);
+        emit NewProvider(msg.sender, title, endpoint);
         return true;
     }
 
@@ -73,7 +73,7 @@ contract Registry is Destructible {
         require(stor.getCurveUnset(msg.sender, endpoint));
 
         stor.setCurve(msg.sender, endpoint, constants, parts, dividers);
-        NewCurve(msg.sender,  endpoint, constants, parts, dividers);
+        emit NewCurve(msg.sender,  endpoint, constants, parts, dividers);
 
         return true;
     }

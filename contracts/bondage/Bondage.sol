@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 // v1.0
 
 import "../lib/Destructible.sol";
@@ -29,10 +29,10 @@ contract Bondage is Destructible {
     }
 
     /// @dev Initialize Storage, Token, anc CurrentCost Contracts
-    function Bondage(address storageAddress, address tokenAddress, address currentCostAddress) public {
-        stor = BondageStorage(storageAddress);
-        token = ERC20(tokenAddress); 
-        currentCost = CurrentCostInterface(currentCostAddress);
+    constructor(address _storageAddress, address _tokenAddress, address _currentCostAddress) public {
+        stor = BondageStorage(_storageAddress);
+        token = ERC20(_tokenAddress); 
+        currentCost = CurrentCostInterface(_currentCostAddress);
     }
 
     /// @dev Set Arbiter address
@@ -56,13 +56,13 @@ contract Bondage is Destructible {
     /// @return total ZAP bound to oracle
     function bond(address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 bound) {
         bound = _bond(msg.sender, oracleAddress, endpoint, numZap);
-        Bound(msg.sender, oracleAddress, endpoint, numZap);
+        emit Bound(msg.sender, oracleAddress, endpoint, numZap);
     }
 
     /// @return total ZAP unbound from oracle
     function unbond(address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
         unbound = _unbond(msg.sender, oracleAddress, endpoint, numDots);
-        Unbound(msg.sender, oracleAddress, endpoint, numDots);
+        emit Unbound(msg.sender, oracleAddress, endpoint, numDots);
     }        
 
     /// @dev will bond to an oracle on behalf of some holder
@@ -71,14 +71,14 @@ contract Bondage is Destructible {
         require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
         stor.setDelegate(holderAddress, oracleAddress, msg.sender);
         bound = _bond(holderAddress, oracleAddress, endpoint, numZap);
-        Bound(holderAddress, oracleAddress, endpoint, numZap);
+        emit Bound(holderAddress, oracleAddress, endpoint, numZap);
     }
 
     /// @return total ZAP unbound from oracle
     function delegateUnbond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
         require(stor.getDelegate(holderAddress, oracleAddress) == msg.sender);
         unbound = _unbond(holderAddress, oracleAddress, endpoint, numDots);
-        Unbound(holderAddress, oracleAddress, endpoint, numDots);
+        emit Unbound(holderAddress, oracleAddress, endpoint, numDots);
     }
 
     /// @dev will reset delegate 
@@ -104,7 +104,7 @@ contract Bondage is Destructible {
         if (numDots > currentDots) dotsToEscrow = currentDots; 
         stor.updateBondValue(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
         stor.updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "add");
-        Escrowed(holderAddress, oracleAddress, endpoint, dotsToEscrow);
+        emit Escrowed(holderAddress, oracleAddress, endpoint, dotsToEscrow);
         return true;
     }
 
@@ -127,7 +127,7 @@ contract Bondage is Destructible {
         if (numDots > numEscrowed) dotsToEscrow = numEscrowed;
         stor.updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
         stor.updateBondValue(oracleAddress, oracleAddress, endpoint, dotsToEscrow, "add");
-        Released(holderAddress, oracleAddress, endpoint, dotsToEscrow);
+        emit Released(holderAddress, oracleAddress, endpoint, dotsToEscrow);
         return true;
     }
 

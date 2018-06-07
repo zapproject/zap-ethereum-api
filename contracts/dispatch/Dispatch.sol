@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 // v1.0
 
 import "../lib/Destructible.sol";
@@ -64,7 +64,7 @@ contract Dispatch is Destructible {
                 OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams); 
             }
             else{
-                Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
+                emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
             }
         }
     }
@@ -83,7 +83,7 @@ contract Dispatch is Destructible {
 
         bondage.releaseDots(subscriber, provider, endpoint, 1);
 
-        FulfillQuery(subscriber, provider, endpoint);
+        emit FulfillQuery(subscriber, provider, endpoint);
 
         return true;
     }

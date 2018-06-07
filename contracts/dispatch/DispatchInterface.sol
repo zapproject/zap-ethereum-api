@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 interface DispatchInterface {
     function query(address, string, bytes32, bytes32[]) external returns (uint256);

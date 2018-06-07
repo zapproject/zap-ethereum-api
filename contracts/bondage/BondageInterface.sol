@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 interface BondageInterface {
     function bond(address, bytes32, uint256) external returns(uint256);
