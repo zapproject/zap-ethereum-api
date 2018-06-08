@@ -68,7 +68,7 @@ contract('Dispatch', function (accounts) {
     var provider = accounts[2];
 
     const tokensForOwner = new BigNumber("5000e18");
-    const tokensForSubscriber = new BigNumber("2000e18");
+    const tokensForSubscriber = new BigNumber("3000e18");
     const tokensForProvider = new BigNumber("2000e18");
     const approveTokens = new BigNumber("1000e18");
 
@@ -80,7 +80,7 @@ contract('Dispatch', function (accounts) {
 
     const piecewiseFunction = { // 2x^2
         constants: [2, 2, 2],
-        parts: [0, 1000],
+        parts: [0, 1000000000],
         dividers: [1]
     };
 
@@ -168,18 +168,26 @@ contract('Dispatch', function (accounts) {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
        
+        // watch events
         const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
         const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
         subscriberEvents.watch((err, res) => { });
+        const bondageEvents = this.test.bondage.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        bondageEvents.watch((err, res) => { });
 
         var oracleAddr = this.test.oracle.address;
-        
-        // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await this.test.subscriber.bondToOracle(oracleAddr, 10, { from: owner });
-        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await this.test.dispatch.query(oracleAddr, query, specifier, params, true, {from: subscriber});
+        var subAddr = this.test.subscriber.address;
 
+
+
+        console.log("INITIALIZED");
+        // Bond subscriber account with contract
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, web3.toHex(specifier), 100, {from: subscriber});
+
+        console.log("BOUNDED");
+        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
+        await this.test.subscriber.query(oracleAddr, query, specifier, params, {from: subscriber});
 
 
         // GET ALL EVENTS LOG 
@@ -196,6 +204,7 @@ contract('Dispatch', function (accounts) {
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
         subscriberEvents.stopWatching();
+        bondageEvents.stopWatching();
     });
 
 /*

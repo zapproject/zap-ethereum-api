@@ -52,31 +52,11 @@ contract TestClient is Client1{
     	emit Result1(_response1);
     }
 
-  	/*
-    SPECIFY DATA PROVIDER FROM WHAT YOU WILL RECEIVING DATA, AND PAY FOR IT
-    */
-    function bondToOracle(address provider, uint256 numberOfDataRequests) public {
-    	uint256 balance = token.balanceOf(this);
-    	emit TESTING(balance);
-    	uint256 numZap = bondage.calcZapForDots(provider, specifier, numberOfDataRequests);
-    	emit TESTING(numZap);
-    	uint256 bondageDecimals = 10 ** token.decimals();
-    	uint256 availableZap = balance;
-    	if (availableZap >= numZap) {
-    		token.approve(bondage, numZap * bondageDecimals);
-    		bondage.bond(provider, specifier, numZap);
-    	}
+    function query(address oracleAddr, string query, bytes32 specifier, bytes32[] params) external {
+
+    	dispatch.query(oracleAddr, query, specifier, params, true);
     }
 
-    /*
-    YOUR QUERY: "0x48da300FA4A832403aF2369cF32d453c599616A6", "hr3101,house_passage,_1515733200"
-    */
-    function queryTest(address provider, string query) public returns(uint256 ) {
-    	bytes32[] memory endpoint_params = new bytes32[](1);
-    	endpoint_params[0] = stringToBytes32("1");
-    	uint256 id = dispatch.query(provider, query, specifier, endpoint_params); // should return hello world
-    	return id;
-    }
 
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
     	bytes memory tempEmptyStringTest = bytes(source);
