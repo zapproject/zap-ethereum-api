@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 import "../../lib/Destructible.sol";
 import "../../lib/PiecewiseLogic.sol";
@@ -8,7 +8,7 @@ contract CurrentCost is Destructible {
 
     RegistryInterface registry;
 
-    function CurrentCost(address registryAddress) public {
+    constructor(address registryAddress) public {
        registry = RegistryInterface(registryAddress);
     }
 

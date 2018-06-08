@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 // v1.0
 
 import "../lib/Destructible.sol";
@@ -29,17 +29,17 @@ contract Arbiter is Destructible {
     ArbiterStorage stor;
     BondageInterface bondage;
 
-    address public storageAddress;
-    address public bondageAddress;
+    //address public storageAddress; @TODO: I believe these are unneeded
+    //address public bondageAddress;
 
-    function Arbiter(address storageAddress, address bondageAddress) public {
-        stor = ArbiterStorage(storageAddress);
-        bondage = BondageInterface(bondageAddress);
+    constructor(address _storageAddress, address _bondageAddress) public {
+        stor = ArbiterStorage(_storageAddress);
+        bondage = BondageInterface(_bondageAddress);
     }
 
     /// @notice Upgdate bondage function (barring no interface change)
-    function setBondage(address currentCostAddress) public onlyOwner {
-        bondage = BondageInterface(bondageAddress);
+    function setBondage(address newBondageAddress) public onlyOwner {
+        bondage = BondageInterface(newBondageAddress);
     }    
 
     /// @dev subscribe to specified number of blocks of provider
@@ -76,7 +76,7 @@ contract Arbiter is Destructible {
             uint96(block.number) + uint96(blocks)
         );
 
-        DataPurchase(
+        emit DataPurchase(
             providerAddress,
             msg.sender,
             publicKey,
@@ -108,7 +108,7 @@ contract Arbiter is Destructible {
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(msg.sender, subscriberAddress, endpoint))
-             DataSubscriptionEnd(
+            emit DataSubscriptionEnd(
                 msg.sender, 
                 subscriberAddress, 
                 SubscriptionTerminator.Provider
@@ -124,7 +124,7 @@ contract Arbiter is Destructible {
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(providerAddress, msg.sender, endpoint))
-             DataSubscriptionEnd(
+            emit DataSubscriptionEnd(
                 providerAddress,
                 msg.sender,
                 SubscriptionTerminator.Subscriber

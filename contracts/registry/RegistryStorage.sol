@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 import "../lib/Destructible.sol";
 
@@ -43,7 +43,7 @@ contract RegistryStorage is Ownable {
         return oracles[provider].endpointParams[endpoint][index];
     }
 
-    function getCurveUnset(address provider, bytes32 endpoint) returns (bool) {
+    function getCurveUnset(address provider, bytes32 endpoint) public view returns (bool) {
         return oracles[provider].curves[endpoint].parts.length==0;
     }
 
@@ -54,9 +54,14 @@ contract RegistryStorage is Ownable {
         returns (int[],uint[],uint[])
     {
         PiecewisePiece memory pieces = oracles[provider].curves[endpoint];
-        require(pieces.parts.length>0);
 
-    return (pieces.constants, pieces.parts, pieces.dividers);
+        // curve for this provider/endpoint not set
+        if(getCurveUnset(provider, endpoint)){
+            return (new int[](0), new uint[](0), new uint[](0)); 
+        }
+
+        require(pieces.parts.length>0);
+        return (pieces.constants, pieces.parts, pieces.dividers);
 
     }
 

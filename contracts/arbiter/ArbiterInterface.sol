@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.24;
 
 interface ArbiterInterface {
     function initiateSubscription(address, bytes32[], bytes32, uint256, uint64) external;
