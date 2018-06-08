@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 
 library PiecewiseLogic {
 
-
     struct PiecewiseTerm {
         int coef;
         int power;

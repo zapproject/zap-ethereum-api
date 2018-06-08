@@ -169,7 +169,7 @@ contract('Bondage', function (accounts) {
         const ethTok = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
 
-        await expect(ethDots).to.be.equal(1);
+        await expect(ethDots).to.be.equal(0);
         await expect(ethTok).to.be.equal(0);
     });
 
@@ -318,7 +318,7 @@ contract('Bondage', function (accounts) {
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
         await expect(subscriberDots).to.be.equal(0);
-        await expect(escrowDots).to.be.equal(1);
+        await expect(escrowDots).to.be.equal(0);
     });
 
     it("BONDAGE_18 - releaseDots() - Check that operator can release dots", async function () {
