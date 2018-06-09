@@ -55,11 +55,6 @@ contract RegistryStorage is Ownable {
     {
         PiecewisePiece memory pieces = oracles[provider].curves[endpoint];
 
-        // curve for this provider/endpoint not set
-        if(getCurveUnset(provider, endpoint)){
-            return (new int[](0), new uint[](0), new uint[](0)); 
-        }
-
         require(pieces.parts.length>0);
         return (pieces.constants, pieces.parts, pieces.dividers);
 
