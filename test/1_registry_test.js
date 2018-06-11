@@ -135,15 +135,10 @@ contract('Registry', async (accounts) => {
 
     });
 
-    it("REGISTRY_13 - getProviderCurve() - Check that uninitialized provider curve is empty", async function () {
+    it("REGISTRY_13 - getProviderCurve() - Check that cant get uninitialized curve ", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
-        const res = await this.test.registry.getProviderCurve.call(owner, specifier, { from: owner });
-        console.log("result : ", res)
-        for(let arr of res ) {
-            arr = Utils.fetchPureArray(arr, parseInt);
-            await expect(arr.length.valueOf()).to.be.an('number').equal(0);
-        }
+        await expect(this.test.registry.getProviderCurve.call(owner, specifier, { from: owner })).to.be.eventually.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_14 - setEndpointParams() - Check that we can set endpoint params", async function () {

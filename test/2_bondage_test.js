@@ -127,13 +127,11 @@ contract('Bondage', function (accounts) {
         await expect(fun0Res).to.be.equal(fun0Calc);
     });
 
-    it("BONDAGE_6 - calcZapForDots() - Check that function return 0 if curve not intialized", async function () {
+    it("BONDAGE_6 - calcZapForDots() - Check that function revert if curve not intialized", async function () {
 
         //prepareProvider.call(this.test, true, false);
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
-        const res = await this.test.bondage.calcZapForDots.call(oracle, specifier, 5);
-        
-        await expect(res.valueOf()).to.be.equal('0');
+        await expect(this.test.bondage.calcZapForDots.call(oracle, specifier, 5)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
     it("BONDAGE_7 - calcBondRate()) - Check calcBondRate function", async function () {
@@ -169,7 +167,7 @@ contract('Bondage', function (accounts) {
         const ethTok = parseInt(res1[0].valueOf());
         const ethDots = parseInt(res1[1].valueOf());
 
-        await expect(ethDots).to.be.equal(1);
+        await expect(ethDots).to.be.equal(0);
         await expect(ethTok).to.be.equal(0);
     });
 
@@ -318,7 +316,7 @@ contract('Bondage', function (accounts) {
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
         await expect(subscriberDots).to.be.equal(0);
-        await expect(escrowDots).to.be.equal(1);
+        await expect(escrowDots).to.be.equal(0);
     });
 
     it("BONDAGE_18 - releaseDots() - Check that operator can release dots", async function () {

@@ -245,7 +245,7 @@ contract Bondage is Destructible {
         }
 
         // User must have approved contract to transfer working ZAP
-        require(token.transferFrom(msg.sender, this, numZap * decimals));
+        require(token.transferFrom(msg.sender, this, numZap));
 
         stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");        
         stor.updateTotalIssued(oracleAddress, endpoint, numDots, "add");
@@ -284,7 +284,7 @@ contract Bondage is Destructible {
             stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
             stor.updateBondValue(holderAddress, oracleAddress, endpoint, subTotal, "sub");
 
-            if(token.transfer(holderAddress, numZap * decimals))
+            if(token.transfer(holderAddress, numZap))
                 return numZap;
         }
         return 0;
