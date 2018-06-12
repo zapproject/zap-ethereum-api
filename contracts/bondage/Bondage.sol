@@ -13,6 +13,8 @@ contract Bondage is Destructible {
     event Escrowed(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
 
+    event TEST_EVENT(uint256 val);
+
     BondageStorage stor;
     CurrentCostInterface currentCost;
     ERC20 token;
@@ -68,7 +70,10 @@ contract Bondage is Destructible {
     /// @dev will bond to an oracle on behalf of some holder
     /// @return total ZAP bound to oracle
     function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 bound) {
+            
+        emit TEST_EVENT(1);
         require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
+        emit TEST_EVENT(2);
         stor.setDelegate(holderAddress, oracleAddress, msg.sender);
         bound = _bond(holderAddress, oracleAddress, endpoint, numZap);
         emit Bound(holderAddress, oracleAddress, endpoint, numZap);

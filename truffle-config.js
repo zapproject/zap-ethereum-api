@@ -12,8 +12,9 @@ module.exports = {
             host: "localhost",
             port: 9545,
             network_id: "*", 
-            gas: "7500000",
-            gasPrice: "4000000000"
+            // infinite gas for testing
+            // gas: "7500000",
+            // gasPrice: "4000000000"
         },
         "ganache-cli": {
             host: "localhost",

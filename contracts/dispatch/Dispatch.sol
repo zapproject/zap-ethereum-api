@@ -25,20 +25,24 @@ contract Dispatch is Destructible {
         bytes32 indexed endpoint
     );
     
+    event DISPATCH_TEST(
+        uint256 bonded
+    );
+
     DispatchStorage stor;
     BondageInterface bondage;
 
     address public storageAddress;
     address public bondageAddress;
 
-    function Dispatch(address storageAddress, address bondageAddress) public {
-        stor = DispatchStorage(storageAddress);
-        bondage = BondageInterface(bondageAddress);
+    constructor(address _storageAddress, address _bondageAddress) public {
+        stor = DispatchStorage(_storageAddress);
+        bondage = BondageInterface(_bondageAddress);
     }
 
     /// @notice Upgdate bondage function (barring no interface change)
-    function setBondage(address currentCostAddress) public onlyOwner {
-        bondage = BondageInterface(bondageAddress);
+    function setBondage(address _bondageAddress) public onlyOwner {
+        bondage = BondageInterface(_bondageAddress);
     }    
 
     /// @notice Escrow dot for oracle request
@@ -55,17 +59,24 @@ contract Dispatch is Destructible {
     {
         uint256 dots = bondage.getBoundDots(msg.sender, provider, endpoint);
 
+        emit DISPATCH_TEST(dots);
+
         if(dots >= 1) {
             //enough dots
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
+
             id = uint256(keccak256(block.number, now, userQuery, msg.sender));
             stor.createQuery(id, provider, msg.sender, endpoint, userQuery);
+            
+            emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
             if(onchain) {
                 OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams); 
             }
             else{
-                emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
+                // Do something offchain
             }
+        } else {
+            // NOT ENOUGH DOTS
         }
     }
 
