@@ -12,7 +12,8 @@ contract DispatchStorage is Ownable {
         address subscriber;     // requester's address
         bytes32 endpoint;       // endpoint for response. (currently only 'smart_contract' endpoint supported)
         Status status;          // status of the request
-        string userQuery;
+        string userQuery;       // query string
+        bool onchainSubscriber; // is subscriber contract or offchain
     }
 
     //mapping of unique ids to query objects
@@ -50,6 +51,11 @@ contract DispatchStorage is Ownable {
         return queries[id].userQuery;
     }
 
+    /// @dev is subscriber contract or offchain 
+    /// @param id request id
+    function getSubscriberOnchain(uint256 id) external view returns (bool) {
+        return queries[id].onchainSubscriber;
+    }
 
 
 	/**** Set Methods ****/
@@ -58,12 +64,13 @@ contract DispatchStorage is Ownable {
         address provider,
         address subscriber,
         bytes32 endpoint,
-        string userQuery
+        string userQuery,
+        bool onchainSubscriber
     ) 
         external
         onlyOwner
     {
-        queries[id] = Query(provider, subscriber, endpoint, Status.Pending, userQuery);
+        queries[id] = Query(provider, subscriber, endpoint, Status.Pending, userQuery, onchainSubscriber);
     }
 
     function setFulfilled(uint256 id) external onlyOwner {
