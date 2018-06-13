@@ -65,17 +65,19 @@ function getParamsFromIncomingEvent(logs) {
 contract('Dispatch', function (accounts) {
     const owner = accounts[0];
     const subscriber = accounts[1];
-    var provider = accounts[2];
+    const provider = accounts[2];
 
     const tokensForOwner = new BigNumber("5000e18");
     const tokensForSubscriber = new BigNumber("3000e18");
     const tokensForProvider = new BigNumber("2000e18");
     const approveTokens = new BigNumber("1000e18");
 
+    const params = ["param1", "param2"];
+
     const specifier = "spec01";
+
     const publicKey = 10001;
     const title = "tst";
-    const params = ["param1", "param2"];
     const extInfo = [111, 222, 333];
 
     const piecewiseFunction = { // 2x^2
@@ -86,11 +88,17 @@ contract('Dispatch', function (accounts) {
 
     const query = "Why?";
 
-    async function prepareProvider(curveParams = piecewiseFunction, account = provider) {
+   /* async function prepareProvider(account = provider, curveParams = piecewiseFunction) {
+        await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
+        await this.registry.initiateProviderCurve(specifier, curveParams.constants, curveParams.parts, curveParams.dividers, { from: account });
+    }*/
+
+/*  async function prepareProvider(curveParams = piecewiseFunction, account = provider) {
         await this.registry.initiateProvider(publicKey, title, specifier, params, {from: account});
         await this.registry.initiateProviderCurve(specifier, curveParams.constants, curveParams.parts, curveParams.dividers, { from: account });
-    }
+}*/ 
 
+/* OLD
     async function prepareTokens(sub = true) {
         await this.token.allocate(owner, tokensForOwner, { from: owner });
         await this.token.allocate(provider, tokensForProvider, { from: owner });
@@ -99,10 +107,16 @@ contract('Dispatch', function (accounts) {
             // bond Zap
             await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
         }
+    } */
+
+    async function prepareTokens(allocAddress = subscriber) {
+        await this.token.allocate(owner, tokensForOwner, { from: owner });
+        await this.token.allocate(allocAddress, tokensForSubscriber, { from: owner });
+        //await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
     }
 
     beforeEach(async function deployContracts() {
-        this.currentTest.regStor = await RegistryStorage.new();
+        /*this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
         await this.currentTest.regStor.transferOwnership(this.currentTest.registry. address);
 
@@ -121,7 +135,29 @@ contract('Dispatch', function (accounts) {
         await this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
 
         this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address);
+        */
+        this.currentTest.regStor = await RegistryStorage.new();
+        this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
+        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+
+        this.currentTest.token = await ZapToken.new();
+
+        this.currentTest.oracle = await Oracle.new(this.currentTest.registry.address);
+
+        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
+
+        this.currentTest.bondStor = await BondageStorage.new();
+        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+
+
+        this.currentTest.dispStor = await DispatchStorage.new();
+        this.currentTest.dispatch = await Dispatch.new(this.currentTest.dispStor.address, this.currentTest.bondage.address);
+        await this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
+        this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address, this.currentTest.registry.address);
     });
+
+    /*
 
     it("DISPATCH_1 - query() - Check query function", async function () {
 
@@ -161,39 +197,42 @@ contract('Dispatch', function (accounts) {
         await this.test.bondage.bond(provider, specifier, 100, {from: subscriber});
         var oracleAddr = this.test.oracle.address;
         await this.test.dispatch.query(oracleAddr, query, specifier, params, true, {from: accounts[3]}); //should FAIL
-    });
+    }); */
 
     it("DISPATCH_4 - respond1() - Respond check", async function () {
 
-        await prepareProvider.call(this.test);
-        await prepareTokens.call(this.test);
-       
+        await prepareTokens.call(this.test, subscriber);
+
+        var oracleAddr = this.test.oracle.address;
+        var subAddr = this.test.subscriber.address; 
+        console.log("SUBADDR: " + subAddr);
+        console.log("ORACLEADDR: " + oracleAddr);
+
         // watch events
         const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
         const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { });
-        const bondageEvents = this.test.bondage.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        bondageEvents.watch((err, res) => { });
+        subscriberEvents.watch((err, res) => { }); 
 
-        var oracleAddr = this.test.oracle.address;
-        var subAddr = this.test.subscriber.address;
+             
+        
 
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+            
+        //holder: subAddr (holder of dots)
+        // subscriber: owner of zap
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, specifier, 100, {from: subscriber});
 
+        console.log("BONDED");
 
-        console.log("INITIALIZED");
-        // Bond subscriber account with contract
-        await this.test.bondage.delegateBond(subAddr, oracleAddr, web3.toHex(specifier), 100, {from: subscriber});
-
-        console.log("BOUNDED");
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await this.test.subscriber.query(oracleAddr, query, specifier, params, {from: subscriber});
+        await this.test.subscriber.testQuery(oracleAddr, query, specifier, params);
 
+        // wait for callback
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
         console.log("LOOKING AT LOGS");
-        console.log(logs);
         await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
         console.log("GOOD");
@@ -463,4 +502,6 @@ contract('Dispatch', function (accounts) {
         await this.test.dispatch.query(provider, subscriber, query ,specifier, params, {from: subscriber});
     });
 */
+
+
 }); 

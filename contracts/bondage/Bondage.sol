@@ -8,12 +8,14 @@ import "./BondageStorage.sol";
 
 contract Bondage is Destructible {
 
-    event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numZap);
+    event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numZap, uint256 numDots);
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Escrowed(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
 
     event TEST_EVENT(uint256 val);
+    event BONDRATE(uint256 zap, uint256 dots);
+    event COST(uint256 x, uint256 cost);
 
     BondageStorage stor;
     CurrentCostInterface currentCost;
@@ -58,7 +60,7 @@ contract Bondage is Destructible {
     /// @return total ZAP bound to oracle
     function bond(address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 bound) {
         bound = _bond(msg.sender, oracleAddress, endpoint, numZap);
-        emit Bound(msg.sender, oracleAddress, endpoint, numZap);
+        emit Bound(msg.sender, oracleAddress, endpoint, numZap, bound);
     }
 
     /// @return total ZAP unbound from oracle
@@ -69,14 +71,11 @@ contract Bondage is Destructible {
 
     /// @dev will bond to an oracle on behalf of some holder
     /// @return total ZAP bound to oracle
-    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 bound) {
-            
-        emit TEST_EVENT(1);
+    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 boundDots) {
         require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
-        emit TEST_EVENT(2);
         stor.setDelegate(holderAddress, oracleAddress, msg.sender);
-        bound = _bond(holderAddress, oracleAddress, endpoint, numZap);
-        emit Bound(holderAddress, oracleAddress, endpoint, numZap);
+        boundDots = _bond(holderAddress, oracleAddress, endpoint, numZap);
+        emit Bound(holderAddress, oracleAddress, endpoint, numZap, boundDots);
     }
 
     /// @return total ZAP unbound from oracle
@@ -166,12 +165,26 @@ contract Bondage is Destructible {
     )
         public
         view
-        returns (uint256 maxNumZap, uint256 numDots) 
+        returns (uint256, uint256) 
     {
+
         uint256 infinity = decimals;
         uint256 dotCost;
         if (numZap > 1000) numZap = 1000;
         if (numZap==0) return (0,0);
+
+        /*uint256 test = currentCostOfDot(
+                oracleAddress,
+                endpoint,
+                1
+            );
+        COST(1, test);
+        return (0,0);*/
+
+        uint256 maxNumZap = 0;
+        uint256 numDots = 1;
+
+        // BUG: INFINITE LOOP
         for (numDots; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
@@ -183,6 +196,7 @@ contract Bondage is Destructible {
                 numZap -= dotCost;
                 maxNumZap += dotCost;
             } else {
+                numDots-=1;
                 break;
             }
         }
@@ -243,6 +257,8 @@ contract Bondage is Destructible {
     {   
         // This also checks if oracle is registered w/an initialized curve
         (numZap, numDots) = calcBondRate(oracleAddress, endpoint, numZap);
+
+        BONDRATE(numZap, numDots);
 
         if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
             stor.setProviderInitialized(holderAddress, oracleAddress);

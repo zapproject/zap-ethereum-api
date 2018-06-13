@@ -13,11 +13,16 @@ contract Registry is Destructible {
     );
 
     event NewCurve(
-        address indexed provider,
-        bytes32 indexed endpoint,
+        address provider,
+        bytes32 endpoint,
         int[] constants,
         uint[] parts,
         uint[] dividers
+    );
+
+    event GetCurve(
+        address indexed provider,
+        bytes32 indexed endpoint
     );
 
     RegistryStorage stor;
@@ -73,7 +78,7 @@ contract Registry is Destructible {
         require(stor.getCurveUnset(msg.sender, endpoint));
 
         stor.setCurve(msg.sender, endpoint, constants, parts, dividers);
-        emit NewCurve(msg.sender,  endpoint, constants, parts, dividers);
+        emit NewCurve(msg.sender, endpoint, constants, parts, dividers);
 
         return true;
     }
@@ -116,6 +121,8 @@ contract Registry is Destructible {
         view
         returns (int[], uint[],uint[])
     {
+
+        emit GetCurve(msg.sender, endpoint);
         return stor.getCurve(provider, endpoint);
     }
 

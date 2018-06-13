@@ -26,11 +26,13 @@ contract CurrentCost is Destructible {
         view
         returns (uint256 cost)
     {
+
         uint[] memory lens = new uint[](3);
         (lens[0],lens[1],lens[2]) = registry.getProviderArgsLength(oracleAddress,endpoint);
         int[] memory constants = new int[](lens[0]);
         uint[] memory  parts = new uint[](lens[1]);
         uint[] memory dividers = new uint[](lens[2]);
+
         (constants,parts,dividers) = registry.getProviderCurve(oracleAddress, endpoint);
 
         return uint256(PiecewiseLogic.evalutePiecewiseFunction(constants,parts,dividers,

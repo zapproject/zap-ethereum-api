@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 
 contract RegistryInterface {
 	enum CurveType { None, Linear, Exponential, Logarithmic }
-    function initiateProvider(uint256, string, bytes32, bytes32[]) public returns (bool);
+    function initiateProvider(uint256, bytes32, bytes32, bytes32[]) public returns (bool);
     function initiateProviderCurve(bytes32, int256[], uint256[], uint256[]) public;
     function setEndpointParams(bytes32, bytes32[]) public;
     function getProviderPublicKey(address) public view returns (uint256);
