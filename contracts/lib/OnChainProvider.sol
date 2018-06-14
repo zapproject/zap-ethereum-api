@@ -7,5 +7,5 @@ contract OnChainProvider {
     /// @param userQuery query string
     /// @param endpoint endpoint specifier ala 'smart_contract'
     /// @param endpointParams endpoint-specific params
-    function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams) external;
+    function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external;
 }

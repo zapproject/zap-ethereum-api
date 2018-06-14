@@ -30,3 +30,10 @@ contract Client4 {
     /// @param response4 fourth provider-specified param
     function callback(uint256 id, string response1, string response2, string response3, string response4) external;
 }
+
+contract ClientBytes32Array {
+    /// @dev callback that provider will call after Dispatch.query() call
+    /// @param id request id
+    /// @param response bytes32 array
+    function callback(uint256 id, bytes32[] response) external;
+}

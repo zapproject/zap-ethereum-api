@@ -17,7 +17,8 @@ contract Dispatch is Destructible, DispatchInterface {
         address indexed subscriber,
         string query,
         bytes32 endpoint,
-        bytes32[] endpointParams
+        bytes32[] endpointParams,
+        bool onchainSubscriber
     );
 
     event FulfillQuery(
@@ -25,9 +26,12 @@ contract Dispatch is Destructible, DispatchInterface {
         address indexed provider,
         bytes32 indexed endpoint
     );
-    
-    event DISPATCH_TEST(
-        uint256 bonded
+
+    event OffchainResponse(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider,
+        bytes32[] response
     );
 
     DispatchStorage stor;
@@ -53,28 +57,26 @@ contract Dispatch is Destructible, DispatchInterface {
         string userQuery,           // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
         bytes32[] endpointParams,   // endpoint-specific params
-        bool onchain                // is provider a contract 
+        bool onchainProvider,                // is provider a contract 
+        bool onchainSubscriber               // is subscriber a contract 
     )
         external
         returns (uint256 id)
     {
         uint256 dots = bondage.getBoundDots(msg.sender, provider, endpoint);
 
-        emit DISPATCH_TEST(dots);
-
         if(dots >= 1) {
             //enough dots
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
 
             id = uint256(keccak256(block.number, now, userQuery, msg.sender));
-            stor.createQuery(id, provider, msg.sender, endpoint, userQuery);
-            
-            emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams);
-            if(onchain) {
-                OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams); 
+
+            stor.createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
+            if(onchainProvider) {
+                OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams, onchainSubscriber); 
             }
             else{
-                // Do something offchain
+                emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams, onchainSubscriber);
             }
         } else {
             // NOT ENOUGH DOTS
@@ -97,6 +99,25 @@ contract Dispatch is Destructible, DispatchInterface {
 
         emit FulfillQuery(subscriber, provider, endpoint);
 
+        return true;
+    }
+
+    /// @dev Parameter-count specific method called by data provider in response
+    function respondBytes32Array(
+        uint256 id,
+        bytes32[] response
+    )
+        external
+        returns (bool)
+    {
+        if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
+            revert();
+        if(stor.getSubscriberOnchain(id)) {
+            ClientBytes32Array(stor.getSubscriber(id)).callback(id, response);
+        }
+        else {
+            emit OffchainResponse(id, stor.getSubscriber(id), msg.sender, response);
+        }
         return true;
     }
 
