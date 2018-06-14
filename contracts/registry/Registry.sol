@@ -7,6 +7,8 @@ import "./RegistryInterface.sol";
 
 contract Registry is Destructible, RegistryInterface {
 
+    enum CurveType { None, Linear, Exponential, Logarithmic }
+
     event NewProvider(
         address indexed provider,
         bytes32 indexed title,
@@ -61,9 +63,9 @@ contract Registry is Destructible, RegistryInterface {
     /// @param dividers array of indices, each specifying range of indices in coef,power,fn belonging to each piece
     function initiateProviderCurve(
         bytes32 endpoint,
-        int[] constants,
-        uint[] parts,
-        uint[] dividers
+        int256[] constants,
+        uint256[] parts,
+        uint256[] dividers
     )
         public
         returns (bool)

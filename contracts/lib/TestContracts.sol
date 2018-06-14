@@ -50,14 +50,6 @@ contract TestClient is Client1{
 	event Result3(string response1, string response2, string response3);
 	event Result4(string response1, string response2, string response3, string response4);
 
-	event NumZapReceived(uint256 numZap);
-    event TokensApproved(bool isApproved);
-    event Bonded();
-    event BalanceReceived(uint256 balance);
-    event AvailableZapCalculated(uint256 zap);
-    event LogDecimals(uint256 decimals, uint256 bondage_decimals);
-
-
 	ERC20 token;
 	DispatchInterface dispatch;
 	BondageInterface bondage;

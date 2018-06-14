@@ -3,8 +3,9 @@ pragma solidity ^0.4.24;
 import "../../lib/Destructible.sol";
 import "../../lib/PiecewiseLogic.sol";
 import "../../registry/RegistryInterface.sol";
+import "./CurrentCostInterface.sol";
 
-contract CurrentCost is Destructible {
+contract CurrentCost is Destructible, CurrentCostInterface {
 
     RegistryInterface registry;
 
