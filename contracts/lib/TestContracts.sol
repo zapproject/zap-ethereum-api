@@ -19,10 +19,9 @@ contract TestProvider is OnChainProvider {
 
     RegistryInterface registry;
 
-	function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams) external {
-        // do something with
-		emit RecievedQuery(userQuery, endpoint, endpointParams);
-		Dispatch(msg.sender).respond1(id, "Hello World");
+	function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external {
+        emit RecievedQuery(userQuery, endpoint, endpointParams);
+        if(onchainSubscriber) Dispatch(msg.sender).respond1(id, "Hello World");
 	}
 
     constructor(address registryAddress) public{

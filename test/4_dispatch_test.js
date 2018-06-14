@@ -139,17 +139,13 @@ contract('Dispatch', function (accounts) {
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
         await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
-
         this.currentTest.token = await ZapToken.new();
-
         this.currentTest.oracle = await Oracle.new(this.currentTest.registry.address);
 
         this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
-
         this.currentTest.bondStor = await BondageStorage.new();
         this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
         await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
-
 
         this.currentTest.dispStor = await DispatchStorage.new();
         this.currentTest.dispatch = await Dispatch.new(this.currentTest.dispStor.address, this.currentTest.bondage.address);
@@ -199,7 +195,7 @@ contract('Dispatch', function (accounts) {
         await this.test.dispatch.query(oracleAddr, query, specifier, params, true, {from: accounts[3]}); //should FAIL
     }); */
 
-    it("DISPATCH_4 - respond1() - Check that we can make a query", async function () {
+    it("DISPATCH_4 - respond1() - Check that we can make a simple query", async function () {
 
         await prepareTokens.call(this.test, subscriber);
 
@@ -225,10 +221,7 @@ contract('Dispatch', function (accounts) {
         // wait for callback
 
         // GET ALL EVENTS LOG 
-        let logs = await dispatchEvents.get();
-        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
-
-        logs = await subscriberEvents.get();
+        let logs = await subscriberEvents.get();
         await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
 
         // subscriber should have emitted one event
