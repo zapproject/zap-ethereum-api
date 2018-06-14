@@ -4,8 +4,9 @@ pragma solidity ^0.4.24;
 import "../lib/Destructible.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
+import "./ArbiterInterface.sol";
 
-contract Arbiter is Destructible {
+contract Arbiter is Destructible, ArbiterInterface {
     // Called when a data purchase is initiated
     event DataPurchase(
         address indexed provider,          // Etheruem address of the provider

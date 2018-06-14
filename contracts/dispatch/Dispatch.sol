@@ -6,8 +6,9 @@ import "../lib/Client.sol";
 import "../lib/OnChainProvider.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
+import "./DispatchInterface.sol";
 
-contract Dispatch is Destructible { 
+contract Dispatch is Destructible, DispatchInterface { 
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(

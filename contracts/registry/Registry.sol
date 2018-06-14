@@ -3,8 +3,9 @@ pragma solidity ^0.4.24;
 
 import "./../lib/Destructible.sol";
 import "./RegistryStorage.sol";
+import "./RegistryInterface.sol";
 
-contract Registry is Destructible {
+contract Registry is Destructible, RegistryInterface {
 
     event NewProvider(
         address indexed provider,

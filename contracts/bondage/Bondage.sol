@@ -5,8 +5,9 @@ import "../lib/Destructible.sol";
 import "../lib/ERC20.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
+import "./BondageInterface.sol";
 
-contract Bondage is Destructible {
+contract Bondage is Destructible, BondageInterface {
 
     event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numZap, uint256 numDots);
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
