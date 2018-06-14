@@ -58,8 +58,8 @@ contract Dispatch is Destructible, DispatchInterface {
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
         bytes32[] endpointParams,   // endpoint-specific params
         bool onchainProvider,                // is provider a contract 
-        bool onchainSubscriber               // is subscriber a contract 
-    )
+        bool onchainSubscriber               // is subscriber a contract
+        )
         external
         returns (uint256 id)
     {

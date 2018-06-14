@@ -6,4 +6,5 @@ interface DispatchInterface {
     function respond2(uint256, string, string) external returns (bool);
     function respond3(uint256, string, string, string) external returns (bool);
     function respond4(uint256, string, string, string, string) external returns (bool);
+    function respondBytes32Array(uint256, bytes32[]) external returns (bool);
 }

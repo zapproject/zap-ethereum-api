@@ -19,10 +19,9 @@ contract TestProvider is OnChainProvider {
 
     RegistryInterface registry;
 
-	function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams) external {
-        // do something with
-		emit RecievedQuery(userQuery, endpoint, endpointParams);
-		Dispatch(msg.sender).respond1(id, "Hello World");
+	function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external {
+        emit RecievedQuery(userQuery, endpoint, endpointParams);
+        if(onchainSubscriber) Dispatch(msg.sender).respond1(id, "Hello World");
 	}
 
     constructor(address registryAddress) public{
@@ -71,7 +70,7 @@ contract TestClient is Client1{
     }
 
     function testQuery(address oracleAddr, string query, bytes32 specifier, bytes32[] params) external {
-    	dispatch.query(oracleAddr, query, specifier, params, true);
+    	dispatch.query(oracleAddr, query, specifier, params, true, true);
     }
 
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
