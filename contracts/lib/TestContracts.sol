@@ -71,7 +71,7 @@ contract TestClient is Client1{
     }
 
     function testQuery(address oracleAddr, string query, bytes32 specifier, bytes32[] params) external {
-    	dispatch.query(oracleAddr, query, specifier, params, true);
+    	dispatch.query(oracleAddr, query, specifier, params, true, true);
     }
 
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
