@@ -20,11 +20,6 @@ contract Registry is Destructible {
         uint[] dividers
     );
 
-    event GetCurve(
-        address indexed provider,
-        bytes32 indexed endpoint
-    );
-
     RegistryStorage stor;
 
     address public storageAddress;
@@ -122,7 +117,6 @@ contract Registry is Destructible {
         returns (int[], uint[],uint[])
     {
 
-        emit GetCurve(msg.sender, endpoint);
         return stor.getCurve(provider, endpoint);
     }
 

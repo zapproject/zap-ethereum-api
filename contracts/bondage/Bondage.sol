@@ -13,10 +13,6 @@ contract Bondage is Destructible {
     event Escrowed(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
 
-    event TEST_EVENT(uint256 val);
-    event BONDRATE(uint256 zap, uint256 dots);
-    event COST(uint256 x, uint256 cost);
-
     BondageStorage stor;
     CurrentCostInterface currentCost;
     ERC20 token;
@@ -257,8 +253,6 @@ contract Bondage is Destructible {
     {   
         // This also checks if oracle is registered w/an initialized curve
         (numZap, numDots) = calcBondRate(oracleAddress, endpoint, numZap);
-
-        BONDRATE(numZap, numDots);
 
         if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
             stor.setProviderInitialized(holderAddress, oracleAddress);

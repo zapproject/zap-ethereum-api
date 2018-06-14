@@ -54,13 +54,7 @@ contract RegistryStorage is Ownable {
         returns (int[],uint[],uint[])
     {
         PiecewisePiece memory pieces = oracles[provider].curves[endpoint];
-
-        int[] memory a = new int[](0); 
-        uint[] memory b = new uint[](0);
-        uint[] memory c = new uint[](0);
-
         require(pieces.parts.length>0);
-
         return (pieces.constants, pieces.parts, pieces.dividers);
     }
 

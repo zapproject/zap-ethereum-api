@@ -199,14 +199,12 @@ contract('Dispatch', function (accounts) {
         await this.test.dispatch.query(oracleAddr, query, specifier, params, true, {from: accounts[3]}); //should FAIL
     }); */
 
-    it("DISPATCH_4 - respond1() - Respond check", async function () {
+    it("DISPATCH_4 - respond1() - Check that we can make a query", async function () {
 
         await prepareTokens.call(this.test, subscriber);
 
         var oracleAddr = this.test.oracle.address;
         var subAddr = this.test.subscriber.address; 
-        console.log("SUBADDR: " + subAddr);
-        console.log("ORACLEADDR: " + oracleAddr);
 
         // watch events
         const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
@@ -214,16 +212,12 @@ contract('Dispatch', function (accounts) {
         const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
         subscriberEvents.watch((err, res) => { }); 
 
-             
-        
-
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
             
-        //holder: subAddr (holder of dots)
+        // holder: subAddr (holder of dots)
         // subscriber: owner of zap
         await this.test.bondage.delegateBond(subAddr, oracleAddr, specifier, 100, {from: subscriber});
 
-        console.log("BONDED");
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
         await this.test.subscriber.testQuery(oracleAddr, query, specifier, params);
@@ -232,18 +226,18 @@ contract('Dispatch', function (accounts) {
 
         // GET ALL EVENTS LOG 
         let logs = await dispatchEvents.get();
-        console.log("LOOKING AT LOGS");
         await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
 
-        console.log("GOOD");
         logs = await subscriberEvents.get();
         await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
-        console.log("VERY GOOD");
+
+        // subscriber should have emitted one event
+        var result = logs[0].args["response1"];
+        await expect(result == "Hello World");
 
         // STOP WATCHING EVENTS 
         dispatchEvents.stopWatching();
         subscriberEvents.stopWatching();
-        bondageEvents.stopWatching();
     });
 
 /*
