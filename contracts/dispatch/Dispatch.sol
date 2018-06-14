@@ -57,7 +57,7 @@ contract Dispatch is Destructible {
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
         bytes32[] endpointParams,   // endpoint-specific params
         bool onchainProvider,                // is provider a contract 
-        bool onchainSubscriber               // is provider a contract 
+        bool onchainSubscriber               // is subscriber a contract 
     )
         external
         returns (uint256 id)
@@ -69,7 +69,7 @@ contract Dispatch is Destructible {
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
             id = uint256(keccak256(block.number, now, userQuery, msg.sender));
             stor.createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
-            if(onchainSubscriber) {
+            if(onchainProvider) {
                 OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams, onchainSubscriber); 
             }
             else{
