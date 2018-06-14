@@ -27,6 +27,8 @@ library PiecewiseLogic {
         else if ( term.fn == 1 ) {
             if ( x < 0 ) x = 0;
             else         x = int256(fastlog2(uint256(x)));
+        } else {
+            revert("Invalid piece definition");
         }
 
         int exp = term.power;

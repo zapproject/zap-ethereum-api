@@ -8,20 +8,20 @@ import "./OnChainProvider.sol";
 import "../lib/ERC20.sol";
 
 contract TestProvider is OnChainProvider {
-	event RecievedQuery(string received);
+	event RecievedQuery(string query, bytes32 endpoint, bytes32[] params);
 
     bytes32 public specifier = "spec01";
 
     // curve 2x^2
-    int[] constants = [2, 2, 2];
+    int[] constants = [2, 2, 0];
     uint[] parts = [0, 1000000000];
     uint[] dividers = [1]; 
 
     RegistryInterface registry;
 
 	function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams) external {
-        // do something with query, endpoint, endpointParams
-		emit RecievedQuery("Hello World");
+        // do something with
+		emit RecievedQuery(userQuery, endpoint, endpointParams);
 		Dispatch(msg.sender).respond1(id, "Hello World");
 	}
 

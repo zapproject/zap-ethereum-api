@@ -143,7 +143,7 @@ contract Bondage is Destructible, BondageInterface {
         view
         returns (uint256 numZap)
     {
-        for (uint256 i = 0; i < numDots; i++) {
+        for (uint256 i = 1; i <= numDots; i++) {
             numZap += currentCostOfDot(                
                 oracleAddress,
                 endpoint,

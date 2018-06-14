@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 // Technically an abstract contract, not interface (solidity compiler devs are working to fix this right now)
 
-interface RegistryInterface {
+contract RegistryInterface {
     function initiateProvider(uint256, bytes32, bytes32, bytes32[]) public returns (bool);
     function initiateProviderCurve(bytes32, int256[], uint256[], uint256[]) public returns (bool);
     function setEndpointParams(bytes32, bytes32[]) public;

@@ -1,21 +1,21 @@
 pragma solidity ^0.4.11;
 library SafeMath {
-    function mul(uint256 a, uint256 b) internal constant returns (uint256) {
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a * b;
         assert(a == 0 || c / a == b);
         return c;
     }
-    function div(uint256 a, uint256 b) internal constant returns (uint256) {
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
         // assert(b > 0); // Solidity automatically throws when dividing by 0
         uint256 c = a / b;
         // assert(a == b * c + a % b); // There is no case in which this doesn't hold
         return c;
     }
-    function sub(uint256 a, uint256 b) internal constant returns (uint256) {
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
         assert(b <= a);
         return a - b;
     }
-    function add(uint256 a, uint256 b) internal constant returns (uint256) {
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         assert(c >= a);
         return c;
@@ -37,6 +37,7 @@ contract ERC20 is ERC20Basic {
     function approve(address spender, uint256 value) public returns (bool);
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
+
 contract BasicToken is ERC20Basic {
     using SafeMath for uint256;
     mapping(address => uint256) balances;
@@ -69,7 +70,7 @@ contract Ownable {
      * @dev The Ownable constructor sets the original `owner` of the contract to the sender
      * account.
      */
-    constructor() {
+    constructor() public {
         owner = msg.sender;
     }
     /**
@@ -138,13 +139,13 @@ contract StandardToken is ERC20, BasicToken {
      * the first transaction is mined)
      * From MonolithDAO Token.sol
      */
-    function increaseApproval (address _spender, uint _addedValue)
+    function increaseApproval (address _spender, uint _addedValue) public
         returns (bool success) {
         allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
         emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
         return true;
     }
-    function decreaseApproval (address _spender, uint _subtractedValue)
+    function decreaseApproval (address _spender, uint _subtractedValue) public
         returns (bool success) {
         uint oldValue = allowed[msg.sender][_spender];
         if (_subtractedValue > oldValue) {
@@ -196,7 +197,7 @@ contract ZapToken is MintableToken {
     string public symbol = "TEST";
     uint256 public decimals = 18;
 
-    function allocate(address to, uint amount){
+    function allocate(address to, uint amount) public{
         mint(to,amount);
     }
     
