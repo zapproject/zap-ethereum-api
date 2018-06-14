@@ -3,8 +3,11 @@ pragma solidity ^0.4.24;
 
 import "./../lib/Destructible.sol";
 import "./RegistryStorage.sol";
+import "./RegistryInterface.sol";
 
-contract Registry is Destructible {
+contract Registry is Destructible, RegistryInterface {
+
+    enum CurveType { None, Linear, Exponential, Logarithmic }
 
     event NewProvider(
         address indexed provider,
@@ -13,8 +16,8 @@ contract Registry is Destructible {
     );
 
     event NewCurve(
-        address indexed provider,
-        bytes32 indexed endpoint,
+        address provider,
+        bytes32 endpoint,
         int[] constants,
         uint[] parts,
         uint[] dividers
@@ -60,9 +63,9 @@ contract Registry is Destructible {
     /// @param dividers array of indices, each specifying range of indices in coef,power,fn belonging to each piece
     function initiateProviderCurve(
         bytes32 endpoint,
-        int[] constants,
-        uint[] parts,
-        uint[] dividers
+        int256[] constants,
+        uint256[] parts,
+        uint256[] dividers
     )
         public
         returns (bool)
@@ -73,7 +76,7 @@ contract Registry is Destructible {
         require(stor.getCurveUnset(msg.sender, endpoint));
 
         stor.setCurve(msg.sender, endpoint, constants, parts, dividers);
-        emit NewCurve(msg.sender,  endpoint, constants, parts, dividers);
+        emit NewCurve(msg.sender, endpoint, constants, parts, dividers);
 
         return true;
     }
@@ -116,6 +119,7 @@ contract Registry is Destructible {
         view
         returns (int[], uint[],uint[])
     {
+
         return stor.getCurve(provider, endpoint);
     }
 

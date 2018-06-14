@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-interface ArbiterInterface {
-    function initiateSubscription(address, bytes32[], bytes32, uint256, uint64) external;
-    function getSubscription(address, address, bytes32) external view returns (uint64, uint96, uint96);
-    function endSubscriptionProvider(address, address, bytes32) external;
-    function endSubscriptionSubscriber(address, address, bytes32) external;
+contract ArbiterInterface {
+    function initiateSubscription(address, bytes32, bytes32[], uint256, uint64) public;
+    function getSubscription(address, address, bytes32) public view returns (uint64, uint96, uint96);
+    function endSubscriptionProvider(address, bytes32) public;
+    function endSubscriptionSubscriber(address, bytes32) public;
 }

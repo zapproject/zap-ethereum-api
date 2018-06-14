@@ -6,8 +6,9 @@ import "../lib/Client.sol";
 import "../lib/OnChainProvider.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
+import "./DispatchInterface.sol";
 
-contract Dispatch is Destructible { 
+contract Dispatch is Destructible, DispatchInterface { 
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(
@@ -39,14 +40,14 @@ contract Dispatch is Destructible {
     address public storageAddress;
     address public bondageAddress;
 
-    function Dispatch(address storageAddress, address bondageAddress) public {
-        stor = DispatchStorage(storageAddress);
-        bondage = BondageInterface(bondageAddress);
+    constructor(address _storageAddress, address _bondageAddress) public {
+        stor = DispatchStorage(_storageAddress);
+        bondage = BondageInterface(_bondageAddress);
     }
 
     /// @notice Upgdate bondage function (barring no interface change)
-    function setBondage(address currentCostAddress) public onlyOwner {
-        bondage = BondageInterface(bondageAddress);
+    function setBondage(address _bondageAddress) public onlyOwner {
+        bondage = BondageInterface(_bondageAddress);
     }    
 
     /// @notice Escrow dot for oracle request
@@ -67,7 +68,9 @@ contract Dispatch is Destructible {
         if(dots >= 1) {
             //enough dots
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
+
             id = uint256(keccak256(block.number, now, userQuery, msg.sender));
+
             stor.createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
             if(onchainProvider) {
                 OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams, onchainSubscriber); 
@@ -75,6 +78,8 @@ contract Dispatch is Destructible {
             else{
                 emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams, onchainSubscriber);
             }
+        } else {
+            // NOT ENOUGH DOTS
         }
     }
 

@@ -1,8 +1,6 @@
 exports.CurveTypes = {
-    "None": 0,
-    "Linear": 1,
-    "Exponential": 2,
-    "Logarithmic": 3
+    "Absolute": 0,
+    "Logarithmic": 1
 };
 
 exports.DECIMALS = 1000000000000000000;
@@ -64,7 +62,7 @@ exports.calcNextDotCost = function (structurizedCurve, total) {
 
 exports.calcDotsCost = function (structurizedCurve, numDots) {
     let cost = 0;
-    for (let i = 0; i < numDots; i++) {
+    for (let i = 1; i <= numDots; i++) {
         cost += exports.calcNextDotCost(structurizedCurve, i);
     }
 

@@ -54,10 +54,8 @@ contract RegistryStorage is Ownable {
         returns (int[],uint[],uint[])
     {
         PiecewisePiece memory pieces = oracles[provider].curves[endpoint];
-
         require(pieces.parts.length>0);
         return (pieces.constants, pieces.parts, pieces.dividers);
-
     }
 
     /// @dev get length of constants, parts and dividers arrays
@@ -126,11 +124,11 @@ contract RegistryStorage is Ownable {
     {
         require(dividers[dividers.length-1]==constants.length/3);
         require((parts.length/2)==dividers.length);
+        require(parts.length > 0);
 
         PiecewisePiece storage pieces = oracles[origin].curves[endpoint];
         pieces.constants = constants;
         pieces.parts = parts;
         pieces.dividers = dividers;
-
     }
 }

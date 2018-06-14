@@ -32,7 +32,7 @@ contract('Arbiter', function (accounts) {
 
     // test function: 2x^2
     const piecewiseFunction = {
-        constants: [2, 2, 2],
+        constants: [2, 2, 0],
         parts: [0, 1000],
         dividers: [1]
     };
