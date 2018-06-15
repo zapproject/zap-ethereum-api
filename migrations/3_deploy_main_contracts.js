@@ -31,5 +31,13 @@ module.exports = function(deployer) {
     BondageStorage.deployed().then(instance => instance.transferOwnership(Bondage.address));
     ArbiterStorage.deployed().then(instance => instance.transferOwnership(Arbiter.address));
     DispatchStorage.deployed().then(instance => instance.transferOwnership(Dispatch.address));
+      Bondage.deployed().then(instance=>{
+          instance.setArbiterAddress(Arbiter.address);
+          instance.setDispatchAddress(Dispatch.address);
+          instance.setCurrentCostAddress(CurrentCost.address);
+      });
+      Dispatch.deployed().then(instance =>{
+          instance.setBondage(Bondage.address);
+      })
   });
 };
