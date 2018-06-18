@@ -34,6 +34,40 @@ contract Dispatch is Destructible, DispatchInterface {
         bytes32[] response
     );
 
+    event OffchainResult1(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider,
+        string response1
+    );
+
+    event OffchainResult2(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider,
+        string response1,
+        string response2
+    );
+
+    event OffchainResult3(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider,
+        string response1,
+        string response2,
+        string response3
+    );
+
+    event OffchainResult4(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider,
+        string response1,
+        string response2,
+        string response3,
+        string response4
+    );
+
     DispatchStorage stor;
     BondageInterface bondage;
 
@@ -80,6 +114,7 @@ contract Dispatch is Destructible, DispatchInterface {
             }
         } else {
             // NOT ENOUGH DOTS
+            revert("Subscriber does not have any dots.");
         }
     }
 
@@ -132,7 +167,13 @@ contract Dispatch is Destructible, DispatchInterface {
     {
         if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
-        Client1(stor.getSubscriber(id)).callback(id, response);
+
+        if(stor.getSubscriberOnchain(id)) {
+            Client1(stor.getSubscriber(id)).callback(id, response);
+        }
+        else {
+            emit OffchainResult1(id, stor.getSubscriber(id), msg.sender, response);
+        }
         return true;
     }
 
@@ -147,7 +188,14 @@ contract Dispatch is Destructible, DispatchInterface {
     {
         if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
-        Client2(stor.getSubscriber(id)).callback(id, response1, response2);
+
+        if(stor.getSubscriberOnchain(id)) {
+            Client2(stor.getSubscriber(id)).callback(id, response1, response2);
+        }
+        else {
+            emit OffchainResult2(id, stor.getSubscriber(id), msg.sender, response1, response2);
+        }
+
         return true;
     }
 
@@ -163,7 +211,14 @@ contract Dispatch is Destructible, DispatchInterface {
     {
         if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
-        Client3(stor.getSubscriber(id)).callback(id, response1, response2, response3);
+
+        if(stor.getSubscriberOnchain(id)) {
+            Client3(stor.getSubscriber(id)).callback(id, response1, response2, response3);
+        }
+        else {
+            emit OffchainResult3(id, stor.getSubscriber(id), msg.sender, response1, response2, response3);
+        }
+
         return true;
     }
 
@@ -180,13 +235,20 @@ contract Dispatch is Destructible, DispatchInterface {
     {
         if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
-        Client4(stor.getSubscriber(id)).callback(id, response1, response2, response3, response4);
+
+        if(stor.getSubscriberOnchain(id)) {
+            Client4(stor.getSubscriber(id)).callback(id, response1, response2, response3, response4);
+        }
+        else {
+            emit OffchainResult4(id, stor.getSubscriber(id), msg.sender, response1, response2, response3, response4);
+        }
+
         return true;
     }
 }
 
 /*
-/* For use in example contract, see TestSubscriber.sol
+/* For use in example contract, see TestContracts.sol
 /*
 /* When User Contract calls ZapDispatch.query(),
 /* 1 oracle specific dot is escrowed by ZapBondage and Incoming event is ted.

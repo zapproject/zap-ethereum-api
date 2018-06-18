@@ -74,7 +74,10 @@ contract('Dispatch', function (accounts) {
 
     const params = ["param1", "param2"];
 
-    const specifier = "spec01";
+    const spec1 = "Hello?";
+    const spec2 = "Reverse";
+    const spec3 = "Add";
+
 
     const publicKey = 10001;
     const title = "tst";
@@ -86,7 +89,7 @@ contract('Dispatch', function (accounts) {
         dividers: [1]
     };
 
-    const query = "Why?";
+    const query = "query";
 
    /* async function prepareProvider(account = provider, curveParams = piecewiseFunction) {
         await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
@@ -116,26 +119,6 @@ contract('Dispatch', function (accounts) {
     }
 
     beforeEach(async function deployContracts() {
-        /*this.currentTest.regStor = await RegistryStorage.new();
-        this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        await this.currentTest.regStor.transferOwnership(this.currentTest.registry. address);
-
-        this.currentTest.token = await ZapToken.new();
-
-        this.currentTest.oracle = await Oracle.new();
-
-        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
-
-        this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
-        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
-
-        this.currentTest.dispStor = await DispatchStorage.new();
-        this.currentTest.dispatch = await Dispatch.new(this.currentTest.dispStor.address, this.currentTest.bondage.address);
-        await this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
-
-        this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address);
-        */
         this.currentTest.regStor = await RegistryStorage.new();
         this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
         await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
@@ -153,49 +136,7 @@ contract('Dispatch', function (accounts) {
         this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address, this.currentTest.registry.address);
     });
 
-    /*
-
-    it("DISPATCH_1 - query() - Check query function", async function () {
-
-        await prepareProvider.call(this.test);
-        await prepareTokens.call(this.test);
-        
-        const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        dispatchEvents.watch((err, res) => {});
-        
-        await this.test.bondage.bond(provider, specifier, 100, {from: subscriber});
-        
-        var oracleAddr = this.test.oracle.address;
-        await this.test.dispatch.query(oracleAddr, query, specifier, params, true, {from: subscriber});
-
-        // STOP WATCHING EVENTS
-        dispatchEvents.stopWatching();
-    });
-
-    it("DISPATCH_2 - query() - Check query function will not be performed if subscriber will not have enough dots", async function () {
-
-        await prepareProvider.call(this.test);
-        await prepareTokens.call(this.test);
-
-        await this.test.bondage.bond(provider, specifier, 100, {from: subscriber});
-        
-        var oracleAddr = this.test.oracle.address;
-        await this.test.dispatch.query(oracleAddr, query, specifier, params, true, {from: subscriber});
-
-        //DONT THINK THIS IS RIGHT
-    });
-
-    it("DISPATCH_3 - query() - Check query function will not be performed if subscriber was not msg.sender", async function () {
-
-        await prepareProvider.call(this.test);
-        await prepareTokens.call(this.test);
-
-        await this.test.bondage.bond(provider, specifier, 100, {from: subscriber});
-        var oracleAddr = this.test.oracle.address;
-        await this.test.dispatch.query(oracleAddr, query, specifier, params, true, {from: accounts[3]}); //should FAIL
-    }); */
-
-    it("DISPATCH_4 - respond1() - Check that we can make a simple query", async function () {
+    it("DISPATCH_1 - respond1() - Check that we can make a simple query", async function () {
 
         await prepareTokens.call(this.test, subscriber);
 
@@ -208,15 +149,14 @@ contract('Dispatch', function (accounts) {
         const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
         subscriberEvents.watch((err, res) => { }); 
 
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-            
+        
         // holder: subAddr (holder of dots)
         // subscriber: owner of zap
-        await this.test.bondage.delegateBond(subAddr, oracleAddr, specifier, 100, {from: subscriber});
-
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await this.test.subscriber.testQuery(oracleAddr, query, specifier, params);
+        await this.test.subscriber.testQuery(oracleAddr, query, spec1, params);
 
         // wait for callback
 
@@ -233,99 +173,133 @@ contract('Dispatch', function (accounts) {
         subscriberEvents.stopWatching();
     });
 
-/*
-    it("DISPATCH_5 - respond1() - Respond will throw error if it was called not from provider address", async function () {
-
-        await prepareProvider.call(this.test);
-        await prepareTokens.call(this.test);        
-
-        const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        dispatchEvents.watch((err, res) => { });
+    it("DISPATCH_2 - query() - Check query function will not be performed if subscriber will not have enough dots", async function () {
+        await prepareTokens.call(this.test, subscriber);
 
         var oracleAddr = this.test.oracle.address;
-        // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await this.test.subscriber.bondToOracle(oracleAddr, 10, { from: owner });
 
-        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await this.test.dispatch.query(oracleAddr, query, specifier, params, true, {from: subscriber});
-
-        // GET ALL EVENTS LOG 
-        let logs = await dispatchEvents.get();
-        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
-
-        const data = getParamsFromIncomingEvent(logs);
-
-        await expect(this.test.dispatch.respond1(data.id, "pum-tum-pum", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
-
-        // STOP WATCHING EVENTS 
-        dispatchEvents.stopWatching();
-        subscriberEvents.stopWatching();
+        await expect(this.test.subscriber.testQuery(oracleAddr, query, spec1, params)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
-    it("DISPATCH_6 - respond2() - Respond check", async function () {
 
-        await prepareProvider.call(this.test);
-        await prepareTokens.call(this.test);        
-
-        const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        dispatchEvents.watch((err, res) => { });
-
+    it("DISPATCH_3 - query() - Check query function will not be performed if msg.sender is not subscriber", async function () {
+        await prepareTokens.call(this.test, subscriber);
 
         var oracleAddr = this.test.oracle.address;
-        // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await this.test.subscriber.bondToOracle(oracleAddr, 10, { from: owner });
+        var subAddr = this.test.subscriber.address; 
 
-        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await this.test.subscriber.queryTest(oracleAddr, query, { from: owner });
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
 
-        // GET ALL EVENTS LOG 
-        let logs = await dispatchEvents.get();
-        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        await expect(this.test.dispatch.query(oracleAddr, query, spec1, params, true, true, {from: accounts[4]})).to.be.eventually.rejectedWith(EVMRevert);
+    }); 
 
-        const data = getParamsFromIncomingEvent(logs);
-        await this.test.dispatch.respond2(data.id, "pum-tum-pum", "hi", { from: provider });
 
-        logs = await subscriberEvents.get();
-        await expect(isEventReceived(logs, "Result2")).to.be.equal(true);
+    it("DISPATCH_4 - query() - Check that our contract will revert with an invalid endpoint", async function () {
+        await prepareTokens.call(this.test, subscriber);
 
-        const q = await this.test.dispStor.getStatus.call(data.id, { from: owner });
-        await expect(parseInt(q.valueOf())).to.be.equal(1);
+        var oracleAddr = this.test.oracle.address;
+        var subAddr = this.test.subscriber.address; 
 
-        // STOP WATCHING EVENTS 
-        dispatchEvents.stopWatching();
-        subscriberEvents.stopWatching();
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
+
+        await expect(this.test.subscriber.testQuery(oracleAddr, query, "Bad Endpoint", params)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
-    it("DISPATCH_7 - respond2() - Respond will throw error if it was called not from provider address", async function () {
 
-        await prepareProvider.call(this.test);
-        await prepareTokens.call(this.test);        
+    it("DISPATCH_5 - query() - Check that our test contract can bond and make queries to different endpoints", async function () {
+        await prepareTokens.call(this.test, subscriber);
 
-        const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        dispatchEvents.watch((err, res) => { });
         const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { });
+        subscriberEvents.watch((err, res) => { }); 
 
         var oracleAddr = this.test.oracle.address;
-        // BONDING OUR SUBSCRIBER WITH DATA PROVIDER
-        await this.test.subscriber.bondToOracle(oracleAddr, 10, { from: owner });
+        var subAddr = this.test.subscriber.address; 
 
-        // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
-        await this.test.subscriber.queryTest(oracleAddr, query, { from: owner });
+        // Bond to endpoints 1-3
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec2, 100, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec3, 100, {from: subscriber});
 
-        // GET ALL EVENTS LOG 
-        let logs = await dispatchEvents.get();
-        await expect(isEventReceived(logs, "Incoming")).to.be.equal(true);
+        // Make three separate queries
+        await this.test.subscriber.testQuery(oracleAddr, query, spec1, params);
+        let logs = await subscriberEvents.get();
+        await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
+        var result = logs[0].args["response1"];
+        await expect(result == "Hello World");
 
-        const data = getParamsFromIncomingEvent(logs);
+        await this.test.subscriber.testQuery(oracleAddr, "test", spec2, params);
+        logs = await subscriberEvents.get();
+        result = logs[1].args["response1"];
+        await expect(result == "tset");
 
-        await expect(this.test.dispatch.respond2(data.id, "pum-tum-pum", "hi", { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
-       
-        // STOP WATCHING EVENTS 
-        dispatchEvents.stopWatching();
+        // STOP WATCHING EVENTS
         subscriberEvents.stopWatching();
     });
 
+    it("DISPATCH_6 - Check that dispatch will revert if subscriber is subscribed to a different endpoint", async function () {
+        await prepareTokens.call(this.test, subscriber);    
+
+        var oracleAddr = this.test.oracle.address;
+        var subAddr = this.test.subscriber.address; 
+
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
+
+        await expect(this.test.subscriber.testQuery(oracleAddr, query, spec2, params)).to.be.eventually.rejectedWith(EVMRevert);
+    });
+
+
+    it("DISPATCH_7 - query() - Check that the test oracle can access the given endpoint parameters and use respondBytes32Array", async function () {
+        await prepareTokens.call(this.test, subscriber);    
+
+        const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        subscriberEvents.watch((err, res) => { }); 
+
+        var oracleAddr = this.test.oracle.address;
+        var subAddr = this.test.subscriber.address; 
+
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec3, 100, {from: subscriber});
+
+        let params3 = [toHex(1), toHex(2), toHex(3)]; 
+
+        await this.test.subscriber.testQuery(oracleAddr, query, spec3, params3);
+
+        let logs = await subscriberEvents.get();
+        await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
+        var result = logs[0].args["response1"];
+        var sum = web3.toDecimal(result);
+
+        await expect(sum).to.be.equal(6);
+    });
+
+    it("DISPATCH_7 - respond2() - Dispatch will revert if query has already been fulfilled", async function () {
+        await prepareTokens.call(this.test, subscriber);    
+
+        const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        subscriberEvents.watch((err, res) => { }); 
+
+        var oracleAddr = this.test.oracle.address;
+        var subAddr = this.test.subscriber.address; 
+
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
+
+        await this.test.subscriber.testQuery(oracleAddr, query, spec1, params);
+
+        let logs = await subscriberEvents.get();
+        await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
+
+        // get id from the Result1 event
+        var id = new BigNumber(logs[0].args["id"]);
+
+        await expect(this.test.dispatch.respond1(id, "Bad Data")).to.be.eventually.rejectedWith(EVMRevert);
+    });
+
+/*
     it("DISPATCH_8 - respond3() - Respond check", async function () {
 
         await prepareProvider.call(this.test);
@@ -490,5 +464,11 @@ contract('Dispatch', function (accounts) {
     });
 */
 
-
+    // converts an integer to its 32-bit hex representation
+    function toHex(num){
+        var hex = web3.toHex(num).substring(2);
+          while (hex.length < 64) hex = "0" + hex;
+        hex = "0x" + hex;
+        return hex; 
+    }
 }); 
