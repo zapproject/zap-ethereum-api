@@ -69,22 +69,8 @@ contract Bondage is Destructible, BondageInterface {
     /// @dev will bond to an oracle on behalf of some holder
     /// @return total ZAP bound to oracle
     function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 boundDots) {
-        require(stor.getDelegate(holderAddress, oracleAddress) == 0x0);
-        stor.setDelegate(holderAddress, oracleAddress, msg.sender);
         boundDots = _bond(holderAddress, oracleAddress, endpoint, numZap);
         emit Bound(holderAddress, oracleAddress, endpoint, numZap, boundDots);
-    }
-
-    /// @return total ZAP unbound from oracle
-    function delegateUnbond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
-        require(stor.getDelegate(holderAddress, oracleAddress) == msg.sender);
-        unbound = _unbond(holderAddress, oracleAddress, endpoint, numDots);
-        emit Unbound(holderAddress, oracleAddress, endpoint, numDots);
-    }
-
-    /// @dev will reset delegate 
-    function resetDelegate(address oracleAddress) external {
-        stor.deleteDelegate(msg.sender, oracleAddress);
     }
 
     /// @dev Move numDots dots from provider-requester to bondage according to 
