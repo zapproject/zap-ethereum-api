@@ -115,16 +115,16 @@ contract BondageStorage is Ownable {
     function updateTotalBound(        
         address oracleAddress,
         bytes32 endpoint,
-        uint256 numDots,
+        uint256 numZap,
         bytes32 op
     )
         external
         onlyOwner       
     {
         if (op == "sub")
-            totalBound[oracleAddress][endpoint] -= numDots;
+            totalBound[oracleAddress][endpoint] -= numZap;
         else {
-            totalBound[oracleAddress][endpoint] += numDots;
+            totalBound[oracleAddress][endpoint] += numZap;
         }
     }
 
