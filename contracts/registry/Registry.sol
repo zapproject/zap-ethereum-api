@@ -16,8 +16,8 @@ contract Registry is Destructible, RegistryInterface {
     );
 
     event NewCurve(
-        address indexed provider,
-        bytes32 indexed endpoint,
+        address provider,
+        bytes32 endpoint,
         int[] constants,
         uint[] parts,
         uint[] dividers
