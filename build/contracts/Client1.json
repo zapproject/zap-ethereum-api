@@ -1,0 +1,1430 @@
+{
+  "contractName": "Client1",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "name": "response1",
+          "type": "string"
+        }
+      ],
+      "name": "callback",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.4.24;\n\ncontract Client1 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    function callback(uint256 id, string response1) external;\n}\ncontract Client2 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    function callback(uint256 id, string response1, string response2) external;\n}\ncontract Client3 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    /// @param response3 third provider-specified param\n    function callback(uint256 id, string response1, string response2, string response3) external;\n}\ncontract Client4 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    /// @param response3 third provider-specified param\n    /// @param response4 fourth provider-specified param\n    function callback(uint256 id, string response1, string response2, string response3, string response4) external;\n}\n\ncontract ClientBytes32Array {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response bytes32 array\n    function callback(uint256 id, bytes32[] response) external;\n}\n",
+  "sourcePath": "/home/iefnw/office3/zap-ethereum-api/contracts/lib/platform/Client.sol",
+  "ast": {
+    "absolutePath": "/home/iefnw/office3/zap-ethereum-api/contracts/lib/platform/Client.sol",
+    "exportedSymbols": {
+      "Client1": [
+        156
+      ],
+      "Client2": [
+        166
+      ],
+      "Client3": [
+        178
+      ],
+      "Client4": [
+        192
+      ],
+      "ClientBytes32Array": [
+        201
+      ]
+    },
+    "id": 202,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 148,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 156,
+        "linearizedBaseContracts": [
+          156
+        ],
+        "name": "Client1",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param",
+            "id": 155,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 153,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 150,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 155,
+                  "src": "226:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 149,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "226:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 152,
+                  "name": "response1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 155,
+                  "src": "238:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 151,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "238:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "225:30:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 154,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "264:0:3"
+            },
+            "scope": 156,
+            "src": "208:57:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "26:241:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 166,
+        "linearizedBaseContracts": [
+          166
+        ],
+        "name": "Client2",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param",
+            "id": 165,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 163,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 158,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 165,
+                  "src": "525:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 157,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "525:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 160,
+                  "name": "response1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 165,
+                  "src": "537:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 159,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "537:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 162,
+                  "name": "response2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 165,
+                  "src": "555:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 161,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "555:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "524:48:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 164,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "581:0:3"
+            },
+            "scope": 166,
+            "src": "507:75:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "268:316:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 178,
+        "linearizedBaseContracts": [
+          178
+        ],
+        "name": "Client3",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param\n @param response3 third provider-specified param",
+            "id": 177,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 175,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 168,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 177,
+                  "src": "898:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 167,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "898:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 170,
+                  "name": "response1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 177,
+                  "src": "910:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 169,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "910:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 172,
+                  "name": "response2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 177,
+                  "src": "928:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 171,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "928:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 174,
+                  "name": "response3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 177,
+                  "src": "946:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 173,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "946:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "897:66:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 176,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "972:0:3"
+            },
+            "scope": 178,
+            "src": "880:93:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "585:390:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 192,
+        "linearizedBaseContracts": [
+          192
+        ],
+        "name": "Client4",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param\n @param response3 third provider-specified param\n @param response4 fourth provider-specified param",
+            "id": 191,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 189,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 180,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1346:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 179,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1346:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 182,
+                  "name": "response1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1358:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 181,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1358:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 184,
+                  "name": "response2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1376:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 183,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1376:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 186,
+                  "name": "response3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1394:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 185,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1394:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 188,
+                  "name": "response4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1412:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 187,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1412:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1345:84:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 190,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1438:0:3"
+            },
+            "scope": 192,
+            "src": "1328:111:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "976:465:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 201,
+        "linearizedBaseContracts": [
+          201
+        ],
+        "name": "ClientBytes32Array",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response bytes32 array",
+            "id": 200,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 198,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 194,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 200,
+                  "src": "1636:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 193,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1636:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 197,
+                  "name": "response",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 200,
+                  "src": "1648:18:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                    "typeString": "bytes32[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 195,
+                      "name": "bytes32",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1648:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "id": 196,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1648:9:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                      "typeString": "bytes32[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1635:32:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 199,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1676:0:3"
+            },
+            "scope": 201,
+            "src": "1618:59:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "1443:236:3"
+      }
+    ],
+    "src": "0:1680:3"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/iefnw/office3/zap-ethereum-api/contracts/lib/platform/Client.sol",
+    "exportedSymbols": {
+      "Client1": [
+        156
+      ],
+      "Client2": [
+        166
+      ],
+      "Client3": [
+        178
+      ],
+      "Client4": [
+        192
+      ],
+      "ClientBytes32Array": [
+        201
+      ]
+    },
+    "id": 202,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 148,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 156,
+        "linearizedBaseContracts": [
+          156
+        ],
+        "name": "Client1",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param",
+            "id": 155,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 153,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 150,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 155,
+                  "src": "226:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 149,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "226:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 152,
+                  "name": "response1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 155,
+                  "src": "238:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 151,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "238:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "225:30:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 154,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "264:0:3"
+            },
+            "scope": 156,
+            "src": "208:57:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "26:241:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 166,
+        "linearizedBaseContracts": [
+          166
+        ],
+        "name": "Client2",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param",
+            "id": 165,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 163,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 158,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 165,
+                  "src": "525:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 157,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "525:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 160,
+                  "name": "response1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 165,
+                  "src": "537:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 159,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "537:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 162,
+                  "name": "response2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 165,
+                  "src": "555:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 161,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "555:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "524:48:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 164,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "581:0:3"
+            },
+            "scope": 166,
+            "src": "507:75:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "268:316:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 178,
+        "linearizedBaseContracts": [
+          178
+        ],
+        "name": "Client3",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param\n @param response3 third provider-specified param",
+            "id": 177,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 175,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 168,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 177,
+                  "src": "898:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 167,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "898:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 170,
+                  "name": "response1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 177,
+                  "src": "910:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 169,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "910:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 172,
+                  "name": "response2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 177,
+                  "src": "928:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 171,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "928:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 174,
+                  "name": "response3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 177,
+                  "src": "946:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 173,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "946:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "897:66:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 176,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "972:0:3"
+            },
+            "scope": 178,
+            "src": "880:93:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "585:390:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 192,
+        "linearizedBaseContracts": [
+          192
+        ],
+        "name": "Client4",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param\n @param response3 third provider-specified param\n @param response4 fourth provider-specified param",
+            "id": 191,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 189,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 180,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1346:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 179,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1346:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 182,
+                  "name": "response1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1358:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 181,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1358:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 184,
+                  "name": "response2",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1376:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 183,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1376:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 186,
+                  "name": "response3",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1394:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 185,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1394:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 188,
+                  "name": "response4",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 191,
+                  "src": "1412:16:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 187,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1412:6:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1345:84:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 190,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1438:0:3"
+            },
+            "scope": 192,
+            "src": "1328:111:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "976:465:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 201,
+        "linearizedBaseContracts": [
+          201
+        ],
+        "name": "ClientBytes32Array",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response bytes32 array",
+            "id": 200,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 198,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 194,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 200,
+                  "src": "1636:10:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 193,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1636:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 197,
+                  "name": "response",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 200,
+                  "src": "1648:18:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                    "typeString": "bytes32[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 195,
+                      "name": "bytes32",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1648:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "id": 196,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1648:9:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                      "typeString": "bytes32[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1635:32:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 199,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1676:0:3"
+            },
+            "scope": 201,
+            "src": "1618:59:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 202,
+        "src": "1443:236:3"
+      }
+    ],
+    "src": "0:1680:3"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-06-19T18:30:26.791Z"
+}

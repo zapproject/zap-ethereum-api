@@ -1,0 +1,492 @@
+{
+  "contractName": "OnChainProvider",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "name": "userQuery",
+          "type": "string"
+        },
+        {
+          "name": "endpoint",
+          "type": "bytes32"
+        },
+        {
+          "name": "endpointParams",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "onchainSubscriber",
+          "type": "bool"
+        }
+      ],
+      "name": "receive",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.4.24;\nimport \"../../platform/dispatch/Dispatch.sol\";\n\ncontract OnChainProvider {\n    /// @dev function for requesting data from on-chain provider\n    /// @param id request id\n    /// @param userQuery query string\n    /// @param endpoint endpoint specifier ala 'smart_contract'\n    /// @param endpointParams endpoint-specific params\n    function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external;\n}\n",
+  "sourcePath": "/home/iefnw/office3/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
+  "ast": {
+    "absolutePath": "/home/iefnw/office3/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
+    "exportedSymbols": {
+      "OnChainProvider": [
+        219
+      ]
+    },
+    "id": 220,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 203,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:4"
+      },
+      {
+        "absolutePath": "/home/iefnw/office3/zap-ethereum-api/contracts/platform/dispatch/Dispatch.sol",
+        "file": "../../platform/dispatch/Dispatch.sol",
+        "id": 204,
+        "nodeType": "ImportDirective",
+        "scope": 220,
+        "sourceUnit": 2261,
+        "src": "25:46:4",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 219,
+        "linearizedBaseContracts": [
+          219
+        ],
+        "name": "OnChainProvider",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev function for requesting data from on-chain provider\n @param id request id\n @param userQuery query string\n @param endpoint endpoint specifier ala 'smart_contract'\n @param endpointParams endpoint-specific params",
+            "id": 218,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "receive",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 216,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 206,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "372:10:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 205,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "372:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 208,
+                  "name": "userQuery",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "384:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 207,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "384:6:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 210,
+                  "name": "endpoint",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "402:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 209,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "402:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 213,
+                  "name": "endpointParams",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "420:24:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                    "typeString": "bytes32[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 211,
+                      "name": "bytes32",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "420:7:4",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "id": 212,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "420:9:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                      "typeString": "bytes32[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 215,
+                  "name": "onchainSubscriber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "446:22:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 214,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "446:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "371:98:4"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 217,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "478:0:4"
+            },
+            "scope": 219,
+            "src": "355:124:4",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 220,
+        "src": "73:408:4"
+      }
+    ],
+    "src": "0:482:4"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/iefnw/office3/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
+    "exportedSymbols": {
+      "OnChainProvider": [
+        219
+      ]
+    },
+    "id": 220,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 203,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:4"
+      },
+      {
+        "absolutePath": "/home/iefnw/office3/zap-ethereum-api/contracts/platform/dispatch/Dispatch.sol",
+        "file": "../../platform/dispatch/Dispatch.sol",
+        "id": 204,
+        "nodeType": "ImportDirective",
+        "scope": 220,
+        "sourceUnit": 2261,
+        "src": "25:46:4",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 219,
+        "linearizedBaseContracts": [
+          219
+        ],
+        "name": "OnChainProvider",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev function for requesting data from on-chain provider\n @param id request id\n @param userQuery query string\n @param endpoint endpoint specifier ala 'smart_contract'\n @param endpointParams endpoint-specific params",
+            "id": 218,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "receive",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 216,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 206,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "372:10:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 205,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "372:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 208,
+                  "name": "userQuery",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "384:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_calldata_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 207,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "384:6:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 210,
+                  "name": "endpoint",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "402:16:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 209,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "402:7:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 213,
+                  "name": "endpointParams",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "420:24:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes32_$dyn_calldata_ptr",
+                    "typeString": "bytes32[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 211,
+                      "name": "bytes32",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "420:7:4",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes32",
+                        "typeString": "bytes32"
+                      }
+                    },
+                    "id": 212,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "420:9:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
+                      "typeString": "bytes32[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 215,
+                  "name": "onchainSubscriber",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 218,
+                  "src": "446:22:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 214,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "446:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "371:98:4"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 217,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "478:0:4"
+            },
+            "scope": 219,
+            "src": "355:124:4",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 220,
+        "src": "73:408:4"
+      }
+    ],
+    "src": "0:482:4"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-06-19T18:30:26.795Z"
+}

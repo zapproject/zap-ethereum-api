@@ -1,0 +1,397 @@
+{
+  "contractName": "CurrentCostInterface",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "bytes32"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "_currentCostOfDot",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.4.24;\n\ncontract CurrentCostInterface {    \n    function _currentCostOfDot(address, bytes32, uint256) public view returns (uint256);\n}\n",
+  "sourcePath": "/home/iefnw/office3/zap-ethereum-api/contracts/platform/bondage/currentCost/CurrentCostInterface.sol",
+  "ast": {
+    "absolutePath": "/home/iefnw/office3/zap-ethereum-api/contracts/platform/bondage/currentCost/CurrentCostInterface.sol",
+    "exportedSymbols": {
+      "CurrentCostInterface": [
+        1778
+      ]
+    },
+    "id": 1779,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1766,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:9"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 1778,
+        "linearizedBaseContracts": [
+          1778
+        ],
+        "name": "CurrentCostInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 1777,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "_currentCostOfDot",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1773,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1768,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1777,
+                  "src": "93:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1767,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "93:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1770,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1777,
+                  "src": "102:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 1769,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "102:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1772,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1777,
+                  "src": "111:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1771,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "111:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "92:27:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1776,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1775,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1777,
+                  "src": "141:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1774,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "141:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "140:9:9"
+            },
+            "scope": 1778,
+            "src": "66:84:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 1779,
+        "src": "26:126:9"
+      }
+    ],
+    "src": "0:153:9"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/iefnw/office3/zap-ethereum-api/contracts/platform/bondage/currentCost/CurrentCostInterface.sol",
+    "exportedSymbols": {
+      "CurrentCostInterface": [
+        1778
+      ]
+    },
+    "id": 1779,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1766,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:9"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 1778,
+        "linearizedBaseContracts": [
+          1778
+        ],
+        "name": "CurrentCostInterface",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 1777,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "_currentCostOfDot",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1773,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1768,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1777,
+                  "src": "93:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 1767,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "93:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1770,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1777,
+                  "src": "102:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 1769,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "102:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 1772,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1777,
+                  "src": "111:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1771,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "111:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "92:27:9"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 1776,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1775,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1777,
+                  "src": "141:7:9",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 1774,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "141:7:9",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "140:9:9"
+            },
+            "scope": 1778,
+            "src": "66:84:9",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 1779,
+        "src": "26:126:9"
+      }
+    ],
+    "src": "0:153:9"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-06-19T18:30:26.819Z"
+}
