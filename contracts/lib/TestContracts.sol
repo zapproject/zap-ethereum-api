@@ -15,6 +15,7 @@ contract TestProvider is OnChainProvider {
     bytes32 public spec1 = "Hello?";
     bytes32 public spec2 = "Reverse";
     bytes32 public spec3 = "Add";
+    bytes32 public spec4 = "Double";
 
     /* Endpoints to Functions:
     spec1: Hello? -> returns "Hello World"
@@ -41,6 +42,8 @@ contract TestProvider is OnChainProvider {
                 endpoint2(id, userQuery, endpointParams);
             } else if (hash == keccak256(spec3)){
                 endpoint3(id, userQuery, endpointParams);
+            } else if (hash == keccak256(spec4)){
+                endpoint4(id, userQuery, endpointParams);
             } else {
                 revert("Invalid endpoint");
             }
@@ -63,6 +66,7 @@ contract TestProvider is OnChainProvider {
         registry.initiateProviderCurve(spec1, constants, parts, dividers);
         registry.initiateProviderCurve(spec2, constants, parts, dividers);
         registry.initiateProviderCurve(spec3, constants, parts, dividers);
+        registry.initiateProviderCurve(spec4, constants, parts, dividers);
     }
 
 
@@ -90,6 +94,11 @@ contract TestProvider is OnChainProvider {
         res[0] = bytes32(sum);
 
         Dispatch(msg.sender).respondBytes32Array(id, res);
+    }
+
+    // returns the sum of all values in endpointParams
+    function endpoint4(uint256 id, string userQuery, bytes32[] endpointParams) internal{
+        Dispatch(msg.sender).respond2(id, "Hello", "World");
     }
 
     // TODO: TEST OUT MORE RETURN VALUES (1,2,3 or 4)!
@@ -123,10 +132,11 @@ contract TestProvider is OnChainProvider {
 }
 
 /* Test Subscriber Client */
-contract TestClient is Client1{
+contract TestClient is Client1, Client2{
 
 	event Result1(uint256 id, string response1);
     event Result1(uint256 id, bytes32 response1);
+    event Result2(uint256 id, string response1, string response2);
 
 	ERC20 token;
 	DispatchInterface dispatch;
@@ -152,6 +162,12 @@ contract TestClient is Client1{
     function callback(uint256 id, bytes32[] response) external {
 
         emit Result1(id, response[0]);
+        // do something with result
+    }
+
+    // Client2 callback
+    function callback(uint256 id, string response1, string response2) external {
+        emit Result2(id, response1, response2);
         // do something with result
     }
 
