@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../lib/Ownable.sol";
+import "../../lib/ownership/Ownable.sol";
 
 contract ArbiterStorage is Ownable {
 

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "../../lib/Destructible.sol";
-import "../../lib/PiecewiseLogic.sol";
+import "../../../lib/lifecycle/Destructible.sol";
+import "../../../lib/platform/PiecewiseLogic.sol";
 import "../../registry/RegistryInterface.sol";
 import "./CurrentCostInterface.sol";
 

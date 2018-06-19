@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 // v1.0
 
-import "../lib/Destructible.sol";
-import "../lib/Client.sol";
-import "../lib/OnChainProvider.sol";
+import "../../lib/lifecycle/Destructible.sol";
+import "../../lib/platform/Client.sol";
+import "../../lib/platform/OnChainProvider.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 import "./DispatchInterface.sol";

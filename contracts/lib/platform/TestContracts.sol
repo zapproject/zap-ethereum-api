@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
 import "./Client.sol";
-import "../dispatch/DispatchInterface.sol";
-import "../bondage/BondageInterface.sol";
-import "../registry/RegistryInterface.sol";
+import "../../platform/dispatch/DispatchInterface.sol";
+import "../../platform/bondage/BondageInterface.sol";
+import "../../platform/registry/RegistryInterface.sol";
 import "./OnChainProvider.sol";
-import "../lib/ERC20.sol";
+import "../ERC20.sol";
 
 contract TestProvider is OnChainProvider {
 	event RecievedQuery(string query, bytes32 endpoint, bytes32[] params);

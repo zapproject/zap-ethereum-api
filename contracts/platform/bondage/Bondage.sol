@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 // v1.0
 
-import "../lib/Destructible.sol";
-import "../lib/ERC20.sol";
+import "../../lib/lifecycle/Destructible.sol";
+import "../../lib/ERC20.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 import "./BondageInterface.sol";

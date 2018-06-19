@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 // v1.0
 
-import "./../lib/Destructible.sol";
+import "../../lib/lifecycle/Destructible.sol";
 import "./RegistryStorage.sol";
 import "./RegistryInterface.sol";
 

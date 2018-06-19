@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../lib/Destructible.sol";
+import "../../lib/ownership/Ownable.sol";
 
 contract RegistryStorage is Ownable {
 
