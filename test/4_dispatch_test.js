@@ -315,7 +315,7 @@ contract('Dispatch', function (accounts) {
         await this.test.subscriber.testQuery(oracleAddr, query, spec4, params);
 
         let logs = await subscriberEvents.get();
-        await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
+        await expect(isEventReceived(logs, "Result2")).to.be.equal(true);
 
         // subscriber should have emitted one event
         var r1 = logs[0].args["response1"];
@@ -323,6 +323,7 @@ contract('Dispatch', function (accounts) {
 
         await expect(r1).to.be.equal("Hello");
         await expect(r2).to.be.equal("World");
+        var id = new BigNumber(logs[0].args["id"]);
 
         await expect(this.test.dispatch.respond1(id, "Bad Data")).to.be.eventually.rejectedWith(EVMRevert);
     });
