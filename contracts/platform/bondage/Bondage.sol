@@ -153,7 +153,6 @@ contract Bondage is Destructible, BondageInterface {
 
         uint256 infinity = decimals;
         uint256 dotCost;
-        if (numZap > 1000) numZap = 1000;
         if (numZap==0) return (0,0);
 
         /*uint256 test = currentCostOfDot(
@@ -167,7 +166,6 @@ contract Bondage is Destructible, BondageInterface {
         uint256 maxNumZap = 0;
         uint256 numDots = 1;
 
-        // BUG: INFINITE LOOP
         for (numDots; numDots < infinity; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
