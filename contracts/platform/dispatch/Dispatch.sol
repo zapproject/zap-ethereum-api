@@ -103,7 +103,7 @@ contract Dispatch is Destructible, DispatchInterface {
             //enough dots
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
 
-            id = uint256(keccak256(block.number, now, userQuery, msg.sender));
+            id = uint256(keccak256(block.number, now, userQuery, msg.sender, provider));
 
             stor.createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
             if(onchainProvider) {
