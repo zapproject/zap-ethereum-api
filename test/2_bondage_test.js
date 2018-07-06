@@ -72,7 +72,7 @@ contract('Bondage', function (accounts) {
          await prepareTokens.call(this.test);
          await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-         await this.test.bondage.bond(oracle, specifier, 100, {from: subscriber});
+         await this.test.bondage.bond(oracle, specifier, approveTokens, {from: subscriber});
     });
 
     it("BONDAGE_2 - bond() - Check that we can't bond oracle with unregistered provider", async function () {
