@@ -180,4 +180,17 @@ contract('Registry', async (accounts) => {
 
         await expect(index).to.be.equal(0);
     });
+    it("REGISTRY_16 - getDotLimit() - get dot range", async function () {
+        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner });
+
+        let dotLimit = await this.test.stor.getDotLimit(owner, specifier, {from: owner });
+        console.log('dotLimit:', dotLimit.toNumber());
+        expect(dotLimit.toNumber()).to.be.equal(parts[parts.length-1]);
+
+    });
+
+
+
+
 });

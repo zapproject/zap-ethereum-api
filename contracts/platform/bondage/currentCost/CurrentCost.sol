@@ -40,4 +40,15 @@ contract CurrentCost is Destructible, CurrentCostInterface {
             int(totalBound)
         ));
     }
+
+   function _dotLimit( 
+        address oracleAddress,
+        bytes32 endpoint
+    )
+        public
+        view
+        returns (uint256 limit)
+    {
+        return registry.getDotLimit(oracleAddress, endpoint);
+    }
 }

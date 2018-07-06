@@ -151,22 +151,18 @@ contract Bondage is Destructible, BondageInterface {
         returns (uint256, uint256) 
     {
 
-        uint256 infinity = decimals;
         uint256 dotCost;
         if (numZap==0) return (0,0);
-
-        /*uint256 test = currentCostOfDot(
-                oracleAddress,
-                endpoint,
-                1
-            );
-        COST(1, test);
-        return (0,0);*/
 
         uint256 maxNumZap = 0;
         uint256 numDots = 1;
 
-        for (numDots; numDots < infinity; numDots++) {
+        // cap on dots. temp patch
+        uint256 _dotLimit = dotLimit(oracleAddress, endpoint);
+        _dotLimit = _dotLimit < 100 ? _dotLimit : 100;
+
+        for (numDots; numDots < _dotLimit; numDots++) {
+        // for (numDots; numDots < dotLimit; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
                 endpoint,
@@ -187,6 +183,7 @@ contract Bondage is Destructible, BondageInterface {
     /// @dev Get the current cost of a dot.
     /// @param endpoint specifier
     /// @param oracleAddress data-provider
+    /// @param totalBound current number of dots
     function currentCostOfDot(
         address oracleAddress,
         bytes32 endpoint,
@@ -198,6 +195,22 @@ contract Bondage is Destructible, BondageInterface {
     {
         return currentCost._currentCostOfDot(oracleAddress, endpoint, totalBound);
     }
+
+    /// @dev Get issuance limit of dots 
+    /// @param endpoint specifier
+    /// @param oracleAddress data-provider
+    function dotLimit(
+        address oracleAddress,
+        bytes32 endpoint
+    )
+        public
+        view
+        returns (uint256 limit)
+    {
+        return currentCost._dotLimit(oracleAddress, endpoint);
+    }
+
+
 
     function getDotsIssued(
         address oracleAddress,

@@ -123,6 +123,20 @@ contract Registry is Destructible, RegistryInterface {
         return stor.getCurve(provider, endpoint);
     }
 
+    /// @dev get curve dot limit 
+    function getDotLimit(
+        address provider,
+        bytes32 endpoint
+    )
+        public
+        view
+        returns (uint)
+    {
+        return stor.getDotLimit(provider, endpoint);
+    }
+
+
+
     /// @dev get length of constants, parts and dividers arrays
     function getProviderArgsLength(address provider, bytes32 endpoint)
         public
