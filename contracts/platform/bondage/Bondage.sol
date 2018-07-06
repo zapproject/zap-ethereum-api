@@ -31,6 +31,7 @@ contract Bondage is Destructible, BondageInterface {
 
     /// @dev Initialize Storage, Token, anc CurrentCost Contracts
     constructor(address _storageAddress, address _tokenAddress, address _currentCostAddress) public {
+        storageAddress = _storageAddress;
         stor = BondageStorage(_storageAddress);
         token = ERC20(_tokenAddress); 
         currentCost = CurrentCostInterface(_currentCostAddress);
@@ -161,12 +162,14 @@ contract Bondage is Destructible, BondageInterface {
         uint256 _dotLimit = dotLimit(oracleAddress, endpoint);
         _dotLimit = _dotLimit < 100 ? _dotLimit : 100;
 
+        uint256 issuedDots = getDotsIssued(oracleAddress, endpoint);
+
         for (numDots; numDots < _dotLimit; numDots++) {
         // for (numDots; numDots < dotLimit; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
                 endpoint,
-                getDotsIssued(oracleAddress, endpoint) + numDots
+                issuedDots + numDots
             );
 
             if (numZap >= dotCost) {
@@ -282,10 +285,11 @@ contract Bondage is Destructible, BondageInterface {
 
             uint256 subTotal = 1;
             uint256 dotsIssued;
+            uint256 totalIssued = getDotsIssued(oracleAddress, endpoint);
 
-            for (subTotal; subTotal < numDots; subTotal++) {
+            for (subTotal; subTotal <= numDots; subTotal++) {
 
-                dotsIssued = getDotsIssued(oracleAddress, endpoint) - subTotal;
+                dotsIssued = totalIssued - subTotal;
 
                 numZap += currentCostOfDot(
                     oracleAddress,
