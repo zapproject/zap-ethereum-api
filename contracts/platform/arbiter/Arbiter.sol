@@ -30,10 +30,12 @@ contract Arbiter is Destructible, ArbiterInterface {
     ArbiterStorage stor;
     BondageInterface bondage;
 
-    //address public storageAddress; @TODO: I believe these are unneeded
-    //address public bondageAddress;
+    address public storageAddress;
+    address public bondageAddress;
 
     constructor(address _storageAddress, address _bondageAddress) public {
+        storageAddress = _storageAddress;
+        bondageAddress = _bondageAddress;
         stor = ArbiterStorage(_storageAddress);
         bondage = BondageInterface(_bondageAddress);
     }

@@ -75,6 +75,8 @@ contract Dispatch is Destructible, DispatchInterface {
     address public bondageAddress;
 
     constructor(address _storageAddress, address _bondageAddress) public {
+        storageAddress = _storageAddress;
+        bondageAddress = _bondageAddress;
         stor = DispatchStorage(_storageAddress);
         bondage = BondageInterface(_bondageAddress);
     }

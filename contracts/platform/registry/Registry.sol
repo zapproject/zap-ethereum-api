@@ -135,8 +135,6 @@ contract Registry is Destructible, RegistryInterface {
         return stor.getDotLimit(provider, endpoint);
     }
 
-
-
     /// @dev get length of constants, parts and dividers arrays
     function getProviderArgsLength(address provider, bytes32 endpoint)
         public
