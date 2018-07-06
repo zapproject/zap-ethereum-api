@@ -2,17 +2,18 @@ pragma solidity ^0.4.18;
 
 contract Token {
     function transfer(address to, uint256 amount) public returns (bool);
-    function balanceOf(address addr) constant public returns (uint256);
+    function balanceOf(address addr) public view returns (uint256);
 }
             
 contract Faucet {
     Token token;
-    uint256 public amt;
     address public owner;
     address public tokenAddress;
 
-    uint public decimals = 10 ** 13;
-    uint public rate = 26 * decimals; //change to whatever
+    uint public decimals = 10 ** 18;
+    uint public rate = 1 * decimals / 1000; //change to whatever
+
+    // 1: 1000 ratio
     
     modifier ownerOnly {
         require(msg.sender == owner); 
@@ -27,12 +28,10 @@ contract Faucet {
     
     event Log(uint256 n1, uint256 n2);
     
-    function() public payable {
+    function buyZap() public payable {
         if(msg.value > 0) {
-            emit Log(msg.value, rate);
-            amt = (msg.value / rate);
-            amt = amt * (10 ** 18);
-            emit Log(amt, token.balanceOf(this));
+            uint256 amt = (msg.value / rate);
+            amt = amt * decimals;
             if(amt <= token.balanceOf(this))
                 token.transfer(msg.sender, amt);                
         }
