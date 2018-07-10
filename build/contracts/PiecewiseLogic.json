@@ -1,14 +1,14 @@
 {
   "contractName": "PiecewiseLogic",
   "abi": [],
-  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820c17bf5aab4a6081b13ee04fbeeb61984ebe1ab58ab7f7ed0479f309f7874547e0029",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820c17bf5aab4a6081b13ee04fbeeb61984ebe1ab58ab7f7ed0479f309f7874547e0029",
+  "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582031ac311af8c869a6a22ff0524da37eb21e4f0a0b3a6f311f12e46b2c5d16e7920029",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a7230582031ac311af8c869a6a22ff0524da37eb21e4f0a0b3a6f311f12e46b2c5d16e7920029",
   "sourceMap": "26:4787:6:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
   "deployedSourceMap": "26:4787:6:-;;;;;;;;",
   "source": "pragma solidity ^0.4.24;\n\nlibrary PiecewiseLogic {\n\n    struct PiecewiseTerm {\n        int coef;\n        int power;\n        int fn;\n    }\n\n    struct PiecewisePiece {\n        PiecewiseTerm[] terms;\n        uint start;\n        uint end;\n    }\n\n    /// @dev calculate term\n    /// @param term term to calculate\n    /// @param x currently bound dots\n    /// @return term result\n    function evaluatePiecewiseTerm(PiecewiseTerm term, int x) private pure returns (int) {\n        int val = 1;\n\n        if ( term.fn == 0 ) {\n            if ( x < 0 ) x = -x;\n        }\n        else if ( term.fn == 1 ) {\n            if ( x < 0 ) x = 0;\n            else         x = int256(fastlog2(uint256(x)));\n        } \n        \n        int exp = term.power;\n\n        while ( exp > 0 ) {\n            val *= x;\n            exp--;\n        }\n\n        return val * term.coef;\n    }\n\n    /// @dev calculate all terms for piece\n    /// @param terms array of terms\n    /// @param x currently bound dots\n    /// @return all terms sum\n    function evaluatePiecewisePolynomial(PiecewiseTerm[] terms, int x) private pure returns (int) {\n        int sum = 0;\n\n        for ( uint i = 0; i < terms.length; i++ ) {\n            sum += evaluatePiecewiseTerm(terms[i], x);\n        }\n\n        return sum;\n    }\n\n    /// @dev choose needed function piece and calculate it\n    /// @param constants flattened array of all coefficients/powers/function across all polynomial terms, [c0,p0,fn0, c1,p1,fn1 ...]\n    /// @param parts array of starting/ending points for piecewise function pieces [start0,end0,start1,end1...]\n    /// @param dividers array of indices, each specifying range of indices in coef, power, fn belonging to each piece\n    /// @param x currently bound dots\n    /// @return chosen piece result\n    function evalutePiecewiseFunction(int[] constants, uint[] parts, uint[] dividers, int x) internal pure returns (int) {\n        if ( x < 0 ) {\n            revert();\n        }\n\n        uint256 _x = uint256(x);\n\n        uint pStart = 0;\n        PiecewisePiece[] memory pieces = new PiecewisePiece[](dividers.length);\n        for ( uint i = 0; i < dividers.length; i++ ) {\n\n            pieces[i].start = uint256(parts[2 * i]);\n            pieces[i].end = uint256(parts[(2 * i) + 1]);\n            PiecewiseTerm[] memory terms = new PiecewiseTerm[](dividers[i]-pStart);\n            for ( uint j = pStart; j < dividers[i]; j++ ) {\n                int coef = constants[(3*j)];\n                int power = constants[(3*j)+1];\n                int fn = constants[(3*j)+2];\n                PiecewiseTerm memory term = PiecewiseTerm(coef,power,fn);\n                terms[j-pStart] = term;\n            }\n            pieces[i].terms = terms;\n\n            pStart = dividers[i];\n        }\n\n        for ( uint y = 0; y < pieces.length; y++ ) {\n            if ( pieces[y].start <= _x && _x <= pieces[y].end ) {\n                return evaluatePiecewisePolynomial(pieces[y].terms, x);\n            }\n            else continue;\n        }\n        return 0;\n    }\n\n\n    function fastlog2(uint256 x) private pure returns (uint256 y) {\n        assembly {\n            let arg := x\n            x := sub(x, 1)\n            x := or(x, div(x, 0x02))\n            x := or(x, div(x, 0x04))\n            x := or(x, div(x, 0x10))\n            x := or(x, div(x, 0x100))\n            x := or(x, div(x, 0x10000))\n            x := or(x, div(x, 0x100000000))\n            x := or(x, div(x, 0x10000000000000000))\n            x := or(x, div(x, 0x100000000000000000000000000000000))\n            x := add(x, 1)\n            let m := mload(0x40)\n            mstore(m, 0xf8f9cbfae6cc78fbefe7cdc3a1793dfcf4f0e8bbd8cec470b6a28a7a5a3e1efd)\n            mstore(add(m, 0x20), 0xf5ecf1b3e9debc68e1d9cfabc5997135bfb7a7a3938b7b606b5b4b3f2f1f0ffe)\n            mstore(add(m, 0x40), 0xf6e4ed9ff2d6b458eadcdf97bd91692de2d4da8fd2d0ac50c6ae9a8272523616)\n            mstore(add(m, 0x60), 0xc8c0b887b0a8a4489c948c7f847c6125746c645c544c444038302820181008ff)\n            mstore(add(m, 0x80), 0xf7cae577eec2a03cf3bad76fb589591debb2dd67e0aa9834bea6925f6a4a2e0e)\n            mstore(add(m, 0xa0), 0xe39ed557db96902cd38ed14fad815115c786af479b7e83247363534337271707)\n            mstore(add(m, 0xc0), 0xc976c13bb96e881cb166a933a55e490d9d56952b8d4e801485467d2362422606)\n            mstore(add(m, 0xe0), 0x753a6d1b65325d0c552a4d1345224105391a310b29122104190a110309020100)\n            mstore(0x40, add(m, 0x100))\n            let magic := 0x818283848586878898a8b8c8d8e8f929395969799a9b9d9e9faaeb6bedeeff\n            let shift := 0x100000000000000000000000000000000000000000000000000000000000000\n            let a := div(mul(x, magic), shift)\n            y := div(mload(add(m, sub(255, a))), shift)\n            y := add(y, mul(256, gt(arg, 0x8000000000000000000000000000000000000000000000000000000000000000)))\n        }\n    }\n}\n",
-  "sourcePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/PiecewiseLogic.sol",
+  "sourcePath": "/home/iefnw/office4/zap-ethereum-api/contracts/lib/platform/PiecewiseLogic.sol",
   "ast": {
-    "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/PiecewiseLogic.sol",
+    "absolutePath": "/home/iefnw/office4/zap-ethereum-api/contracts/lib/platform/PiecewiseLogic.sol",
     "exportedSymbols": {
       "PiecewiseLogic": [
         632
@@ -1778,10 +1778,10 @@
                             "name": "revert",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              5947,
-                              5948
+                              5980,
+                              5981
                             ],
-                            "referencedDeclaration": 5947,
+                            "referencedDeclaration": 5980,
                             "src": "1925:6:6",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_revert_pure$__$returns$__$",
@@ -4986,7 +4986,7 @@
     "src": "0:4814:6"
   },
   "legacyAST": {
-    "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/PiecewiseLogic.sol",
+    "absolutePath": "/home/iefnw/office4/zap-ethereum-api/contracts/lib/platform/PiecewiseLogic.sol",
     "exportedSymbols": {
       "PiecewiseLogic": [
         632
@@ -6756,10 +6756,10 @@
                             "name": "revert",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [
-                              5947,
-                              5948
+                              5980,
+                              5981
                             ],
-                            "referencedDeclaration": 5947,
+                            "referencedDeclaration": 5980,
                             "src": "1925:6:6",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_revert_pure$__$returns$__$",
@@ -9969,5 +9969,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-06T19:58:28.160Z"
+  "updatedAt": "2018-07-09T14:31:56.475Z"
 }
