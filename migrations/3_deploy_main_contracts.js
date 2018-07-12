@@ -56,5 +56,5 @@ module.exports = async function(deployer) {
 };
 
 function sleep() {
-  return new Promise(resolve => setTimeout(resolve, 30000));
+  return new Promise(resolve => setTimeout(resolve, 2000));
 }
