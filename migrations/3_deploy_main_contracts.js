@@ -6,6 +6,7 @@ var ArbiterStorage = artifacts.require("./ArbiterStorage.sol");
 var Arbiter = artifacts.require("./Arbiter.sol");
 var DispatchStorage = artifacts.require("./DispatchStorage.sol");
 var Dispatch = artifacts.require("./Dispatch.sol");
+// Kovan token address: 0x98dfab9c3d086f920aecc27dfe790af72d33e5b0
 var ZapToken = artifacts.require("./ZapToken.sol");
 var CurrentCost = artifacts.require("./CurrentCost.sol");
 var Telegram = artifacts.require("./Telegram.sol");
@@ -25,7 +26,7 @@ module.exports = async function(deployer) {
     return deployer.deploy(CurrentCost, Registry.address);
   })
   .then (() => {
-    return deployer.deploy(Bondage, BondageStorage.address, "0x98dfab9c3d086f920aecc27dfe790af72d33e5b0", CurrentCost.address);
+    return deployer.deploy(Bondage, BondageStorage.address, ZapToken.address, CurrentCost.address);
   })
   .then (() => {
     return deployer.deploy(Arbiter, ArbiterStorage.address, Bondage.address);
