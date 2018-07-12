@@ -12,7 +12,7 @@ module.exports = {
         development: {
             host: "localhost",
             port: 9545,
-            network_id: "*", 
+            network_id: "*",
             // a lot of gas for testing
             // gas: "7000000",
             // gasPrice: "4000000000"
@@ -27,7 +27,9 @@ module.exports = {
         "ganache-gui": {
             host: "localhost",
             port: 7545,
-            network_id: "*" 
+            network_id: "5777",
+            gas: "6700000",
+            gasPrice: "10000000"
         },
 	   "docker": {
             host: "bootstrap",
