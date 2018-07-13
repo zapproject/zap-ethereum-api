@@ -427,63 +427,6 @@ contract('Bondage', function (accounts) {
             
         await this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]});
     });
-
-    it("BONDAGE_23 - delegateBond() - Check that delegate bond can not be performed twice from same address before it was reseted", async function () {
-
-        await prepareProvider.call(this.test);      
-        await prepareTokens.call(this.test, accounts[4]);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
-            
-        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]});
-        await expect(this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]})).to.eventually.be.rejectedWith(EVMRevert);
-    });
-
-    it("BONDAGE_24 - delegateUnbond() - Check that delegate unbond can be executed", async function () {
-
-        await prepareProvider.call(this.test);      
-        await prepareTokens.call(this.test, accounts[4]);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
-
-        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 1000, {from: accounts[4]});
-
-        await this.test.bondage.delegateUnbond(subscriber, oracle, specifier, 500, {from: accounts[4]});
-    });
-
-    it("BONDAGE_25 - delegateUnbond() - Check that delegate unbond can be executed only if delegate specified", async function () {
-
-        await prepareProvider.call(this.test);      
-        await prepareTokens.call(this.test, accounts[4]);
-        await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-
-        await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
-
-        await expect(this.test.bondage.delegateUnbond(subscriber, oracle, specifier, 500, {from: accounts[4]})).to.eventually.be.rejectedWith(EVMRevert);
-    });
-
-    it("BONDAGE_26 - resetDelegate() - Check that delegate can be reseted", async function () {
-
-        await prepareProvider.call(this.test);      
-        await prepareTokens.call(this.test, accounts[4]);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
-            
-        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]});
-        await this.test.bondage.resetDelegate(oracle, {from: subscriber});
-        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]});
-    });
-
-    it("BONDAGE_27 - resetDelegate() - Check that unbond will not executed after reset", async function () {
-
-        await prepareProvider.call(this.test);      
-        await prepareTokens.call(this.test, accounts[4]);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
-            
-        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 1000, {from: accounts[4]});
-        await this.test.bondage.resetDelegate(oracle, {from: subscriber});
-        await expect(this.test.bondage.delegateUnbond(subscriber, oracle, specifier, 500, {from: accounts[4]})).to.eventually.be.rejectedWith(EVMRevert);
-    });
-
 }); 
 
 
