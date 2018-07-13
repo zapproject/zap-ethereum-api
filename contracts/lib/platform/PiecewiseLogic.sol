@@ -13,32 +13,7 @@ library PiecewiseLogic {
         uint start;
         uint end;
     }
-
-    /// @dev calculate term
-    /// @param term term to calculate
-    /// @param x currently bound dots
-    /// @return term result
-    function evaluatePiecewiseTerm(PiecewiseTerm term, int x) private pure returns (int) {
-        int val = 1;
-
-        if ( term.fn == 0 ) {
-            if ( x < 0 ) x = -x;
-        }
-        else if ( term.fn == 1 ) {
-            if ( x < 0 ) x = 0;
-            else         x = int256(fastlog2(uint256(x)));
-        } 
-        
-        int exp = term.power;
-
-        while ( exp > 0 ) {
-            val *= x;
-            exp--;
-        }
-
-        return val * term.coef;
-    }
-
+    
     /// @dev calculate all terms for piece
     /// @param terms array of terms
     /// @param x currently bound dots
@@ -47,7 +22,24 @@ library PiecewiseLogic {
         int sum = 0;
 
         for ( uint i = 0; i < terms.length; i++ ) {
-            sum += evaluatePiecewiseTerm(terms[i], x);
+            int val = 1;
+
+            if ( terms[i].fn == 0 ) {
+                if ( x < 0 ) x = -x;
+            }
+            else if ( terms[i].fn == 1 ) {
+                if ( x < 0 ) x = 0;
+                else         x = int256(fastlog2(uint256(x)));
+            } 
+            
+            int exp = terms[i].power;
+
+            while ( exp > 0 ) {
+                val *= x;
+                exp--;
+            }
+
+            sum += val * terms[i].coef;
         }
 
         return sum;
