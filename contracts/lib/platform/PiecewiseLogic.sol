@@ -1,120 +1,79 @@
 pragma solidity ^0.4.24;
 
 library PiecewiseLogic {
-
-    struct PiecewiseTerm {
-        int coef;
-        int power;
-        int fn;
-    }
-
-    struct PiecewisePiece {
-        PiecewiseTerm[] terms;
-        uint start;
-        uint end;
-    }
-    
-    /// @dev calculate all terms for piece
-    /// @param terms array of terms
-    /// @param x currently bound dots
-    /// @return all terms sum
-    function evaluatePiecewisePolynomial(PiecewiseTerm[] terms, int x) private pure returns (int) {
-        int sum = 0;
-
-        for ( uint i = 0; i < terms.length; i++ ) {
-            int val = 1;
-
-            if ( terms[i].fn == 0 ) {
-                if ( x < 0 ) x = -x;
-            }
-            else if ( terms[i].fn == 1 ) {
-                if ( x < 0 ) x = 0;
-                else         x = int256(fastlog2(uint256(x)));
-            } 
-            
-            int exp = terms[i].power;
-
-            while ( exp > 0 ) {
-                val *= x;
-                exp--;
-            }
-
-            sum += val * terms[i].coef;
-        }
-
-        return sum;
-    }
-
     /// @dev choose needed function piece and calculate it
     /// @param constants flattened array of all coefficients/powers/function across all polynomial terms, [c0,p0,fn0, c1,p1,fn1 ...]
     /// @param parts array of starting/ending points for piecewise function pieces [start0,end0,start1,end1...]
     /// @param dividers array of indices, each specifying range of indices in coef, power, fn belonging to each piece
     /// @param x currently bound dots
     /// @return chosen piece result
-    function evalutePiecewiseFunction(int[] constants, uint[] parts, uint[] dividers, int x) internal pure returns (int) {
-        if ( x < 0 ) {
-            revert();
-        }
-
-        uint256 _x = uint256(x);
-
-        uint pStart = 0;
-        PiecewisePiece[] memory pieces = new PiecewisePiece[](dividers.length);
+    function evalutePiecewiseFunction(int[] constants, uint[] parts, uint[] dividers, uint x) internal pure returns (int) {
         for ( uint i = 0; i < dividers.length; i++ ) {
+            // Check start range
+            uint start = parts[2 * i];
 
-            pieces[i].start = uint256(parts[2 * i]);
-            pieces[i].end = uint256(parts[(2 * i) + 1]);
-            PiecewiseTerm[] memory terms = new PiecewiseTerm[](dividers[i]-pStart);
+            if ( x < start ) {
+                continue;
+            }
+
+            // Check the end range
+            uint end = parts[(2 * i) + 1];
+
+            if ( x > end ) {
+                continue;
+            }
+
+            // Calculate sum
+            int sum = 0;
+            uint pStart = i == 0 ? 0 : dividers[i - 1];
+
             for ( uint j = pStart; j < dividers[i]; j++ ) {
-                int coef = constants[(3*j)];
-                int power = constants[(3*j)+1];
-                int fn = constants[(3*j)+2];
-                PiecewiseTerm memory term = PiecewiseTerm(coef,power,fn);
-                terms[j-pStart] = term;
-            }
-            pieces[i].terms = terms;
+                // Get the components
+                int coef = constants[(3 * j)];
+                int power = constants[(3 * j)+1];
+                int fn = constants[(3 * j)+2];
 
-            pStart = dividers[i];
+                // Calculate the exponential in constant time
+                assembly {
+                    let _x := x
+
+                    switch fn
+                        // Fast Log2 calculation
+                        case 1 {
+                            _x := sub(_x, 1)
+                            _x := or(_x, div(_x, 0x02))
+                            _x := or(_x, div(_x, 0x04))
+                            _x := or(_x, div(_x, 0x10))
+                            _x := or(_x, div(_x, 0x100))
+                            _x := or(_x, div(_x, 0x10000))
+                            _x := or(_x, div(_x, 0x100000000))
+                            _x := or(_x, div(_x, 0x10000000000000000))
+                            _x := or(_x, div(_x, 0x100000000000000000000000000000000))
+                            _x := add(_x, 1)
+                            let m := mload(0x40)
+                            mstore(m, 0xf8f9cbfae6cc78fbefe7cdc3a1793dfcf4f0e8bbd8cec470b6a28a7a5a3e1efd)
+                            mstore(add(m, 0x20), 0xf5ecf1b3e9debc68e1d9cfabc5997135bfb7a7a3938b7b606b5b4b3f2f1f0ffe)
+                            mstore(add(m, 0x40), 0xf6e4ed9ff2d6b458eadcdf97bd91692de2d4da8fd2d0ac50c6ae9a8272523616)
+                            mstore(add(m, 0x60), 0xc8c0b887b0a8a4489c948c7f847c6125746c645c544c444038302820181008ff)
+                            mstore(add(m, 0x80), 0xf7cae577eec2a03cf3bad76fb589591debb2dd67e0aa9834bea6925f6a4a2e0e)
+                            mstore(add(m, 0xa0), 0xe39ed557db96902cd38ed14fad815115c786af479b7e83247363534337271707)
+                            mstore(add(m, 0xc0), 0xc976c13bb96e881cb166a933a55e490d9d56952b8d4e801485467d2362422606)
+                            mstore(add(m, 0xe0), 0x753a6d1b65325d0c552a4d1345224105391a310b29122104190a110309020100)
+                            mstore(0x40, add(m, 0x100))
+                            let y := div(mload(add(m, sub(255, div(mul(_x, 0x818283848586878898a8b8c8d8e8f929395969799a9b9d9e9faaeb6bedeeff), 0x100000000000000000000000000000000000000000000000000000000000000)))), 0x100000000000000000000000000000000000000000000000000000000000000)
+                            y := add(y, mul(256, gt(_x, 0x8000000000000000000000000000000000000000000000000000000000000000)))
+                            _x := y
+                        }
+                        default {}
+
+                    // sum += (_x ** power) * coef
+                    sum := add(sum, mul(exp(_x, power), coef))
+                }
+            }
+
+            return sum;
         }
 
-        for ( uint y = 0; y < pieces.length; y++ ) {
-            if ( pieces[y].start <= _x && _x <= pieces[y].end ) {
-                return evaluatePiecewisePolynomial(pieces[y].terms, x);
-            }
-            else continue;
-        }
         return 0;
-    }
-
-
-    function fastlog2(uint256 x) private pure returns (uint256 y) {
-        assembly {
-            let arg := x
-            x := sub(x, 1)
-            x := or(x, div(x, 0x02))
-            x := or(x, div(x, 0x04))
-            x := or(x, div(x, 0x10))
-            x := or(x, div(x, 0x100))
-            x := or(x, div(x, 0x10000))
-            x := or(x, div(x, 0x100000000))
-            x := or(x, div(x, 0x10000000000000000))
-            x := or(x, div(x, 0x100000000000000000000000000000000))
-            x := add(x, 1)
-            let m := mload(0x40)
-            mstore(m, 0xf8f9cbfae6cc78fbefe7cdc3a1793dfcf4f0e8bbd8cec470b6a28a7a5a3e1efd)
-            mstore(add(m, 0x20), 0xf5ecf1b3e9debc68e1d9cfabc5997135bfb7a7a3938b7b606b5b4b3f2f1f0ffe)
-            mstore(add(m, 0x40), 0xf6e4ed9ff2d6b458eadcdf97bd91692de2d4da8fd2d0ac50c6ae9a8272523616)
-            mstore(add(m, 0x60), 0xc8c0b887b0a8a4489c948c7f847c6125746c645c544c444038302820181008ff)
-            mstore(add(m, 0x80), 0xf7cae577eec2a03cf3bad76fb589591debb2dd67e0aa9834bea6925f6a4a2e0e)
-            mstore(add(m, 0xa0), 0xe39ed557db96902cd38ed14fad815115c786af479b7e83247363534337271707)
-            mstore(add(m, 0xc0), 0xc976c13bb96e881cb166a933a55e490d9d56952b8d4e801485467d2362422606)
-            mstore(add(m, 0xe0), 0x753a6d1b65325d0c552a4d1345224105391a310b29122104190a110309020100)
-            mstore(0x40, add(m, 0x100))
-            let magic := 0x818283848586878898a8b8c8d8e8f929395969799a9b9d9e9faaeb6bedeeff
-            let shift := 0x100000000000000000000000000000000000000000000000000000000000000
-            let a := div(mul(x, magic), shift)
-            y := div(mload(add(m, sub(255, a))), shift)
-            y := add(y, mul(256, gt(arg, 0x8000000000000000000000000000000000000000000000000000000000000000)))
-        }
     }
 }
