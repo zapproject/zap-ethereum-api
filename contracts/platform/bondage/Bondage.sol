@@ -284,18 +284,16 @@ contract Bondage is Destructible, BondageInterface {
         if (bondValue >= numDots && numDots > 0) {
 
             uint256 subTotal = 1;
-            uint256 dotsIssued;
             uint256 totalIssued = getDotsIssued(oracleAddress, endpoint);
+            uint256 dotsIssued = totalIssued;
 
             for (subTotal; subTotal <= numDots; subTotal++) {
-
-                dotsIssued = totalIssued - subTotal;
-
                 numZap += currentCostOfDot(
                     oracleAddress,
                     endpoint,
                     dotsIssued
                 ); 
+                dotsIssued = totalIssued - subTotal;
             }    
             stor.updateTotalBound(oracleAddress, endpoint, numZap, "sub");
             stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");

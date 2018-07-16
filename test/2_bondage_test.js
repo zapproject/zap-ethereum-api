@@ -171,22 +171,28 @@ contract('Bondage', function (accounts) {
         await expect(ethTok).to.be.equal(0);
     });
 
-    it("BONDAGE_10 - calcBondRate()) - Check calcBondRate function return maximum dots and maximum tok if numTok is more than 1000", async function () {
+    it("BONDAGE_10 - unbond() - Check unbond zap for dots calculation", async function () {
 
-        console.log("TO BE REPLACED");
-        /*
         await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-        const numberOfTokens = 10000;
-        const structurized = Utils.structurizeCurve(piecewiseFunction.constants, piecewiseFunction.parts, piecewiseFunction.dividers);
-        const tokens = Utils.calcDotsCost(structurized, 12);
+        let balance = await this.test.token.balanceOf(subscriber);
+        // we will get 5 dots with current curve (n: [1-5], p = 2n^2)
+        await this.test.bondage.bond(oracle, specifier, 110, {from: subscriber});
 
-        const res1 = await this.test.bondage.calcBondRate.call(oracle, specifier, numberOfTokens);
-        const ethTok = parseInt(res1[0].valueOf());
-        const ethDots = parseInt(res1[1].valueOf());
+        let bond_balance = await this.test.token.balanceOf(subscriber);
 
-        await expect(ethDots).to.be.equal(11);
-        await expect(ethTok).to.be.equal(770);*/
+        // unbond three dots
+        await this.test.bondage.unbond(oracle, specifier, 3, {from: subscriber});
+        let final_balance = await this.test.token.balanceOf(subscriber);
+
+        let delta1 = balance.minus(bond_balance).toString();
+        let delta2 = final_balance.minus(bond_balance).toString();
+
+        // expect total bonding to cost 110 and unbonding to return 100 zap (50+32+18)
+        await expect(delta1).to.be.equal("110");
+        await expect(delta2).to.be.equal("100");
     });
 
     it("BONDAGE_11 - getBoundDots() - Check received dots getting", async function () {
@@ -410,7 +416,7 @@ contract('Bondage', function (accounts) {
 
         // we will get 3 dots with current curve
         await this.test.bondage.bond(oracle, specifier, 28, {from: subscriber});
-        // and another
+        // and another to get 4 dots total
         await this.test.bondage.bond(oracle, specifier, 32, {from: subscriber});
 
         await this.test.bondage.unbond(oracle, specifier, 1, {from: subscriber});
@@ -419,6 +425,7 @@ contract('Bondage', function (accounts) {
         await expect(parseInt(issuedDots.valueOf())).to.be.equal(3);
     });
 
+    /*
     it("BONDAGE_22 - delegateBond() - Check that delegate bond can be executed", async function () {
 
         await prepareProvider.call(this.test);      
@@ -427,6 +434,63 @@ contract('Bondage', function (accounts) {
             
         await this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]});
     });
+
+    it("BONDAGE_23 - delegateBond() - Check that delegate bond can not be performed twice from same address before it was reseted", async function () {
+
+        await prepareProvider.call(this.test);      
+        await prepareTokens.call(this.test, accounts[4]);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
+            
+        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]});
+        await expect(this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]})).to.eventually.be.rejectedWith(EVMRevert);
+    });
+
+    it("BONDAGE_24 - delegateUnbond() - Check that delegate unbond can be executed", async function () {
+
+        await prepareProvider.call(this.test);      
+        await prepareTokens.call(this.test, accounts[4]);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
+
+        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 1000, {from: accounts[4]});
+
+        await this.test.bondage.delegateUnbond(subscriber, oracle, specifier, 500, {from: accounts[4]});
+    });
+
+    it("BONDAGE_25 - delegateUnbond() - Check that delegate unbond can be executed only if delegate specified", async function () {
+
+        await prepareProvider.call(this.test);      
+        await prepareTokens.call(this.test, accounts[4]);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+
+        await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
+
+        await expect(this.test.bondage.delegateUnbond(subscriber, oracle, specifier, 500, {from: accounts[4]})).to.eventually.be.rejectedWith(EVMRevert);
+    });
+
+    it("BONDAGE_26 - resetDelegate() - Check that delegate can be reseted", async function () {
+
+        await prepareProvider.call(this.test);      
+        await prepareTokens.call(this.test, accounts[4]);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
+            
+        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]});
+        await this.test.bondage.resetDelegate(oracle, {from: subscriber});
+        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 100, {from: accounts[4]});
+    });
+
+    it("BONDAGE_27 - resetDelegate() - Check that unbond will not executed after reset", async function () {
+
+        await prepareProvider.call(this.test);      
+        await prepareTokens.call(this.test, accounts[4]);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
+            
+        await this.test.bondage.delegateBond(subscriber, oracle, specifier, 1000, {from: accounts[4]});
+        await this.test.bondage.resetDelegate(oracle, {from: subscriber});
+        await expect(this.test.bondage.delegateUnbond(subscriber, oracle, specifier, 500, {from: accounts[4]})).to.eventually.be.rejectedWith(EVMRevert);
+    });
+    */
 }); 
 
 
