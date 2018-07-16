@@ -297,7 +297,7 @@ contract Bondage is Destructible, BondageInterface {
             }    
             stor.updateTotalBound(oracleAddress, endpoint, numZap, "sub");
             stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
-            stor.updateBondValue(holderAddress, oracleAddress, endpoint, subTotal, "sub");
+            stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
 
             if(token.transfer(holderAddress, numZap))
                 return numZap;
