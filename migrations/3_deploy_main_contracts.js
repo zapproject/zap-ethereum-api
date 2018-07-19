@@ -10,9 +10,10 @@ var Dispatch = artifacts.require("./Dispatch.sol");
 var ZapToken = artifacts.require("./ZapToken.sol");
 var CurrentCost = artifacts.require("./CurrentCost.sol");
 var Telegram = artifacts.require("./Telegram.sol");
+var Faucet = artifacts.require("./Faucet.sol");
 
 module.exports = async function(deployer) {
-
+  
   deployer.deploy(RegistryStorage).then(() => {
     return deployer.deploy(BondageStorage);
   }).then(() => {
@@ -53,9 +54,11 @@ module.exports = async function(deployer) {
     Dispatch.deployed().then(instance =>{
       instance.setBondage(Bondage.address);
     });
+    await sleep();
+    deployer.deploy(Telegram, Registry.address);
   });
 };
 
 function sleep() {
-  return new Promise(resolve => setTimeout(resolve, 2000));
+  return new Promise(resolve => setTimeout(resolve, 30000));
 }
