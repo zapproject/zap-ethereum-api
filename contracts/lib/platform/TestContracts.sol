@@ -33,16 +33,17 @@ contract TestProvider is OnChainProvider {
     // middleware function for handling queries
 	function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external {
         emit RecievedQuery(userQuery, endpoint, endpointParams);
+        bytes32 _endpoint = endpoint;
         if(onchainSubscriber) {
-            bytes32 hash = keccak256(endpoint);
+            bytes32 hash = keccak256(abi.encodePacked(_endpoint));
 
-            if(hash == keccak256(spec1)){
+            if(hash == keccak256(abi.encodePacked(spec1))){
                 endpoint1(id, userQuery, endpointParams);
-            } else if (hash == keccak256(spec2)){               
+            } else if (hash == keccak256(abi.encodePacked(spec2))){               
                 endpoint2(id, userQuery, endpointParams);
-            } else if (hash == keccak256(spec3)){
+            } else if (hash == keccak256(abi.encodePacked(spec3))){
                 endpoint3(id, userQuery, endpointParams);
-            } else if (hash == keccak256(spec4)){
+            } else if (hash == keccak256(abi.encodePacked(spec4))){
                 endpoint4(id, userQuery, endpointParams);
             } else {
                 revert("Invalid endpoint");
@@ -71,19 +72,19 @@ contract TestProvider is OnChainProvider {
 
 
     // return Hello World to query-maker
-    function endpoint1(uint256 id, string userQuery, bytes32[] endpointParams) internal{
+    function endpoint1(uint256 id, string /* userQuery */, bytes32[] /* endpointParams */) internal{
         Dispatch(msg.sender).respond1(id, "Hello World");
     }
 
     // return the hash of the query
-    function endpoint2(uint256 id, string userQuery, bytes32[] endpointParams) internal{
+    function endpoint2(uint256 id, string userQuery, bytes32[] /* endpointParams */) internal{
         // endpointParams
         string memory reversed = reverseString(userQuery);
         Dispatch(msg.sender).respond1(id, reversed);
     }
 
      // returns the sum of all values in endpointParams
-    function endpoint3(uint256 id, string userQuery, bytes32[] endpointParams) internal{
+    function endpoint3(uint256 id, string /* userQuery */, bytes32[] endpointParams) internal{
         uint sum = 0;
         for(uint i = 0; i<endpointParams.length; i++){
             uint value = uint(endpointParams[i]);
@@ -97,13 +98,9 @@ contract TestProvider is OnChainProvider {
     }
 
     // returns the sum of all values in endpointParams
-    function endpoint4(uint256 id, string userQuery, bytes32[] endpointParams) internal{
+    function endpoint4(uint256 id, string /* userQuery */, bytes32[] /* endpointParams */) internal{
         Dispatch(msg.sender).respond2(id, "Hello", "World");
     }
-
-    // TODO: TEST OUT MORE RETURN VALUES (1,2,3 or 4)!
-
-
 
     function reverseString(string _base) internal pure returns (string){
         bytes memory _baseBytes = bytes(_base);
