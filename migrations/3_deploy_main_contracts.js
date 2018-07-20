@@ -12,8 +12,9 @@ var CurrentCost = artifacts.require("./CurrentCost.sol");
 var Telegram = artifacts.require("./Telegram.sol");
 var Faucet = artifacts.require("./Faucet.sol");
 
-module.exports = async function(deployer) {
-  
+module.exports = async function(deployer, network) {
+  console.log("Deploying main contracts on: " + network);
+
   deployer.deploy(RegistryStorage).then(() => {
     return deployer.deploy(BondageStorage);
   }).then(() => {
@@ -36,29 +37,31 @@ module.exports = async function(deployer) {
     return deployer.deploy(Dispatch, DispatchStorage.address, Bondage.address);
   }).then(async function(){
     RegistryStorage.deployed().then(instance => instance.transferOwnership(Registry.address));
-    await sleep();
+    await sleep(network);
     BondageStorage.deployed().then(instance => instance.transferOwnership(Bondage.address));
-    await sleep();
+    await sleep(network);
     ArbiterStorage.deployed().then(instance => instance.transferOwnership(Arbiter.address));
-    await sleep();
+    await sleep(network);
     DispatchStorage.deployed().then(instance => instance.transferOwnership(Dispatch.address));
-    await sleep();
+    await sleep(network);
     Bondage.deployed().then(async function(instance){
       instance.setArbiterAddress(Arbiter.address);
-      await sleep();
+      await sleep(network);
       instance.setDispatchAddress(Dispatch.address);
-      await sleep();
+      await sleep(network);
       instance.setCurrentCostAddress(CurrentCost.address);
     });
-    await sleep();
+    await sleep(network);
     Dispatch.deployed().then(instance =>{
       instance.setBondage(Bondage.address);
     });
-    await sleep();
+    await sleep(network);
     deployer.deploy(Telegram, Registry.address);
   });
 };
 
-function sleep() {
-  return new Promise(resolve => setTimeout(resolve, 30000));
+function sleep(network) {
+  if(network == "kovan"){
+    return new Promise(resolve => setTimeout(resolve, 30000));
+  }
 }
