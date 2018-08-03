@@ -130,14 +130,16 @@ contract Bondage is Destructible, BondageInterface {
         view
         returns (uint256 numZap)
     {
-        for (uint256 i = 1; i <= numDots; i++) {
-            numZap += currentCostOfDot(                
-                oracleAddress,
-                endpoint,
-                getDotsIssued(oracleAddress, endpoint) + i
-            );
-        }
-        return numZap;
+        // for (uint256 i = 1; i <= numDots; i++) {
+        //     numZap += currentCostOfDot(                
+        //         oracleAddress,
+        //         endpoint,
+        //         getDotsIssued(oracleAddress, endpoint) + i
+        //     );
+        // }
+        // return numZap;
+        uint256 issued = getDotsIssued(oracleAddress, endpoint);
+        return currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
     }
 
     /// @dev Calculate amount of dots which could be purchased with given (numZap) ZAP tokens (max is 1000)
@@ -165,7 +167,6 @@ contract Bondage is Destructible, BondageInterface {
         uint256 issuedDots = getDotsIssued(oracleAddress, endpoint);
 
         for (numDots; numDots < _dotLimit; numDots++) {
-        // for (numDots; numDots < dotLimit; numDots++) {
             dotCost = currentCostOfDot(
                 oracleAddress,
                 endpoint,

@@ -39,6 +39,37 @@ contract CurrentCost is Destructible, CurrentCostInterface {
         return uint256(PiecewiseLogic.evalutePiecewiseFunction(constants,parts,dividers,totalBound));
     }
 
+    /// @dev calculates cost of n dots
+    /// @param oracleAddress oracle address
+    /// @param endpoint oracle endpoint
+    /// @param totalBound of already bounded dots
+    /// @param nDots to bond
+    /// @return cost of next dot
+    function _costOfNDots(
+        address oracleAddress,
+        bytes32 endpoint,
+        uint256 totalBound,
+        uint256 nDots
+    )
+        public
+        view
+        returns (uint256 cost)
+    {
+
+        uint[] memory lens = new uint[](3);
+        (lens[0],lens[1],lens[2]) = registry.getProviderArgsLength(oracleAddress,endpoint);
+        int[] memory constants = new int[](lens[0]);
+        uint[] memory  parts = new uint[](lens[1]);
+        uint[] memory dividers = new uint[](lens[2]);
+
+        (constants,parts,dividers) = registry.getProviderCurve(oracleAddress, endpoint);
+
+        uint256 a = uint256(PiecewiseLogic.integratePiecewiseFunction(constants,parts,dividers,totalBound));
+        uint256 b = uint256(PiecewiseLogic.integratePiecewiseFunction(constants,parts,dividers,totalBound + nDots));
+
+        return b - a;
+    }
+
    function _dotLimit( 
         address oracleAddress,
         bytes32 endpoint

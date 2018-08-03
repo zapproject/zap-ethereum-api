@@ -222,9 +222,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\ncontract ERC20Basic {\n    uint256 public totalSupply;\n    function balanceOf(address who) public constant returns (uint256);\n    function transfer(address to, uint256 value) public returns (bool);\n    event Transfer(address indexed from, address indexed to, uint256 value);\n}\n\ncontract ERC20 is ERC20Basic {\n    string public name;\n    string public symbol;\n    uint256 public decimals;\n    function allowance(address owner, address spender) public constant returns (uint256);\n    function transferFrom(address from, address to, uint256 value) public returns (bool);\n    function approve(address spender, uint256 value) public returns (bool);\n    event Approval(address indexed owner, address indexed spender, uint256 value);\n}\n",
-  "sourcePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/ERC20.sol",
+  "sourcePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ERC20.sol",
   "ast": {
-    "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/ERC20.sol",
+    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ERC20.sol",
     "exportedSymbols": {
       "ERC20": [
         74
@@ -1148,7 +1148,7 @@
     "src": "0:754:0"
   },
   "legacyAST": {
-    "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/ERC20.sol",
+    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ERC20.sol",
     "exportedSymbols": {
       "ERC20": [
         74
@@ -2077,5 +2077,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-18T20:55:12.650Z"
+  "updatedAt": "2018-08-03T17:11:13.315Z"
 }

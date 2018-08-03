@@ -37,9 +37,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\nimport \"../../platform/dispatch/Dispatch.sol\";\n\ncontract OnChainProvider {\n    /// @dev function for requesting data from on-chain provider\n    /// @param id request id\n    /// @param userQuery query string\n    /// @param endpoint endpoint specifier ala 'smart_contract'\n    /// @param endpointParams endpoint-specific params\n    function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external;\n}\n",
-  "sourcePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
+  "sourcePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
   "ast": {
-    "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
+    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
     "exportedSymbols": {
       "OnChainProvider": [
         219
@@ -60,12 +60,12 @@
         "src": "0:24:4"
       },
       {
-        "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/platform/dispatch/Dispatch.sol",
+        "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/platform/dispatch/Dispatch.sol",
         "file": "../../platform/dispatch/Dispatch.sol",
         "id": 204,
         "nodeType": "ImportDirective",
         "scope": 220,
-        "sourceUnit": 2816,
+        "sourceUnit": 3359,
         "src": "25:46:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -261,7 +261,7 @@
     "src": "0:482:4"
   },
   "legacyAST": {
-    "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
+    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/platform/OnChainProvider.sol",
     "exportedSymbols": {
       "OnChainProvider": [
         219
@@ -282,12 +282,12 @@
         "src": "0:24:4"
       },
       {
-        "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/platform/dispatch/Dispatch.sol",
+        "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/platform/dispatch/Dispatch.sol",
         "file": "../../platform/dispatch/Dispatch.sol",
         "id": 204,
         "nodeType": "ImportDirective",
         "scope": 220,
-        "sourceUnit": 2816,
+        "sourceUnit": 3359,
         "src": "25:46:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -488,5 +488,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-07-18T20:55:12.651Z"
+  "updatedAt": "2018-08-03T15:34:01.884Z"
 }
