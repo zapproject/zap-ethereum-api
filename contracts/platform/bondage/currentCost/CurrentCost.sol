@@ -64,10 +64,7 @@ contract CurrentCost is Destructible, CurrentCostInterface {
 
         (constants,parts,dividers) = registry.getProviderCurve(oracleAddress, endpoint);
 
-        uint256 a = uint256(PiecewiseLogic.integratePiecewiseFunction(constants,parts,dividers,totalBound));
-        uint256 b = uint256(PiecewiseLogic.integratePiecewiseFunction(constants,parts,dividers,totalBound + nDots));
-
-        return b - a;
+        return uint256(PiecewiseLogic.fastPiecewiseFunction(constants, parts, dividers, totalBound, nDots));
     }
 
    function _dotLimit( 
