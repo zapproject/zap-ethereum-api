@@ -109,9 +109,9 @@ contract('Bondage', function (accounts) {
     it("BONDAGE_5 - calcZapForDots() - Check zap for dots calculating", async function () {
 
         const curveParams1 = {
-            constants: [1, 2, 0],
+            constants: [40, 4, 0, 10, 3, 0, 7, 2, 0, 1, 1, 0, 10, 0, 0],
             parts: [0, 1000],
-            dividers: [1]
+            dividers: [5]
         };
         const totalBound = 100;
 
