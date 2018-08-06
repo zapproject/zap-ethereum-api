@@ -39,22 +39,24 @@ library PiecewiseLogic {
             }
 
             uint end = parts[(2 * i) + 1];
-            uint _b = b;
 
-            if ( a + _b > end ) {
-                _b = end - a;
+
+            if ( a + b > end ) {
+                continue;
             }
+
+            uint _b = a + b > end ? end - a : b;
 
             for ( uint j = (i == 0 ? 0 : dividers[i - 1]); j < dividers[i]; j++ ) {
                 // Get the components
                 uint coef = uint(constants[(3 * j)]);
-                uint power = uint(constants[(3 * j)+1]);
+                uint power = uint(constants[(3 * j) + 1]);
                 
                 sum += coef * (sumOfPowers(a + _b, power) - sumOfPowers(a - 1, power));
             }
 
             if ( a + b > end ) {
-                a += end;
+                a += _b;
             }
             else {
                 break;

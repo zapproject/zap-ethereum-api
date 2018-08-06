@@ -56,9 +56,9 @@ contract Bondage is Destructible, BondageInterface {
 
     /// @dev will bond to an oracle
     /// @return total ZAP bound to oracle
-    function bond(address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 bound) {
-        bound = _bond(msg.sender, oracleAddress, endpoint, numZap);
-        emit Bound(msg.sender, oracleAddress, endpoint, numZap, bound);
+    function bond(address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 bound) {
+        bound = _bond(msg.sender, oracleAddress, endpoint, numDots);
+        emit Bound(msg.sender, oracleAddress, endpoint, bound, numDots);
     }
 
     /// @return total ZAP unbound from oracle
@@ -69,9 +69,9 @@ contract Bondage is Destructible, BondageInterface {
 
     /// @dev will bond to an oracle on behalf of some holder
     /// @return total ZAP bound to oracle
-    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numZap) external returns (uint256 boundDots) {
-        boundDots = _bond(holderAddress, oracleAddress, endpoint, numZap);
-        emit Bound(holderAddress, oracleAddress, endpoint, numZap, boundDots);
+    function delegateBond(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 boundZap) {
+        boundZap = _bond(holderAddress, oracleAddress, endpoint, numDots);
+        emit Bound(holderAddress, oracleAddress, endpoint, boundZap, numDots);
     }
 
     /// @dev Move numDots dots from provider-requester to bondage according to 
@@ -130,14 +130,6 @@ contract Bondage is Destructible, BondageInterface {
         view
         returns (uint256 numZap)
     {
-        // for (uint256 i = 1; i <= numDots; i++) {
-        //     numZap += currentCostOfDot(                
-        //         oracleAddress,
-        //         endpoint,
-        //         getDotsIssued(oracleAddress, endpoint) + i
-        //     );
-        // }
-        // return numZap;
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
         return currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
     }
@@ -248,27 +240,31 @@ contract Bondage is Destructible, BondageInterface {
         address holderAddress,
         address oracleAddress,
         bytes32 endpoint,
-        uint256 numZap        
+        uint256 numDots        
     )
         private
-        returns (uint256 numDots) 
+        returns (uint256 numZap) 
     {   
         // This also checks if oracle is registered w/an initialized curve
-        (numZap, numDots) = calcBondRate(oracleAddress, endpoint, numZap);
+        uint256 issued = getDotsIssued(oracleAddress, endpoint);
+
+        require(issued + numDots <= dotLimit(oracleAddress, endpoint));
+
+        numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
+
+        // User must have approved contract to transfer working ZAP
+        require(token.transferFrom(msg.sender, this, numZap));
 
         if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
             stor.setProviderInitialized(holderAddress, oracleAddress);
             stor.addHolderOracle(holderAddress, oracleAddress);
         }
 
-        // User must have approved contract to transfer working ZAP
-        require(token.transferFrom(msg.sender, this, numZap));
-
         stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");        
         stor.updateTotalIssued(oracleAddress, endpoint, numDots, "add");
         stor.updateTotalBound(oracleAddress, endpoint, numZap, "add");
 
-        return numDots;
+        return numZap;
     }
 
     function _unbond(        
@@ -280,30 +276,24 @@ contract Bondage is Destructible, BondageInterface {
         private
         returns (uint256 numZap)
     {
-        //currentDots
-        uint256 bondValue = stor.getBondValue(holderAddress, oracleAddress, endpoint);
-        if (bondValue >= numDots && numDots > 0) {
+    	// Make sure the user has enough to bond with some additional sanity checks
+        uint256 amountBound = stor.getBondValue(holderAddress, oracleAddress, endpoint);
+        require(amountBound >= numDots);
+        require(numDots > 0);
 
-            uint256 subTotal = 1;
-            uint256 totalIssued = getDotsIssued(oracleAddress, endpoint);
-            uint256 dotsIssued = totalIssued;
+        // Get the value of the dots
+        uint256 issued = getDotsIssued(oracleAddress, endpoint);
+		numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1 - numDots, numDots - 1);
 
-            for (subTotal; subTotal <= numDots; subTotal++) {
-                numZap += currentCostOfDot(
-                    oracleAddress,
-                    endpoint,
-                    dotsIssued
-                ); 
-                dotsIssued = totalIssued - subTotal;
-            }    
-            stor.updateTotalBound(oracleAddress, endpoint, numZap, "sub");
-            stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
-            stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
+		// Update the storage values
+        stor.updateTotalBound(oracleAddress, endpoint, numZap, "sub");
+        stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
+        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
 
-            if(token.transfer(holderAddress, numZap))
-                return numZap;
-        }
-        return 0;
+		// Do the transfer
+        require(token.transfer(holderAddress, numZap));
+
+        return numZap;
     }
 
 }
