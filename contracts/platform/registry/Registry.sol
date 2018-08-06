@@ -162,4 +162,11 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
         }
         return (0,0x0,0,"");
     }
+
+    /// @dev is provider initiated
+    /// @param oracleAddress the provider address
+    /// @return Whether or not the provider has initiated in the Registry.
+    function isProviderInitiated(address oracleAddress) public view returns (bool) {
+        return getProviderTitle(oracleAddress) != 0;
+    }
 }
