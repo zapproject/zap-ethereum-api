@@ -7,7 +7,6 @@ contract BondageInterface {
     function escrowDots(address, address, bytes32, uint256) external returns (bool);
     function releaseDots(address, address, bytes32, uint256) external returns (bool);
     function calcZapForDots(address, bytes32, uint256) external view returns (uint256);
-    function calcBondRate(address, bytes32, uint256) public view returns (uint256, uint256);
     function currentCostOfDot(address, bytes32, uint256) public view returns (uint256);
     function getDotsIssued(address, bytes32) public view returns (uint256);
     function getBoundDots(address, address, bytes32) public view returns (uint256);

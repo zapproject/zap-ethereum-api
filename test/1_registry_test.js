@@ -32,9 +32,8 @@ contract('Registry', async (accounts) => {
     const specifier = "test-linear-specifier";
     const params = ["param1", "param2"];
 
-    const parts= [0,5,5,100];
-    const constants = [2,2,0,1,1,1,10,0,0];
-    const dividers=[1,3];
+    // y = 2x + x^2 from [1, 100]
+    const curve = [3, 0, 2, 1, 100];
 
     beforeEach(async function deployContracts() {
         this.currentTest.stor = await RegistryStorage.new();
@@ -57,17 +56,17 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_3 - initiateProviderCurve() - Check that we can initiate provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
     });
 
     it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
-        await expect(this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.registry.initiateProviderCurve(specifier, curve, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if passing in invalid curve arguments ", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
-        await expect(this.test.registry.initiateProviderCurve(specifier,parts, constants, dividers, { from: owner }))
+        await expect(this.test.registry.initiateProviderCurve(specifier, [3, 0, 0, 0, 5, 100], { from: owner }))
             .to.eventually.be.rejectedWith(EVMRevert);
     });
 
@@ -116,23 +115,17 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_12 - getProviderCurve() - Check that we initialize and get provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner });
-        const curve = await this.test.registry.getProviderCurve.call(owner, specifier, { from: owner });
-        for(let item of curve) {
-            let arr = Utils.fetchPureArray(item,parseInt)
-            expect(arr).to.be.an('array');
-            expect(arr.length.valueOf()).to.be.greaterThan(0);
-        }
-        expect(Utils.fetchPureArray(curve[0],parseInt)).to.deep.equal(constants);
-        expect(Utils.fetchPureArray(curve[1],parseInt)).to.deep.equal(parts);
-        expect(Utils.fetchPureArray(curve[2],parseInt)).to.deep.equal(dividers);
-        const args = await this.test.registry.getProviderArgsLength.call(owner,specifier,{from:owner});
-        let lenArr = Utils.fetchPureArray(args,parseInt)
-        expect(lenArr.length.valueOf()).to.be.equal(3);
-        expect(lenArr[0]).to.be.equal(constants.length);
-        expect(lenArr[1]).to.be.equal(parts.length);
-        expect(lenArr[2]).to.be.equal(dividers.length);
+        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
+            
+        const l = this.test.registry.getProviderCurve(owner, specifier);
+        const b = await l;
+        
+        const curve = Utils.fetchPureArray(b,parseInt);
+        expect(curve).to.be.an('array');
+        expect(curve.length.valueOf()).to.be.greaterThan(0);
 
+        const args = await this.test.registry.getProviderArgsLength.call(owner,specifier,{from:owner});
+        expect(curve.length.valueOf()).to.be.equal(args);
     });
 
     it("REGISTRY_13 - getProviderCurve() - Check that cant get uninitialized curve ", async function () {

@@ -8,8 +8,6 @@ import "./RegistryInterface.sol";
 
 contract Registry is Destructible, RegistryInterface, StorageHandler {
 
-    enum CurveType { None, Linear, Exponential, Logarithmic }
-
     event NewProvider(
         address indexed provider,
         bytes32 indexed title,
@@ -19,12 +17,12 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
     event NewCurve(
         address indexed provider,
         bytes32 indexed endpoint,
-        int[] constants,
-        uint[] parts,
-        uint[] dividers
+        int[] curve
     );
 
     RegistryStorage stor;
+
+    address public storageAddress;
 
     constructor(address _storageAddress) public {
         storageAddress = _storageAddress;
@@ -57,14 +55,10 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
     /// @dev initiates an endpoint specific provider curve
     /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
     /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
-    /// @param constants flattened array of all coefficients/powers/function across all polynomial terms
-    /// @param parts array of starting/ending points for piecewise function pieces
-    /// @param dividers array of indices, each specifying range of indices in coef,power,fn belonging to each piece
+    /// @param curve flattened array of all segments, coefficients across all polynomial terms, [e0,l0,c0,c1,c2,...]
     function initiateProviderCurve(
         bytes32 endpoint,
-        int256[] constants,
-        uint256[] parts,
-        uint256[] dividers
+        int256[] curve
     )
         public
         returns (bool)
@@ -74,8 +68,8 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
         // Can't reset their curve
         require(stor.getCurveUnset(msg.sender, endpoint));
 
-        stor.setCurve(msg.sender, endpoint, constants, parts, dividers);
-        emit NewCurve(msg.sender, endpoint, constants, parts, dividers);
+        stor.setCurve(msg.sender, endpoint, curve);
+        emit NewCurve(msg.sender, endpoint, curve);
 
         return true;
     }
@@ -109,6 +103,11 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
         return(0,0);
     }
 
+    /// @dev get all oracle addresses
+    function getAllOracles() external view returns (address[]){
+        return stor.getAllOracles();
+    }
+
     /// @dev get curve paramaters from oracle
     function getProviderCurve(
         address provider,
@@ -116,17 +115,17 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
     )
         public
         view
-        returns (int[], uint[],uint[])
+        returns (int[])
     {
 
         return stor.getCurve(provider, endpoint);
     }
 
-    /// @dev get length of constants, parts and dividers arrays
+    /// @dev get length of curve array
     function getProviderArgsLength(address provider, bytes32 endpoint)
         public
         view
-        returns (uint, uint,uint)
+        returns (uint256)
     {
         return stor.getProviderArgsLength(provider, endpoint);
 

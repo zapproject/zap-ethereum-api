@@ -8,10 +8,8 @@ contract Telegram is OnChainProvider {
     uint256 decimals = 10 ** 18;
 
     // curve y=1/5 (1 zap = 5 dots)
-    int[] constants = [1*10**18/5, 0, 2];
+    int[] curve = [1, 1*10**18/5, 1000000000];
 
-    uint[] parts = [0, 1000000000];
-    uint[] dividers = [1]; 
 
     RegistryInterface registry;
 
@@ -30,6 +28,6 @@ contract Telegram is OnChainProvider {
         params[1] = "p2";
 
         registry.initiateProvider(123, title, spec1, params);
-        registry.initiateProviderCurve(spec1, constants, parts, dividers);
+        registry.initiateProviderCurve(spec1, curve);
     }
 }

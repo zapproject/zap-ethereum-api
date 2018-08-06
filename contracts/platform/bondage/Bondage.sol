@@ -276,21 +276,21 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
         private
         returns (uint256 numZap)
     {
-    	// Make sure the user has enough to bond with some additional sanity checks
+        // Make sure the user has enough to bond with some additional sanity checks
         uint256 amountBound = stor.getBondValue(holderAddress, oracleAddress, endpoint);
         require(amountBound >= numDots);
         require(numDots > 0);
 
         // Get the value of the dots
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
-		numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1 - numDots, numDots - 1);
+        numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1 - numDots, numDots - 1);
 
-		// Update the storage values
+        // Update the storage values
         stor.updateTotalBound(oracleAddress, endpoint, numZap, "sub");
         stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
         stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
 
-		// Do the transfer
+        // Do the transfer
         require(token.transfer(holderAddress, numZap));
 
         return numZap;

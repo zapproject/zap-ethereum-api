@@ -16,39 +16,34 @@ contract CurrentCost is Destructible, CurrentCostInterface {
     /// @dev calculates current cost of dot
     /// @param oracleAddress oracle address
     /// @param endpoint oracle endpoint
-    /// @param totalBound of already bounded dots
+    /// @param start nth dot to calculate price of
     /// @return cost of next dot
     function _currentCostOfDot(
         address oracleAddress,
         bytes32 endpoint,
-        uint256 totalBound
+        uint256 start
     )
         public
         view
         returns (uint256 cost)
     {
+        uint256 length = registry.getProviderArgsLength(oracleAddress,endpoint);
+        int[] memory curve = new int[](length);
+        curve = registry.getProviderCurve(oracleAddress, endpoint);
 
-        uint[] memory lens = new uint[](3);
-        (lens[0],lens[1],lens[2]) = registry.getProviderArgsLength(oracleAddress,endpoint);
-        int[] memory constants = new int[](lens[0]);
-        uint[] memory  parts = new uint[](lens[1]);
-        uint[] memory dividers = new uint[](lens[2]);
-
-        (constants,parts,dividers) = registry.getProviderCurve(oracleAddress, endpoint);
-
-        return uint256(PiecewiseLogic.evalutePiecewiseFunction(constants,parts,dividers,totalBound));
+        return uint256(PiecewiseLogic.evaluateFunction(curve,start,1));
     }
 
     /// @dev calculates cost of n dots
     /// @param oracleAddress oracle address
     /// @param endpoint oracle endpoint
-    /// @param totalBound of already bounded dots
+    /// @param start nth dot to start calculating price at
     /// @param nDots to bond
     /// @return cost of next dot
     function _costOfNDots(
         address oracleAddress,
         bytes32 endpoint,
-        uint256 totalBound,
+        uint256 start,
         uint256 nDots
     )
         public
@@ -56,15 +51,12 @@ contract CurrentCost is Destructible, CurrentCostInterface {
         returns (uint256 cost)
     {
 
-        uint[] memory lens = new uint[](3);
-        (lens[0],lens[1],lens[2]) = registry.getProviderArgsLength(oracleAddress,endpoint);
-        int[] memory constants = new int[](lens[0]);
-        uint[] memory  parts = new uint[](lens[1]);
-        uint[] memory dividers = new uint[](lens[2]);
 
-        (constants,parts,dividers) = registry.getProviderCurve(oracleAddress, endpoint);
+        uint256 length = registry.getProviderArgsLength(oracleAddress,endpoint);
+        int[] memory curve = new int[](length);
+        curve = registry.getProviderCurve(oracleAddress, endpoint);
 
-        return uint256(PiecewiseLogic.fastPiecewiseFunction(constants, parts, dividers, totalBound, nDots));
+        return uint256(PiecewiseLogic.evaluateFunction(curve, start, nDots));
     }
 
    function _dotLimit( 
@@ -73,15 +65,12 @@ contract CurrentCost is Destructible, CurrentCostInterface {
     )
         public
         view
-        returns (uint256 limit)
+        returns (uint256)
     {
-        uint len;
-        (,len,) = registry.getProviderArgsLength(oracleAddress,endpoint);
-        uint[] memory parts = new uint[](len);
+        uint256 length = registry.getProviderArgsLength(oracleAddress,endpoint);
+        int[] memory curve = new int[](length);
+        curve = registry.getProviderCurve(oracleAddress, endpoint);
 
-        (,parts,) = registry.getProviderCurve(oracleAddress, endpoint);
-        require(parts.length>0);
-         
-        return uint(parts[parts.length-1]);
+        return uint(curve[length-1]);
     }
 }

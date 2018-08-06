@@ -2,10 +2,10 @@ pragma solidity ^0.4.24;
 // v1.0
 
 import "../../lib/lifecycle/Destructible.sol";
-import "../../lib/ownership/StorageHandler.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 import "./ArbiterInterface.sol";
+import "../../lib/ownership/StorageHandler.sol";
 
 contract Arbiter is Destructible, ArbiterInterface, StorageHandler {
     // Called when a data purchase is initiated
@@ -31,6 +31,7 @@ contract Arbiter is Destructible, ArbiterInterface, StorageHandler {
     ArbiterStorage stor;
     BondageInterface bondage;
 
+    address public storageAddress;
     address public bondageAddress;
 
     constructor(address _storageAddress, address _bondageAddress) public {

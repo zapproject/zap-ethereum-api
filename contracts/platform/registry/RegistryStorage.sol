@@ -4,18 +4,12 @@ import "../../lib/ownership/Ownable.sol";
 
 contract RegistryStorage is Ownable {
 
-    struct PiecewisePiece{
-        int[] constants;
-        uint[] parts;
-        uint[] dividers;
-    }
-
     // fundamental account type for the platform
     struct Oracle {
         uint256 publicKey;                               // Public key of the data provider
         bytes32 title;                                   // Tags (csv)
         mapping(bytes32 => bytes32[]) endpointParams;    // Endpoint specific parameters
-        mapping(bytes32 => PiecewisePiece) curves; // Price vs Supply (contract endpoint)
+        mapping(bytes32 => int[]) curves;                // Endpoint to Curve definition
     }
 
     mapping(address => Oracle) private oracles;
@@ -44,30 +38,26 @@ contract RegistryStorage is Ownable {
     }
 
     function getCurveUnset(address provider, bytes32 endpoint) public view returns (bool) {
-        return oracles[provider].curves[endpoint].parts.length==0;
+        return oracles[provider].curves[endpoint].length == 0;
     }
 
-    /// @dev get curve constants, parts and dividers arrays
+    /// @dev get curve array for this provider/endpoint
     function getCurve(address provider, bytes32 endpoint)
         external
         view
-        returns (int[],uint[],uint[])
-    {
-        PiecewisePiece memory pieces = oracles[provider].curves[endpoint];
-        require(pieces.parts.length>0);
-        return (pieces.constants, pieces.parts, pieces.dividers);
+        returns (int[])
+    {   
+        if(getCurveUnset(provider, endpoint)) revert();
+        return oracles[provider].curves[endpoint];
     }
 
-    /// @dev get length of constants, parts and dividers arrays
+    /// @dev get length of curve array
     function getProviderArgsLength(address provider, bytes32 endpoint)
         external
         view
-        returns (uint,uint,uint)
+        returns (uint)
     {
-        return (oracles[provider].curves[endpoint].constants.length,
-        oracles[provider].curves[endpoint].parts.length,
-        oracles[provider].curves[endpoint].dividers.length);
-
+        return oracles[provider].curves[endpoint].length;
     }
 
     /// @dev get overall number of providers
@@ -78,6 +68,11 @@ contract RegistryStorage is Ownable {
     /// @dev get provider address by index
     function getOracleAddress(uint256 index) external view returns (address) {
         return oracleIndex[index];
+    }
+
+    /// @dev get all oracle addresses
+    function getAllOracles() external view returns (address[]){
+        return oracleIndex;
     }
 
     /**** Set Methods ****/
@@ -109,26 +104,29 @@ contract RegistryStorage is Ownable {
     /// @dev initialize new curve for provider
     /// @param origin address of provider
     /// @param endpoint endpoint specifier
-    /// @param constants flattened array of all coefficients/powers/function across all polynomial terms, [c0,p0,fn0, c1,p1,fn1 ...]
-    /// @param parts array of starting/ending points for piecewise function pieces [start0,end0,start1,end1...]
-    /// @param dividers array of indices, each specifying range of indices in coef, power, fn belonging to each piece
+    /// @param curve flattened array of all segments, coefficients across all polynomial terms, [e0,l0,c0,c1,c2,...]
     function setCurve(
         address origin,
         bytes32 endpoint,
-        int[] constants,
-        uint[] parts,
-        uint[] dividers
+        int[] curve
     )
         external
         onlyOwner
     {
-        require(dividers[dividers.length-1]==constants.length/3);
-        require((parts.length/2)==dividers.length);
-        require(parts.length > 0);
+        // TODO: CHECK VALIDITY OF CURVE
 
-        PiecewisePiece storage pieces = oracles[origin].curves[endpoint];
-        pieces.constants = constants;
-        pieces.parts = parts;
-        pieces.dividers = dividers;
+        uint256 prevEnd;
+        uint i=0;
+        while(i < curve.length){
+            int len = curve[i];
+            require(len > 0);
+            int end = curve[i+uint(len)+1];
+            require(end > 0);
+            require(uint(end) > prevEnd);
+            prevEnd = uint(end);
+            i += uint(len) + 2; 
+        }
+
+        oracles[origin].curves[endpoint] = curve;
     }
 }

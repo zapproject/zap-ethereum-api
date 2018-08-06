@@ -24,9 +24,7 @@ contract TestProvider is OnChainProvider {
     */
 
     // curve 2x^2
-    int[] constants = [2, 2, 0];
-    uint[] parts = [0, 1000000000];
-    uint[] dividers = [1]; 
+    int[] curve = [3, 0, 0, 2, 1000000000];
 
     RegistryInterface registry;
 
@@ -64,10 +62,10 @@ contract TestProvider is OnChainProvider {
 
         registry.initiateProvider(12345, title, spec1, params);
 
-        registry.initiateProviderCurve(spec1, constants, parts, dividers);
-        registry.initiateProviderCurve(spec2, constants, parts, dividers);
-        registry.initiateProviderCurve(spec3, constants, parts, dividers);
-        registry.initiateProviderCurve(spec4, constants, parts, dividers);
+        registry.initiateProviderCurve(spec1, curve);
+        registry.initiateProviderCurve(spec2, curve);
+        registry.initiateProviderCurve(spec3, curve);
+        registry.initiateProviderCurve(spec4, curve);
     }
 
 

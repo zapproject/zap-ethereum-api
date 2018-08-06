@@ -2,10 +2,10 @@ pragma solidity ^0.4.24;
 // v1.0
 
 import "../../lib/lifecycle/Destructible.sol";
-import "../../lib/ownership/StorageHandler.sol";
 import "../../lib/platform/Client.sol";
 import "../../lib/platform/OnChainProvider.sol";
 import "../bondage/BondageInterface.sol"; 
+import "../../lib/ownership/StorageHandler.sol";
 import "./DispatchStorage.sol";
 import "./DispatchInterface.sol";
 
@@ -72,6 +72,7 @@ contract Dispatch is Destructible, DispatchInterface, StorageHandler {
     DispatchStorage stor;
     BondageInterface bondage;
 
+    address public storageAddress;
     address public bondageAddress;
 
     constructor(address _storageAddress, address _bondageAddress) public {
