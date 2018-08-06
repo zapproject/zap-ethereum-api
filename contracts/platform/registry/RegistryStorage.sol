@@ -58,20 +58,6 @@ contract RegistryStorage is Ownable {
         return (pieces.constants, pieces.parts, pieces.dividers);
     }
 
-    /// @dev get limit on costcurve range 
-    function getDotLimit(address provider, bytes32 endpoint)
-        external
-        view
-        returns (uint)
-    {
-        PiecewisePiece memory pieces = oracles[provider].curves[endpoint];
-        require(pieces.parts.length>0);
-         
-        // return int(pieces.parts[pieces.parts.length-1]);
-        return uint(pieces.parts[pieces.parts.length-1]);
-    }
-
-
     /// @dev get length of constants, parts and dividers arrays
     function getProviderArgsLength(address provider, bytes32 endpoint)
         external

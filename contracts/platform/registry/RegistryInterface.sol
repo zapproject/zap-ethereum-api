@@ -9,7 +9,7 @@ contract RegistryInterface {
     function getProviderTitle(address) public view returns (bytes32);
   	function getNextEndpointParam(address, bytes32, uint256) public view returns (uint256, bytes32);
     function getProviderCurve(address, bytes32) public view returns (int[], uint[], uint[]);
-    function getDotLimit(address, bytes32) public view returns (uint);
     function getNextProvider(uint256) public view returns (uint256, address, uint256, bytes32);
     function getProviderArgsLength(address, bytes32) public view returns (uint,uint,uint);
+    function isProviderInitiated(address) public view returns (bool);
 }

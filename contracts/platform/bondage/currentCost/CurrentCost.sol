@@ -75,6 +75,13 @@ contract CurrentCost is Destructible, CurrentCostInterface {
         view
         returns (uint256 limit)
     {
-        return registry.getDotLimit(oracleAddress, endpoint);
+        uint len;
+        (,len,) = registry.getProviderArgsLength(oracleAddress,endpoint);
+        uint[] memory parts = new uint[](len);
+
+        (,parts,) = registry.getProviderCurve(oracleAddress, endpoint);
+        require(parts.length>0);
+         
+        return uint(parts[parts.length-1]);
     }
 }
