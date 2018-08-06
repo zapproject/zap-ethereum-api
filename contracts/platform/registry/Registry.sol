@@ -46,7 +46,7 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
         public
         returns (bool)
     {
-        require(getProviderPublicKey(msg.sender) == 0);
+        require(!isProviderInitiated(msg.sender));
         stor.createOracle(msg.sender, publicKey, title);
         if(endpoint != 0) setEndpointParams(endpoint, endpointParams);
         stor.addOracle(msg.sender);
@@ -70,7 +70,7 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
         returns (bool)
     {
         // Provider must be initiated
-        require(stor.getPublicKey(msg.sender) != 0);
+        require(isProviderInitiated(msg.sender));
         // Can't reset their curve
         require(stor.getCurveUnset(msg.sender, endpoint));
 
@@ -120,18 +120,6 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
     {
 
         return stor.getCurve(provider, endpoint);
-    }
-
-    /// @dev get curve dot limit 
-    function getDotLimit(
-        address provider,
-        bytes32 endpoint
-    )
-        public
-        view
-        returns (uint)
-    {
-        return stor.getDotLimit(provider, endpoint);
     }
 
     /// @dev get length of constants, parts and dividers arrays
