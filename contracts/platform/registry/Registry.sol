@@ -2,10 +2,11 @@ pragma solidity ^0.4.24;
 // v1.0
 
 import "../../lib/lifecycle/Destructible.sol";
+import "../../lib/ownership/StorageHandler.sol";
 import "./RegistryStorage.sol";
 import "./RegistryInterface.sol";
 
-contract Registry is Destructible, RegistryInterface {
+contract Registry is Destructible, RegistryInterface, StorageHandler {
 
     enum CurveType { None, Linear, Exponential, Logarithmic }
 
@@ -24,8 +25,6 @@ contract Registry is Destructible, RegistryInterface {
     );
 
     RegistryStorage stor;
-
-    address public storageAddress;
 
     constructor(address _storageAddress) public {
         storageAddress = _storageAddress;

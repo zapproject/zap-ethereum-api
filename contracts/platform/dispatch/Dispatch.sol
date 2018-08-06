@@ -2,13 +2,14 @@ pragma solidity ^0.4.24;
 // v1.0
 
 import "../../lib/lifecycle/Destructible.sol";
+import "../../lib/ownership/StorageHandler.sol";
 import "../../lib/platform/Client.sol";
 import "../../lib/platform/OnChainProvider.sol";
 import "../bondage/BondageInterface.sol"; 
 import "./DispatchStorage.sol";
 import "./DispatchInterface.sol";
 
-contract Dispatch is Destructible, DispatchInterface { 
+contract Dispatch is Destructible, DispatchInterface, StorageHandler { 
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(
@@ -71,7 +72,6 @@ contract Dispatch is Destructible, DispatchInterface {
     DispatchStorage stor;
     BondageInterface bondage;
 
-    address public storageAddress;
     address public bondageAddress;
 
     constructor(address _storageAddress, address _bondageAddress) public {

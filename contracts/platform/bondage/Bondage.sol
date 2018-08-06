@@ -2,12 +2,13 @@ pragma solidity ^0.4.24;
 // v1.0
 
 import "../../lib/lifecycle/Destructible.sol";
+import "../../lib/ownership/StorageHandler.sol";
 import "../../lib/ERC20.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 import "./BondageInterface.sol";
 
-contract Bondage is Destructible, BondageInterface {
+contract Bondage is Destructible, BondageInterface, StorageHandler {
 
     event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numZap, uint256 numDots);
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
@@ -19,7 +20,6 @@ contract Bondage is Destructible, BondageInterface {
     ERC20 token;
     uint256 decimals = 10 ** 18;
 
-    address public storageAddress;
     address public arbiterAddress;
     address public dispatchAddress;
 
