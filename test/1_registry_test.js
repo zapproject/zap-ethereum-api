@@ -7,6 +7,8 @@ const expect = require('chai')
     .use(require('chai-bignumber')(BigNumber))
     .expect;
 
+const ZapCoordinator = artifacts.require("ZapCoordinator");
+const Database = artifacts.require("Database");
 const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
 const CurrentCost = artifacts.require("CurrentCost");
@@ -36,10 +38,27 @@ contract('Registry', async (accounts) => {
     const curve = [3, 0, 2, 1, 100];
 
     beforeEach(async function deployContracts() {
-        this.currentTest.stor = await RegistryStorage.new();
-        this.currentTest.registry = await Registry.new(this.currentTest.stor.address);
-        this.currentTest.currentCost = await CurrentCost.new(this.currentTest.registry.address);
+        // Deploy initial contracts
+        this.currentTest.coord = await ZapCoordinator.new();
+        const owner = await this.currentTest.coord.owner();
+        this.currentTest.db = await Database.new();
+        await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
+
+        // Deploy storage
+        this.currentTest.stor = await RegistryStorage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY_STORAGE', this.currentTest.stor.address);
+
+        // Deploy registry
+        this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
+        
+        // Deploy current cost
+        this.currentTest.currentCost = await CurrentCost.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.currentCost.address);
+
+        await this.currentTest.coord.updateAllDependencies({ from: owner });
         await this.currentTest.stor.transferOwnership(this.currentTest.registry.address);
+        await this.currentTest.db.setStorageContract(this.currentTest.stor.address, true);
     });
 
     it("REGISTRY_1 - initiateProvider() - Check that we can initiate provider", async function () {
@@ -89,7 +108,6 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
         const receivedTitle = await this.test.registry.getProviderTitle.call(owner);
-
         await expect(hex2a(receivedTitle.valueOf())).to.be.equal(title);
     });
 

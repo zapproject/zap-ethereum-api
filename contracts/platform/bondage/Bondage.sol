@@ -35,7 +35,7 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         _updateDependencies();
     }
 
-    function _updateDependencies() private {
+    function _updateDependencies() internal {
         storageAddress = coordinator.getContract("BONDAGE_STORAGE");
         stor = BondageStorage(storageAddress);
         token = ERC20(coordinator.getContract("ZAP_TOKEN")); 

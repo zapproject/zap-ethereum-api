@@ -15,7 +15,7 @@ contract CurrentCost is Destructible, CurrentCostInterface, Upgradable {
         _updateDependencies();
     }
 
-    function _updateDependencies() private {
+    function _updateDependencies() internal {
         registry = RegistryInterface(coordinator.getContract("REGISTRY"));
     }
 

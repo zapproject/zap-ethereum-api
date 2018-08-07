@@ -469,7 +469,6 @@ contract('Bondage', function (accounts) {
 }); 
 
 
-/*
 contract('CurrentCost', function (accounts) {
     const owner = accounts[0];
     const subscriber = accounts[1];

@@ -29,7 +29,7 @@ contract Registry is Destructible, RegistryInterface, StorageHandler, Upgradable
         _updateDependencies();
     }
 
-    function _updateDependencies() private {
+    function _updateDependencies() internal {
         storageAddress = coordinator.getContract("REGISTRY_STORAGE");
         stor = RegistryStorage(storageAddress);
     }

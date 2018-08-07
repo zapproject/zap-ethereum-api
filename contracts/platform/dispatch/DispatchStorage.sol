@@ -1,16 +1,22 @@
 pragma solidity ^0.4.24;
 
 import "../../lib/ownership/Ownable.sol";
+import "../../lib/ownership/Upgradable.sol";
 import "../database/DatabaseInterface.sol";
 
-contract DispatchStorage is Ownable {
-    DatabaseInterface public db;
+contract DispatchStorage is Ownable, Upgradable {
     enum Status { Pending, Fulfilled }
 
-    constructor(address database) public {
-        db = DatabaseInterface(database);
+    DatabaseInterface public db;
+
+    constructor(address c) Upgradable(c) public {
+        _updateDependencies();
     }
 
+    function _updateDependencies() internal {
+        address databaseAddress = coordinator.getContract("DATABASE");
+        db = DatabaseInterface(databaseAddress);
+    }
     /// @dev get provider address of request
     /// @param id request id
     function getProvider(uint256 id) external view returns (address) {
@@ -47,7 +53,7 @@ contract DispatchStorage is Ownable {
         uint res = db.getNumber(keccak256(abi.encodePacked('queries', id, 'onchainSubscriber')));
         return res == 1 ? true : false;
     }
-
+ 
 
 	/**** Set Methods ****/
     function createQuery(

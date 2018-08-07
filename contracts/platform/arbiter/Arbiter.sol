@@ -39,7 +39,7 @@ contract Arbiter is Destructible, ArbiterInterface, StorageHandler, Upgradable {
         _updateDependencies();
     }
 
-    function _updateDependencies() private {
+    function _updateDependencies() internal {
         storageAddress = coordinator.getContract("ARBITER_STORAGE");
         bondageAddress = coordinator.getContract("BONDAGE");
         stor = ArbiterStorage(storageAddress);
