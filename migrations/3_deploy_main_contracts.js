@@ -21,11 +21,12 @@ module.exports = async function(deployer, network) {
 
   // Deploy all the coordinator
   await deployer.deploy(ZapCoordinator);
-  const coordInstance = (await ZapCoordinator.deployed());
+  const coordInstance = await ZapCoordinator.deployed();
   const owner = await coordInstance.owner();
 
   // Setup important contracts
   await deployer.deploy(Database);
+  const dbInstance = await Database.deployed();
   await coordInstance.setContract('ZAP_TOKEN', ZapToken.address);
   await coordInstance.setContract('DATABASE', Database.address);
 
@@ -40,6 +41,12 @@ module.exports = async function(deployer, network) {
   await coordInstance.setContract('BONDAGE_STORAGE', BondageStorage.address);
   await coordInstance.updateContract('ARBITER_STORAGE', ArbiterStorage.address);
   await coordInstance.updateContract('DISPATCH_STORAGE', DispatchStorage.address);
+
+  // Allow storage contracts to do storing
+  await dbInstance.setStorageContract(RegistryStorage.address, true);
+  await dbInstance.setStorageContract(BondageStorage.address, true);
+  await dbInstance.setStorageContract(ArbiterStorage.address, true);
+  await dbInstance.setStorageContract(DispatchStorage.address, true);
 
   // Deploy the rest of the contracts
   await deployer.deploy(Registry, ZapCoordinator.address);
