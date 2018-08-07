@@ -2,11 +2,12 @@ pragma solidity ^0.4.24;
 // v1.0
 
 import "../../lib/lifecycle/Destructible.sol";
+import "../../lib/ownership/Upgradable.sol";
 import "../../lib/ownership/StorageHandler.sol";
 import "./RegistryStorage.sol";
 import "./RegistryInterface.sol";
 
-contract Registry is Destructible, RegistryInterface, StorageHandler {
+contract Registry is Destructible, RegistryInterface, StorageHandler, Upgradable {
 
     event NewProvider(
         address indexed provider,
@@ -24,9 +25,13 @@ contract Registry is Destructible, RegistryInterface, StorageHandler {
 
     address public storageAddress;
 
-    constructor(address _storageAddress) public {
-        storageAddress = _storageAddress;
-        stor = RegistryStorage(_storageAddress);
+    constructor(address c) Upgradable(c) public {
+        _updateDependencies();
+    }
+
+    function _updateDependencies() private {
+        storageAddress = coordinator.getContract("REGISTRY_STORAGE");
+        stor = RegistryStorage(storageAddress);
     }
 
     /// @dev initiates a provider.

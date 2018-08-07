@@ -1,16 +1,22 @@
 pragma solidity ^0.4.24;
 
 import "../../../lib/lifecycle/Destructible.sol";
+import "../../../lib/ownership/Upgradable.sol";
 import "../../../lib/platform/PiecewiseLogic.sol";
 import "../../registry/RegistryInterface.sol";
 import "./CurrentCostInterface.sol";
 
-contract CurrentCost is Destructible, CurrentCostInterface {
+
+contract CurrentCost is Destructible, CurrentCostInterface, Upgradable {
 
     RegistryInterface registry;
 
-    constructor(address registryAddress) public {
-       registry = RegistryInterface(registryAddress);
+    constructor(address c) Upgradable(c) public {
+        _updateDependencies();
+    }
+
+    function _updateDependencies() private {
+        registry = RegistryInterface(coordinator.getContract("REGISTRY"));
     }
 
     /// @dev calculates current cost of dot

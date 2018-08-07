@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 // v1.0
 
+import "../../lib/ownership/Upgradable.sol";
 import "../../lib/lifecycle/Destructible.sol";
 import "../../lib/platform/Client.sol";
 import "../../lib/platform/OnChainProvider.sol";
@@ -9,7 +10,7 @@ import "../../lib/ownership/StorageHandler.sol";
 import "./DispatchStorage.sol";
 import "./DispatchInterface.sol";
 
-contract Dispatch is Destructible, DispatchInterface, StorageHandler { 
+contract Dispatch is Destructible, DispatchInterface, StorageHandler, Upgradable { 
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(
@@ -75,11 +76,15 @@ contract Dispatch is Destructible, DispatchInterface, StorageHandler {
     address public storageAddress;
     address public bondageAddress;
 
-    constructor(address _storageAddress, address _bondageAddress) public {
-        storageAddress = _storageAddress;
-        bondageAddress = _bondageAddress;
-        stor = DispatchStorage(_storageAddress);
-        bondage = BondageInterface(_bondageAddress);
+    constructor(address c) Upgradable(c) public {
+        _updateDependencies();
+    }
+
+    function _updateDependencies() private {
+        storageAddress = coordinator.getContract("DISPATCH_STORAGE");
+        bondageAddress = coordinator.getContract("BONDAGE");
+        stor = DispatchStorage(storageAddress);
+        bondage = BondageInterface(bondageAddress);
     }
 
     /// @notice Upgdate bondage function (barring no interface change)
