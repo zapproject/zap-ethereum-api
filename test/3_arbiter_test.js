@@ -31,11 +31,7 @@ contract('Arbiter', function (accounts) {
     const specifier = "test-specifier";
 
     // test function: 2x^2
-    const piecewiseFunction = {
-        constants: [2, 2, 0],
-        parts: [0, 1000],
-        dividers: [1]
-    };
+    const piecewiseFunction = [3, 0, 0, 2, 10000];
     
     const tokensForOwner = new BigNumber("1500e18");
     const tokensForSubscriber = new BigNumber("5000e18");
@@ -43,7 +39,7 @@ contract('Arbiter', function (accounts) {
 
     async function prepareProvider() {
         await this.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
-        await this.registry.initiateProviderCurve(specifier, piecewiseFunction.constants, piecewiseFunction.parts, piecewiseFunction.dividers, { from: oracle });
+        await this.registry.initiateProviderCurve(specifier, piecewiseFunction, { from: oracle });
     }
 
     async function prepareTokens() {

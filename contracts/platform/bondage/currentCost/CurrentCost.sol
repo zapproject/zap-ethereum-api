@@ -27,11 +27,7 @@ contract CurrentCost is Destructible, CurrentCostInterface {
         view
         returns (uint256 cost)
     {
-        uint256 length = registry.getProviderArgsLength(oracleAddress,endpoint);
-        int[] memory curve = new int[](length);
-        curve = registry.getProviderCurve(oracleAddress, endpoint);
-
-        return uint256(PiecewiseLogic.evaluateFunction(curve,start,1));
+        return _costOfNDots(oracleAddress, endpoint, start, 0);
     }
 
     /// @dev calculates cost of n dots
@@ -56,7 +52,9 @@ contract CurrentCost is Destructible, CurrentCostInterface {
         int[] memory curve = new int[](length);
         curve = registry.getProviderCurve(oracleAddress, endpoint);
 
-        return uint256(PiecewiseLogic.evaluateFunction(curve, start, nDots));
+        int res = PiecewiseLogic.evaluateFunction(curve, start, nDots);
+        require(res >= 0);
+        return uint256(res);
     }
 
    function _dotLimit( 

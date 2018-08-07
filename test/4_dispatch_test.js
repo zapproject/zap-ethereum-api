@@ -84,34 +84,8 @@ contract('Dispatch', function (accounts) {
     const title = "tst";
     const extInfo = [111, 222, 333];
 
-    const piecewiseFunction = { // 2x^2
-        constants: [2, 2, 0],
-        parts: [0, 1000000000],
-        dividers: [1]
-    };
-
     const query = "query";
 
-   /* async function prepareProvider(account = provider, curveParams = piecewiseFunction) {
-        await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
-        await this.registry.initiateProviderCurve(specifier, curveParams.constants, curveParams.parts, curveParams.dividers, { from: account });
-    }*/
-
-/*  async function prepareProvider(curveParams = piecewiseFunction, account = provider) {
-        await this.registry.initiateProvider(publicKey, title, specifier, params, {from: account});
-        await this.registry.initiateProviderCurve(specifier, curveParams.constants, curveParams.parts, curveParams.dividers, { from: account });
-}*/ 
-
-/* OLD
-    async function prepareTokens(sub = true) {
-        await this.token.allocate(owner, tokensForOwner, { from: owner });
-        await this.token.allocate(provider, tokensForProvider, { from: owner });
-        if (sub) {
-            await this.token.allocate(this.subscriber.address, tokensForSubscriber, { from: owner });
-            // bond Zap
-            await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
-        }
-    } */
 
     async function prepareTokens(allocAddress = subscriber) {
         await this.token.allocate(owner, tokensForOwner, { from: owner });

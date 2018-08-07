@@ -116,16 +116,14 @@ contract('Registry', async (accounts) => {
     it("REGISTRY_12 - getProviderCurve() - Check that we initialize and get provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
-            
-        const l = this.test.registry.getProviderCurve(owner, specifier);
-        const b = await l;
+        const x = await this.test.registry.getProviderCurve.call(owner, specifier);
         
-        const curve = Utils.fetchPureArray(b,parseInt);
-        expect(curve).to.be.an('array');
-        expect(curve.length.valueOf()).to.be.greaterThan(0);
+        const raw = Utils.fetchPureArray(x, parseInt);
+        expect(raw).to.be.an('array');
+        expect(raw.length).to.be.greaterThan(0);
 
-        const args = await this.test.registry.getProviderArgsLength.call(owner,specifier,{from:owner});
-        expect(curve.length.valueOf()).to.be.equal(args);
+        const args = await this.test.registry.getProviderArgsLength.call(owner,specifier);
+        expect(raw.length).to.be.equal(+args.valueOf());
     });
 
     it("REGISTRY_13 - getProviderCurve() - Check that cant get uninitialized curve ", async function () {
