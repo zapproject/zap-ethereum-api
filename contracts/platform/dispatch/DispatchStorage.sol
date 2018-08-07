@@ -1,60 +1,51 @@
 pragma solidity ^0.4.24;
 
 import "../../lib/ownership/Ownable.sol";
+import "../database/DatabaseInterface.sol";
 
 contract DispatchStorage is Ownable {
-    
+    DatabaseInterface public db;
     enum Status { Pending, Fulfilled }
 
-    //query data structure
-    struct Query {
-        address provider;       // data provider's address
-        address subscriber;     // requester's address
-        bytes32 endpoint;       // endpoint for response. (currently only 'smart_contract' endpoint supported)
-        Status status;          // status of the request
-        string userQuery;       // query string
-        bool onchainSubscriber; // is subscriber contract or offchain
+    constructor(address database) public {
+        db = DatabaseInterface(database);
     }
-
-    //mapping of unique ids to query objects
-    mapping(uint256 => Query) private queries;
-
-    /**** Get Methods ****/
 
     /// @dev get provider address of request
     /// @param id request id
     function getProvider(uint256 id) external view returns (address) {
-        return queries[id].provider;
+        return address(db.getNumber(keccak256(abi.encodePacked('queries', id, 'provider'))));
     }
 
     /// @dev get subscriber address of request
     /// @param id request id
     function getSubscriber(uint256 id) external view returns (address) {
-        return queries[id].subscriber;
+        return address(db.getNumber(keccak256(abi.encodePacked('queries', id, 'subscriber'))));
     }
 
     /// @dev get endpoint of request
     /// @param id request id
     function getEndpoint(uint256 id) external view returns (bytes32) {
-        return queries[id].endpoint;
+        return db.getBytes32(keccak256(abi.encodePacked('queries', id, 'endpoint')));
     }
 
     /// @dev get status of request
     /// @param id request id
     function getStatus(uint256 id) external view returns (Status) {
-        return queries[id].status;
+        return Status(db.getNumber(keccak256(abi.encodePacked('queries', id, 'status'))));
     }
 
     /// @dev get user specified query of request
     /// @param id request id
     function getUserQuery(uint256 id) external view returns (string) {
-        return queries[id].userQuery;
+        return db.getString(keccak256(abi.encodePacked('queries', id, 'userQuery')));
     }
 
     /// @dev is subscriber contract or offchain 
     /// @param id request id
     function getSubscriberOnchain(uint256 id) external view returns (bool) {
-        return queries[id].onchainSubscriber;
+        uint res = db.getNumber(keccak256(abi.encodePacked('queries', id, 'onchainSubscriber')));
+        return res == 1 ? true : false;
     }
 
 
@@ -70,10 +61,15 @@ contract DispatchStorage is Ownable {
         external
         onlyOwner
     {
-        queries[id] = Query(provider, subscriber, endpoint, Status.Pending, userQuery, onchainSubscriber);
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'provider')), uint256(provider));
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'subscriber')), uint256(subscriber));
+        db.setBytes32(keccak256(abi.encodePacked('queries', id, 'endpoint')), endpoint);
+        db.setString(keccak256(abi.encodePacked('queries', id, 'userQuery')), userQuery);
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Pending));
+        db.setNumber(keccak256(abi.encodePacked('queries', 'id', 'onchainSubscriber')), onchainSubscriber ? 1 : 0);
     }
 
     function setFulfilled(uint256 id) external onlyOwner {
-        queries[id].status = Status.Fulfilled;
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Fulfilled));
     }
 }
