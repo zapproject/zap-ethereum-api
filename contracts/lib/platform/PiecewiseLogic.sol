@@ -41,7 +41,7 @@ library PiecewiseLogic {
             }
             else {
                 // TODO: calculation is going to be in multiple pieces
-                throw;
+                revert();
 
             }
         }

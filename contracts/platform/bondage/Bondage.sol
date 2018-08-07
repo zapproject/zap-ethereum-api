@@ -1,20 +1,21 @@
 pragma solidity ^0.4.24;
-// v1.0
 
 import "../../lib/lifecycle/Destructible.sol";
+import "../../lib/ownership/Upgradable.sol";
 import "../../lib/ownership/StorageHandler.sol";
 import "../../lib/ERC20.sol";
 import "./currentCost/CurrentCostInterface.sol";
 import "./BondageStorage.sol";
 import "./BondageInterface.sol";
 
-contract Bondage is Destructible, BondageInterface, StorageHandler {
+contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
 
     event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numZap, uint256 numDots);
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Escrowed(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
 
+    address storageAddress;
     BondageStorage stor;
     CurrentCostInterface currentCost;
     ERC20 token;
@@ -26,15 +27,19 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
     modifier operatorOnly {
         if (msg.sender == arbiterAddress || msg.sender == dispatchAddress)
-            _;
+        _;
     }
 
     /// @dev Initialize Storage, Token, anc CurrentCost Contracts
-    constructor(address _storageAddress, address _tokenAddress, address _currentCostAddress) public {
-        storageAddress = _storageAddress;
-        stor = BondageStorage(_storageAddress);
-        token = ERC20(_tokenAddress); 
-        currentCost = CurrentCostInterface(_currentCostAddress);
+    constructor(address c) Upgradable(c) public {
+        _updateDependencies();
+    }
+
+    function _updateDependencies() private {
+        storageAddress = coordinator.getContract("BONDAGE_STORAGE");
+        stor = BondageStorage(storageAddress);
+        token = ERC20(coordinator.getContract("ZAP_TOKEN")); 
+        currentCost = CurrentCostInterface(coordinator.getContract("CURRENT_COST")); 
     }
 
     /// @dev Set Arbiter address
@@ -82,10 +87,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots
-    )
-        external
-        operatorOnly        
-        returns (bool success)
+        )
+    external
+    operatorOnly        
+    returns (bool success)
     {
         uint256 currentDots = getBoundDots(holderAddress, oracleAddress, endpoint);
         uint256 dotsToEscrow = numDots;
@@ -105,10 +110,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots
-    )
-        external
-        operatorOnly 
-        returns (bool success)
+        )
+    external
+    operatorOnly 
+    returns (bool success)
     {
         uint256 numEscrowed = stor.getNumEscrow(holderAddress, oracleAddress, endpoint);
         uint256 dotsToEscrow = numDots;
@@ -125,55 +130,13 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots       
-    ) 
-        external
-        view
-        returns (uint256 numZap)
+        ) 
+    external
+    view
+    returns (uint256 numZap)
     {
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
         return currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
-    }
-
-    /// @dev Calculate amount of dots which could be purchased with given (numZap) ZAP tokens (max is 1000)
-    /// for endpoint specified by endpoint and data-provider address specified by oracleAddress
-    function calcBondRate(
-        address oracleAddress,
-        bytes32 endpoint,
-        uint256 numZap
-    )
-        public
-        view
-        returns (uint256, uint256) 
-    {
-
-        uint256 dotCost;
-        if (numZap==0) return (0,0);
-
-        uint256 maxNumZap = 0;
-        uint256 numDots = 1;
-
-        // cap on dots. temp patch
-        uint256 _dotLimit = dotLimit(oracleAddress, endpoint);
-        _dotLimit = _dotLimit < 100 ? _dotLimit : 100;
-
-        uint256 issuedDots = getDotsIssued(oracleAddress, endpoint);
-
-        for (numDots; numDots < _dotLimit; numDots++) {
-            dotCost = currentCostOfDot(
-                oracleAddress,
-                endpoint,
-                issuedDots + numDots
-            );
-
-            if (numZap >= dotCost) {
-                numZap -= dotCost;
-                maxNumZap += dotCost;
-            } else {
-                numDots-=1;
-                break;
-            }
-        }
-        return (maxNumZap, numDots);
     }
 
     /// @dev Get the current cost of a dot.
@@ -184,10 +147,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
         address oracleAddress,
         bytes32 endpoint,
         uint256 totalBound
-    )
-        public
-        view
-        returns (uint256 cost)
+        )
+    public
+    view
+    returns (uint256 cost)
     {
         return currentCost._currentCostOfDot(oracleAddress, endpoint, totalBound);
     }
@@ -198,10 +161,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
     function dotLimit(
         address oracleAddress,
         bytes32 endpoint
-    )
-        public
-        view
-        returns (uint256 limit)
+        )
+    public
+    view
+    returns (uint256 limit)
     {
         return currentCost._dotLimit(oracleAddress, endpoint);
     }
@@ -211,10 +174,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
     function getDotsIssued(
         address oracleAddress,
         bytes32 endpoint        
-    )        
-        public
-        view
-        returns (uint256 dots)
+        )        
+    public
+    view
+    returns (uint256 dots)
     {
         return stor.getDotsIssued(oracleAddress, endpoint);
     }
@@ -223,10 +186,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
         address holderAddress,
         address oracleAddress,
         bytes32 endpoint
-    )
-        public
-        view        
-        returns (uint256 dots)
+        )
+    public
+    view        
+    returns (uint256 dots)
     {
         return stor.getBoundDots(holderAddress, oracleAddress, endpoint);
     }
@@ -241,16 +204,15 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots        
-    )
-        private
-        returns (uint256 numZap) 
+        )
+    private
+    returns (uint256) 
     {   
         // This also checks if oracle is registered w/an initialized curve
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
-
         require(issued + numDots <= dotLimit(oracleAddress, endpoint));
-
-        numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
+        
+        uint256 numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
 
         // User must have approved contract to transfer working ZAP
         require(token.transferFrom(msg.sender, this, numZap));
@@ -272,9 +234,9 @@ contract Bondage is Destructible, BondageInterface, StorageHandler {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots
-    )
-        private
-        returns (uint256 numZap)
+        )
+    private
+    returns (uint256 numZap)
     {
         // Make sure the user has enough to bond with some additional sanity checks
         uint256 amountBound = stor.getBondValue(holderAddress, oracleAddress, endpoint);

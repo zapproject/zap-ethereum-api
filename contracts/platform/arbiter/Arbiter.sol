@@ -1,13 +1,14 @@
 pragma solidity ^0.4.24;
 // v1.0
 
+import "../../lib/ownership/Upgradable.sol";
 import "../../lib/lifecycle/Destructible.sol";
 import "../bondage/BondageInterface.sol";
 import "./ArbiterStorage.sol";
 import "./ArbiterInterface.sol";
 import "../../lib/ownership/StorageHandler.sol";
 
-contract Arbiter is Destructible, ArbiterInterface, StorageHandler {
+contract Arbiter is Destructible, ArbiterInterface, StorageHandler, Upgradable {
     // Called when a data purchase is initiated
     event DataPurchase(
         address indexed provider,          // Etheruem address of the provider
@@ -34,12 +35,17 @@ contract Arbiter is Destructible, ArbiterInterface, StorageHandler {
     address public storageAddress;
     address public bondageAddress;
 
-    constructor(address _storageAddress, address _bondageAddress) public {
-        storageAddress = _storageAddress;
-        bondageAddress = _bondageAddress;
-        stor = ArbiterStorage(_storageAddress);
-        bondage = BondageInterface(_bondageAddress);
+    constructor(address c) Upgradable(c) public {
+        _updateDependencies();
     }
+
+    function _updateDependencies() private {
+        storageAddress = coordinator.getContract("ARBITER_STORAGE");
+        bondageAddress = coordinator.getContract("BONDAGE");
+        stor = ArbiterStorage(storageAddress);
+        bondage = BondageInterface(bondageAddress);
+    }
+
 
     /// @notice Upgdate bondage function (barring no interface change)
     function setBondage(address newBondageAddress) public onlyOwner {
