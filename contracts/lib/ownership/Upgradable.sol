@@ -16,7 +16,7 @@ contract Upgradable {
        _updateDependencies();
     }
 
-    function _updateDependencies() private;
+    function _updateDependencies() internal;
 
     modifier coordinatorOnly() {
     	require(msg.sender == coordinatorAddr);

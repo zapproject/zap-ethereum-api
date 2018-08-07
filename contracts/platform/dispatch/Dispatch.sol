@@ -80,7 +80,7 @@ contract Dispatch is Destructible, DispatchInterface, StorageHandler, Upgradable
         _updateDependencies();
     }
 
-    function _updateDependencies() private {
+    function _updateDependencies() internal {
         storageAddress = coordinator.getContract("DISPATCH_STORAGE");
         bondageAddress = coordinator.getContract("BONDAGE");
         stor = DispatchStorage(storageAddress);

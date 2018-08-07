@@ -2,9 +2,8 @@ pragma solidity ^0.4.24;
 
 import "./DatabaseInterface.sol";
 import "../../lib/ownership/Ownable.sol";
-import "../../lib/ownership/Upgradable.sol";
 
-contract Database is Ownable, DatabaseInterface, Upgradable {
+contract Database is Ownable {
 	event StorageTransferred(address indexed previousStorage, address indexed _storageContract);
 
 	mapping (bytes32 => bytes32) data_bytes32;

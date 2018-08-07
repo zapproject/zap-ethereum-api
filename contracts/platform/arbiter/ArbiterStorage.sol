@@ -1,13 +1,19 @@
 pragma solidity ^0.4.24;
 
 import "../../lib/ownership/Ownable.sol";
+import "../../lib/ownership/Upgradable.sol";
 import "../database/DatabaseInterface.sol";
 
-contract ArbiterStorage is Ownable {
+contract ArbiterStorage is Ownable, Upgradable {
     DatabaseInterface public db;
 
-    constructor(address database) public {
-        db = DatabaseInterface(database);
+    constructor(address c) Upgradable(c) public {
+        _updateDependencies();
+    }
+
+    function _updateDependencies() internal {
+        address databaseAddress = coordinator.getContract("DATABASE");
+        db = DatabaseInterface(databaseAddress);
     }
 
     /// @dev get subscriber dots remaining for specified provider endpoint

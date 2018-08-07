@@ -1,6 +1,8 @@
 pragma solidity ^0.4.24;
 
-contract DatabaseInterface {
+import "../../lib/ownership/Ownable.sol";
+
+contract DatabaseInterface is Ownable {
 	function setStorageContract(address _storageContract) public;
 	/*** Bytes32 ***/
 	function getBytes32(bytes32 key) external view returns(bytes32);

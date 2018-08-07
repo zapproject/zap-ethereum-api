@@ -1,13 +1,19 @@
 pragma solidity ^0.4.24;
 
 import "../../lib/ownership/Ownable.sol";
+import "../../lib/ownership/Upgradable.sol";
 import "../database/DatabaseInterface.sol";
 
-contract RegistryStorage is Ownable {
+contract RegistryStorage is Ownable, Upgradable {
     DatabaseInterface public db;
 
-    constructor(address database) public {
-        db = DatabaseInterface(database);
+    constructor(address c) Upgradable(c) public {
+        _updateDependencies();
+    }
+
+    function _updateDependencies() internal {
+        address databaseAddress = coordinator.getContract("DATABASE");
+        db = DatabaseInterface(databaseAddress);
     }
 
     /// @dev get public key of provider
@@ -70,8 +76,8 @@ contract RegistryStorage is Ownable {
 
     ///  @dev add new provider to mapping
     function createOracle(address origin, uint256 publicKey, bytes32 title) external onlyOwner {
-        db.setNumber(keccak256(abi.encodePacked('oracles', origin)), uint256(publicKey));
-        db.setBytes32(keccak256(abi.encodePacked('oracles', origin)), title);
+        db.setNumber(keccak256(abi.encodePacked('oracles', origin, "publicKey")), uint256(publicKey));
+        db.setBytes32(keccak256(abi.encodePacked('oracles', origin, "title")), title);
     }
 
     /// @dev add new provider address to oracles array
