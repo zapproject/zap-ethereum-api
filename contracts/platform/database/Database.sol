@@ -27,27 +27,51 @@ contract Database is Ownable, DatabaseInterface {
 		storageContract = _storageContract;
 	}
 
-	function get_b32(bytes32 key) external view returns(bytes32) {
+	function getBytes32(bytes32 key) external view returns(bytes32) {
 		return data_bytes32[key];
 	}
 
-	function get_bs(bytes32 key) external view returns(bytes) {
-		return data_bytes[key];
-	}
-
-	function get_ba(bytes32 key) external view returns(bytes32[]) {
-		return data_bytesArray[key];
-	}
-
-	function set_b32(bytes32 key, bytes32 value) external {
+	function setBytes32(bytes32 key, bytes32 value) external {
 		data_bytes32[key] = value;
 	}
 
-	function set_bs(bytes32 key, bytes value) external {
+	function getNumber(bytes32 key) external view returns(uint256) {
+		return uint256(data_bytes32[key]);
+	}
+
+	function setNumber(bytes32 key, uint256 value) external {
+		data_bytes32[key] = bytes32(value);
+	}
+
+	function getBytes(bytes32 key) external view returns(bytes) {
+		return data_bytes[key];
+	}
+
+	function setBytes(bytes32 key, bytes value) external {
 		data_bytes[key] = value;
 	}
 
-	function set_ba(bytes32 key, bytes32[] value) external {
+	function getString(bytes32 key) external view returns(string) {
+		return string(data_bytes[key]);
+	}
+
+	function setString(bytes32 key, string value) external {
+		data_bytes[key] = bytes(value);
+	}
+
+	function getArray(bytes32 key, uint256 index) external view returns (bytes32) {
+		return data_bytesArray[key][index];
+	}
+
+	function getArrayLength(bytes32 key) external view returns (uint256) {
+		return data_bytesArray[key].length;
+	}
+
+	function pushArray(bytes32 key, bytes32 value) external {
+		data_bytesArray[key].push(value);
+	}
+
+	function setArray(bytes32 key, bytes32[] value) external {
 		data_bytesArray[key] = value;
-	}	
+	}
 }
