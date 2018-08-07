@@ -71,6 +71,10 @@ contract Database is Ownable, DatabaseInterface {
 		data_bytesArray[key].push(value);
 	}
 
+	function setArrayIndex(bytes32 key, uint256 index, bytes32 value) external {
+		data_bytesArray[key][index] = value;
+	}
+
 	function setArray(bytes32 key, bytes32[] value) external {
 		data_bytesArray[key] = value;
 	}

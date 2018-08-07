@@ -15,5 +15,6 @@ contract DatabaseInterface is Ownable {
 	function getArray(bytes32 key, uint256 index) external view returns (bytes32);
 	function getArrayLength(bytes32 key) external view returns (uint256);
 	function pushArray(bytes32 key, bytes32 value) external;
+	function setArrayIndex(bytes32 key, uint256 index, bytes32 value) external;
 	function setArray(bytes32 key, bytes32[] value) external;
 }
