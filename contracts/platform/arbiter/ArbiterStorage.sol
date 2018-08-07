@@ -1,20 +1,14 @@
 pragma solidity ^0.4.24;
 
 import "../../lib/ownership/Ownable.sol";
+import "../database/DatabaseInterface.sol";
 
 contract ArbiterStorage is Ownable {
+    DatabaseInterface public db;
 
-    // Each subscription is represented as the following
-    struct Subscription {
-        uint64 dots;          // Cost in dots
-        uint96 blockStart;    // Block number subscription was initiated
-        uint96 preBlockEnd;   // Precalculated block end
+    constructor(address database) public {
+        db = DatabaseInterface(database);
     }
-    
-    // providerAddress => subscriberAddress => endpoint => Subscription
-    mapping(address => mapping(address => mapping(bytes32 => Subscription))) private subscriptions;
-
-    /**** Get Methods ****/
 
     /// @dev get subscriber dots remaining for specified provider endpoint
     function getDots(
@@ -26,7 +20,7 @@ contract ArbiterStorage is Ownable {
         view
         returns (uint64)
     {
-        return subscriptions[providerAddress][subscriberAddress][endpoint].dots;
+        return uint64(db.getNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'dots'))));
     }
 
     /// @dev get first subscription block number
@@ -39,7 +33,7 @@ contract ArbiterStorage is Ownable {
         view
         returns (uint96)
     {
-        return subscriptions[providerAddress][subscriberAddress][endpoint].blockStart;
+        return uint96(db.getNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'blockStart'))));
     }
 
     /// @dev get last subscription block number
@@ -52,7 +46,7 @@ contract ArbiterStorage is Ownable {
         view
         returns (uint96)
     {
-        return subscriptions[providerAddress][subscriberAddress][endpoint].preBlockEnd;
+        return uint96(db.getNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'preBlockEnd'))));
     }
 
 	/**** Set Methods ****/
@@ -68,11 +62,9 @@ contract ArbiterStorage is Ownable {
     )
         external
     {
-        subscriptions[providerAddress][subscriberAddress][endpoint] = Subscription(
-            dots,
-            blockStart,
-            preBlockEnd
-        );
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'dots')), dots);
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'blockStart')), uint256(blockStart));
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'preBlockEnd')), uint256(preBlockEnd));
     }
 
     /**** Delete Methods ****/
@@ -85,6 +77,8 @@ contract ArbiterStorage is Ownable {
     )
         external
     {
-        delete subscriptions[providerAddress][subscriberAddress][endpoint];
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'dots')), 0);
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'blockStart')), uint256(0));
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'preBlockEnd')), uint256(0));
     }
 }
