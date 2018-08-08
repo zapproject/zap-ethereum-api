@@ -26,6 +26,10 @@ contract('ZapCoordinator', async (accounts) => {
         await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
     });
 
+    it("COORDINATOR_1 - addImmutableContract() - Check that we can set the DATABASE to provider", async function () {
+        // Do nothing, this happens in beforeEach
+    });
+
     it("COORDINATOR_2 - addImmutableContract() - Check that we can't set the DATABASE to provider with the wrong owner", async function () {
         await expect(this.test.coord.addImmutableContract('DATABASE', this.test.db.address, { from: accounts[1] })).to.eventually.be.rejectedWith(EVMRevert);
     });
