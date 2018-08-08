@@ -22,11 +22,8 @@ contract('ZapCoordinator', async (accounts) => {
         // Deploy initial contracts
         this.currentTest.coord = await ZapCoordinator.new();
         this.currentTest.db = await Database.new();
-        this.currentTest.db.transferOwnership(this.currentTest.coord.address);
-    });
-
-    it("COORDINATOR_1 - addImmutableContract() - Check that we can set the DATABASE to provider", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
+        await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
+        await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
     });
 
     it("COORDINATOR_2 - addImmutableContract() - Check that we can't set the DATABASE to provider with the wrong owner", async function () {
@@ -38,37 +35,28 @@ contract('ZapCoordinator', async (accounts) => {
     });
 
     it("COORDINATOR_4 - addImmutableContract() - Check that when we set the DATABASE it updates db", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
         await expect(await this.test.coord.db()).equals(this.test.db.address);
     });
 
     it("COORDINATOR_5 - getContract() - Check that we can get the DATABASE address after setting it", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
         await expect(await this.test.coord.getContract.call('DATABASE')).equals(this.test.db.address);
     });
 
     it("COORDINATOR_6 - getContractName() - Check that DATABASE doesn't add to loadedContracts", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
         await expect(this.test.coord.getContractName.call(0)).to.eventually.be.rejectedWith('invalid opcode');
     });
 
     it("COORDINATOR_7 - updateContract() - Check that we can update REGISTRY", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
-
         const reg = await Registry.new(this.test.coord.address);
         await this.test.coord.updateContract('REGISTRY', reg.address);
     });
 
     it("COORDINATOR_8 - updateContract() - Check that we can't update REGISTRY from an address that's not the owner", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
-
         const reg = await Registry.new(this.test.coord.address);
         await expect(this.test.coord.updateContract('REGISTRY', reg.address, { from: accounts[1] })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("COORDINATOR_9 - updateContract() - Check that we can update REGISTRY twice", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
-
         const reg = await Registry.new(this.test.coord.address);
         const reg2 = await Registry.new(this.test.coord.address);
 
@@ -77,8 +65,6 @@ contract('ZapCoordinator', async (accounts) => {
     });
 
     it("COORDINATOR_10 - getContract() - Check that we get the REGISTRY address after updateContract", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
-
         const reg = await Registry.new(this.test.coord.address);
 
         await this.test.coord.updateContract('REGISTRY', reg.address);
@@ -86,8 +72,6 @@ contract('ZapCoordinator', async (accounts) => {
     });
 
     it("COORDINATOR_11 - getContract() - Check that we get the REGISTRY address after two updateContracts", async function () {
-        await this.test.coord.addImmutableContract('DATABASE', this.test.db.address);
-
         const reg = await Registry.new(this.test.coord.address);
         const reg2 = await Registry.new(this.test.coord.address);
 
@@ -96,18 +80,4 @@ contract('ZapCoordinator', async (accounts) => {
 
         await expect(await this.test.coord.getContract.call('REGISTRY')).equals(reg2.address);
     });
-
-    // const owner = await this.currentTest.coord.owner();
-    // this.currentTest.db = await Database.new();
-    // await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
-    // // Deploy registry
-    // this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
-    // await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
-    // await this.currentTest.db.setStorageContract(this.currentTest.registry.address, true);
-
-    // // Deploy current cost
-    // this.currentTest.currentCost = await CurrentCost.new(this.currentTest.coord.address);
-    // await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.currentCost.address);
-
-    // await this.currentTest.coord.updateAllDependencies({ from: owner });
 });
