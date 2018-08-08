@@ -2,21 +2,19 @@ pragma solidity ^0.4.24;
 
 import "../../lib/lifecycle/Destructible.sol";
 import "../../lib/ownership/Upgradable.sol";
-import "../../lib/ownership/StorageHandler.sol";
 import "../../lib/ERC20.sol";
+import "../database/DatabaseInterface.sol";
 import "./currentCost/CurrentCostInterface.sol";
-import "./BondageStorage.sol";
 import "./BondageInterface.sol";
 
-contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
+contract Bondage is Destructible, BondageInterface, Upgradable {
+    DatabaseInterface public db;
 
     event Bound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numZap, uint256 numDots);
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Escrowed(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
 
-    address storageAddress;
-    BondageStorage stor;
     CurrentCostInterface currentCost;
     ERC20 token;
     uint256 decimals = 10 ** 18;
@@ -36,10 +34,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
     }
 
     function _updateDependencies() internal {
+        address databaseAddress = coordinator.getContract("DATABASE");
+        db = DatabaseInterface(databaseAddress);
         arbiterAddress = coordinator.getContract("ARBITER");
         dispatchAddress = coordinator.getContract("DISPATCH");
-        storageAddress = coordinator.getContract("BONDAGE_STORAGE");
-        stor = BondageStorage(storageAddress);
         token = ERC20(coordinator.getContract("ZAP_TOKEN")); 
         currentCost = CurrentCostInterface(coordinator.getContract("CURRENT_COST")); 
     }
@@ -79,8 +77,8 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
     {
         uint256 boundDots = getBoundDots(holderAddress, oracleAddress, endpoint);
         require(numDots < boundDots);
-        stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
-        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
+        updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
+        updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
         emit Escrowed(holderAddress, oracleAddress, endpoint, numDots);
         return true;
     }
@@ -99,11 +97,11 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         operatorOnly 
         returns (bool success)
     {
-        uint256 numEscrowed = stor.getNumEscrow(holderAddress, oracleAddress, endpoint);
+        uint256 numEscrowed = getNumEscrow(holderAddress, oracleAddress, endpoint);
         uint256 dotsToEscrow = numDots;
         if (numDots > numEscrowed) dotsToEscrow = numEscrowed;
-        stor.updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
-        stor.updateBondValue(oracleAddress, oracleAddress, endpoint, dotsToEscrow, "add");
+        updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
+        updateBondValue(oracleAddress, oracleAddress, endpoint, dotsToEscrow, "add");
         emit Released(holderAddress, oracleAddress, endpoint, dotsToEscrow);
         return true;
     }
@@ -154,18 +152,6 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
     }
 
 
-
-    function getDotsIssued(
-        address oracleAddress,
-        bytes32 endpoint        
-    )        
-        public
-        view
-        returns (uint256 dots)
-    {
-        return stor.getDotsIssued(oracleAddress, endpoint);
-    }
-
     function getBoundDots(        
         address holderAddress,
         address oracleAddress,
@@ -175,12 +161,12 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         view        
         returns (uint256 dots)
     {
-        return stor.getBoundDots(holderAddress, oracleAddress, endpoint);
+        return getBoundDots(holderAddress, oracleAddress, endpoint);
     }
 
     /// @return total ZAP held by contract
     function getZapBound(address oracleAddress, bytes32 endpoint) public view returns (uint256) {
-        return stor.getNumZap(oracleAddress, endpoint);
+        return getNumZap(oracleAddress, endpoint);
     }
 
     function _bond(
@@ -201,14 +187,14 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         // User must have approved contract to transfer working ZAP
         require(token.transferFrom(msg.sender, this, numZap));
 
-        if (!stor.isProviderInitialized(holderAddress, oracleAddress)) {            
-            stor.setProviderInitialized(holderAddress, oracleAddress);
-            stor.addHolderOracle(holderAddress, oracleAddress);
+        if (!isProviderInitialized(holderAddress, oracleAddress)) {            
+            setProviderInitialized(holderAddress, oracleAddress);
+            addHolderOracle(holderAddress, oracleAddress);
         }
 
-        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");        
-        stor.updateTotalIssued(oracleAddress, endpoint, numDots, "add");
-        stor.updateTotalBound(oracleAddress, endpoint, numZap, "add");
+        updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");        
+        updateTotalIssued(oracleAddress, endpoint, numDots, "add");
+        updateTotalBound(oracleAddress, endpoint, numZap, "add");
 
         return numZap;
     }
@@ -232,9 +218,9 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1 - numDots, numDots - 1);
 
         // Update the storage values
-        stor.updateTotalBound(oracleAddress, endpoint, numZap, "sub");
-        stor.updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
-        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
+        updateTotalBound(oracleAddress, endpoint, numZap, "sub");
+        updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
+        updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
 
         // Do the transfer
         require(token.transfer(holderAddress, numZap));
@@ -242,4 +228,98 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         return numZap;
     }
 
+    /**** Get Methods ****/
+    function isProviderInitialized(address holderAddress, address oracleAddress) public view returns (bool) {
+        return db.getNumber(keccak256(abi.encodePacked('holders', holderAddress, 'initialized', oracleAddress))) == 1 ? true : false;
+    }
+
+    function getNumEscrow(address holderAddress, address oracleAddress, bytes32 endpoint) public view returns (uint256) {
+        return db.getNumber(keccak256(abi.encodePacked('escrow', holderAddress, oracleAddress, endpoint)));
+    }
+
+    function getNumZap(address oracleAddress, bytes32 endpoint) public view returns (uint256) {
+        return db.getNumber(keccak256(abi.encodePacked('totalBound', oracleAddress, endpoint)));
+    }
+
+    function getDotsIssued(address oracleAddress, bytes32 endpoint) public view returns (uint256) {
+        return db.getNumber(keccak256(abi.encodePacked('totalIssued', oracleAddress, endpoint)));
+    }
+
+    function getBoundDots(address holderAddress, address oracleAddress, bytes32 endpoint) public view returns (uint256) {
+        return db.getNumber(keccak256(abi.encodePacked('holders', holderAddress, 'bonds', oracleAddress, endpoint)));
+    }
+
+    function getIndexSize(address holderAddress) external view returns (uint256) {
+        return db.getAddressArrayLength(keccak256(abi.encodePacked('holders', holderAddress, 'oracleList')));
+    }
+
+    function getOracleAddress(address holderAddress, uint256 index) public view returns (address) {
+        return db.getAddressArrayIndex(keccak256(abi.encodePacked('holders', holderAddress, 'oracleList')), index);
+    }
+
+    /**** Set Methods ****/
+    function addHolderOracle(address holderAddress, address oracleAddress) internal {
+        db.pushAddressArray(keccak256(abi.encodePacked('holders', holderAddress, 'oracleList')), oracleAddress);
+    }
+
+    function setProviderInitialized(address holderAddress, address oracleAddress) internal {
+        db.setNumber(keccak256(abi.encodePacked('holders', holderAddress, 'initialized', oracleAddress)), 1);
+    }
+
+    function updateEscrow(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots, bytes32 op) internal {
+        uint256 newEscrow = db.getNumber(keccak256(abi.encodePacked('escrow', holderAddress, oracleAddress, endpoint)));
+
+        if ( op == "sub" ) {
+            newEscrow -= numDots;
+        } else if ( op == "add" ) {
+            newEscrow += numDots;
+        }
+        else {
+            revert();
+        }
+
+        db.setNumber(keccak256(abi.encodePacked('escrow', holderAddress, oracleAddress, endpoint)), newEscrow);
+    }
+
+    function updateBondValue(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots, bytes32 op) internal {
+        uint256 bondValue = db.getNumber(keccak256(abi.encodePacked('holders', holderAddress, 'bonds', oracleAddress, endpoint)));
+        
+        if (op == "sub") {
+            bondValue -= numDots;
+        } else if (op == "add") {
+            bondValue += numDots;
+        }
+
+        db.setNumber(keccak256(abi.encodePacked('holders', holderAddress, 'bonds', oracleAddress, endpoint)), bondValue);
+    }
+
+    function updateTotalBound(address oracleAddress, bytes32 endpoint, uint256 numZap, bytes32 op) internal {
+        uint256 totalBound = db.getNumber(keccak256(abi.encodePacked('totalBound', oracleAddress, endpoint)));
+        
+        if (op == "sub"){
+            totalBound -= numZap;
+        } else if (op == "add") {
+            totalBound += numZap;
+        }
+        else {
+            revert();
+        }
+        
+        db.setNumber(keccak256(abi.encodePacked('totalBound', oracleAddress, endpoint)), totalBound);
+    }
+
+    function updateTotalIssued(address oracleAddress, bytes32 endpoint, uint256 numDots, bytes32 op) internal {
+        uint256 totalIssued = db.getNumber(keccak256(abi.encodePacked('totalIssued', oracleAddress, endpoint)));
+        
+        if (op == "sub"){
+            totalIssued -= numDots;
+        } else if (op == "add") {
+            totalIssued += numDots;
+        }
+        else {
+            revert();
+        }
+    
+        db.setNumber(keccak256(abi.encodePacked('totalIssued', oracleAddress, endpoint)), totalIssued);
+    }
 }
