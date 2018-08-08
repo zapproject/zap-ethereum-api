@@ -13,7 +13,6 @@ const ZapCoordinator = artifacts.require("ZapCoordinator");
 const Database = artifacts.require("Database");
 const Bondage = artifacts.require("Bondage");
 const Registry = artifacts.require("Registry");
-const RegistryStorage = artifacts.require("RegistryStorage");
 const ZapToken = artifacts.require("ZapToken");
 const Dispatch = artifacts.require("Dispatch");
 const Arbiter = artifacts.require("Arbiter");
@@ -56,8 +55,9 @@ contract('Bondage', function (accounts) {
         this.currentTest.coord = await ZapCoordinator.new();
         const owner = await this.currentTest.coord.owner();
         this.currentTest.db = await Database.new();
-        await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
-        await this.currentTest.coord.setContract('ZAP_TOKEN', this.currentTest.token.address);
+        await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
+        await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
+        await this.currentTest.coord.addImmutableContract('ZAP_TOKEN', this.currentTest.token.address);
 
         // Deploy registry
         this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
@@ -72,12 +72,9 @@ contract('Bondage', function (accounts) {
         await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
 
         // Hack for making arbiter an account we control for testing the escrow
-        await this.currentTest.coord.setContract('ARBITER', accounts[3]);
+        await this.currentTest.coord.addImmutableContract('ARBITER', accounts[3]);
         
         await this.currentTest.coord.updateAllDependencies({ from: owner });
-
-        await this.currentTest.db.setStorageContract(this.currentTest.registry.address, true);
-        await this.currentTest.db.setStorageContract(this.currentTest.bondage.address, true);
     });
 
     it("BONDAGE_1 - bond() - Check bond function", async function () {
@@ -413,8 +410,10 @@ contract('CurrentCost', function (accounts) {
         this.currentTest.coord = await ZapCoordinator.new();
         const owner = await this.currentTest.coord.owner();
         this.currentTest.db = await Database.new();
-        await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
-        await this.currentTest.coord.setContract('ZAP_TOKEN', this.currentTest.token.address);
+        await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
+
+        await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
+        await this.currentTest.coord.addImmutableContract('ZAP_TOKEN', this.currentTest.token.address);
 
         // Deploy registry
         this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
@@ -425,7 +424,6 @@ contract('CurrentCost', function (accounts) {
         await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
         
         await this.currentTest.coord.updateAllDependencies({ from: owner });
-        await this.currentTest.db.setStorageContract(this.currentTest.registry.address, true);
     });
 
     it("CURRENT_COST_1 - _currentCostOfDot() - Check current cost for function 0", async function () {

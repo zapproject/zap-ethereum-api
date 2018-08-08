@@ -10,7 +10,6 @@ const expect = require('chai')
 const ZapCoordinator = artifacts.require("ZapCoordinator");
 const Database = artifacts.require("Database");
 const Registry = artifacts.require("Registry");
-const RegistryStorage = artifacts.require("RegistryStorage");
 const CurrentCost = artifacts.require("CurrentCost");
 
 const Utils = require("./helpers/utils.js");
@@ -42,11 +41,11 @@ contract('Registry', async (accounts) => {
         this.currentTest.coord = await ZapCoordinator.new();
         const owner = await this.currentTest.coord.owner();
         this.currentTest.db = await Database.new();
-        await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
+        await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
+        await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
         // Deploy registry
         this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
-        await this.currentTest.db.setStorageContract(this.currentTest.registry.address, true);
 
         // Deploy current cost
         this.currentTest.currentCost = await CurrentCost.new(this.currentTest.coord.address);

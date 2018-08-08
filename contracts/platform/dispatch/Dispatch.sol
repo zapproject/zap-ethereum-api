@@ -71,21 +71,21 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         string response4
     );
 
-    BondageInterface bondage;
+    BondageInterface public bondage;
     address public bondageAddress;
 
     DatabaseInterface public db;
 
     constructor(address c) Upgradable(c) public {
-        _updateDependencies();
+        //_updateDependencies();
     }
 
     function _updateDependencies() internal {
-        bondageAddress = coordinator.getContract("BONDAGE");
-        bondage = BondageInterface(bondageAddress);
-
         address databaseAddress = coordinator.getContract("DATABASE");
         db = DatabaseInterface(databaseAddress);
+
+        bondageAddress = coordinator.getContract("BONDAGE");
+        bondage = BondageInterface(bondageAddress);
     }
 
     /// @notice Escrow dot for oracle request

@@ -13,11 +13,8 @@ const EVMRevert = require("./helpers/EVMRevert");
 const ZapCoordinator = artifacts.require("ZapCoordinator");
 const Database = artifacts.require("Database");
 const Dispatch = artifacts.require("Dispatch");
-const DispatchStorage = artifacts.require("DispatchStorage");
 const Bondage = artifacts.require("Bondage");
-const BondageStorage = artifacts.require("BondageStorage");
 const Registry = artifacts.require("Registry");
-const RegistryStorage = artifacts.require("RegistryStorage");
 const ZapToken = artifacts.require("ZapToken");
 const Cost = artifacts.require("CurrentCost");
 const Oracle = artifacts.require("TestProvider");
@@ -107,28 +104,27 @@ contract('Dispatch', function (accounts) {
         this.currentTest.coord = await ZapCoordinator.new();
         const owner = await this.currentTest.coord.owner();
         this.currentTest.db = await Database.new();
-        await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
-        await this.currentTest.coord.setContract('ZAP_TOKEN', this.currentTest.token.address);
+        await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
 
-        // Deploy registry
+        await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
+        await this.currentTest.coord.addImmutableContract('ZAP_TOKEN', this.currentTest.token.address);
+
+        // Deploy dependent contracts
         this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
-        // Deploy current cost
-        this.currentTest.cost = await Cost.new(this.currentTest.coord.address);
-        // Deploy Bondage
-        this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
-        // Deploy Arbiter
-        this.currentTest.dispatch = await Dispatch.new(this.currentTest.coord.address);
-
         await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
-        await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
-        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
-        await this.currentTest.coord.updateContract('DISPATCH', this.currentTest.dispatch.address);
-        await this.currentTest.db.setStorageContract(this.currentTest.registry.address, true);
-        await this.currentTest.db.setStorageContract(this.currentTest.bondage.address, true);
-        await this.currentTest.db.setStorageContract(this.currentTest.dispatch.address, true);
 
-        await this.currentTest.coord.updateAllDependencies();
+        this.currentTest.cost = await Cost.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
+
+        this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
+
+        // Deploy Dispatch contract
+        this.currentTest.dispatch = await Dispatch.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('DISPATCH', this.currentTest.dispatch.address);
         
+        await this.currentTest.coord.updateAllDependencies();
+
         this.currentTest.subscriber = await Subscriber.new(
             this.currentTest.token.address,
             this.currentTest.dispatch.address,

@@ -3,8 +3,8 @@ pragma solidity ^0.4.24;
 import "./DatabaseInterface.sol";
 import "../../lib/ownership/Ownable.sol";
 
-contract Database is Ownable {
-	event StorageTransferred(address indexed previousStorage, address indexed _storageContract);
+contract Database is Ownable, DatabaseInterface {
+	event StorageModified(address indexed contractAddress, bool allowed);
 
 	mapping (bytes32 => bytes32) data_bytes32;
 	mapping (bytes32 => bytes) data_bytes;
@@ -25,6 +25,7 @@ contract Database is Ownable {
 	function setStorageContract(address _storageContract, bool _allowed) public onlyOwner {
 		require(_storageContract != address(0));
 		allowed[_storageContract] = _allowed;
+		emit StorageModified(_storageContract, _allowed);
 	}
 
 	/*** Bytes32 ***/
