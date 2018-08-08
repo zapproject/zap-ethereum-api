@@ -14,7 +14,7 @@ contract ZapCoordinator is Ownable {
 	// names of upgradable contracts
 	string[] public loadedContracts;
 
-	DatabaseInterface db;	
+	DatabaseInterface public db;
 
 	// used for adding contracts like Database and ZapToken
 	function addImmutableContract(string contractName, address newAddress) external onlyOwner {
