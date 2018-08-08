@@ -152,18 +152,6 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     }
 
 
-    function getBoundDots(        
-        address holderAddress,
-        address oracleAddress,
-        bytes32 endpoint
-    )
-        public
-        view        
-        returns (uint256 dots)
-    {
-        return getBoundDots(holderAddress, oracleAddress, endpoint);
-    }
-
     /// @return total ZAP held by contract
     function getZapBound(address oracleAddress, bytes32 endpoint) public view returns (uint256) {
         return getNumZap(oracleAddress, endpoint);

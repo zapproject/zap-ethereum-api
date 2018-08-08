@@ -12,7 +12,6 @@ const Utils = require('./helpers/utils');
 const ZapCoordinator = artifacts.require("ZapCoordinator");
 const Database = artifacts.require("Database");
 const Bondage = artifacts.require("Bondage");
-const BondageStorage = artifacts.require("BondageStorage");
 const Registry = artifacts.require("Registry");
 const RegistryStorage = artifacts.require("RegistryStorage");
 const ZapToken = artifacts.require("ZapToken");
@@ -63,8 +62,6 @@ contract('Bondage', function (accounts) {
         // Deploy storage
         this.currentTest.regStor = await RegistryStorage.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('REGISTRY_STORAGE', this.currentTest.regStor.address);
-        this.currentTest.bondStor = await BondageStorage.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('BONDAGE_STORAGE', this.currentTest.bondStor.address);
 
         // Deploy registry
         this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
@@ -83,10 +80,9 @@ contract('Bondage', function (accounts) {
         
         await this.currentTest.coord.updateAllDependencies({ from: owner });
         await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
-        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
         
         await this.currentTest.db.setStorageContract(this.currentTest.regStor.address, true);
-        await this.currentTest.db.setStorageContract(this.currentTest.bondStor.address, true);
+        await this.currentTest.db.setStorageContract(this.currentTest.bondage.address, true);
     });
 
     it("BONDAGE_1 - bond() - Check bond function", async function () {
@@ -232,7 +228,7 @@ contract('Bondage', function (accounts) {
         const subscriberDotsRes = await this.test.bondage.getBoundDots(subscriber, oracle, specifier, { from: subscriber });
         const subscriberDots = parseInt(subscriberDotsRes.valueOf());
 
-        const escrowDotsRes = await this.test.bondStor.getNumEscrow(subscriber, oracle, specifier);
+        const escrowDotsRes = await this.test.bondage.getNumEscrow(subscriber, oracle, specifier);
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
         await expect(subscriberDots).to.be.equal(dots - dotsForEscrow);
@@ -287,7 +283,7 @@ contract('Bondage', function (accounts) {
         const subscriberDotsRes = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier,);
         const subscriberDots = parseInt(subscriberDotsRes.valueOf());
 
-        const pendingDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
+        const pendingDotsRes = await this.test.bondage.getNumEscrow.call(subscriber, oracle, specifier);
         const pendingDots = parseInt(pendingDotsRes.valueOf());
 
         const releaseRes = await this.test.bondage.getBoundDots.call(oracle, oracle, specifier, { from: oracle });
@@ -318,7 +314,7 @@ contract('Bondage', function (accounts) {
         const subscriberDotsRes = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier, { from: subscriber });
         const subscriberDots = parseInt(subscriberDotsRes.valueOf());
 
-        const escrowDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
+        const escrowDotsRes = await this.test.bondage.getNumEscrow.call(subscriber, oracle, specifier);
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
         const releaseRes = await this.test.bondage.getBoundDots.call(oracle, oracle, specifier, { from: oracle });
@@ -428,8 +424,8 @@ contract('CurrentCost', function (accounts) {
         // Deploy storage
         this.currentTest.regStor = await RegistryStorage.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('REGISTRY_STORAGE', this.currentTest.regStor.address);
-        this.currentTest.bondStor = await RegistryStorage.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('BONDAGE_STORAGE', this.currentTest.bondStor.address);
+        this.currentTest.bondage = await RegistryStorage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('BONDAGE_STORAGE', this.currentTest.bondage.address);
 
         // Deploy registry
         this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
@@ -445,7 +441,7 @@ contract('CurrentCost', function (accounts) {
         
         await this.currentTest.coord.updateAllDependencies({ from: owner });
         await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
-        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        await this.currentTest.bondage.transferOwnership(this.currentTest.bondage.address);
         await this.currentTest.db.setStorageContract(this.currentTest.regStor.address, true);
     });
 

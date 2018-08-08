@@ -2,7 +2,6 @@ const ZapCoordinator = artifacts.require('./ZapCoordinator.sol');
 const Database = artifacts.require('./Database.sol');
 
 const ArbiterStorage = artifacts.require("./ArbiterStorage.sol");
-const BondageStorage = artifacts.require("./BondageStorage.sol");
 const DispatchStorage = artifacts.require("./DispatchStorage.sol");
 const RegistryStorage = artifacts.require("./RegistryStorage.sol");
 
@@ -32,19 +31,17 @@ module.exports = async function(deployer, network) {
 
   // Deploy the storage related contracts
   await deployer.deploy(RegistryStorage, ZapCoordinator.address);
-  await deployer.deploy(BondageStorage, ZapCoordinator.address);
   await deployer.deploy(ArbiterStorage, ZapCoordinator.address);
   await deployer.deploy(DispatchStorage, ZapCoordinator.address);
 
   // Update the coordinator with the new contracts
   await coordInstance.updateContract('REGISTRY_STORAGE', RegistryStorage.address);
-  await coordInstance.updateContract('BONDAGE_STORAGE', BondageStorage.address);
   await coordInstance.updateContract('ARBITER_STORAGE', ArbiterStorage.address);
   await coordInstance.updateContract('DISPATCH_STORAGE', DispatchStorage.address);
 
   // Allow storage contracts to do storing
   await dbInstance.setStorageContract(RegistryStorage.address, true);
-  await dbInstance.setStorageContract(BondageStorage.address, true);
+  await dbInstance.setStorageContract(Bondage.address, true);
   await dbInstance.setStorageContract(ArbiterStorage.address, true);
   await dbInstance.setStorageContract(DispatchStorage.address, true);
 
@@ -64,8 +61,6 @@ module.exports = async function(deployer, network) {
 
   // Transfer ownership
   await (await RegistryStorage.deployed()).transferOwnership(Registry.address);
-  await sleep(network);
-  await (await BondageStorage.deployed()).transferOwnership(Bondage.address);
   await sleep(network);
   await (await ArbiterStorage.deployed()).transferOwnership(Arbiter.address);
   await sleep(network);
