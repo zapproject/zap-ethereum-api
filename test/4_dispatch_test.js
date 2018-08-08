@@ -110,40 +110,25 @@ contract('Dispatch', function (accounts) {
         await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
         await this.currentTest.coord.setContract('ZAP_TOKEN', this.currentTest.token.address);
 
-        // Deploy storage
-        this.currentTest.regStor = await RegistryStorage.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('REGISTRY_STORAGE', this.currentTest.regStor.address);
-        this.currentTest.bondStor = await BondageStorage.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('BONDAGE_STORAGE', this.currentTest.bondStor.address);
-        this.currentTest.dispStor = await DispatchStorage.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('DISPATCH_STORAGE', this.currentTest.dispStor.address);
-
-
         // Deploy registry
         this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
-
         // Deploy current cost
         this.currentTest.cost = await Cost.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
-
         // Deploy Bondage
         this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
-
         // Deploy Arbiter
         this.currentTest.dispatch = await Dispatch.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('DISPATCH', this.currentTest.dispatch.address);
-        
-        await this.currentTest.coord.updateAllDependencies({ from: owner });
-        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
-        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
-        await this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
-        
-        await this.currentTest.db.setStorageContract(this.currentTest.regStor.address, true);
-        await this.currentTest.db.setStorageContract(this.currentTest.bondStor.address, true);
-        await this.currentTest.db.setStorageContract(this.currentTest.dispStor.address, true);
 
+        await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
+        await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
+        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
+        await this.currentTest.coord.updateContract('DISPATCH', this.currentTest.dispatch.address);
+        await this.currentTest.db.setStorageContract(this.currentTest.registry.address, true);
+        await this.currentTest.db.setStorageContract(this.currentTest.bondage.address, true);
+        await this.currentTest.db.setStorageContract(this.currentTest.dispatch.address, true);
+
+        await this.currentTest.coord.updateAllDependencies();
+        
         this.currentTest.subscriber = await Subscriber.new(
             this.currentTest.token.address,
             this.currentTest.dispatch.address,

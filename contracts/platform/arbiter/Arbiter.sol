@@ -34,7 +34,6 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
 
     // database address and reference
     DatabaseInterface public db;
-    address databaseAddress;
 
     constructor(address c) Upgradable(c) public {
         _updateDependencies();
@@ -44,7 +43,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
         bondageAddress = coordinator.getContract("BONDAGE");
         bondage = BondageInterface(bondageAddress);
 
-        databaseAddress = coordinator.getContract("DATABASE");
+        address databaseAddress = coordinator.getContract("DATABASE");
         db = DatabaseInterface(databaseAddress);
     }
 
