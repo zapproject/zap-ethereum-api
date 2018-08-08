@@ -23,10 +23,9 @@ module.exports = async function(deployer, network) {
   await deployer.deploy(Database);
   const dbInstance = await Database.deployed();
   await dbInstance.transferOwnership(ZapCoordinator.address);
-  
+
   await coordInstance.addImmutableContract('ZAP_TOKEN', ZapToken.address);
   await coordInstance.addImmutableContract('DATABASE', Database.address);
-
 
   // Deploy the rest of the contracts
   await deployer.deploy(Registry, ZapCoordinator.address);
@@ -46,7 +45,7 @@ module.exports = async function(deployer, network) {
 
   // Deploy telegram example
   // await deployer.deploy(Telegram, Registry.address);
-  console.log('Done');
+  console.log('Done migrating core contracts');
 };
 
 function sleep(network) {
