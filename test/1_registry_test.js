@@ -43,22 +43,16 @@ contract('Registry', async (accounts) => {
         const owner = await this.currentTest.coord.owner();
         this.currentTest.db = await Database.new();
         await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
-
-        // Deploy storage
-        this.currentTest.stor = await RegistryStorage.new(this.currentTest.coord.address);
-        await this.currentTest.coord.updateContract('REGISTRY_STORAGE', this.currentTest.stor.address);
-
         // Deploy registry
         this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
-        
+        await this.currentTest.db.setStorageContract(this.currentTest.registry.address, true);
+
         // Deploy current cost
         this.currentTest.currentCost = await CurrentCost.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.currentCost.address);
 
         await this.currentTest.coord.updateAllDependencies({ from: owner });
-        await this.currentTest.stor.transferOwnership(this.currentTest.registry.address);
-        await this.currentTest.db.setStorageContract(this.currentTest.stor.address, true);
     });
 
     it("REGISTRY_1 - initiateProvider() - Check that we can initiate provider", async function () {
