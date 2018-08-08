@@ -4,11 +4,11 @@ pragma solidity ^0.4.24;
 import "../../lib/ownership/Upgradable.sol";
 import "../../lib/lifecycle/Destructible.sol";
 import "../bondage/BondageInterface.sol";
-import "./ArbiterStorage.sol";
 import "./ArbiterInterface.sol";
-import "../../lib/ownership/StorageHandler.sol";
+import "../database/DatabaseInterface.sol";
 
-contract Arbiter is Destructible, ArbiterInterface, StorageHandler, Upgradable {
+
+contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     // Called when a data purchase is initiated
     event DataPurchase(
         address indexed provider,          // Etheruem address of the provider
@@ -29,28 +29,24 @@ contract Arbiter is Destructible, ArbiterInterface, StorageHandler, Upgradable {
     // Used to specify who is the terminator of a contract
     enum SubscriptionTerminator { Provider, Subscriber }
 
-    ArbiterStorage stor;
     BondageInterface bondage;
-
-    address public storageAddress;
     address public bondageAddress;
+
+    // database address and reference
+    DatabaseInterface public db;
+    address databaseAddress;
 
     constructor(address c) Upgradable(c) public {
         _updateDependencies();
     }
 
     function _updateDependencies() internal {
-        storageAddress = coordinator.getContract("ARBITER_STORAGE");
         bondageAddress = coordinator.getContract("BONDAGE");
-        stor = ArbiterStorage(storageAddress);
         bondage = BondageInterface(bondageAddress);
+
+        databaseAddress = coordinator.getContract("DATABASE");
+        db = DatabaseInterface(databaseAddress);
     }
-
-
-    /// @notice Upgdate bondage function (barring no interface change)
-    function setBondage(address newBondageAddress) public onlyOwner {
-        bondage = BondageInterface(newBondageAddress);
-    }    
 
     /// @dev subscribe to specified number of blocks of provider
     /// @param providerAddress Provider address
@@ -71,13 +67,13 @@ contract Arbiter is Destructible, ArbiterInterface, StorageHandler, Upgradable {
         require(blocks > 0);
 
         // Can't reinitiate a currently active contract
-        require(stor.getDots(providerAddress, msg.sender, endpoint) == 0);
+        require(getDots(providerAddress, msg.sender, endpoint) == 0);
 
         // Escrow the necessary amount of dots
         bondage.escrowDots(msg.sender, providerAddress, endpoint, blocks);
         
         // Initiate the subscription struct
-        stor.setSubscription(
+        setSubscription(
             providerAddress,
             msg.sender,
             endpoint,
@@ -103,9 +99,9 @@ contract Arbiter is Destructible, ArbiterInterface, StorageHandler, Upgradable {
         returns (uint64 dots, uint96 blockStart, uint96 preBlockEnd)
     {
         return (
-            stor.getDots(providerAddress, subscriberAddress, endpoint),
-            stor.getBlockStart(providerAddress, subscriberAddress, endpoint),
-            stor.getPreBlockEnd(providerAddress, subscriberAddress, endpoint)
+            getDots(providerAddress, subscriberAddress, endpoint),
+            getBlockStart(providerAddress, subscriberAddress, endpoint),
+            getPreBlockEnd(providerAddress, subscriberAddress, endpoint)
         );
     }
 
@@ -150,8 +146,8 @@ contract Arbiter is Destructible, ArbiterInterface, StorageHandler, Upgradable {
         private
         returns (bool)
     {
-        uint256 dots = stor.getDots(providerAddress, subscriberAddress, endpoint);
-        uint256 preblockend = stor.getPreBlockEnd(providerAddress, subscriberAddress, endpoint);
+        uint256 dots = getDots(providerAddress, subscriberAddress, endpoint);
+        uint256 preblockend = getPreBlockEnd(providerAddress, subscriberAddress, endpoint);
         // Make sure the subscriber has a subscription
         require(dots > 0);
 
@@ -184,7 +180,82 @@ contract Arbiter is Destructible, ArbiterInterface, StorageHandler, Upgradable {
             );
         }
         // Kill the subscription
-        stor.deleteSubscription(providerAddress, subscriberAddress, endpoint);
+        deleteSubscription(providerAddress, subscriberAddress, endpoint);
         return true;
     }    
+
+
+    /*** --- *** STORAGE METHODS *** --- ***/
+
+    /// @dev get subscriber dots remaining for specified provider endpoint
+    function getDots(
+        address providerAddress,
+        address subscriberAddress,
+        bytes32 endpoint
+    )
+        public
+        view
+        returns (uint64)
+    {
+        return uint64(db.getNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'dots'))));
+    }
+
+    /// @dev get first subscription block number
+    function getBlockStart(
+        address providerAddress,
+        address subscriberAddress,
+        bytes32 endpoint
+    )
+        public
+        view
+        returns (uint96)
+    {
+        return uint96(db.getNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'blockStart'))));
+    }
+
+    /// @dev get last subscription block number
+    function getPreBlockEnd(
+        address providerAddress,
+        address subscriberAddress,
+        bytes32 endpoint
+    )
+        public
+        view
+        returns (uint96)
+    {
+        return uint96(db.getNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'preBlockEnd'))));
+    }
+
+    /**** Set Methods ****/
+
+    /// @dev store new subscription
+    function setSubscription(
+        address providerAddress,
+        address subscriberAddress,
+        bytes32 endpoint,
+        uint64 dots,
+        uint96 blockStart,
+        uint96 preBlockEnd
+    )
+        private
+    {
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'dots')), dots);
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'blockStart')), uint256(blockStart));
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'preBlockEnd')), uint256(preBlockEnd));
+    }
+
+    /**** Delete Methods ****/
+
+    /// @dev remove subscription
+    function deleteSubscription(
+        address providerAddress,
+        address subscriberAddress,
+        bytes32 endpoint
+    )
+        private
+    {
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'dots')), 0);
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'blockStart')), uint256(0));
+        db.setNumber(keccak256(abi.encodePacked('subscriptions', providerAddress, subscriberAddress, endpoint, 'preBlockEnd')), uint256(0));
+    }
 }
