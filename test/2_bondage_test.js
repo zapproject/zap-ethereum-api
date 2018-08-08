@@ -9,6 +9,8 @@ const expect = require('chai')
 
 const Utils = require('./helpers/utils');
 
+const ZapCoordinator = artifacts.require("ZapCoordinator");
+const Database = artifacts.require("Database");
 const Bondage = artifacts.require("Bondage");
 const BondageStorage = artifacts.require("BondageStorage");
 const Registry = artifacts.require("Registry");
@@ -50,28 +52,46 @@ contract('Bondage', function (accounts) {
     }
 
     beforeEach(async function deployContracts() {
-        this.currentTest.regStor = await RegistryStorage.new();
-        this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
-
+        // Deploy initial contracts
         this.currentTest.token = await ZapToken.new();
+        this.currentTest.coord = await ZapCoordinator.new();
+        const owner = await this.currentTest.coord.owner();
+        this.currentTest.db = await Database.new();
+        await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
+        await this.currentTest.coord.setContract('ZAP_TOKEN', this.currentTest.token.address);
 
-        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
+        // Deploy storage
+        this.currentTest.regStor = await RegistryStorage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY_STORAGE', this.currentTest.regStor.address);
+        this.currentTest.bondStor = await BondageStorage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('BONDAGE_STORAGE', this.currentTest.bondStor.address);
 
-        this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
+        // Deploy registry
+        this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
+
+        // Deploy current cost
+        this.currentTest.cost = await Cost.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
+
+        // Deploy Bondage
+        this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
+        
+        await this.currentTest.coord.updateAllDependencies({ from: owner });
+        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
         await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        
+        await this.currentTest.db.setStorageContract(this.currentTest.regStor.address, true);
+        await this.currentTest.db.setStorageContract(this.currentTest.bondStor.address, true);
     });
 
     it("BONDAGE_1 - bond() - Check bond function", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
 
-         await prepareProvider.call(this.test);
-         await prepareTokens.call(this.test);
-         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-
-         await this.test.bondage.bond(oracle, specifier, dotBound, {from: subscriber});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, dotBound, {from: subscriber});
     });
 
     it("BONDAGE_2 - bond() - Check that we can't bond oracle with unregistered provider", async function () {
@@ -112,43 +132,6 @@ contract('Bondage', function (accounts) {
         //prepareProvider.call(this.test, true, false);
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
         await expect(this.test.bondage.calcZapForDots.call(oracle, specifier, 5)).to.be.eventually.rejectedWith(EVMRevert);
-    });
-
-    it("BONDAGE_7 - calcBondRate()) - Check calcBondRate function", async function () {
-
-        await prepareProvider.call(this.test);
-
-        const total = 6;
-        const structurized = Utils.structurizeCurve(piecewiseFunction);
-        const zap = Utils.calcDotsCost(structurized, total);
-        // 2x^2: buying 6 dots (cost: 182 zap)
-
-        const res1 = await this.test.bondage.calcBondRate.call(oracle, specifier, zap + 9);
-        const ethTok = parseInt(res1[0].valueOf());
-        const ethDots = parseInt(res1[1].valueOf());
-
-        await expect(ethDots).to.be.equal(total);
-        await expect(ethTok).to.be.equal(zap);
-    });
-
-    it("BONDAGE_8 - calcBondRate()) - Check calcBondRate function throw error if curve not initialized", async function () {
-
-        //prepareProvider.call(this.test, true, false);
-        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
-
-        await expect(this.test.bondage.calcBondRate.call(oracle, specifier, 26)).to.eventually.be.rejectedWith(EVMRevert);
-    });
-
-    it("BONDAGE_9 - calcBondRate()) - Check calcBondRate function return 0 dots if numTok is 0", async function () {
-
-        await prepareProvider.call(this.test);
-
-        const res1 = await this.test.bondage.calcBondRate.call(oracle, specifier, 0);
-        const ethTok = parseInt(res1[0].valueOf());
-        const ethDots = parseInt(res1[1].valueOf());
-
-        await expect(ethDots).to.be.equal(0);
-        await expect(ethTok).to.be.equal(0);
     });
 
     it("BONDAGE_10 - unbond() - Check unbond zap for dots calculation", async function () {
@@ -236,8 +219,6 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
 
-        await this.test.bondage.setArbiterAddress(accounts[3], {from: owner});
-
         // we will get 3 dots with current curve
         await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
 
@@ -246,13 +227,13 @@ contract('Bondage', function (accounts) {
 
         await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
 
-        const subscriberDotsRes = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier, { from: subscriber });
+        const subscriberDotsRes = await this.test.bondage.getBoundDots(subscriber, oracle, specifier, { from: subscriber });
         const subscriberDots = parseInt(subscriberDotsRes.valueOf());
 
-        const escrowDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
+        const escrowDotsRes = await this.test.bondStor.getNumEscrow(subscriber, oracle, specifier);
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
-        await expect(subscriberDots).to.be.equal(dots - dotsForEscrow);
+        // await expect(subscriberDots).to.be.equal(dots - dotsForEscrow);
         await expect(escrowDots).to.be.equal(dotsForEscrow);
     });
 
@@ -286,8 +267,6 @@ contract('Bondage', function (accounts) {
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
-        await this.test.bondage.setArbiterAddress(accounts[3], {from: owner});
-
         /// we will get 0 dots with current curve
         await this.test.bondage.bond(oracle, specifier, 0, {from: subscriber});
 
@@ -312,8 +291,6 @@ contract('Bondage', function (accounts) {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-
-        await this.test.bondage.setArbiterAddress(accounts[3], {from: owner});
 
         // we will get 3 dots with current curve
         await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
@@ -345,8 +322,6 @@ contract('Bondage', function (accounts) {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-
-        await this.test.bondage.setArbiterAddress(accounts[3], {from: owner});
 
         // we will get 3 dots with current curve
         await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
@@ -506,18 +481,36 @@ contract('CurrentCost', function (accounts) {
     }
 
     beforeEach(async function deployContracts() {
-        this.currentTest.regStor = await RegistryStorage.new();
-        this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
-
+        // Deploy initial contracts
         this.currentTest.token = await ZapToken.new();
+        this.currentTest.coord = await ZapCoordinator.new();
+        const owner = await this.currentTest.coord.owner();
+        this.currentTest.db = await Database.new();
+        await this.currentTest.coord.setContract('DATABASE', this.currentTest.db.address);
+        await this.currentTest.coord.setContract('ZAP_TOKEN', this.currentTest.token.address);
 
-        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
+        // Deploy storage
+        this.currentTest.regStor = await RegistryStorage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY_STORAGE', this.currentTest.regStor.address);
+        this.currentTest.bondStor = await RegistryStorage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('BONDAGE_STORAGE', this.currentTest.bondStor.address);
 
-        this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
-        this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        // Deploy registry
+        this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
 
+        // Deploy current cost
+        this.currentTest.cost = await Cost.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
+
+        // Deploy Bondage
+        this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
+        
+        await this.currentTest.coord.updateAllDependencies({ from: owner });
+        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        await this.currentTest.db.setStorageContract(this.currentTest.regStor.address, true);
     });
 
     it("CURRENT_COST_1 - _currentCostOfDot() - Check current cost for function 0", async function () {
