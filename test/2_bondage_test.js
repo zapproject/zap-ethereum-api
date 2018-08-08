@@ -77,6 +77,9 @@ contract('Bondage', function (accounts) {
         // Deploy Bondage
         this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
+
+        // Hack for making arbiter an account we control for testing the escrow
+        await this.currentTest.coord.setContract('ARBITER', accounts[3]);
         
         await this.currentTest.coord.updateAllDependencies({ from: owner });
         await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
@@ -214,7 +217,6 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_15 - escrowDots() - Check that operator can escrow dots", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
@@ -233,12 +235,11 @@ contract('Bondage', function (accounts) {
         const escrowDotsRes = await this.test.bondStor.getNumEscrow(subscriber, oracle, specifier);
         const escrowDots = parseInt(escrowDotsRes.valueOf());
 
-        // await expect(subscriberDots).to.be.equal(dots - dotsForEscrow);
+        await expect(subscriberDots).to.be.equal(dots - dotsForEscrow);
         await expect(escrowDots).to.be.equal(dotsForEscrow);
     });
 
     it("BONDAGE_16 - escrowDots() - Check that not operator can't escrow dots", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -249,20 +250,10 @@ contract('Bondage', function (accounts) {
         const dots = 3;
         const dotsForEscrow = 2;
 
-        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[2] });
-        
-        const subscriberDotsRes = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier, { from: subscriber });
-        const subscriberDots = parseInt(subscriberDotsRes.valueOf());
-
-        const escrowDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
-        const escrowDots = parseInt(escrowDotsRes.valueOf());
-
-        await expect(subscriberDots).to.be.equal(dots);
-        await expect(escrowDots).to.be.equal(0);
+        await expect(this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[2] })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("BONDAGE_17 - escrowDots() - Check that operator can't escrow dots from oracle that haven't got enough dots", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -273,17 +264,7 @@ contract('Bondage', function (accounts) {
         const dots = 0;
         const dotsForEscrow = 2;
 
-       // await this.test.bondage.setDispatchAddress(accounts[3], { from: owner });
-        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
-        
-        const subscriberDotsRes = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier, { from: subscriber });
-        const subscriberDots = parseInt(subscriberDotsRes.valueOf());
-
-        const escrowDotsRes = await this.test.bondStor.getNumEscrow.call(subscriber, oracle, specifier);
-        const escrowDots = parseInt(escrowDotsRes.valueOf());
-
-        await expect(subscriberDots).to.be.equal(0);
-        await expect(escrowDots).to.be.equal(0);
+        await expect(this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("BONDAGE_18 - releaseDots() - Check that operator can release dots", async function () {

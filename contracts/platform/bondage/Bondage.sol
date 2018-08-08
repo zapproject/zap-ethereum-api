@@ -25,8 +25,8 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
     address public dispatchAddress;
 
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
-    modifier operatorOnly {
-        if (msg.sender == arbiterAddress || msg.sender == dispatchAddress)
+    modifier operatorOnly() {
+        require(msg.sender == arbiterAddress || msg.sender == dispatchAddress);
         _;
     }
 
@@ -36,27 +36,12 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
     }
 
     function _updateDependencies() internal {
+        arbiterAddress = coordinator.getContract("ARBITER");
+        dispatchAddress = coordinator.getContract("DISPATCH");
         storageAddress = coordinator.getContract("BONDAGE_STORAGE");
         stor = BondageStorage(storageAddress);
         token = ERC20(coordinator.getContract("ZAP_TOKEN")); 
         currentCost = CurrentCostInterface(coordinator.getContract("CURRENT_COST")); 
-    }
-
-    /// @dev Set Arbiter address
-    /// @notice This needs to be called upon deployment and after Arbiter update
-    function setArbiterAddress(address _arbiterAddress) external onlyOwner {
-        arbiterAddress = _arbiterAddress;
-    }
-    
-    /// @dev Set Dispatch address
-    /// @notice This needs to be called upon deployment and after Dispatch update
-    function setDispatchAddress(address _dispatchAddress) external onlyOwner {
-        dispatchAddress = _dispatchAddress;
-    }
-
-    /// @notice Upgdate currentCostOfDot function (barring no interface change)
-    function setCurrentCostAddress(address currentCostAddress) public onlyOwner {
-        currentCost = CurrentCostInterface(currentCostAddress);
     }
 
     /// @dev will bond to an oracle
@@ -87,17 +72,16 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots
-        )
-    external
-    operatorOnly        
-    returns (bool success)
+    )
+        external
+        operatorOnly        
+        returns (bool success)
     {
-        uint256 currentDots = getBoundDots(holderAddress, oracleAddress, endpoint);
-        uint256 dotsToEscrow = numDots;
-        if (numDots > currentDots) dotsToEscrow = currentDots; 
-        stor.updateBondValue(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
-        stor.updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "add");
-        emit Escrowed(holderAddress, oracleAddress, endpoint, dotsToEscrow);
+        uint256 boundDots = getBoundDots(holderAddress, oracleAddress, endpoint);
+        require(numDots < boundDots);
+        stor.updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
+        stor.updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
+        emit Escrowed(holderAddress, oracleAddress, endpoint, numDots);
         return true;
     }
 
@@ -110,10 +94,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots
-        )
-    external
-    operatorOnly 
-    returns (bool success)
+    )
+        external
+        operatorOnly 
+        returns (bool success)
     {
         uint256 numEscrowed = stor.getNumEscrow(holderAddress, oracleAddress, endpoint);
         uint256 dotsToEscrow = numDots;
@@ -130,10 +114,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots       
-        ) 
-    external
-    view
-    returns (uint256 numZap)
+    ) 
+        external
+        view
+        returns (uint256 numZap)
     {
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
         return currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
@@ -147,10 +131,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 totalBound
-        )
-    public
-    view
-    returns (uint256 cost)
+    )
+        public
+        view
+        returns (uint256 cost)
     {
         return currentCost._currentCostOfDot(oracleAddress, endpoint, totalBound);
     }
@@ -161,10 +145,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
     function dotLimit(
         address oracleAddress,
         bytes32 endpoint
-        )
-    public
-    view
-    returns (uint256 limit)
+    )
+        public
+        view
+        returns (uint256 limit)
     {
         return currentCost._dotLimit(oracleAddress, endpoint);
     }
@@ -174,10 +158,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
     function getDotsIssued(
         address oracleAddress,
         bytes32 endpoint        
-        )        
-    public
-    view
-    returns (uint256 dots)
+    )        
+        public
+        view
+        returns (uint256 dots)
     {
         return stor.getDotsIssued(oracleAddress, endpoint);
     }
@@ -186,10 +170,10 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         address holderAddress,
         address oracleAddress,
         bytes32 endpoint
-        )
-    public
-    view        
-    returns (uint256 dots)
+    )
+        public
+        view        
+        returns (uint256 dots)
     {
         return stor.getBoundDots(holderAddress, oracleAddress, endpoint);
     }
@@ -204,9 +188,9 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots        
-        )
-    private
-    returns (uint256) 
+    )
+        private
+        returns (uint256) 
     {   
         // This also checks if oracle is registered w/an initialized curve
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
@@ -234,12 +218,12 @@ contract Bondage is Destructible, BondageInterface, StorageHandler, Upgradable {
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots
-        )
-    private
-    returns (uint256 numZap)
+    )
+        private
+        returns (uint256 numZap)
     {
         // Make sure the user has enough to bond with some additional sanity checks
-        uint256 amountBound = stor.getBondValue(holderAddress, oracleAddress, endpoint);
+        uint256 amountBound = getBoundDots(holderAddress, oracleAddress, endpoint);
         require(amountBound >= numDots);
         require(numDots > 0);
 

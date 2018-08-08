@@ -5,7 +5,7 @@ import "../../lib/ownership/Upgradable.sol";
 
 contract ZapCoordinator is Ownable {
 	mapping(string => address) contracts; 
-	string[] loadedContracts;
+	string[] public loadedContracts;
 
 	// used for modifying an existing contract
 	function setContract(string contractName, address newAddress) external onlyOwner {

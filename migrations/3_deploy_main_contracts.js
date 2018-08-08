@@ -38,7 +38,7 @@ module.exports = async function(deployer, network) {
 
   // Update the coordinator with the new contracts
   await coordInstance.updateContract('REGISTRY_STORAGE', RegistryStorage.address);
-  await coordInstance.setContract('BONDAGE_STORAGE', BondageStorage.address);
+  await coordInstance.updateContract('BONDAGE_STORAGE', BondageStorage.address);
   await coordInstance.updateContract('ARBITER_STORAGE', ArbiterStorage.address);
   await coordInstance.updateContract('DISPATCH_STORAGE', DispatchStorage.address);
 
