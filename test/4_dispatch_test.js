@@ -46,6 +46,12 @@ function isEventReceived(logs, eventName) {
     return false;
 }
 
+function sleep(ms) {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, ms);
+    });
+}
+
 function getParamsFromIncomingEvent(logs) {
     for (let i in logs) {
         let log = logs[i];
@@ -138,7 +144,13 @@ contract('Dispatch', function (accounts) {
         await this.currentTest.db.setStorageContract(this.currentTest.bondStor.address, true);
         await this.currentTest.db.setStorageContract(this.currentTest.dispStor.address, true);
 
-        this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address, this.currentTest.registry.address);
+        this.currentTest.subscriber = await Subscriber.new(
+            this.currentTest.token.address,
+            this.currentTest.dispatch.address,
+            this.currentTest.bondage.address,
+            this.currentTest.registry.address
+        );
+
         this.currentTest.oracle = await Oracle.new(this.currentTest.registry.address);
     });
 
@@ -152,8 +164,7 @@ contract('Dispatch', function (accounts) {
         const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
         const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { }); 
-
+        subscriberEvents.watch((err, res) => {}); 
         
         // holder: subAddr (holder of dots)
         // subscriber: owner of zap
@@ -163,11 +174,8 @@ contract('Dispatch', function (accounts) {
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
         await this.test.subscriber.testQuery(oracleAddr, query, spec1, params);
 
-        // wait for callback
-
         // GET ALL EVENTS LOG 
         const logs = await subscriberEvents.get();
-        console.log(logs);
         await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
 
         // subscriber should have emitted one event

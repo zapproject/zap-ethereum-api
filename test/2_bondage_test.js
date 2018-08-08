@@ -377,14 +377,6 @@ contract('Bondage', function (accounts) {
             
         await this.test.bondage.delegateBond(subscriber, oracle, specifier, dotBound, {from: accounts[4]});
     });
-    // it("BONDAGE_23 - delegateBond() - Check that delegate bond can not be performed twice from same address before it was reseted", async function () {
-    //     await prepareProvider.call(this.test);      
-    //     await prepareTokens.call(this.test, accounts[4]);
-    //     await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
-            
-    //     await this.test.bondage.delegateBond(subscriber, oracle, specifier, dotBound, {from: accounts[4]});
-    //     await expect(this.test.bondage.delegateBond(subscriber, oracle, specifier, dotBound, {from: accounts[4]})).to.eventually.be.rejectedWith(EVMRevert);
-    // });
 }); 
 
 

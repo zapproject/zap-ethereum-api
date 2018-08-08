@@ -72,7 +72,7 @@ contract DispatchStorage is Ownable, Upgradable {
         db.setBytes32(keccak256(abi.encodePacked('queries', id, 'endpoint')), endpoint);
         db.setString(keccak256(abi.encodePacked('queries', id, 'userQuery')), userQuery);
         db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Pending));
-        db.setNumber(keccak256(abi.encodePacked('queries', 'id', 'onchainSubscriber')), onchainSubscriber ? 1 : 0);
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'onchainSubscriber')), onchainSubscriber ? 1 : 0);
     }
 
     function setFulfilled(uint256 id) external onlyOwner {
