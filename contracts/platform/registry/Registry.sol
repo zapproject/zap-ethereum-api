@@ -27,8 +27,6 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     }
 
     function _updateDependencies() internal {
-        //storageAddress = coordinator.getContract("REGISTRY_STORAGE");
-        //stor = RegistryStorage(storageAddress);
         address databaseAddress = coordinator.getContract("DATABASE");
         db = DatabaseInterface(databaseAddress);
     }
