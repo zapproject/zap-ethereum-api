@@ -425,14 +425,19 @@ contract('CurrentCost', function (accounts) {
     const specifier = "test-specifier";
     const zeroAddress = Utils.ZeroAddress;
 
-    // 2 x ^ 2
+    // 2 x ^ 2 on [1, 1000]
     const curveParams1 = [3, 0, 0, 2, 1000];
 
-    // 1 + 2 x + 3 x ^ 2
+    // 1 + 2 x + 3 x ^ 2 on [1, 1000]
     const curveParams2 = [3, 1, 2, 3, 1000];
 
+    // 10 on [1, 1000]
     const curveParams3 = [1, 10, 1000];
-    
+
+    // 10 on [1, 10]
+    // 20 on [10, 20]
+    const curveParams4 = [3, 1, 2, 3, 10, 1, 2, 20];
+
     const tokensForOwner = new BigNumber("1500e18");
     const tokensForSubscriber = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
@@ -470,48 +475,70 @@ contract('CurrentCost', function (accounts) {
         await this.currentTest.coord.updateAllDependencies({ from: owner });
     });
 
-    it("CURRENT_COST_1 - _currentCostOfDot() - Check current cost for function 0", async function () {
-
+    it("CURRENT_COST_1 - _currentCostOfDot() - Check current cost for function 1", async function () {
         await prepareProvider.call(this.test, true, true, oracle, curveParams1);
 
         const dotNumber = 3;
         const structure = Utils.structurizeCurve(curveParams1);
-        const fun0Cost = Utils.calcNextDotCost(structure, dotNumber);
+        const cost = Utils.calcNextDotCost(structure, dotNumber);
 
+        const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
+        const res = parseInt(_res.valueOf());
 
-        const res1 = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
-        const fun0Res = parseInt(res1.valueOf());
-
-        await expect(fun0Res).to.be.equal(fun0Cost);
+        await expect(res).to.be.equal(cost);
     });
 
-    it("CURRENT_COST_2 - _currentCostOfDot() - Check current cost for function 1", async function () {
-
+    it("CURRENT_COST_2 - _currentCostOfDot() - Check current cost for function 2", async function () {
         await prepareProvider.call(this.test, true, true, oracle, curveParams2);
 
         const dotNumber = 3;
         const structure = Utils.structurizeCurve(curveParams2);
-        const fun1Cost = Utils.calcNextDotCost(structure, dotNumber);
+        const cost = Utils.calcNextDotCost(structure, dotNumber);
 
 
-        const res2 = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
-        const fun1Res = parseInt(res2.valueOf());
+        const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
+        const res = parseInt(_res.valueOf());
 
-        await expect(fun1Res).to.be.equal(fun1Cost);
+        await expect(res).to.be.equal(cost);
     });
 
-    it("CURRENT_COST_3 - _currentCostOfDot() - Check current cost for function > 1", async function () {
-
+    it("CURRENT_COST_3 - _currentCostOfDot() - Check current cost for function 3", async function () {
         await prepareProvider.call(this.test, true, true, oracle, curveParams3);
 
         const dotNumber = 3;
         const structure = Utils.structurizeCurve(curveParams3);
-        const fun2Cost = Utils.calcNextDotCost(structure, dotNumber);
+        const cost = Utils.calcNextDotCost(structure, dotNumber);
 
 
-        const res3 = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
-        const fun2Res = parseInt(res3.valueOf());
+        const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
+        const res = parseInt(_res.valueOf());
 
-        await expect(fun2Res).to.be.equal(fun2Cost);
-    }); 
+        await expect(res).to.be.equal(cost);
+    });
+
+    it("CURRENT_COST_4 - _currentCostOfDot() - Check current cost for function 4", async function () {
+        await prepareProvider.call(this.test, true, true, oracle, curveParams4);
+
+        const dotNumber = 20;
+        const structure = Utils.structurizeCurve(curveParams4);
+        const cost = Utils.calcNextDotCost(structure, dotNumber);
+
+        const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
+        const res = parseInt(_res.valueOf());
+
+        await expect(res).to.be.equal(cost);
+    });
+
+    it("CURRENT_COST_5 - _costOfNDots() - Check cost of n-dots for function 4", async function () {
+        await prepareProvider.call(this.test, true, true, oracle, curveParams4);
+
+        const dotNumber = 20;
+        const structure = Utils.structurizeCurve(curveParams4);
+        const cost = Utils.calcDotsCost(structure, dotNumber);
+
+        const _res = await this.test.cost._costOfNDots.call(oracle, specifier, 1, dotNumber - 1);
+        const res = parseInt(_res.valueOf());
+
+        await expect(res).to.be.equal(cost);
+    });
 });
