@@ -132,7 +132,7 @@ contract('Dispatch', function (accounts) {
             this.currentTest.registry.address
         );
 
-        this.currentTest.oracle = await Oracle.new(this.currentTest.registry.address);
+        this.currentTest.oracle = await Oracle.new(this.currentTest.registry.address, false);
     });
 
     it("DISPATCH_1 - respond1() - Check that we can make a simple query", async function () {
@@ -322,6 +322,48 @@ contract('Dispatch', function (accounts) {
 
         await expect(this.test.dispatch.respond1(id, "Bad Data")).to.be.eventually.rejectedWith(EVMRevert);
     });
+
+
+    it("DISPATCH_10 - cancelQuery() - Check that a subscriber can cancel a query", async function () {
+        // make a "bad" oracle (will never respond)
+        this.test.oracle = await Oracle.new(this.test.registry.address, true);
+        
+        await prepareTokens.call(this.test, subscriber);    
+
+        const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        subscriberEvents.watch((err, res) => { }); 
+
+        const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        dispatchEvents.watch((err, res) => { }); 
+
+
+        var oracleAddr = this.test.oracle.address;
+        var subAddr = this.test.subscriber.address; 
+
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec4, 100, {from: subscriber});
+
+        var dotBalance = await this.test.bondage.getBoundDots(this.test.subscriber.address, oracleAddr, spec4);
+        // make the query
+        await this.test.subscriber.testQuery(oracleAddr, query, spec4, params);
+        var s_logs = await subscriberEvents.get();
+        var queryId = s_logs[0].args["id"];
+        var postQueryDots = await this.test.bondage.getBoundDots(this.test.subscriber.address, oracleAddr, spec4);
+        
+        // expect to have escrowed a dot
+        expect(dotBalance.minus(postQueryDots).toString()).to.be.equal("1");
+
+        await this.test.subscriber.cancelQuery(queryId);
+
+        let d_logs = await dispatchEvents.get();
+        var newBalance = await this.test.bondage.getBoundDots(this.test.subscriber.address, oracleAddr, spec4);
+        
+        expect(d_logs[0].event).to.be.equal("CanceledRequest");
+        // expect escrowed dot to be returned
+        expect(dotBalance.toString()).to.be.equal(newBalance.toString());
+    });
+
+    
 
     // converts an integer to its 32-bit hex representation
     function toHex(num){

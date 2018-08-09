@@ -65,7 +65,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 
     /// @dev Move numDots dots from provider-requester to bondage according to 
     /// data-provider address, holder address, and endpoint specifier (ala 'smart_contract')
-    /// Called only by Disptach or Arbiter Contracts
+    /// Called only by Dispatch or Arbiter Contracts
     function escrowDots(        
         address holderAddress,
         address oracleAddress,
