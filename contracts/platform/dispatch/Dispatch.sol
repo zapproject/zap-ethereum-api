@@ -152,7 +152,13 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
             // if it's current block ignore the cancel
             require(block.number == canceled);
 
+            // Uncancel the query
             setCanceled(id, false);
+
+            // Re-escrow the previously returned dots
+            bondage.escrowDots(subscriber, provider, endpoint, 1);
+
+            // Emit the events
             emit RevertCancelation(id, subscriber, provider);
         }
 
@@ -168,10 +174,20 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @notice Cancel a query.
     /// @dev If responded on the same block, ignore the cancel.
     function cancelQuery(uint256 id) external {
-        require(getSubscriber(id) == msg.sender);
+        address subscriber = getSubscriber(id);
+        address provider = getProvider(id);
+        bytes32 endpoint = getEndpoint(id);
+
+        require(subscriber == msg.sender);
         require(getStatus(id) == Status.Pending);
 
+        // Cancel the query
         setCanceled(id, true);
+
+        // Return the dots to the subscriber
+        bondage.returnDots(subscriber, provider, endpoint, 1);
+
+        // Release an event
         emit CanceledRequest(id, getSubscriber(id), getProvider(id));
     }
 
