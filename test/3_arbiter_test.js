@@ -3,9 +3,9 @@ import EVMRevert from './helpers/EVMRevert';
 const BigNumber = web3.BigNumber;
 
 const expect = require('chai')
-    .use(require('chai-as-promised'))
-    .use(require('chai-bignumber')(BigNumber))
-    .expect;
+.use(require('chai-as-promised'))
+.use(require('chai-bignumber')(BigNumber))
+.expect;
 
 const Utils = require('./helpers/utils.js');
 
@@ -194,5 +194,57 @@ contract('Arbiter', function (accounts) {
         await expect(parseInt(res[0].valueOf())).to.be.equal(10);
 
         await expect(this.test.arbiter.endSubscriptionProvider(subscriber, specifier, {from: accounts[7]})).to.eventually.be.rejectedWith(EVMRevert);
+    });
+    
+    it("ARBITER_10 - endSubscriptionProvider() - Check that subscriber receives any unused dots", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 100, {from: subscriber});
+
+        let initBalance = await this.test.bondage.getBoundDots(subscriber, oracle, specifier);
+        expect(initBalance.toString()).to.be.equal("100");
+        await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
+
+        let postEscrowBal = await this.test.bondage.getBoundDots(subscriber, oracle, specifier);
+        expect(postEscrowBal.toString()).to.be.equal("90");
+
+        let res = await this.test.arbiter.getSubscription(oracle, subscriber, specifier);
+        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+
+        const bondageEvents = this.test.bondage.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        bondageEvents.watch((err, res) => { }); 
+
+        var mine = function() {
+            return new Promise((resolve, reject) => {
+                web3.currentProvider.sendAsync({
+                  jsonrpc: "2.0",
+                  method: "evm_mine",
+                  id: 12345
+                }, function(err, result){
+                    resolve();
+                });
+            });
+        };
+
+        // mine 6 blocks
+        await mine();
+        await mine();
+        await mine();
+        await mine();
+        await mine();
+        await mine();
+
+        // After blocks have been mined
+        await this.test.arbiter.endSubscriptionSubscriber(oracle, specifier, {from: subscriber});
+        let b_logs = bondageEvents.get();
+
+        // 6 blocks have passed, and we include the first block in our calcuation, so we should receive 10-7=(3) dots back
+        let postCancelBal = await this.test.bondage.getBoundDots(subscriber, oracle, specifier);
+        expect(postCancelBal.toString()).to.be.equal("93");
+
+        // check that the provider received their 7 dots
+        let postCancelProviderBal = await this.test.bondage.getBoundDots(oracle, oracle, specifier);
+        expect(postCancelProviderBal.toString()).to.be.equal("7");
     });
 });

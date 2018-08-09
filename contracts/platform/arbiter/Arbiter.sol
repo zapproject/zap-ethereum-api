@@ -144,7 +144,8 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     )
         private
         returns (bool)
-    {
+    {   
+        // get the total value/block length of this subscription
         uint256 dots = getDots(providerAddress, subscriberAddress, endpoint);
         uint256 preblockend = getPreBlockEnd(providerAddress, subscriberAddress, endpoint);
         // Make sure the subscriber has a subscription
@@ -152,7 +153,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
 
         if (block.number < preblockend) {
             // Subscription ended early
-            uint256 earnedDots = (block.number * dots) / preblockend;
+            uint256 earnedDots = block.number - getBlockStart(providerAddress, subscriberAddress, endpoint);
             uint256 returnedDots = dots - earnedDots;
 
             // Transfer the earned dots to the provider
