@@ -11,7 +11,7 @@ import "../database/DatabaseInterface.sol";
 
 contract Dispatch is Destructible, DispatchInterface, Upgradable { 
 
-    enum Status { Pending, Fulfilled }
+    enum Status { Pending, Fulfilled, Canceled }
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(
@@ -71,6 +71,18 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         string response4
     );
 
+    event CanceledRequest(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider
+    );
+
+    event RevertCancelation(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider
+    );
+
     BondageInterface public bondage;
     address public bondageAddress;
 
@@ -125,12 +137,24 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @notice Transfer dots from Bondage escrow to data provider's Holder object under its own address
     /// @dev Called upon data-provider request fulfillment
     function fulfillQuery(uint256 id) private returns (bool) {
+        Status status = getStatus(id);
 
-        require(getStatus(id) == Status.Pending);
+        require(status != Status.Fulfilled);
 
         address subscriber = getSubscriber(id);
         address provider = getProvider(id);
         bytes32 endpoint = getEndpoint(id);
+        
+        if ( status == Status.Canceled ) {
+            uint256 canceled = getCancel(id);
+
+            // Make sure we've canceled in the past,
+            // if it's current block ignore the cancel
+            require(block.number == canceled);
+
+            setCanceled(id, false);
+            emit RevertCancelation(id, subscriber, provider);
+        }
 
         setFulfilled(id);
 
@@ -139,6 +163,16 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         emit FulfillQuery(subscriber, provider, endpoint);
 
         return true;
+    }
+
+    /// @notice Cancel a query.
+    /// @dev If responded on the same block, ignore the cancel.
+    function cancelQuery(uint256 id) external {
+        require(getSubscriber(id) == msg.sender);
+        require(getStatus(id) == Status.Pending);
+
+        setCanceled(id, true);
+        emit CanceledRequest(id, getSubscriber(id), getProvider(id));
     }
 
     /// @dev Parameter-count specific method called by data provider in response
@@ -276,6 +310,12 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         return Status(db.getNumber(keccak256(abi.encodePacked('queries', id, 'status'))));
     }
 
+    /// @dev get the cancelation block of a request
+    /// @param id request id
+    function getCancel(uint256 id) public view returns (uint256) {
+        return db.getNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')));
+    }
+
     /// @dev get user specified query of request
     /// @param id request id
     function getUserQuery(uint256 id) public view returns (string) {
@@ -310,6 +350,17 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
 
     function setFulfilled(uint256 id) private {
         db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Fulfilled));
+    }
+
+    function setCanceled(uint256 id, bool canceled) private {
+        if ( canceled ) {
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')), block.number);
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Canceled));
+        }
+        else {
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')), 0);
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Pending));            
+        }
     }
 }
 
