@@ -17,6 +17,8 @@ contract TestProvider is OnChainProvider {
     bytes32 public spec3 = "Add";
     bytes32 public spec4 = "Double";
 
+    bool AM_A_BAD_ORACLE;
+
     /* Endpoints to Functions:
     spec1: Hello? -> returns "Hello World"
     spec2: Reverse -> returns the query string in reverse
@@ -31,6 +33,7 @@ contract TestProvider is OnChainProvider {
     // middleware function for handling queries
 	function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external {
         emit RecievedQuery(userQuery, endpoint, endpointParams);
+        if(AM_A_BAD_ORACLE) return;
         bytes32 _endpoint = endpoint;
         if(onchainSubscriber) {
             bytes32 hash = keccak256(abi.encodePacked(_endpoint));
@@ -46,12 +49,12 @@ contract TestProvider is OnChainProvider {
             } else {
                 revert("Invalid endpoint");
             }
-        }
+        } // else: Do nothing (onchain only)
 	}
 
-    constructor(address registryAddress) public{
-
+    constructor(address registryAddress, bool isBad) public{
         registry = RegistryInterface(registryAddress);
+        AM_A_BAD_ORACLE = isBad;
 
         // initialize in registry
         bytes32 title = "TestContract";
@@ -129,6 +132,7 @@ contract TestProvider is OnChainProvider {
 /* Test Subscriber Client */
 contract TestClient is Client1, Client2{
 
+    event MadeQuery(address oracle, string query, uint256 id);
 	event Result1(uint256 id, string response1);
     event Result1(uint256 id, bytes32 response1);
     event Result2(uint256 id, string response1, string response2);
@@ -166,8 +170,10 @@ contract TestClient is Client1, Client2{
         // do something with result
     }
 
-    function testQuery(address oracleAddr, string query, bytes32 specifier, bytes32[] params) external {
-    	dispatch.query(oracleAddr, query, specifier, params, true, true);
+    function testQuery(address oracleAddr, string query, bytes32 specifier, bytes32[] params) external returns (uint256) {
+    	uint256 id = dispatch.query(oracleAddr, query, specifier, params, true, true);
+        emit MadeQuery(oracleAddr, query, id);
+        return id;
     }
 
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
@@ -179,6 +185,11 @@ contract TestClient is Client1, Client2{
     	assembly {
     		result := mload(add(source, 32))
     	}
+    }
+
+    // attempts to cancel an existing query
+    function cancelQuery(uint256 id) external {
+        dispatch.cancelQuery(id);
     }
 
 }
