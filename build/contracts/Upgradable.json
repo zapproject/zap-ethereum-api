@@ -1,0 +1,1130 @@
+{
+  "contractName": "Upgradable",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "name": "c",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "updateDependencies",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "import \"../../lib/ownership/ZapCoordinator.sol\";\n\npragma solidity ^0.4.24;\n\ncontract Upgradable {\n\n\taddress coordinatorAddr;\n\tZapCoordinator coordinator;\n\n\tconstructor(address c) public{\n\t\tcoordinatorAddr = c;\n\t\tcoordinator = ZapCoordinator(c);\n\t}\n\n    function updateDependencies() external coordinatorOnly {\n       _updateDependencies();\n    }\n\n    function _updateDependencies() internal;\n\n    modifier coordinatorOnly() {\n    \trequire(msg.sender == coordinatorAddr);\n    \t_;\n    }\n}\n",
+  "sourcePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
+  "ast": {
+    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
+    "exportedSymbols": {
+      "Upgradable": [
+        193
+      ]
+    },
+    "id": 194,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/ZapCoordinator.sol",
+        "file": "../../lib/ownership/ZapCoordinator.sol",
+        "id": 148,
+        "nodeType": "ImportDirective",
+        "scope": 194,
+        "sourceUnit": 399,
+        "src": "0:48:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 149,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "50:24:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 193,
+        "linearizedBaseContracts": [
+          193
+        ],
+        "name": "Upgradable",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 151,
+            "name": "coordinatorAddr",
+            "nodeType": "VariableDeclaration",
+            "scope": 193,
+            "src": "100:23:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 150,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "100:7:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "constant": false,
+            "id": 153,
+            "name": "coordinator",
+            "nodeType": "VariableDeclaration",
+            "scope": 193,
+            "src": "126:26:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+              "typeString": "contract ZapCoordinator"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 152,
+              "name": "ZapCoordinator",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 398,
+              "src": "126:14:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+                "typeString": "contract ZapCoordinator"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 168,
+              "nodeType": "Block",
+              "src": "185:62:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 160,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 158,
+                      "name": "coordinatorAddr",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 151,
+                      "src": "189:15:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "id": 159,
+                      "name": "c",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 155,
+                      "src": "207:1:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "189:19:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 161,
+                  "nodeType": "ExpressionStatement",
+                  "src": "189:19:3"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 166,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 162,
+                      "name": "coordinator",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 153,
+                      "src": "212:11:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+                        "typeString": "contract ZapCoordinator"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 164,
+                          "name": "c",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 155,
+                          "src": "241:1:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 163,
+                        "name": "ZapCoordinator",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 398,
+                        "src": "226:14:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_ZapCoordinator_$398_$",
+                          "typeString": "type(contract ZapCoordinator)"
+                        }
+                      },
+                      "id": 165,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "226:17:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+                        "typeString": "contract ZapCoordinator"
+                      }
+                    },
+                    "src": "212:31:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+                      "typeString": "contract ZapCoordinator"
+                    }
+                  },
+                  "id": 167,
+                  "nodeType": "ExpressionStatement",
+                  "src": "212:31:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 169,
+            "implemented": true,
+            "isConstructor": true,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 156,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 155,
+                  "name": "c",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 169,
+                  "src": "168:9:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 154,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "168:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "167:11:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 157,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "185:0:3"
+            },
+            "scope": 193,
+            "src": "156:91:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 177,
+              "nodeType": "Block",
+              "src": "308:37:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 174,
+                      "name": "_updateDependencies",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 181,
+                      "src": "317:19:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
+                        "typeString": "function ()"
+                      }
+                    },
+                    "id": 175,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "317:21:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 176,
+                  "nodeType": "ExpressionStatement",
+                  "src": "317:21:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 178,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [
+              {
+                "arguments": null,
+                "id": 172,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 171,
+                  "name": "coordinatorOnly",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 192,
+                  "src": "292:15:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "292:15:3"
+              }
+            ],
+            "name": "updateDependencies",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 170,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "280:2:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 173,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "308:0:3"
+            },
+            "scope": 193,
+            "src": "253:92:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 181,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "_updateDependencies",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 179,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "379:2:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 180,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "390:0:3"
+            },
+            "scope": 193,
+            "src": "351:40:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 191,
+              "nodeType": "Block",
+              "src": "424:60:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 187,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 184,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3974,
+                            "src": "439:3:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 185,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "439:10:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 186,
+                          "name": "coordinatorAddr",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 151,
+                          "src": "453:15:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "src": "439:29:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 183,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        3977,
+                        3978
+                      ],
+                      "referencedDeclaration": 3977,
+                      "src": "431:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
+                        "typeString": "function (bool) pure"
+                      }
+                    },
+                    "id": 188,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "431:38:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 189,
+                  "nodeType": "ExpressionStatement",
+                  "src": "431:38:3"
+                },
+                {
+                  "id": 190,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "476:1:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 192,
+            "name": "coordinatorOnly",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 182,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "421:2:3"
+            },
+            "src": "397:87:3",
+            "visibility": "internal"
+          }
+        ],
+        "scope": 194,
+        "src": "76:410:3"
+      }
+    ],
+    "src": "0:487:3"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
+    "exportedSymbols": {
+      "Upgradable": [
+        193
+      ]
+    },
+    "id": 194,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/ZapCoordinator.sol",
+        "file": "../../lib/ownership/ZapCoordinator.sol",
+        "id": 148,
+        "nodeType": "ImportDirective",
+        "scope": 194,
+        "sourceUnit": 399,
+        "src": "0:48:3",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "id": 149,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "50:24:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 193,
+        "linearizedBaseContracts": [
+          193
+        ],
+        "name": "Upgradable",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 151,
+            "name": "coordinatorAddr",
+            "nodeType": "VariableDeclaration",
+            "scope": 193,
+            "src": "100:23:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 150,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "100:7:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "constant": false,
+            "id": 153,
+            "name": "coordinator",
+            "nodeType": "VariableDeclaration",
+            "scope": 193,
+            "src": "126:26:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+              "typeString": "contract ZapCoordinator"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 152,
+              "name": "ZapCoordinator",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 398,
+              "src": "126:14:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+                "typeString": "contract ZapCoordinator"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 168,
+              "nodeType": "Block",
+              "src": "185:62:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 160,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 158,
+                      "name": "coordinatorAddr",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 151,
+                      "src": "189:15:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "id": 159,
+                      "name": "c",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 155,
+                      "src": "207:1:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "src": "189:19:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "id": 161,
+                  "nodeType": "ExpressionStatement",
+                  "src": "189:19:3"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 166,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "id": 162,
+                      "name": "coordinator",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 153,
+                      "src": "212:11:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+                        "typeString": "contract ZapCoordinator"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 164,
+                          "name": "c",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 155,
+                          "src": "241:1:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        ],
+                        "id": 163,
+                        "name": "ZapCoordinator",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 398,
+                        "src": "226:14:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_contract$_ZapCoordinator_$398_$",
+                          "typeString": "type(contract ZapCoordinator)"
+                        }
+                      },
+                      "id": 165,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "226:17:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+                        "typeString": "contract ZapCoordinator"
+                      }
+                    },
+                    "src": "212:31:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_contract$_ZapCoordinator_$398",
+                      "typeString": "contract ZapCoordinator"
+                    }
+                  },
+                  "id": 167,
+                  "nodeType": "ExpressionStatement",
+                  "src": "212:31:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 169,
+            "implemented": true,
+            "isConstructor": true,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 156,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 155,
+                  "name": "c",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 169,
+                  "src": "168:9:3",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 154,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "168:7:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "167:11:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 157,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "185:0:3"
+            },
+            "scope": 193,
+            "src": "156:91:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 177,
+              "nodeType": "Block",
+              "src": "308:37:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [],
+                    "expression": {
+                      "argumentTypes": [],
+                      "id": 174,
+                      "name": "_updateDependencies",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 181,
+                      "src": "317:19:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_internal_nonpayable$__$returns$__$",
+                        "typeString": "function ()"
+                      }
+                    },
+                    "id": 175,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "317:21:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 176,
+                  "nodeType": "ExpressionStatement",
+                  "src": "317:21:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 178,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [
+              {
+                "arguments": null,
+                "id": 172,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 171,
+                  "name": "coordinatorOnly",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 192,
+                  "src": "292:15:3",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_modifier$__$",
+                    "typeString": "modifier ()"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "292:15:3"
+              }
+            ],
+            "name": "updateDependencies",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 170,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "280:2:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 173,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "308:0:3"
+            },
+            "scope": 193,
+            "src": "253:92:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 181,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "_updateDependencies",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 179,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "379:2:3"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 180,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "390:0:3"
+            },
+            "scope": 193,
+            "src": "351:40:3",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 191,
+              "nodeType": "Block",
+              "src": "424:60:3",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "commonType": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "id": 187,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": false,
+                        "lValueRequested": false,
+                        "leftExpression": {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 184,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 3974,
+                            "src": "439:3:3",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 185,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "439:10:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "nodeType": "BinaryOperation",
+                        "operator": "==",
+                        "rightExpression": {
+                          "argumentTypes": null,
+                          "id": 186,
+                          "name": "coordinatorAddr",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 151,
+                          "src": "453:15:3",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "src": "439:29:3",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        }
+                      ],
+                      "id": 183,
+                      "name": "require",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [
+                        3977,
+                        3978
+                      ],
+                      "referencedDeclaration": 3977,
+                      "src": "431:7:3",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
+                        "typeString": "function (bool) pure"
+                      }
+                    },
+                    "id": 188,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "431:38:3",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 189,
+                  "nodeType": "ExpressionStatement",
+                  "src": "431:38:3"
+                },
+                {
+                  "id": 190,
+                  "nodeType": "PlaceholderStatement",
+                  "src": "476:1:3"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 192,
+            "name": "coordinatorOnly",
+            "nodeType": "ModifierDefinition",
+            "parameters": {
+              "id": 182,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "421:2:3"
+            },
+            "src": "397:87:3",
+            "visibility": "internal"
+          }
+        ],
+        "scope": 194,
+        "src": "76:410:3"
+      }
+    ],
+    "src": "0:487:3"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-08-09T21:46:42.585Z"
+}
