@@ -163,9 +163,9 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
                 earnedDots
             );
             //  Transfer the returned dots to the subscriber
-            bondage.releaseDots(
+            bondage.returnDots(
                 subscriberAddress,
-                subscriberAddress,
+                providerAddress,
                 endpoint,
                 returnedDots
             );
