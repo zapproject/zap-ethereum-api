@@ -14,6 +14,8 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     event Unbound(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Escrowed(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
     event Released(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
+    event Returned(address indexed holder, address indexed oracle, bytes32 indexed endpoint, uint256 numDots);
+
 
     CurrentCostInterface currentCost;
     ERC20 token;
@@ -75,7 +77,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         returns (bool success)
     {
         uint256 boundDots = getBoundDots(holderAddress, oracleAddress, endpoint);
-        require(numDots < boundDots);
+        require(numDots <= boundDots);
         updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
         updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
         emit Escrowed(holderAddress, oracleAddress, endpoint, numDots);
@@ -97,13 +99,35 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         returns (bool success)
     {
         uint256 numEscrowed = getNumEscrow(holderAddress, oracleAddress, endpoint);
-        uint256 dotsToEscrow = numDots;
-        if (numDots > numEscrowed) dotsToEscrow = numEscrowed;
-        updateEscrow(holderAddress, oracleAddress, endpoint, dotsToEscrow, "sub");
-        updateBondValue(oracleAddress, oracleAddress, endpoint, dotsToEscrow, "add");
-        emit Released(holderAddress, oracleAddress, endpoint, dotsToEscrow);
+        require(numDots <= numEscrowed);
+        updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
+        updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
+        emit Released(holderAddress, oracleAddress, endpoint, numDots);
         return true;
     }
+
+    /// @dev Transfer N dots from destAddress to fromAddress. 
+    /// Called only by Disptach or Arbiter Contracts
+    /// In smart contract endpoint, occurs per satisfied request. 
+    /// In socket endpoint called on termination of subscription.
+    function returnDots(
+        address holderAddress,
+        address oracleAddress,
+        bytes32 endpoint,
+        uint256 numDots
+    )
+        external
+        operatorOnly 
+        returns (bool success)
+    {
+        uint256 numEscrowed = getNumEscrow(holderAddress, oracleAddress, endpoint);
+        require(numDots <= numEscrowed);
+        updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
+        updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");
+        emit Returned(holderAddress, oracleAddress, endpoint, numDots);
+        return true;
+    }
+
 
     /// @dev Calculate quantity of tokens required for specified amount of dots
     /// for endpoint defined by endpoint and data provider defined by oracleAddress
