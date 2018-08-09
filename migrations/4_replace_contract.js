@@ -12,59 +12,54 @@ const Telegram = artifacts.require("./Telegram.sol");
 const ZapToken = artifacts.require("./ZapToken.sol");
 
 module.exports = async function(deployer, network) {
-  console.log("Deploying main contracts on: " + network);
+    console.log("Deploying main contracts on: " + network);
 
-  //var contractList = [Registry, CurrentCost, Bondage, Arbiter, Dispatch];
-  var redeployList = {
-    "REGISTRY": false,
-    "CURRENT_COST": false, 
-    "BONDAGE": true, 
-    "ARBITER": false, 
-    "DISPATCH": false
-  };
+    const redeployList = [
+        { contract: Registry,    deploy: false, name: "REGISTRY" },
+        { contract: CurrentCost, deploy: false, name: "CURRENT_COST" },
+        { contract: Bondage,     deploy: false, name: "BONDAGE" },
+        { contract: Arbiter,     deploy: false, name: "ARBITER" },
+        { contract: Dispatch,    deploy: false, name: "DISPATCH" }
+    ];
 
-  // Hard code ZapCoordinator address
-  var coordInstance = await ZapCoordinator.at("0x7393baa2e736a351ca9e23b53952508e554978d1");
+    // Hard code ZapCoordinator address
+    if ( ZapCoordinator.address ) {
+        let doUpdate = false;
+        const coordInstance = await ZapCoordinator.at(ZapCoordinator.address);
 
-  if(redeployList["REGISTRY"]){
-    await deployer.deploy(Registry, coordInstance.address);
-    await sleep(network);
-    await coordInstance.updateContract("REGISTRY", Registry.address);
-  } 
+        for ( const contract of redeployList ) {
+            if ( contract.deploy ) {
+                doUpdate = true;
 
-  if(redeployList["CURRENT_COST"]){
-    await deployer.deploy(CurrentCost, coordInstance.address);
-    await sleep(network);
-    await coordInstance.updateContract("CURRENT_COST", CurrentCost.address);
-  }
+                console.log('Updating', redeployList.name);
 
-  if(redeployList["BONDAGE"]){
+                await deployer.deploy(contract.contract, coordInstance.address);
+                await sleep(network);
 
-    await deployer.deploy(Bondage, coordInstance.address);
-    await sleep(network);
-    await coordInstance.updateContract("BONDAGE", Bondage.address);
-  } 
+                console.log(redeployList.name, 'is now at', contract.contract.address);
+                await coordInstance.updateContract(contract.name, contract.contract.address);
+            }
+        }
 
-  if(redeployList["ARBITER"]){
-    await deployer.deploy(Arbiter, coordInstance.address);
-    await sleep(network);
-    await coordInstance.updateContract("ARBITER", Arbiter.address);
-  } 
+        if ( doUpdate ) {
+            console.log('Updating all the dependencies');
+            await coordInstance.updateAllDependencies();
+        }
+        else {
+            console.log('No contracts require an update.');
+        }
+    }
+    else {
+        console.log('ZapCoordinator not found');
+    }
 
-  if(redeployList["DISPATCH"]){
-   await deployer.deploy(Dispatch, coordInstance.address);
-   await sleep(network);
-   await coordInstance.updateContract("DISPATCH", Dispatch.address);
- } 
- await coordInstance.updateAllDependencies();
- console.log('Done updating contracts');
- process.exit(0);
+    console.log('Done updating contracts');
 };
 
 function sleep(network) {
-  if ( network == "kovan" ) {
-    return new Promise(resolve => setTimeout(resolve, 30000));
-  } else {
-    return new Promise(resolve => setTimeout(resolve, 1000));
-  }
+    if ( network == "kovan" ) {
+        return new Promise(resolve => setTimeout(resolve, 30000));
+    } else {
+        return new Promise(resolve => setTimeout(resolve, 1000));
+    }
 }
