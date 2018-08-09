@@ -495,7 +495,6 @@ contract('CurrentCost', function (accounts) {
         const structure = Utils.structurizeCurve(curveParams2);
         const cost = Utils.calcNextDotCost(structure, dotNumber);
 
-
         const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
         const res = parseInt(_res.valueOf());
 
@@ -508,7 +507,6 @@ contract('CurrentCost', function (accounts) {
         const dotNumber = 3;
         const structure = Utils.structurizeCurve(curveParams3);
         const cost = Utils.calcNextDotCost(structure, dotNumber);
-
 
         const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
         const res = parseInt(_res.valueOf());
