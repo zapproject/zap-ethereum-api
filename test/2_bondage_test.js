@@ -125,7 +125,7 @@ contract('Bondage', function (accounts) {
         await expect(this.test.bondage.calcZapForDots.call(oracle, specifier, 5)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
-    it("BONDAGE_10 - unbond() - Check unbond zap for dots calculation", async function () {
+    it("BONDAGE_7 - unbond() - Check unbond zap for dots calculation", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -149,7 +149,7 @@ contract('Bondage', function (accounts) {
         await expect(delta2).to.be.equal("100");
     });
 
-    it("BONDAGE_11 - getBoundDots() - Check received dots getting", async function () {
+    it("BONDAGE_8 - getBoundDots() - Check received dots getting", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -164,7 +164,7 @@ contract('Bondage', function (accounts) {
         await expect(receivedDots).to.be.equal(3);
     });
 
-    it("BONDAGE_12 - getBoundDots() - Check that number of dots of unbonded provider is 0", async function () {
+    it("BONDAGE_9 - getBoundDots() - Check that number of dots of unbonded provider is 0", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -177,7 +177,7 @@ contract('Bondage', function (accounts) {
     });
 
 
-    it("BONDAGE_13 - getZapBound() - Check received ZAP getting", async function () {
+    it("BONDAGE_10 - getZapBound() - Check received ZAP getting", async function () {
         
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -192,7 +192,7 @@ contract('Bondage', function (accounts) {
         await expect(receivedTok).to.be.equal(28);
     });
 
-    it("BONDAGE_14 - getZapBound() - Check that received ZAP of unbonded provider is 0", async function () {
+    it("BONDAGE_11 - getZapBound() - Check that received ZAP of unbonded provider is 0", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -204,7 +204,7 @@ contract('Bondage', function (accounts) {
         await expect(receivedTok).to.be.equal(0);
     });
 
-    it("BONDAGE_15 - escrowDots() - Check that operator can escrow dots", async function () {
+    it("BONDAGE_12 - escrowDots() - Check that operator can escrow dots", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
@@ -227,7 +227,7 @@ contract('Bondage', function (accounts) {
         await expect(escrowDots).to.be.equal(dotsForEscrow);
     });
 
-    it("BONDAGE_16 - escrowDots() - Check that not operator can't escrow dots", async function () {
+    it("BONDAGE_13 - escrowDots() - Check that not operator can't escrow dots", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -241,7 +241,7 @@ contract('Bondage', function (accounts) {
         await expect(this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[2] })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
-    it("BONDAGE_17 - escrowDots() - Check that operator can't escrow dots from oracle that haven't got enough dots", async function () {
+    it("BONDAGE_14 - escrowDots() - Check that operator can't escrow dots from oracle that haven't got enough dots", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -255,7 +255,7 @@ contract('Bondage', function (accounts) {
         await expect(this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
-    it("BONDAGE_18 - releaseDots() - Check that operator can release dots", async function () {
+    it("BONDAGE_15 - releaseDots() - Check that operator can release dots", async function () {
     
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -286,7 +286,7 @@ contract('Bondage', function (accounts) {
         await expect(releaseDots).to.be.equal(dotsForEscrow);
     });
 
-    it("BONDAGE_19 - releaseDots() - Check that operator can't release dots if trying to release more dots than escrowed", async function () {
+    it("BONDAGE_16 - releaseDots() - Check that operator can't release dots if trying to release more dots than escrowed", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -304,7 +304,7 @@ contract('Bondage', function (accounts) {
         await expect(this.test.bondage.releaseDots(subscriber, oracle, specifier, dotsForEscrow + 2, { from: accounts[3] })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
-    it("BONDAGE_20 - getDotsIssued() - Check that issued dots will increase with every bond", async function () {
+    it("BONDAGE_17 - getDotsIssued() - Check that issued dots will increase with every bond", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -319,7 +319,7 @@ contract('Bondage', function (accounts) {
         await expect(parseInt(issuedDots.valueOf())).to.be.equal(4);
     });
 
-    it("BONDAGE_21 - getDotsIssued() - Check that issued dots will decrease with every unbond", async function () {
+    it("BONDAGE_18 - getDotsIssued() - Check that issued dots will decrease with every unbond", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -336,7 +336,7 @@ contract('Bondage', function (accounts) {
         await expect(parseInt(issuedDots.valueOf())).to.be.equal(3);
     });
 
-    it("BONDAGE_22 - bond() - Check bond function", async function () {
+    it("BONDAGE_19 - bond() - Check bond function", async function () {
 
          await prepareProvider.call(this.test);
          await prepareTokens.call(this.test);
@@ -345,12 +345,69 @@ contract('Bondage', function (accounts) {
          await expect(this.test.bondage.bond(oracle, specifier, approveTokens, {from: subscriber})).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
-    it("BONDAGE_22 - delegateBond() - Check that delegate bond can be executed", async function () {
+    it("BONDAGE_20 - delegateBond() - Check that delegate bond can be executed", async function () {
         await prepareProvider.call(this.test);      
         await prepareTokens.call(this.test, accounts[4]);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
             
         await this.test.bondage.delegateBond(subscriber, oracle, specifier, dotBound, {from: accounts[4]});
+    });
+
+    it("BONDAGE_21 - returnDots() - Check that dots can be returned", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
+
+        // we will get 3 dots with current curve
+        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+
+        const dots = 3;
+        const dotsForEscrow = 2;
+        const dotsForReturn = 1;
+
+        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
+        await this.test.bondage.returnDots(subscriber, oracle, specifier, dotsForReturn, { from: accounts[3] });
+
+        const subscriberDotsRes = await this.test.bondage.getBoundDots(subscriber, oracle, specifier, { from: subscriber });
+        const subscriberDots = parseInt(subscriberDotsRes.valueOf());
+
+        const escrowDotsRes = await this.test.bondage.getNumEscrow(subscriber, oracle, specifier);
+        const escrowDots = parseInt(escrowDotsRes.valueOf());
+
+        await expect(subscriberDots).to.be.equal(dots - dotsForEscrow + dotsForReturn);
+        await expect(escrowDots).to.be.equal(dotsForEscrow - dotsForReturn);
+    });
+
+    it("BONDAGE_22 - returnDots() - Check that more dots can't be returned than already escrowed", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
+
+        // we will get 3 dots with current curve
+        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+
+        const dots = 3;
+        const dotsForEscrow = 2;
+        const dotsForReturn = 1;
+
+        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
+        await expect(this.test.bondage.returnDots(subscriber, oracle, specifier, dotsForEscrow + 1, { from: accounts[3] })).to.be.eventually.be.rejectedWith(EVMRevert);
+    });
+
+    it("BONDAGE_23 - returnDots() - Check that more dots can't be called by someone who isn't the owner", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
+
+        // we will get 3 dots with current curve
+        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+
+        const dots = 3;
+        const dotsForEscrow = 2;
+        const dotsForReturn = 1;
+
+        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
+        await expect(this.test.bondage.returnDots(subscriber, oracle, specifier, dotsForEscrow + 1, { from: accounts[0] })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 }); 
 
