@@ -286,7 +286,7 @@ contract('Bondage', function (accounts) {
         await expect(releaseDots).to.be.equal(dotsForEscrow);
     });
 
-    it("BONDAGE_19 - releaseDots() - Check that operator can release dots if trying to release more dots than escrowed", async function () {
+    it("BONDAGE_19 - releaseDots() - Check that operator can't release dots if trying to release more dots than escrowed", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -301,20 +301,7 @@ contract('Bondage', function (accounts) {
         const forRelease = accounts[8];
 
         await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
-        await this.test.bondage.releaseDots(subscriber, oracle, specifier, dotsForEscrow + 2, { from: accounts[3] });
-
-        const subscriberDotsRes = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier, { from: subscriber });
-        const subscriberDots = parseInt(subscriberDotsRes.valueOf());
-
-        const escrowDotsRes = await this.test.bondage.getNumEscrow.call(subscriber, oracle, specifier);
-        const escrowDots = parseInt(escrowDotsRes.valueOf());
-
-        const releaseRes = await this.test.bondage.getBoundDots.call(oracle, oracle, specifier, { from: oracle });
-        const releaseDots = parseInt(releaseRes.valueOf());
-
-        await expect(subscriberDots).to.be.equal(dots - dotsForEscrow);
-        await expect(escrowDots).to.be.equal(0);
-        await expect(releaseDots).to.be.equal(dotsForEscrow);
+        await expect(this.test.bondage.releaseDots(subscriber, oracle, specifier, dotsForEscrow + 2, { from: accounts[3] })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("BONDAGE_20 - getDotsIssued() - Check that issued dots will increase with every bond", async function () {

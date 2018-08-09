@@ -12,44 +12,44 @@ const Telegram = artifacts.require("./Telegram.sol");
 const ZapToken = artifacts.require("./ZapToken.sol");
 
 module.exports = async function(deployer, network) {
-  console.log("Deploying main contracts on: " + network);
+    console.log("Deploying main contracts on: " + network);
 
-  // Deploy all the coordinator
-  await deployer.deploy(ZapCoordinator);
-  const coordInstance = await ZapCoordinator.deployed();
-  const owner = await coordInstance.owner();
+    // Deploy all the coordinator
+    await deployer.deploy(ZapCoordinator);
+    const coordInstance = await ZapCoordinator.deployed();
+    const owner = await coordInstance.owner();
 
-  // Setup important contracts
-  await deployer.deploy(Database);
-  const dbInstance = await Database.deployed();
-  await dbInstance.transferOwnership(ZapCoordinator.address);
+    // Setup important contracts
+    await deployer.deploy(Database);
+    const dbInstance = await Database.deployed();
+    await dbInstance.transferOwnership(ZapCoordinator.address);
 
-  await coordInstance.addImmutableContract('ZAP_TOKEN', ZapToken.address);
-  await coordInstance.addImmutableContract('DATABASE', Database.address);
+    await coordInstance.addImmutableContract('ZAP_TOKEN', ZapToken.address);
+    await coordInstance.addImmutableContract('DATABASE', Database.address);
 
-  // Deploy the rest of the contracts
-  await deployer.deploy(Registry, ZapCoordinator.address);
-  await deployer.deploy(CurrentCost, ZapCoordinator.address);
-  await deployer.deploy(Bondage, ZapCoordinator.address);
-  await deployer.deploy(Arbiter, ZapCoordinator.address);
-  await deployer.deploy(Dispatch, ZapCoordinator.address);
+    // Deploy the rest of the contracts
+    await deployer.deploy(Registry, ZapCoordinator.address);
+    await deployer.deploy(CurrentCost, ZapCoordinator.address);
+    await deployer.deploy(Bondage, ZapCoordinator.address);
+    await deployer.deploy(Arbiter, ZapCoordinator.address);
+    await deployer.deploy(Dispatch, ZapCoordinator.address);
 
-  // Add the above contracts to the coordinator 
-  await coordInstance.updateContract('REGISTRY', Registry.address);
-  await coordInstance.updateContract('CURRENT_COST', CurrentCost.address);
-  await coordInstance.updateContract('BONDAGE', Bondage.address);
-  await coordInstance.updateContract('ARBITER', Arbiter.address);
-  await coordInstance.updateContract('DISPATCH', Dispatch.address);
+    // Add the above contracts to the coordinator 
+    await coordInstance.updateContract('REGISTRY', Registry.address);
+    await coordInstance.updateContract('CURRENT_COST', CurrentCost.address);
+    await coordInstance.updateContract('BONDAGE', Bondage.address);
+    await coordInstance.updateContract('ARBITER', Arbiter.address);
+    await coordInstance.updateContract('DISPATCH', Dispatch.address);
 
-  await coordInstance.updateAllDependencies({ from: owner });
+    await coordInstance.updateAllDependencies({ from: owner });
 
-  // Deploy telegram example
-  // await deployer.deploy(Telegram, Registry.address);
-  console.log('Done migrating core contracts');
+    // Deploy telegram example
+    // await deployer.deploy(Telegram, Registry.address);
+    console.log('Done migrating core contracts');
 };
 
 function sleep(network) {
-  if ( network == "kovan" ) {
-    return new Promise(resolve => setTimeout(resolve, 30000));
-  }
+    if ( network == "kovan" ) {
+        return new Promise(resolve => setTimeout(resolve, 30000));
+    }
 }
