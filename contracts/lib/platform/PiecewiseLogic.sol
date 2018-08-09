@@ -18,7 +18,8 @@ library PiecewiseLogic {
 
     function evaluateFunction(int[] curve, uint a, uint b) internal pure returns (int) {
         uint i = 0;
-        
+        int sum = 0;
+
         // Require to be within the dot limit
         require(a + b <= uint(curve[curve.length - 1]));
 
@@ -35,14 +36,16 @@ library PiecewiseLogic {
                 continue;
             }
 
+            sum += evaluatePiece(curve, i, a, (a + b > end) ? end - a : b);
+
             if ( a + b <= end ) {
-                // entire calculation is within this piece
-                return evaluatePiece(curve, i, a, b);
+                // Entire calculation is within this piece
+                return sum;
             }
             else {
-                // TODO: calculation is going to be in multiple pieces
-                revert();
-
+                b -= end - a + 1; // Remove the dots we've already bound from b
+                a = end;          // Move a up to the end
+                i = nextIndex;    // Move index up
             }
         }
     }
