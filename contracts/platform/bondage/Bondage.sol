@@ -17,7 +17,6 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 
     CurrentCostInterface currentCost;
     ERC20 token;
-    uint256 decimals = 10 ** 18;
 
     address public arbiterAddress;
     address public dispatchAddress;
