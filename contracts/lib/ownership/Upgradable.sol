@@ -1,15 +1,15 @@
-import "../../lib/ownership/ZapCoordinator.sol";
+import "./ZapCoordinatorInterface.sol";
 
 pragma solidity ^0.4.24;
 
 contract Upgradable {
 
 	address coordinatorAddr;
-	ZapCoordinator coordinator;
+	ZapCoordinatorInterface coordinator;
 
 	constructor(address c) public{
 		coordinatorAddr = c;
-		coordinator = ZapCoordinator(c);
+		coordinator = ZapCoordinatorInterface(c);
 	}
 
     function updateDependencies() external coordinatorOnly {
