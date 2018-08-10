@@ -1,5 +1,4 @@
 pragma solidity ^0.4.24;
-import "../../platform/dispatch/Dispatch.sol";
 
 contract OnChainProvider {
     /// @dev function for requesting data from on-chain provider
