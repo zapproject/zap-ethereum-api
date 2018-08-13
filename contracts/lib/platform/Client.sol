@@ -37,3 +37,11 @@ contract ClientBytes32Array {
     /// @param response bytes32 array
     function callback(uint256 id, bytes32[] response) external;
 }
+
+contract ClientIntArray{
+    /// @dev callback that provider will call after Dispatch.query() call
+    /// @param id request id
+    /// @param response int array
+    function callback(uint256 id, int[] response) external;
+}
+
