@@ -37,7 +37,7 @@ const deploy = async function(deployer, network) {
                 await deployer.deploy(contract.contract, coordInstance.address);
                 await sleep(network);
 
-                console.log(redeployList.name, 'is now at', contract.contract.address);
+                console.log(contract.name, 'is now at', contract.contract.address);
                 await coordInstance.updateContract(contract.name, contract.contract.address);
             }
         }
