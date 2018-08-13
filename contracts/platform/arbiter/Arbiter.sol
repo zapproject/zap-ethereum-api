@@ -61,7 +61,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     /// @param params arbitrary params to be passed
     function passParams(address receiver, bytes32 endpoint, bytes32[] params) public {
 
-        ParamsPassed(msg.sender, receiver, endpoint, params);    
+        emit ParamsPassed(msg.sender, receiver, endpoint, params);    
     }
 
     /// @dev subscribe to specified number of blocks of provider
