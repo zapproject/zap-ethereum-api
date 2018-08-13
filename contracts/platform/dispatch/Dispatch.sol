@@ -1,14 +1,17 @@
 pragma solidity ^0.4.24;
 // v1.0
 
+import "../../lib/ownership/Upgradable.sol";
 import "../../lib/lifecycle/Destructible.sol";
 import "../../lib/platform/Client.sol";
 import "../../lib/platform/OnChainProvider.sol";
 import "../bondage/BondageInterface.sol"; 
-import "./DispatchStorage.sol";
 import "./DispatchInterface.sol";
+import "../database/DatabaseInterface.sol";
 
-contract Dispatch is Destructible, DispatchInterface { 
+contract Dispatch is Destructible, DispatchInterface, Upgradable { 
+
+    enum Status { Pending, Fulfilled, Canceled }
 
     //event data provider is listening for, containing all relevant request parameters
     event Incoming(
@@ -32,6 +35,13 @@ contract Dispatch is Destructible, DispatchInterface {
         address indexed subscriber,
         address indexed provider,
         bytes32[] response
+    );
+
+    event OffchainResponseInt(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider,
+        int[] response
     );
 
     event OffchainResult1(
@@ -68,23 +78,34 @@ contract Dispatch is Destructible, DispatchInterface {
         string response4
     );
 
-    DispatchStorage stor;
-    BondageInterface bondage;
+    event CanceledRequest(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider
+    );
 
-    address public storageAddress;
+    event RevertCancelation(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider
+    );
+
+    BondageInterface public bondage;
     address public bondageAddress;
 
-    constructor(address _storageAddress, address _bondageAddress) public {
-        storageAddress = _storageAddress;
-        bondageAddress = _bondageAddress;
-        stor = DispatchStorage(_storageAddress);
-        bondage = BondageInterface(_bondageAddress);
+    DatabaseInterface public db;
+
+    constructor(address c) Upgradable(c) public {
+        //_updateDependencies();
     }
 
-    /// @notice Upgdate bondage function (barring no interface change)
-    function setBondage(address _bondageAddress) public onlyOwner {
-        bondage = BondageInterface(_bondageAddress);
-    }    
+    function _updateDependencies() internal {
+        address databaseAddress = coordinator.getContract("DATABASE");
+        db = DatabaseInterface(databaseAddress);
+
+        bondageAddress = coordinator.getContract("BONDAGE");
+        bondage = BondageInterface(bondageAddress);
+    }
 
     /// @notice Escrow dot for oracle request
     /// @dev Called by user contract
@@ -107,7 +128,7 @@ contract Dispatch is Destructible, DispatchInterface {
 
             id = uint256(keccak256(abi.encodePacked(block.number, now, userQuery, msg.sender, provider)));
 
-            stor.createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
+            createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
             if(onchainProvider) {
                 OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams, onchainSubscriber); 
             }
@@ -122,21 +143,59 @@ contract Dispatch is Destructible, DispatchInterface {
 
     /// @notice Transfer dots from Bondage escrow to data provider's Holder object under its own address
     /// @dev Called upon data-provider request fulfillment
-    function fulfillQuery(uint256 id) internal returns (bool) {
+    function fulfillQuery(uint256 id) private returns (bool) {
+        Status status = getStatus(id);
 
-        require(stor.getStatus(id) == DispatchStorage.Status.Pending);
+        require(status != Status.Fulfilled);
 
-        address subscriber = stor.getSubscriber(id);
-        address provider = stor.getProvider(id);
-        bytes32 endpoint = stor.getEndpoint(id);
+        address subscriber = getSubscriber(id);
+        address provider = getProvider(id);
+        bytes32 endpoint = getEndpoint(id);
+        
+        if ( status == Status.Canceled ) {
+            uint256 canceled = getCancel(id);
 
-        stor.setFulfilled(id);
+            // Make sure we've canceled in the past,
+            // if it's current block ignore the cancel
+            require(block.number == canceled);
+
+            // Uncancel the query
+            setCanceled(id, false);
+
+            // Re-escrow the previously returned dots
+            bondage.escrowDots(subscriber, provider, endpoint, 1);
+
+            // Emit the events
+            emit RevertCancelation(id, subscriber, provider);
+        }
+
+        setFulfilled(id);
 
         bondage.releaseDots(subscriber, provider, endpoint, 1);
 
         emit FulfillQuery(subscriber, provider, endpoint);
 
         return true;
+    }
+
+    /// @notice Cancel a query.
+    /// @dev If responded on the same block, ignore the cancel.
+    function cancelQuery(uint256 id) external {
+        address subscriber = getSubscriber(id);
+        address provider = getProvider(id);
+        bytes32 endpoint = getEndpoint(id);
+
+        require(subscriber == msg.sender);
+        require(getStatus(id) == Status.Pending);
+
+        // Cancel the query
+        setCanceled(id, true);
+
+        // Return the dots to the subscriber
+        bondage.returnDots(subscriber, provider, endpoint, 1);
+
+        // Release an event
+        emit CanceledRequest(id, getSubscriber(id), getProvider(id));
     }
 
     /// @dev Parameter-count specific method called by data provider in response
@@ -147,13 +206,32 @@ contract Dispatch is Destructible, DispatchInterface {
         external
         returns (bool)
     {
-        if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
+        if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
-        if(stor.getSubscriberOnchain(id)) {
-            ClientBytes32Array(stor.getSubscriber(id)).callback(id, response);
+        if(getSubscriberOnchain(id)) {
+            ClientBytes32Array(getSubscriber(id)).callback(id, response);
         }
         else {
-            emit OffchainResponse(id, stor.getSubscriber(id), msg.sender, response);
+            emit OffchainResponse(id, getSubscriber(id), msg.sender, response);
+        }
+        return true;
+    }
+
+    /// @dev Parameter-count specific method called by data provider in response
+    function respondIntArray(
+        uint256 id,
+        int[] response
+    )
+        external
+        returns (bool)
+    {
+        if (getProvider(id) != msg.sender || !fulfillQuery(id))
+            revert();
+        if(getSubscriberOnchain(id)) {
+            ClientIntArray(getSubscriber(id)).callback(id, response);
+        }
+        else {
+            emit OffchainResponseInt(id, getSubscriber(id), msg.sender, response);
         }
         return true;
     }
@@ -167,14 +245,14 @@ contract Dispatch is Destructible, DispatchInterface {
         external
         returns (bool)
     {
-        if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
+        if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
 
-        if(stor.getSubscriberOnchain(id)) {
-            Client1(stor.getSubscriber(id)).callback(id, response);
+        if(getSubscriberOnchain(id)) {
+            Client1(getSubscriber(id)).callback(id, response);
         }
         else {
-            emit OffchainResult1(id, stor.getSubscriber(id), msg.sender, response);
+            emit OffchainResult1(id, getSubscriber(id), msg.sender, response);
         }
         return true;
     }
@@ -188,14 +266,14 @@ contract Dispatch is Destructible, DispatchInterface {
         external
         returns (bool)
     {
-        if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
+        if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
 
-        if(stor.getSubscriberOnchain(id)) {
-            Client2(stor.getSubscriber(id)).callback(id, response1, response2);
+        if(getSubscriberOnchain(id)) {
+            Client2(getSubscriber(id)).callback(id, response1, response2);
         }
         else {
-            emit OffchainResult2(id, stor.getSubscriber(id), msg.sender, response1, response2);
+            emit OffchainResult2(id, getSubscriber(id), msg.sender, response1, response2);
         }
 
         return true;
@@ -211,14 +289,14 @@ contract Dispatch is Destructible, DispatchInterface {
         external
         returns (bool)
     {
-        if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
+        if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
 
-        if(stor.getSubscriberOnchain(id)) {
-            Client3(stor.getSubscriber(id)).callback(id, response1, response2, response3);
+        if(getSubscriberOnchain(id)) {
+            Client3(getSubscriber(id)).callback(id, response1, response2, response3);
         }
         else {
-            emit OffchainResult3(id, stor.getSubscriber(id), msg.sender, response1, response2, response3);
+            emit OffchainResult3(id, getSubscriber(id), msg.sender, response1, response2, response3);
         }
 
         return true;
@@ -235,17 +313,96 @@ contract Dispatch is Destructible, DispatchInterface {
         external
         returns (bool)
     {
-        if (stor.getProvider(id) != msg.sender || !fulfillQuery(id))
+        if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
 
-        if(stor.getSubscriberOnchain(id)) {
-            Client4(stor.getSubscriber(id)).callback(id, response1, response2, response3, response4);
+        if(getSubscriberOnchain(id)) {
+            Client4(getSubscriber(id)).callback(id, response1, response2, response3, response4);
         }
         else {
-            emit OffchainResult4(id, stor.getSubscriber(id), msg.sender, response1, response2, response3, response4);
+            emit OffchainResult4(id, getSubscriber(id), msg.sender, response1, response2, response3, response4);
         }
 
         return true;
+    }
+
+    /*** STORAGE METHODS ***/
+
+    /// @dev get provider address of request
+    /// @param id request id
+    function getProvider(uint256 id) public view returns (address) {
+        return address(db.getNumber(keccak256(abi.encodePacked('queries', id, 'provider'))));
+    }
+
+    /// @dev get subscriber address of request
+    /// @param id request id
+    function getSubscriber(uint256 id) public view returns (address) {
+        return address(db.getNumber(keccak256(abi.encodePacked('queries', id, 'subscriber'))));
+    }
+
+    /// @dev get endpoint of request
+    /// @param id request id
+    function getEndpoint(uint256 id) public view returns (bytes32) {
+        return db.getBytes32(keccak256(abi.encodePacked('queries', id, 'endpoint')));
+    }
+
+    /// @dev get status of request
+    /// @param id request id
+    function getStatus(uint256 id) public view returns (Status) {
+        return Status(db.getNumber(keccak256(abi.encodePacked('queries', id, 'status'))));
+    }
+
+    /// @dev get the cancelation block of a request
+    /// @param id request id
+    function getCancel(uint256 id) public view returns (uint256) {
+        return db.getNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')));
+    }
+
+    /// @dev get user specified query of request
+    /// @param id request id
+    function getUserQuery(uint256 id) public view returns (string) {
+        return db.getString(keccak256(abi.encodePacked('queries', id, 'userQuery')));
+    }
+
+    /// @dev is subscriber contract or offchain 
+    /// @param id request id
+    function getSubscriberOnchain(uint256 id) public view returns (bool) {
+        uint res = db.getNumber(keccak256(abi.encodePacked('queries', id, 'onchainSubscriber')));
+        return res == 1 ? true : false;
+    }
+ 
+    /**** Set Methods ****/
+    function createQuery(
+        uint256 id,
+        address provider,
+        address subscriber,
+        bytes32 endpoint,
+        string userQuery,
+        bool onchainSubscriber
+    ) 
+        private
+    {
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'provider')), uint256(provider));
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'subscriber')), uint256(subscriber));
+        db.setBytes32(keccak256(abi.encodePacked('queries', id, 'endpoint')), endpoint);
+        db.setString(keccak256(abi.encodePacked('queries', id, 'userQuery')), userQuery);
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Pending));
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'onchainSubscriber')), onchainSubscriber ? 1 : 0);
+    }
+
+    function setFulfilled(uint256 id) private {
+        db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Fulfilled));
+    }
+
+    function setCanceled(uint256 id, bool canceled) private {
+        if ( canceled ) {
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')), block.number);
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Canceled));
+        }
+        else {
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')), 0);
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Pending));            
+        }
     }
 }
 

@@ -7,8 +7,9 @@ const expect = require('chai')
     .use(require('chai-bignumber')(BigNumber))
     .expect;
 
+const ZapCoordinator = artifacts.require("ZapCoordinator");
+const Database = artifacts.require("Database");
 const Registry = artifacts.require("Registry");
-const RegistryStorage = artifacts.require("RegistryStorage");
 const CurrentCost = artifacts.require("CurrentCost");
 
 const Utils = require("./helpers/utils.js");
@@ -32,15 +33,25 @@ contract('Registry', async (accounts) => {
     const specifier = "test-linear-specifier";
     const params = ["param1", "param2"];
 
-    const parts= [0,5,5,100];
-    const constants = [2,2,0,1,1,1,10,0,0];
-    const dividers=[1,3];
+    // y = 2x + x^2 from [1, 100]
+    const curve = [3, 0, 2, 1, 100];
 
     beforeEach(async function deployContracts() {
-        this.currentTest.stor = await RegistryStorage.new();
-        this.currentTest.registry = await Registry.new(this.currentTest.stor.address);
-        this.currentTest.currentCost = await CurrentCost.new(this.currentTest.registry.address);
-        await this.currentTest.stor.transferOwnership(this.currentTest.registry.address);
+        // Deploy initial contracts
+        this.currentTest.coord = await ZapCoordinator.new();
+        const owner = await this.currentTest.coord.owner();
+        this.currentTest.db = await Database.new();
+        await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
+        await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
+        // Deploy registry
+        this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
+
+        // Deploy current cost
+        this.currentTest.currentCost = await CurrentCost.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.currentCost.address);
+
+        await this.currentTest.coord.updateAllDependencies({ from: owner });
     });
 
     it("REGISTRY_1 - initiateProvider() - Check that we can initiate provider", async function () {
@@ -57,17 +68,17 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_3 - initiateProviderCurve() - Check that we can initiate provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
     });
 
     it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
-        await expect(this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.registry.initiateProviderCurve(specifier, curve, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if passing in invalid curve arguments ", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
-        await expect(this.test.registry.initiateProviderCurve(specifier,parts, constants, dividers, { from: owner }))
+        await expect(this.test.registry.initiateProviderCurve(specifier, [3, 0, 0, 0, 5, 100], { from: owner }))
             .to.eventually.be.rejectedWith(EVMRevert);
     });
 
@@ -90,7 +101,6 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
 
         const receivedTitle = await this.test.registry.getProviderTitle.call(owner);
-
         await expect(hex2a(receivedTitle.valueOf())).to.be.equal(title);
     });
 
@@ -116,23 +126,15 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_12 - getProviderCurve() - Check that we initialize and get provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner });
-        const curve = await this.test.registry.getProviderCurve.call(owner, specifier, { from: owner });
-        for(let item of curve) {
-            let arr = Utils.fetchPureArray(item,parseInt)
-            expect(arr).to.be.an('array');
-            expect(arr.length.valueOf()).to.be.greaterThan(0);
-        }
-        expect(Utils.fetchPureArray(curve[0],parseInt)).to.deep.equal(constants);
-        expect(Utils.fetchPureArray(curve[1],parseInt)).to.deep.equal(parts);
-        expect(Utils.fetchPureArray(curve[2],parseInt)).to.deep.equal(dividers);
-        const args = await this.test.registry.getProviderArgsLength.call(owner,specifier,{from:owner});
-        let lenArr = Utils.fetchPureArray(args,parseInt)
-        expect(lenArr.length.valueOf()).to.be.equal(3);
-        expect(lenArr[0]).to.be.equal(constants.length);
-        expect(lenArr[1]).to.be.equal(parts.length);
-        expect(lenArr[2]).to.be.equal(dividers.length);
+        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
+        const x = await this.test.registry.getProviderCurve.call(owner, specifier);
+        
+        const raw = Utils.fetchPureArray(x, parseInt);
+        expect(raw).to.be.an('array');
+        expect(raw.length).to.be.greaterThan(0);
 
+        const args = await this.test.registry.getProviderArgsLength.call(owner,specifier);
+        expect(raw.length).to.be.equal(+args.valueOf());
     });
 
     it("REGISTRY_13 - getProviderCurve() - Check that cant get uninitialized curve ", async function () {
@@ -180,17 +182,4 @@ contract('Registry', async (accounts) => {
 
         await expect(index).to.be.equal(0);
     });
-    it("REGISTRY_16 - getDotLimit() - get dot range", async function () {
-        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, constants, parts, dividers, { from: owner });
-
-        let dotLimit = await this.test.stor.getDotLimit(owner, specifier, {from: owner });
-        console.log('dotLimit:', dotLimit.toNumber());
-        expect(dotLimit.toNumber()).to.be.equal(parts[parts.length-1]);
-
-    });
-
-
-
-
 });

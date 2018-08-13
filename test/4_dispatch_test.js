@@ -10,12 +10,11 @@ const expect = require('chai')
 const Utils = require("./helpers/utils");
 const EVMRevert = require("./helpers/EVMRevert");
 
+const ZapCoordinator = artifacts.require("ZapCoordinator");
+const Database = artifacts.require("Database");
 const Dispatch = artifacts.require("Dispatch");
-const DispatchStorage = artifacts.require("DispatchStorage");
 const Bondage = artifacts.require("Bondage");
-const BondageStorage = artifacts.require("BondageStorage");
 const Registry = artifacts.require("Registry");
-const RegistryStorage = artifacts.require("RegistryStorage");
 const ZapToken = artifacts.require("ZapToken");
 const Cost = artifacts.require("CurrentCost");
 const Oracle = artifacts.require("TestProvider");
@@ -42,6 +41,12 @@ function isEventReceived(logs, eventName) {
         }
     }
     return false;
+}
+
+function sleep(ms) {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, ms);
+    });
 }
 
 function getParamsFromIncomingEvent(logs) {
@@ -84,34 +89,8 @@ contract('Dispatch', function (accounts) {
     const title = "tst";
     const extInfo = [111, 222, 333];
 
-    const piecewiseFunction = { // 2x^2
-        constants: [2, 2, 0],
-        parts: [0, 1000000000],
-        dividers: [1]
-    };
-
     const query = "query";
 
-   /* async function prepareProvider(account = provider, curveParams = piecewiseFunction) {
-        await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
-        await this.registry.initiateProviderCurve(specifier, curveParams.constants, curveParams.parts, curveParams.dividers, { from: account });
-    }*/
-
-/*  async function prepareProvider(curveParams = piecewiseFunction, account = provider) {
-        await this.registry.initiateProvider(publicKey, title, specifier, params, {from: account});
-        await this.registry.initiateProviderCurve(specifier, curveParams.constants, curveParams.parts, curveParams.dividers, { from: account });
-}*/ 
-
-/* OLD
-    async function prepareTokens(sub = true) {
-        await this.token.allocate(owner, tokensForOwner, { from: owner });
-        await this.token.allocate(provider, tokensForProvider, { from: owner });
-        if (sub) {
-            await this.token.allocate(this.subscriber.address, tokensForSubscriber, { from: owner });
-            // bond Zap
-            await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
-        }
-    } */
 
     async function prepareTokens(allocAddress = subscriber) {
         await this.token.allocate(owner, tokensForOwner, { from: owner });
@@ -120,21 +99,40 @@ contract('Dispatch', function (accounts) {
     }
 
     beforeEach(async function deployContracts() {
-        this.currentTest.regStor = await RegistryStorage.new();
-        this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
+        // Deploy initial contracts
         this.currentTest.token = await ZapToken.new();
-        this.currentTest.oracle = await Oracle.new(this.currentTest.registry.address);
+        this.currentTest.coord = await ZapCoordinator.new();
+        const owner = await this.currentTest.coord.owner();
+        this.currentTest.db = await Database.new();
+        await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
 
-        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
-        this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
-        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
+        await this.currentTest.coord.addImmutableContract('ZAP_TOKEN', this.currentTest.token.address);
 
-        this.currentTest.dispStor = await DispatchStorage.new();
-        this.currentTest.dispatch = await Dispatch.new(this.currentTest.dispStor.address, this.currentTest.bondage.address);
-        await this.currentTest.dispStor.transferOwnership(this.currentTest.dispatch.address);
-        this.currentTest.subscriber = await Subscriber.new(this.currentTest.token.address, this.currentTest.dispatch.address, this.currentTest.bondage.address, this.currentTest.registry.address);
+        // Deploy dependent contracts
+        this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
+
+        this.currentTest.cost = await Cost.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
+
+        this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
+
+        // Deploy Dispatch contract
+        this.currentTest.dispatch = await Dispatch.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('DISPATCH', this.currentTest.dispatch.address);
+        
+        await this.currentTest.coord.updateAllDependencies();
+
+        this.currentTest.subscriber = await Subscriber.new(
+            this.currentTest.token.address,
+            this.currentTest.dispatch.address,
+            this.currentTest.bondage.address,
+            this.currentTest.registry.address
+        );
+
+        this.currentTest.oracle = await Oracle.new(this.currentTest.registry.address, false);
     });
 
     it("DISPATCH_1 - respond1() - Check that we can make a simple query", async function () {
@@ -147,25 +145,22 @@ contract('Dispatch', function (accounts) {
         const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
         dispatchEvents.watch((err, res) => { });
         const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        subscriberEvents.watch((err, res) => { }); 
-
+        subscriberEvents.watch((err, res) => {}); 
         
         // holder: subAddr (holder of dots)
         // subscriber: owner of zap
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 10, {from: subscriber});
 
         // SUBSCRIBE SUBSCRIBER TO RECIVE DATA FROM PROVIDER
         await this.test.subscriber.testQuery(oracleAddr, query, spec1, params);
 
-        // wait for callback
-
         // GET ALL EVENTS LOG 
-        let logs = await subscriberEvents.get();
+        const logs = await subscriberEvents.get();
         await expect(isEventReceived(logs, "Result1")).to.be.equal(true);
 
         // subscriber should have emitted one event
-        var result = logs[0].args["response1"];
+        const result = logs[0].args["response1"];
         await expect(result).to.be.equal("Hello World");
 
         // STOP WATCHING EVENTS 
@@ -189,7 +184,7 @@ contract('Dispatch', function (accounts) {
         var subAddr = this.test.subscriber.address; 
 
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 1, {from: subscriber});
 
         await expect(this.test.dispatch.query(oracleAddr, query, spec1, params, true, true, {from: accounts[4]})).to.be.eventually.rejectedWith(EVMRevert);
     }); 
@@ -202,7 +197,7 @@ contract('Dispatch', function (accounts) {
         var subAddr = this.test.subscriber.address; 
 
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 100, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 1, {from: subscriber});
 
         await expect(this.test.subscriber.testQuery(oracleAddr, query, "Bad Endpoint", params)).to.be.eventually.rejectedWith(EVMRevert);
     });
@@ -327,6 +322,48 @@ contract('Dispatch', function (accounts) {
 
         await expect(this.test.dispatch.respond1(id, "Bad Data")).to.be.eventually.rejectedWith(EVMRevert);
     });
+
+
+    it("DISPATCH_10 - cancelQuery() - Check that a subscriber can cancel a query", async function () {
+        // make a "bad" oracle (will never respond)
+        this.test.oracle = await Oracle.new(this.test.registry.address, true);
+        
+        await prepareTokens.call(this.test, subscriber);    
+
+        const subscriberEvents = this.test.subscriber.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        subscriberEvents.watch((err, res) => { }); 
+
+        const dispatchEvents = this.test.dispatch.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        dispatchEvents.watch((err, res) => { }); 
+
+
+        var oracleAddr = this.test.oracle.address;
+        var subAddr = this.test.subscriber.address; 
+
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.delegateBond(subAddr, oracleAddr, spec4, 100, {from: subscriber});
+
+        var dotBalance = await this.test.bondage.getBoundDots(this.test.subscriber.address, oracleAddr, spec4);
+        // make the query
+        await this.test.subscriber.testQuery(oracleAddr, query, spec4, params);
+        var s_logs = await subscriberEvents.get();
+        var queryId = s_logs[0].args["id"];
+        var postQueryDots = await this.test.bondage.getBoundDots(this.test.subscriber.address, oracleAddr, spec4);
+        
+        // expect to have escrowed a dot
+        expect(dotBalance.minus(postQueryDots).toString()).to.be.equal("1");
+
+        await this.test.subscriber.cancelQuery(queryId);
+
+        let d_logs = await dispatchEvents.get();
+        var newBalance = await this.test.bondage.getBoundDots(this.test.subscriber.address, oracleAddr, spec4);
+        
+        expect(d_logs[0].event).to.be.equal("CanceledRequest");
+        // expect escrowed dot to be returned
+        expect(dotBalance.toString()).to.be.equal(newBalance.toString());
+    });
+
+    
 
     // converts an integer to its 32-bit hex representation
     function toHex(num){

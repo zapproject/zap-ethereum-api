@@ -3,19 +3,19 @@ import EVMRevert from './helpers/EVMRevert';
 const BigNumber = web3.BigNumber;
 
 const expect = require('chai')
-    .use(require('chai-as-promised'))
-    .use(require('chai-bignumber')(BigNumber))
-    .expect;
+.use(require('chai-as-promised'))
+.use(require('chai-bignumber')(BigNumber))
+.expect;
 
 const Utils = require('./helpers/utils.js');
 
-const Arbiter = artifacts.require("Arbiter");
-const ArbiterStorage = artifacts.require("ArbiterStorage");
+const ZapCoordinator = artifacts.require("ZapCoordinator");
+const Database = artifacts.require("Database");
 const Bondage = artifacts.require("Bondage");
-const BondageStorage = artifacts.require("BondageStorage");
 const Registry = artifacts.require("Registry");
-const RegistryStorage = artifacts.require("RegistryStorage");
 const ZapToken = artifacts.require("ZapToken");
+const Dispatch = artifacts.require("Dispatch");
+const Arbiter = artifacts.require("Arbiter");
 const Cost = artifacts.require("CurrentCost");
 
 contract('Arbiter', function (accounts) {
@@ -31,11 +31,7 @@ contract('Arbiter', function (accounts) {
     const specifier = "test-specifier";
 
     // test function: 2x^2
-    const piecewiseFunction = {
-        constants: [2, 2, 0],
-        parts: [0, 1000],
-        dividers: [1]
-    };
+    const piecewiseFunction = [3, 0, 0, 2, 10000];
     
     const tokensForOwner = new BigNumber("1500e18");
     const tokensForSubscriber = new BigNumber("5000e18");
@@ -43,7 +39,7 @@ contract('Arbiter', function (accounts) {
 
     async function prepareProvider() {
         await this.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
-        await this.registry.initiateProviderCurve(specifier, piecewiseFunction.constants, piecewiseFunction.parts, piecewiseFunction.dividers, { from: oracle });
+        await this.registry.initiateProviderCurve(specifier, piecewiseFunction, { from: oracle });
     }
 
     async function prepareTokens() {
@@ -53,21 +49,30 @@ contract('Arbiter', function (accounts) {
     }
 
     beforeEach(async function deployContracts() {
-        this.currentTest.regStor = await RegistryStorage.new();
-        this.currentTest.registry = await Registry.new(this.currentTest.regStor.address);
-        await this.currentTest.regStor.transferOwnership(this.currentTest.registry.address);
-
+        // Deploy initial contracts
         this.currentTest.token = await ZapToken.new();
+        this.currentTest.coord = await ZapCoordinator.new();
+        const owner = await this.currentTest.coord.owner();
+        this.currentTest.db = await Database.new();
+        await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
 
-        this.currentTest.cost = await Cost.new(this.currentTest.registry.address);
-        
-        this.currentTest.bondStor = await BondageStorage.new();
-        this.currentTest.bondage = await Bondage.new(this.currentTest.bondStor.address, this.currentTest.token.address, this.currentTest.cost.address);
-        await this.currentTest.bondStor.transferOwnership(this.currentTest.bondage.address);
+        await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
+        await this.currentTest.coord.addImmutableContract('ZAP_TOKEN', this.currentTest.token.address);
 
-        this.currentTest.arbStor = await ArbiterStorage.new();
-        this.currentTest.arbiter = await Arbiter.new(this.currentTest.arbStor.address, this.currentTest.bondage.address);
-        await this.currentTest.arbStor.transferOwnership(this.currentTest.arbiter.address);
+        // Deploy registry
+        this.currentTest.registry = await Registry.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('REGISTRY', this.currentTest.registry.address);
+        // Deploy current cost
+        this.currentTest.cost = await Cost.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
+        // Deploy Bondage
+        this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
+        // Deploy Arbiter
+        this.currentTest.arbiter = await Arbiter.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('ARBITER', this.currentTest.arbiter.address);
+
+        await this.currentTest.coord.updateAllDependencies({ from: owner });
     });
 
     it("ARBITER_1 - initiateSubscription() - Check subscription", async function () {
@@ -189,5 +194,57 @@ contract('Arbiter', function (accounts) {
         await expect(parseInt(res[0].valueOf())).to.be.equal(10);
 
         await expect(this.test.arbiter.endSubscriptionProvider(subscriber, specifier, {from: accounts[7]})).to.eventually.be.rejectedWith(EVMRevert);
+    });
+    
+    it("ARBITER_10 - endSubscriptionProvider() - Check that subscriber receives any unused dots", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 100, {from: subscriber});
+
+        let initBalance = await this.test.bondage.getBoundDots(subscriber, oracle, specifier);
+        expect(initBalance.toString()).to.be.equal("100");
+        await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
+
+        let postEscrowBal = await this.test.bondage.getBoundDots(subscriber, oracle, specifier);
+        expect(postEscrowBal.toString()).to.be.equal("90");
+
+        let res = await this.test.arbiter.getSubscription(oracle, subscriber, specifier);
+        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+
+        const bondageEvents = this.test.bondage.allEvents({ fromBlock: 0, toBlock: 'latest' });
+        bondageEvents.watch((err, res) => { }); 
+
+        var mine = function() {
+            return new Promise((resolve, reject) => {
+                web3.currentProvider.sendAsync({
+                  jsonrpc: "2.0",
+                  method: "evm_mine",
+                  id: 12345
+                }, function(err, result){
+                    resolve();
+                });
+            });
+        };
+
+        // mine 6 blocks
+        await mine();
+        await mine();
+        await mine();
+        await mine();
+        await mine();
+        await mine();
+
+        // After blocks have been mined
+        await this.test.arbiter.endSubscriptionSubscriber(oracle, specifier, {from: subscriber});
+        let b_logs = bondageEvents.get();
+
+        // 6 blocks have passed, and we include the first block in our calcuation, so we should receive 10-7=(3) dots back
+        let postCancelBal = await this.test.bondage.getBoundDots(subscriber, oracle, specifier);
+        expect(postCancelBal.toString()).to.be.equal("93");
+
+        // check that the provider received their 7 dots
+        let postCancelProviderBal = await this.test.bondage.getBoundDots(oracle, oracle, specifier);
+        expect(postCancelProviderBal.toString()).to.be.equal("7");
     });
 });
