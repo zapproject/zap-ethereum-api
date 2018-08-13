@@ -74,14 +74,14 @@ contract TestProvider is OnChainProvider {
 
     // return Hello World to query-maker
     function endpoint1(uint256 id, string /* userQuery */, bytes32[] /* endpointParams */) internal{
-        Dispatch(msg.sender).respond1(id, "Hello World");
+        DispatchInterface(msg.sender).respond1(id, "Hello World");
     }
 
     // return the hash of the query
     function endpoint2(uint256 id, string userQuery, bytes32[] /* endpointParams */) internal{
         // endpointParams
         string memory reversed = reverseString(userQuery);
-        Dispatch(msg.sender).respond1(id, reversed);
+        DispatchInterface(msg.sender).respond1(id, reversed);
     }
 
      // returns the sum of all values in endpointParams
@@ -95,12 +95,12 @@ contract TestProvider is OnChainProvider {
         bytes32[] memory res = new bytes32[](1);
         res[0] = bytes32(sum);
 
-        Dispatch(msg.sender).respondBytes32Array(id, res);
+        DispatchInterface(msg.sender).respondBytes32Array(id, res);
     }
 
     // returns the sum of all values in endpointParams
     function endpoint4(uint256 id, string /* userQuery */, bytes32[] /* endpointParams */) internal{
-        Dispatch(msg.sender).respond2(id, "Hello", "World");
+        DispatchInterface(msg.sender).respond2(id, "Hello", "World");
     }
 
     function reverseString(string _base) internal pure returns (string){
