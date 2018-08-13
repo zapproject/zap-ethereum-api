@@ -36,10 +36,10 @@
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.4.24;\n\ncontract Client1 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    function callback(uint256 id, string response1) external;\n}\ncontract Client2 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    function callback(uint256 id, string response1, string response2) external;\n}\ncontract Client3 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    /// @param response3 third provider-specified param\n    function callback(uint256 id, string response1, string response2, string response3) external;\n}\ncontract Client4 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    /// @param response3 third provider-specified param\n    /// @param response4 fourth provider-specified param\n    function callback(uint256 id, string response1, string response2, string response3, string response4) external;\n}\n\ncontract ClientBytes32Array {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response bytes32 array\n    function callback(uint256 id, bytes32[] response) external;\n}\n",
-  "sourcePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/platform/Client.sol",
+  "source": "pragma solidity ^0.4.24;\n\ncontract Client1 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    function callback(uint256 id, string response1) external;\n}\ncontract Client2 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    function callback(uint256 id, string response1, string response2) external;\n}\ncontract Client3 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    /// @param response3 third provider-specified param\n    function callback(uint256 id, string response1, string response2, string response3) external;\n}\ncontract Client4 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    /// @param response3 third provider-specified param\n    /// @param response4 fourth provider-specified param\n    function callback(uint256 id, string response1, string response2, string response3, string response4) external;\n}\n\ncontract ClientBytes32Array {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response bytes32 array\n    function callback(uint256 id, bytes32[] response) external;\n}\n\ncontract ClientIntArray{\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response int array\n    function callback(uint256 id, int[] response) external;\n}\n\n",
+  "sourcePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/Client.sol",
   "ast": {
-    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/platform/Client.sol",
+    "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/Client.sol",
     "exportedSymbols": {
       "Client1": [
         240
@@ -55,9 +55,12 @@
       ],
       "ClientBytes32Array": [
         285
+      ],
+      "ClientIntArray": [
+        294
       ]
     },
-    "id": 286,
+    "id": 295,
     "nodeType": "SourceUnit",
     "nodes": [
       {
@@ -167,7 +170,7 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "26:241:5"
       },
       {
@@ -292,7 +295,7 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "268:316:5"
       },
       {
@@ -443,7 +446,7 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "585:390:5"
       },
       {
@@ -620,7 +623,7 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "976:465:5"
       },
       {
@@ -729,14 +732,123 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "1443:236:5"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 294,
+        "linearizedBaseContracts": [
+          294
+        ],
+        "name": "ClientIntArray",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response int array",
+            "id": 293,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 291,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 287,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "1865:10:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 286,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1865:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 290,
+                  "name": "response",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "1877:14:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_int256_$dyn_calldata_ptr",
+                    "typeString": "int256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 288,
+                      "name": "int",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1877:3:5",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int256",
+                        "typeString": "int256"
+                      }
+                    },
+                    "id": 289,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1877:5:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_int256_$dyn_storage_ptr",
+                      "typeString": "int256[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1864:28:5"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 292,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1901:0:5"
+            },
+            "scope": 294,
+            "src": "1847:55:5",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 295,
+        "src": "1681:223:5"
       }
     ],
-    "src": "0:1680:5"
+    "src": "0:1906:5"
   },
   "legacyAST": {
-    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/platform/Client.sol",
+    "absolutePath": "/Users/michaelzman/Documents/workspace/zap-ethereum-api/contracts/lib/platform/Client.sol",
     "exportedSymbols": {
       "Client1": [
         240
@@ -752,9 +864,12 @@
       ],
       "ClientBytes32Array": [
         285
+      ],
+      "ClientIntArray": [
+        294
       ]
     },
-    "id": 286,
+    "id": 295,
     "nodeType": "SourceUnit",
     "nodes": [
       {
@@ -864,7 +979,7 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "26:241:5"
       },
       {
@@ -989,7 +1104,7 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "268:316:5"
       },
       {
@@ -1140,7 +1255,7 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "585:390:5"
       },
       {
@@ -1317,7 +1432,7 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "976:465:5"
       },
       {
@@ -1426,11 +1541,120 @@
             "visibility": "external"
           }
         ],
-        "scope": 286,
+        "scope": 295,
         "src": "1443:236:5"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 294,
+        "linearizedBaseContracts": [
+          294
+        ],
+        "name": "ClientIntArray",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response int array",
+            "id": 293,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "callback",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 291,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 287,
+                  "name": "id",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "1865:10:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 286,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1865:7:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 290,
+                  "name": "response",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 293,
+                  "src": "1877:14:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_int256_$dyn_calldata_ptr",
+                    "typeString": "int256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 288,
+                      "name": "int",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1877:3:5",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_int256",
+                        "typeString": "int256"
+                      }
+                    },
+                    "id": 289,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1877:5:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_int256_$dyn_storage_ptr",
+                      "typeString": "int256[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1864:28:5"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 292,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1901:0:5"
+            },
+            "scope": 294,
+            "src": "1847:55:5",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 295,
+        "src": "1681:223:5"
       }
     ],
-    "src": "0:1680:5"
+    "src": "0:1906:5"
   },
   "compiler": {
     "name": "solc",
@@ -1438,5 +1662,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-09T22:55:04.028Z"
+  "updatedAt": "2018-08-13T22:19:39.736Z"
 }
