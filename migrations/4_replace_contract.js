@@ -11,6 +11,7 @@ const Faucet = artifacts.require("./Faucet.sol");
 const Telegram = artifacts.require("./Telegram.sol");
 const ZapToken = artifacts.require("./ZapToken.sol");
 
+// TO EXEC: truffle migrate -f 4 -to 4 --network=kovan
 const deploy = async function(deployer, network) {
     console.log("Deploying main contracts on: " + network);
 
@@ -24,7 +25,7 @@ const deploy = async function(deployer, network) {
 
     // Hard code ZapCoordinator address
     if ( ZapCoordinator.address ) {
-        let doUpdate = false;
+        let doUpdate = true;
         const coordInstance = await ZapCoordinator.at(ZapCoordinator.address);
 
         for ( const contract of redeployList ) {
@@ -36,7 +37,7 @@ const deploy = async function(deployer, network) {
                 await deployer.deploy(contract.contract, coordInstance.address);
                 await sleep(network);
 
-                console.log(redeployList.name, 'is now at', contract.contract.address);
+                console.log(contract.name, 'is now at', contract.contract.address);
                 await coordInstance.updateContract(contract.name, contract.contract.address);
             }
         }

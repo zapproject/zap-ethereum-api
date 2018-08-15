@@ -27,9 +27,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "import \"./ZapCoordinatorInterface.sol\";\n\npragma solidity ^0.4.24;\n\ncontract Upgradable {\n\n\taddress coordinatorAddr;\n\tZapCoordinatorInterface coordinator;\n\n\tconstructor(address c) public{\n\t\tcoordinatorAddr = c;\n\t\tcoordinator = ZapCoordinatorInterface(c);\n\t}\n\n    function updateDependencies() external coordinatorOnly {\n       _updateDependencies();\n    }\n\n    function _updateDependencies() internal;\n\n    modifier coordinatorOnly() {\n    \trequire(msg.sender == coordinatorAddr);\n    \t_;\n    }\n}\n",
-  "sourcePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
+  "sourcePath": "/home/iefnw/office6/tmp/tmp/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
   "ast": {
-    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
+    "absolutePath": "/home/iefnw/office6/tmp/tmp/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
     "exportedSymbols": {
       "Upgradable": [
         193
@@ -39,7 +39,7 @@
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/ZapCoordinatorInterface.sol",
+        "absolutePath": "/home/iefnw/office6/tmp/tmp/zap-ethereum-api/contracts/lib/ownership/ZapCoordinatorInterface.sol",
         "file": "./ZapCoordinatorInterface.sol",
         "id": 148,
         "nodeType": "ImportDirective",
@@ -465,7 +465,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3806,
+                            "referencedDeclaration": 3369,
                             "src": "448:3:3",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -519,10 +519,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3809,
-                        3810
+                        3372,
+                        3373
                       ],
-                      "referencedDeclaration": 3809,
+                      "referencedDeclaration": 3372,
                       "src": "440:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -575,7 +575,7 @@
     "src": "0:496:3"
   },
   "legacyAST": {
-    "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
+    "absolutePath": "/home/iefnw/office6/tmp/tmp/zap-ethereum-api/contracts/lib/ownership/Upgradable.sol",
     "exportedSymbols": {
       "Upgradable": [
         193
@@ -585,7 +585,7 @@
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "absolutePath": "/Users/avisaven/Documents/Work/Zap/zap-ethereum-api/contracts/lib/ownership/ZapCoordinatorInterface.sol",
+        "absolutePath": "/home/iefnw/office6/tmp/tmp/zap-ethereum-api/contracts/lib/ownership/ZapCoordinatorInterface.sol",
         "file": "./ZapCoordinatorInterface.sol",
         "id": 148,
         "nodeType": "ImportDirective",
@@ -1011,7 +1011,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3806,
+                            "referencedDeclaration": 3369,
                             "src": "448:3:3",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -1065,10 +1065,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3809,
-                        3810
+                        3372,
+                        3373
                       ],
-                      "referencedDeclaration": 3809,
+                      "referencedDeclaration": 3372,
                       "src": "440:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1126,5 +1126,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-09T22:55:04.024Z"
+  "updatedAt": "2018-08-13T22:31:22.816Z"
 }

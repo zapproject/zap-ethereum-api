@@ -37,6 +37,13 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         bytes32[] response
     );
 
+    event OffchainResponseInt(
+        uint256 indexed id,
+        address indexed subscriber,
+        address indexed provider,
+        int[] response
+    );
+
     event OffchainResult1(
         uint256 indexed id,
         address indexed subscriber,
@@ -206,6 +213,25 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         }
         else {
             emit OffchainResponse(id, getSubscriber(id), msg.sender, response);
+        }
+        return true;
+    }
+
+    /// @dev Parameter-count specific method called by data provider in response
+    function respondIntArray(
+        uint256 id,
+        int[] response
+    )
+        external
+        returns (bool)
+    {
+        if (getProvider(id) != msg.sender || !fulfillQuery(id))
+            revert();
+        if(getSubscriberOnchain(id)) {
+            ClientIntArray(getSubscriber(id)).callback(id, response);
+        }
+        else {
+            emit OffchainResponseInt(id, getSubscriber(id), msg.sender, response);
         }
         return true;
     }

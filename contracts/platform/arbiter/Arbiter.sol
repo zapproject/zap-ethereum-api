@@ -26,6 +26,14 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
         SubscriptionTerminator indexed terminator      // Which terminated the contract
     ); 
 
+    // Called when party passes arguments to another party
+    event ParamsPassed(
+        address indexed sender,
+        address indexed receiver,
+        bytes32 endpoint,
+        bytes32[] params
+    );
+
     // Used to specify who is the terminator of a contract
     enum SubscriptionTerminator { Provider, Subscriber }
 
@@ -45,6 +53,15 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
 
         address databaseAddress = coordinator.getContract("DATABASE");
         db = DatabaseInterface(databaseAddress);
+    }
+
+    //@dev broadcast parameters from sender to offchain receiver
+    /// @param receiver address
+    /// @param endpoint Endpoint specifier
+    /// @param params arbitrary params to be passed
+    function passParams(address receiver, bytes32 endpoint, bytes32[] params) public {
+
+        emit ParamsPassed(msg.sender, receiver, endpoint, params);    
     }
 
     /// @dev subscribe to specified number of blocks of provider
