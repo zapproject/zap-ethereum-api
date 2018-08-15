@@ -39,7 +39,7 @@ contract('Bondage', function (accounts) {
     const dotBound = new BigNumber("999");
 
     async function prepareProvider(provider = true, curve = true, account = oracle, curveParams = piecewiseFunction) {
-        if (provider) await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
+        if (provider) await this.registry.initiateProvider(publicKey, title, { from: account });
         if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, { from: account });
     }
 
@@ -91,7 +91,7 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_3 - bond() - Check that we can't bond oracle with uninitialized curve", async function () {
-        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: subscriber });
+        await this.test.registry.initiateProvider(publicKey, title, { from: subscriber });
         await prepareTokens.call(this.test);
         await expect(this.test.bondage.bond(oracle, specifier, 1, {from: subscriber})).to.eventually.be.rejectedWith(EVMRevert);
     });
@@ -107,7 +107,7 @@ contract('Bondage', function (accounts) {
     it("BONDAGE_5 - calcZapForDots() - Check zap for dots calculating", async function () {
         const totalBound = 5;
 
-        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: accounts[5] });
+        await this.test.registry.initiateProvider(publicKey, title, { from: accounts[5] });
         await this.test.registry.initiateProviderCurve(specifier, piecewiseFunction, { from: accounts[5] });
 
         const structure = Utils.structurizeCurve(piecewiseFunction);
@@ -121,7 +121,7 @@ contract('Bondage', function (accounts) {
     it("BONDAGE_6 - calcZapForDots() - Check that function revert if curve not intialized", async function () {
 
         //prepareProvider.call(this.test, true, false);
-        await this.test.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
+        await this.test.registry.initiateProvider(publicKey, title, { from: oracle });
         await expect(this.test.bondage.calcZapForDots.call(oracle, specifier, 5)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
@@ -443,7 +443,7 @@ contract('CurrentCost', function (accounts) {
     const approveTokens = new BigNumber("1000e18");
 
     async function prepareProvider(provider = true, curve = true, account = oracle, curveParams) {
-        if (provider) await this.registry.initiateProvider(publicKey, title, specifier, params, { from: account });
+        if (provider) await this.registry.initiateProvider(publicKey, title, { from: account });
         if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, { from: account });
     }
 
