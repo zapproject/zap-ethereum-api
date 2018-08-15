@@ -63,7 +63,7 @@ contract TestProvider is OnChainProvider {
         params[0] = "p1";
         params[1] = "p2";
 
-        registry.initiateProvider(12345, title, spec1, params);
+        registry.initiateProvider(12345, title);
 
         registry.initiateProviderCurve(spec1, curve);
         registry.initiateProviderCurve(spec2, curve);

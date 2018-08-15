@@ -2,14 +2,14 @@ pragma solidity ^0.4.24;
 // Technically an abstract contract, not interface (solidity compiler devs are working to fix this right now)
 
 contract RegistryInterface {
-    function initiateProvider(uint256, bytes32, bytes32, bytes32[]) public returns (bool);
+    function initiateProvider(uint256, bytes32) public returns (bool);
     function initiateProviderCurve(bytes32, int256[]) public returns (bool);
     function setEndpointParams(bytes32, bytes32[]) public;
     function getEndpointParams(address, bytes32) public view returns (bytes32[]);
     function getProviderPublicKey(address) public view returns (uint256);
     function getProviderTitle(address) public view returns (bytes32);
     function setProviderParameter(bytes32, bytes32) public;
-    function getProviderParameter(address, bytes32, bytes32) public view returns (bytes32);
+    function getProviderParameter(address, bytes32) public view returns (bytes32);
     function getAllProviderParams(address) public view returns (bytes32[]);
     function getProviderCurveLength(address, bytes32) public view returns (uint256);
     function getProviderCurve(address, bytes32) public view returns (int[]);
