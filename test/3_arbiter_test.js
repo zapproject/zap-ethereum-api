@@ -38,7 +38,7 @@ contract('Arbiter', function (accounts) {
     const approveTokens = new BigNumber("1000e18");
 
     async function prepareProvider() {
-        await this.registry.initiateProvider(publicKey, title, specifier, params, { from: oracle });
+        await this.registry.initiateProvider(publicKey, title, { from: oracle });
         await this.registry.initiateProviderCurve(specifier, piecewiseFunction, { from: oracle });
     }
 

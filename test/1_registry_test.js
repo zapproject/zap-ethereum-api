@@ -86,21 +86,23 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
 
-        await this.test.registry.setEndpointParams(specifier, ["Hello", "World"]);
+        const p = ["Hello", "World"].map(x=>web3utils.padLeft(web3utils.asciiToHex(x), 64));
+        await this.test.registry.setEndpointParams(specifier, p);
         const params = await this.test.registry.getEndpointParams(owner, specifier);
-        console.log(params);
-        expect(params[1]).to.be.equal(web3utils.asciiToHex("World"));
+        expect(params[1]).to.be.equal(p[1]);
     });
 
     it("REGISTRY_7 - get/setProviderParameter() - Check that we can get and set provider parameters", async function () {
-        const res = await this.test.registry.getNextEndpointParam.call(owner, specifier, 0);
-        await this.test.registry.setProviderParameter("Hello", "World", {from: owner});
-        await this.test.registry.setProviderParameter("Apple", "Orange", {from: owner});
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner });
+        const val_a = web3utils.padLeft(web3utils.asciiToHex("World"), 64);
+        const val_b = web3utils.padLeft(web3utils.asciiToHex("Orange"), 64);
+        await this.test.registry.setProviderParameter("Hello", val_a, {from: owner});
+        await this.test.registry.setProviderParameter("Apple", val_b, {from: owner});
 
         const a = await this.test.registry.getProviderParameter(owner, "Hello");
         const b = await this.test.registry.getProviderParameter(owner, "Apple");
-        expect(a).to.be.equal("World");
-        expect(b).to.be.equal("Orange");
+        expect(a).to.be.equal(val_a);
+        expect(b).to.be.equal(val_b);
     });
 
     it("REGISTRY_8 - getProviderTitle() - Check that we can get provider title", async function () {
@@ -133,13 +135,13 @@ contract('Registry', async (accounts) => {
     it("REGISTRY_12 - getProviderCurve() - Check that we initialize and get provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, {from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
-        const x = await this.test.registry.getProviderCurve.call(owner, specifier);
+        const x = await this.test.registry.getProviderCurve(owner, specifier);
         
         const raw = Utils.fetchPureArray(x, parseInt);
         expect(raw).to.be.an('array');
         expect(raw.length).to.be.greaterThan(0);
 
-        const args = await this.test.registry.getProviderArgsLength.call(owner,specifier);
+        const args = await this.test.registry.getProviderCurveLength(owner,specifier);
         expect(raw.length).to.be.equal(+args.valueOf());
     });
 
@@ -147,6 +149,15 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
 
         await expect(this.test.registry.getProviderCurve.call(owner, specifier, { from: owner })).to.be.eventually.rejectedWith(EVMRevert);
+    });
+
+
+    it("REGISTRY_14 - setProviderParameter()/setEndpointParams() - Check that a non-owner cannot edit provider & endpoint parameters", async function () {
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
+        
+        await expect(this.test.registry.setProviderParameter("A", "B", { from: accounts[1] })).to.be.eventually.rejectedWith(EVMRevert);
+        await expect(this.test.registry.setEndpointParams(specifier, ["A", "B"], { from: accounts[1] })).to.be.eventually.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_15 - getNextProvider() - Check that we can get all providers", async function () {
