@@ -54,7 +54,7 @@ contract CurrentCost is Destructible, CurrentCostInterface, Upgradable {
     {
 
 
-        uint256 length = registry.getProviderArgsLength(oracleAddress,endpoint);
+        uint256 length = registry.getProviderCurveLength(oracleAddress,endpoint);
         int[] memory curve = new int[](length);
         curve = registry.getProviderCurve(oracleAddress, endpoint);
 
@@ -71,7 +71,7 @@ contract CurrentCost is Destructible, CurrentCostInterface, Upgradable {
         view
         returns (uint256)
     {
-        uint256 length = registry.getProviderArgsLength(oracleAddress,endpoint);
+        uint256 length = registry.getProviderCurveLength(oracleAddress,endpoint);
         int[] memory curve = new int[](length);
         curve = registry.getProviderCurve(oracleAddress, endpoint);
 
