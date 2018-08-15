@@ -35,20 +35,15 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     /// If no address->Oracle mapping exists, Oracle object is created
     /// @param publicKey unique id for provider. used for encyrpted key swap for subscription endpoints
     /// @param title name
-    /// @param endpoint specifier
-    /// @param endpointParams endpoint specific params
     function initiateProvider(
         uint256 publicKey,
         bytes32 title,
-        bytes32 endpoint,
-        bytes32[] endpointParams
     )
         public
         returns (bool)
     {
         require(!isProviderInitiated(msg.sender));
         createOracle(msg.sender, publicKey, title);
-        if(endpoint != 0) setEndpointParams(endpoint, endpointParams);
         addOracle(msg.sender);
         emit NewProvider(msg.sender, title, endpoint);
         return true;
@@ -71,12 +66,18 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         require(getCurveUnset(msg.sender, endpoint));
 
         setCurve(msg.sender, endpoint, curve);
+        addEndpoint(msg.sender, endpoint);
         emit NewCurve(msg.sender, endpoint, curve);
 
         return true;
     }
 
     function setEndpointParams(bytes32 endpoint, bytes32[] endpointParams) public {
+        // Provider must be initiated
+        require(isProviderInitiated(msg.sender));
+        // Can't set endpoint params on an unset provider
+        require(!getCurveUnset(msg.sender, endpoint));
+
         setEndpointParameters(msg.sender, endpoint, endpointParams);
     }
 
@@ -172,6 +173,11 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         return db.getBytesArrayLength(keccak256(abi.encodePacked("oracles", provider, "endpointParams", endpoint)));
     }
 
+    /// @dev get the endpoints of a provider
+    function getProviderEndpoints(address provider) {
+        return db.getBytesArray(keccak256(abi.encodePacked("oracles", provider, "endpoints")));
+    }
+
     /// @dev get endpoint param by index
     function getEndPointParam(address provider, bytes32 endpoint, uint256 index) public view returns (bytes32) {
         return db.getBytesArrayIndex(keccak256(abi.encodePacked('oracles', provider, 'endpointParams', endpoint)), index);
@@ -237,7 +243,6 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         db.setBytesArray(keccak256(abi.encodePacked('oracles', origin, 'endpointParams', endpoint)), endpointParams);
     }
 
-
     /// @dev initialize new curve for provider
     /// @param origin address of provider
     /// @param endpoint endpoint specifier
@@ -271,5 +276,15 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         }
 
         db.setIntArray(keccak256(abi.encodePacked('oracles', origin, 'curves', endpoint)), curve);
+    }
+
+    /// @dev add an endpoint to the endpoints of an oracle
+    function addEndpoint(
+        address origin,
+        bytes32 endpoint
+    )
+        private
+    {
+        db.pushBytesArray(keccak256(abi.encodePacked("oracles", address, "endpoints")), endpoint);
     }
 }
