@@ -113,15 +113,14 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         address provider,           // data provider address
         string userQuery,           // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
-        bytes32[] endpointParams,   // endpoint-specific params
-        bool onchainProvider,                // is provider a contract 
-        bool onchainSubscriber               // is subscriber a contract
+        bytes32[] endpointParams   // endpoint-specific params
         )
         external
         returns (uint256 id)
     {
         uint256 dots = bondage.getBoundDots(msg.sender, provider, endpoint);
-
+        bool onchainProvider = isContract(provider);
+        bool onchainSubscriber = isContract(msg.sender);
         if(dots >= 1) {
             //enough dots
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
@@ -403,6 +402,12 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
             db.setNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')), 0);
             db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Pending));            
         }
+    }
+
+    function isContract(address addr) private view returns (bool) {
+        uint size;
+        assembly { size := extcodesize(addr) }
+        return size > 0;
     }
 }
 

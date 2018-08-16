@@ -171,7 +171,7 @@ contract TestClient is Client1, Client2{
     }
 
     function testQuery(address oracleAddr, string query, bytes32 specifier, bytes32[] params) external returns (uint256) {
-    	uint256 id = dispatch.query(oracleAddr, query, specifier, params, true, true);
+    	uint256 id = dispatch.query(oracleAddr, query, specifier, params);
         emit MadeQuery(oracleAddr, query, id);
         return id;
     }

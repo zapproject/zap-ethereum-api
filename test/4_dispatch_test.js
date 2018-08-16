@@ -186,7 +186,7 @@ contract('Dispatch', function (accounts) {
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.delegateBond(subAddr, oracleAddr, spec1, 1, {from: subscriber});
 
-        await expect(this.test.dispatch.query(oracleAddr, query, spec1, params, true, true, {from: accounts[4]})).to.be.eventually.rejectedWith(EVMRevert);
+        await expect(this.test.dispatch.query(oracleAddr, query, spec1, params, {from: accounts[4]})).to.be.eventually.rejectedWith(EVMRevert);
     }); 
 
 
