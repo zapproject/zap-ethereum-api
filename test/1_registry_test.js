@@ -32,7 +32,7 @@ contract('Registry', async (accounts) => {
     const title = "test";
     const specifier = "test-linear-specifier";
     const params = ["param1", "param2"];
-
+    const emptyBroker = 0;
     // y = 2x + x^2 from [1, 100]
     const curve = [3, 0, 2, 1, 100];
 
@@ -68,23 +68,23 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_3 - initiateProviderCurve() - Check that we can initiate provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
     });
 
     it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
-        await expect(this.test.registry.initiateProviderCurve(specifier, curve, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if passing in invalid curve arguments ", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
 
-        await expect(this.test.registry.initiateProviderCurve(specifier, [3, 0, 0, 0, 5, 100], { from: owner }))
+        await expect(this.test.registry.initiateProviderCurve(specifier, [3, 0, 0, 0, 5, 100], emptyBroker, { from: owner }))
             .to.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("REGISTRY_6 - get/setEndpointParams() - Check that we can get and set provider endpoint parameters", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
 
         const p = ["Hello", "World"].map(x=>web3utils.padLeft(web3utils.asciiToHex(x), 64));
         await this.test.registry.setEndpointParams(specifier, p);
@@ -134,9 +134,9 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_12 - getProviderCurve() - Check that we initialize and get provider curve", async function () {
         await this.test.registry.initiateProvider(publicKey, title, {from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
         const x = await this.test.registry.getProviderCurve(owner, specifier);
-        
+
         const raw = Utils.fetchPureArray(x, parseInt);
         expect(raw).to.be.an('array');
         expect(raw.length).to.be.greaterThan(0);
@@ -154,8 +154,8 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_14 - setProviderParameter()/setEndpointParams() - Check that a non-owner cannot edit provider & endpoint parameters", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
-        await this.test.registry.initiateProviderCurve(specifier, curve, { from: owner });
-        
+        await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
+
         await expect(this.test.registry.setProviderParameter("A", "B", { from: accounts[1] })).to.be.eventually.rejectedWith(EVMRevert);
         await expect(this.test.registry.setEndpointParams(specifier, ["A", "B"], { from: accounts[1] })).to.be.eventually.rejectedWith(EVMRevert);
     });
@@ -171,4 +171,15 @@ contract('Registry', async (accounts) => {
         await expect(providers[1]).to.be.equal(accounts[1]);
         await expect(providers[2]).to.be.equal(accounts[2]);
     });
+
+    it("REGISTRY_16 - getEndpointBroker() - Check that broker address can be saved and retreived", async function () {
+
+        let testBroker = owner;
+        await this.test.registry.initiateProvider(publicKey, title, {from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, curve, testBroker, { from: owner });
+        const savedBroker = await this.test.registry.getEndpointBroker(owner, specifier);
+        console.log('broker: ', savedBroker); 
+        expect(savedBroker).to.be.equal(testBroker);
+    });
+
 });

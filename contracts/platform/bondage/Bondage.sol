@@ -257,8 +257,9 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         return db.getNumber(keccak256(abi.encodePacked('holders', holderAddress, 'initialized', oracleAddress))) == 1 ? true : false;
     }
 
+    /// @dev get broker address for endpoint
     function getEndpointBroker(address oracleAddress, bytes32 endpoint) public view returns (address) {
-        return address(db.getBytes32(keccak256(abi.encodePacked('oracles', oracleAddress, 'broker', endpoint))));
+        return address(db.getBytes32(keccak256(abi.encodePacked('oracles', oracleAddress, endpoint, 'broker'))));
     }
 
     function getNumEscrow(address holderAddress, address oracleAddress, bytes32 endpoint) public view returns (uint256) {

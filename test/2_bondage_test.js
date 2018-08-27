@@ -30,17 +30,18 @@ contract('Bondage', function (accounts) {
 
     const specifier = "test-specifier";
     const zeroAddress = Utils.ZeroAddress;
-
-    const piecewiseFunction = [3, 0, 0, 2, 10000];
     
+    const piecewiseFunction = [3, 0, 0, 2, 10000];
+    const broker = 0;
+
     const tokensForOwner = new BigNumber("1500e18");
     const tokensForSubscriber = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
     const dotBound = new BigNumber("999");
 
-    async function prepareProvider(provider = true, curve = true, account = oracle, curveParams = piecewiseFunction) {
+    async function prepareProvider(provider = true, curve = true, account = oracle, curveParams = piecewiseFunction, bondBroker = broker) {
         if (provider) await this.registry.initiateProvider(publicKey, title, { from: account });
-        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, { from: account });
+        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, bondBroker, { from: account });
     }
 
     async function prepareTokens(allocAddress = subscriber) {
@@ -108,7 +109,7 @@ contract('Bondage', function (accounts) {
         const totalBound = 5;
 
         await this.test.registry.initiateProvider(publicKey, title, { from: accounts[5] });
-        await this.test.registry.initiateProviderCurve(specifier, piecewiseFunction, { from: accounts[5] });
+        await this.test.registry.initiateProviderCurve(specifier, piecewiseFunction, broker, { from: accounts[5] });
 
         const structure = Utils.structurizeCurve(piecewiseFunction);
         const fun0Calc = Utils.calcDotsCost(structure, totalBound);
@@ -178,7 +179,7 @@ contract('Bondage', function (accounts) {
 
 
     it("BONDAGE_10 - getZapBound() - Check received ZAP getting", async function () {
-        
+
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -256,7 +257,7 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_15 - releaseDots() - Check that operator can release dots", async function () {
-    
+
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -349,7 +350,7 @@ contract('Bondage', function (accounts) {
         await prepareProvider.call(this.test);      
         await prepareTokens.call(this.test, accounts[4]);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
-            
+
         await this.test.bondage.delegateBond(subscriber, oracle, specifier, dotBound, {from: accounts[4]});
     });
 
@@ -409,6 +410,46 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
         await expect(this.test.bondage.returnDots(subscriber, oracle, specifier, dotsForEscrow + 1, { from: accounts[0] })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
+
+    it("BONDAGE_24 - bond() - Check that broker can bond to its endpoint", async function () {
+
+
+        await this.test.token.allocate(oracle, tokensForOwner, { from: owner });
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: oracle});
+
+        let testBroker = oracle;
+        await this.test.registry.initiateProvider(publicKey, title, { from: oracle });
+        await this.test.registry.initiateProviderCurve(specifier, piecewiseFunction, testBroker, { from: oracle });
+ 
+        let savedBroker = await this.test.registry.getEndpointBroker(oracle, specifier, { from: oracle });
+
+        // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
+        await this.test.bondage.bond(oracle, specifier, 3, {from: oracle});
+
+        const res = await this.test.bondage.getZapBound.call(oracle, specifier, { from: oracle });
+        const receivedTok = parseInt(res.valueOf());
+
+        await expect(receivedTok).to.be.equal(28);
+
+    });
+
+
+    it("BONDAGE_25 - bond() - Check that nonbroker cannot bond to broker endpoint", async function () {
+
+        await this.test.token.allocate(subscriber, tokensForOwner, { from: owner });
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+
+        await this.test.registry.initiateProvider(publicKey, title, { from: oracle });
+        await this.test.registry.initiateProviderCurve(specifier, piecewiseFunction, oracle, { from: oracle });
+
+        let savedBroker = await this.test.registry.getEndpointBroker(oracle, specifier, { from: subscriber });
+
+        await expect(this.test.bondage.bond(oracle, specifier, 3, {from: subscriber})).to.be.eventually.be.rejectedWith(EVMRevert);
+    });
+
+
+
+
 }); 
 
 
@@ -424,6 +465,7 @@ contract('CurrentCost', function (accounts) {
 
     const specifier = "test-specifier";
     const zeroAddress = Utils.ZeroAddress;
+    const broker = zeroAddress;
 
     // 2 x ^ 2 on [1, 1000]
     const curveParams1 = [3, 0, 0, 2, 1000];
@@ -444,7 +486,7 @@ contract('CurrentCost', function (accounts) {
 
     async function prepareProvider(provider = true, curve = true, account = oracle, curveParams) {
         if (provider) await this.registry.initiateProvider(publicKey, title, { from: account });
-        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, { from: account });
+        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, broker, { from: account });
     }
 
     async function prepareTokens(allocAddress = subscriber) {
