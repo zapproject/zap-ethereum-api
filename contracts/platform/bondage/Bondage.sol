@@ -189,6 +189,13 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         private
         returns (uint256) 
     {   
+
+        address broker = getEndpointBroker(oracleAddress, endpoint);
+
+        if( broker != address(0)){
+            require(msg.sender == broker);
+        }
+
         // This also checks if oracle is registered w/an initialized curve
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
         require(issued + numDots <= dotLimit(oracleAddress, endpoint));
@@ -219,6 +226,12 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         private
         returns (uint256 numZap)
     {
+        address broker = getEndpointBroker(oracleAddress, endpoint);
+
+        if( broker != address(0)){
+            require(msg.sender == broker);
+        }
+
         // Make sure the user has enough to bond with some additional sanity checks
         uint256 amountBound = getBoundDots(holderAddress, oracleAddress, endpoint);
         require(amountBound >= numDots);
@@ -242,6 +255,11 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     /**** Get Methods ****/
     function isProviderInitialized(address holderAddress, address oracleAddress) public view returns (bool) {
         return db.getNumber(keccak256(abi.encodePacked('holders', holderAddress, 'initialized', oracleAddress))) == 1 ? true : false;
+    }
+
+    /// @dev get broker address for endpoint
+    function getEndpointBroker(address oracleAddress, bytes32 endpoint) public view returns (address) {
+        return address(db.getBytes32(keccak256(abi.encodePacked('oracles', oracleAddress, endpoint, 'broker'))));
     }
 
     function getNumEscrow(address holderAddress, address oracleAddress, bytes32 endpoint) public view returns (uint256) {

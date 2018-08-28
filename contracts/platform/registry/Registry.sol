@@ -16,7 +16,8 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     event NewCurve(
         address indexed provider,
         bytes32 indexed endpoint,
-        int[] curve
+        int[] curve,
+        address indexed broker
     );
 
     DatabaseInterface public db;
@@ -52,11 +53,12 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
     /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
     /// @param curve flattened array of all segments, coefficients across all polynomial terms, [e0,l0,c0,c1,c2,...]
+    /// @param broker address for endpoint. if non-zero address, only this address will be able to bond/unbond 
     function initiateProviderCurve(
         bytes32 endpoint,
-        int256[] curve
+        int256[] curve,
+        address broker
     )
-        public
         returns (bool)
     {
         // Provider must be initiated
@@ -66,7 +68,9 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
 
         setCurve(msg.sender, endpoint, curve);        
         db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
-        emit NewCurve(msg.sender, endpoint, curve);
+        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(broker));
+
+        emit NewCurve(msg.sender, endpoint, curve, broker);
 
         return true;
     }
@@ -175,13 +179,13 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         return db.getBytesArray(keccak256(abi.encodePacked('oracles', provider, 'endpointParams', endpoint)));
     }
 
-    function getCurveUnset(address provider, bytes32 endpoint) public view returns (bool) {
-        return db.getIntArrayLength(keccak256(abi.encodePacked('oracles', provider, 'curves', endpoint))) == 0;
+    /// @dev get broker address for endpoint
+    function getEndpointBroker(address oracleAddress, bytes32 endpoint) public view returns (address) {
+        return address(db.getBytes32(keccak256(abi.encodePacked('oracles', oracleAddress, endpoint, 'broker'))));
     }
 
-    /// @dev get overall number of providers
-    function getOracleIndexSize() public view returns (uint256) {
-        return db.getAddressArrayLength(keccak256(abi.encodePacked('oracleIndex')));
+    function getCurveUnset(address provider, bytes32 endpoint) public view returns (bool) {
+        return db.getIntArrayLength(keccak256(abi.encodePacked('oracles', provider, 'curves', endpoint))) == 0;
     }
 
     /// @dev get provider address by index
@@ -250,6 +254,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     * 'oracles', provider, 'endpoints' => {bytes32[]} array of endpoints for this oracle
     * 'oracles', provider, 'endpointParams', endpoint => {bytes32[]} array of params for this endpoint
     * 'oracles', provider, 'curves', endpoint => {uint[]} curve array for this endpoint
+    * 'oracles', provider, 'broker', endpoint => {bytes32} broker address for this endpoint
     * 'oracles', provider, 'is_param_set', key => {uint} Is this provider parameter set (0/1)
     * 'oracles', provider, "publicKey" => {uint} public key for this oracle
     * 'oracles', provider, "title" => {bytes32} title of this oracle

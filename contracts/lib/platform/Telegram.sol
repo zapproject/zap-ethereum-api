@@ -28,6 +28,6 @@ contract Telegram is OnChainProvider {
         params[1] = "p2";
 
         registry.initiateProvider(123, title);
-        registry.initiateProviderCurve(spec1, curve);
+        registry.initiateProviderCurve(spec1, curve, address(0));
     }
 }
