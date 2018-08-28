@@ -247,7 +247,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
 
         // Do the transfer
-        require(token.transfer(holderAddress, numZap));
+        require(token.transfer(msg.sender, numZap));
 
         return numZap;
     }
