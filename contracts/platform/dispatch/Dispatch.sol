@@ -130,12 +130,10 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
             createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
             if(onchainProvider) {
                 OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams, onchainSubscriber); 
-            }
-            else{
+            } else{
                 emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams, onchainSubscriber);
             }
-        } else {
-            // NOT ENOUGH DOTS
+        } else { // NOT ENOUGH DOTS
             revert("Subscriber does not have any dots.");
         }
     }
@@ -423,3 +421,13 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
 /* Dots are moved from ZapBondage escrow to data-provider's bond Holder struct,
 /* with data provider address set as self's address.
 /*/ 
+
+/*************************************** STORAGE ****************************************
+* 'queries', id, 'provider' => {address} address of provider that this query was sent to
+* 'queries', id, 'subscriber' => {address} address of subscriber that this query was sent by
+* 'queries', id, 'endpoint' => {bytes32} endpoint that this query was sent to
+* 'queries', id, 'status' => {Status} current status of this query
+* 'queries', id, 'cancelBlock' => {uint256} the block number of the cancellation request (0 if none)
+* 'queries', id, 'userQuery' => {uint256} the query that was sent with this queryId
+* 'queries', id, 'onchainSubscriber' => {uint256} 1 -> onchainSubscriber, 0 -> offchainSubscriber
+****************************************************************************************/

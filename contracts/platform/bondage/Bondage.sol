@@ -352,3 +352,13 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         db.setNumber(keccak256(abi.encodePacked('totalIssued', oracleAddress, endpoint)), totalIssued);
     }
 }
+
+    /*************************************** STORAGE ****************************************
+    * 'holders', holderAddress, 'initialized', oracleAddress => {uint256} 1 -> provider-subscriber initialized, 0 -> not initialized 
+    * 'holders', holderAddress, 'bonds', oracleAddress, endpoint => {uint256} number of dots this address has bound to this endpoint
+    * 'oracles', oracleAddress, endpoint, 'broker' => {address} address of endpoint broker, 0 if none
+    * 'escrow', holderAddress, oracleAddress, endpoint => {uint256} amount of Zap that have been escrowed
+    * 'totalBound', oracleAddress, endpoint => {uint256} amount of Zap bound to this endpoint
+    * 'totalIssued', oracleAddress, endpoint => {uint256} number of dots issued by this endpoint
+    * 'holders', holderAddress, 'oracleList' => {address[]} array of oracle addresses associated with this holder
+    ****************************************************************************************/
