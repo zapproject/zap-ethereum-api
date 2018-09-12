@@ -16,7 +16,7 @@ contract Faucet {
     // 1: 1000 ratio
     
     modifier ownerOnly {
-        require(msg.sender == owner); 
+        require(msg.sender == owner,"Error: Only the owner can access this function"); 
         _;
     }
            
@@ -41,7 +41,7 @@ contract Faucet {
     }
   
     function setOwner(address _owner) public ownerOnly {
-        require(_owner != address(0));
+        require(_owner != address(0), "Error: Address cannot be zero");
         owner = _owner;
     }
     
