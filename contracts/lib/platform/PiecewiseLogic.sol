@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 library PiecewiseLogic {
     function sumOfPowers(uint n, uint i) internal pure returns (uint) {
-        require(i <= 6 && i >= 0);
+        require((i <= 6 && i >= 0), "Error: Invalid Parameter in PiecewiseLogic Contract");
 
         if ( i == 0 ) return n;
         if ( i == 1 ) return (n * (n + 1)) / 2;
