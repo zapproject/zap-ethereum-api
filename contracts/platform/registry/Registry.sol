@@ -91,8 +91,8 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     // Gets provider data
     function getProviderParameter(address provider, bytes32 key) public view returns (bytes32){
         // Provider must be initiated
-        require(isProviderInitiated(provider"Error: Provider does not exist"),);
-        require(isProviderParamInitialized(provider, key)"Error: Provider parameter does not exist");
+        require(isProviderInitiated(provider),"Error: Provider does not exist");
+        require(isProviderParamInitialized(provider, key),"Error: Provider parameter does not exist");
         return db.getBytes32(keccak256(abi.encodePacked('oracles', provider, 'providerParams', key)));
     }
 
