@@ -21,7 +21,7 @@ library PiecewiseLogic {
         int sum = 0;
 
         // Require to be within the dot limit
-        require(a + b <= uint(curve[curve.length - 1]));
+        require((a + b <= uint(curve[curve.length - 1])), "Error: Not within Dot Limit");
 
         // Loop invariant: i should always point to the start of a piecewise piece (the length)
         while ( i < curve.length ) {
@@ -61,7 +61,7 @@ library PiecewiseLogic {
             sum += curve[i] * int(sumOfPowers(a + b, i - base) - sumOfPowers(a - 1, i - base));
         }
 
-        require(sum >= 0);
+        require((sum >= 0),"Error: Sum of piece must be greater than 0");
         return sum;
     }
 }
