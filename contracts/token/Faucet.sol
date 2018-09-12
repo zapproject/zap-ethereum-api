@@ -16,7 +16,7 @@ contract Faucet {
     // 1: 1000 ratio
     
     modifier ownerOnly {
-        require(msg.sender == owner,"Error: Only the owner can access this function"); 
+        require(msg.sender == owner,"Error: Owner Only Error"); 
         _;
     }
            

@@ -9,14 +9,14 @@ contract Ownable {
 
     /// @dev Throws if called by any contract other than latest designated caller
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == owner,"Error: Only Owner Error");
         _;
     }
 
     /// @dev Allows the current owner to transfer control of the contract to a newOwner.
     /// @param newOwner The address to transfer ownership to.
     function transferOwnership(address newOwner) public onlyOwner {
-       require(newOwner != address(0));
+       require(newOwner != address(0),"Error: Recipient cannot be address 0");
        emit OwnershipTransferred(owner, newOwner);
        owner = newOwner;
     }
