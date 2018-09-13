@@ -42,7 +42,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         public
         returns (bool)
     {
-        require(!isProviderInitiated(msg.sender));
+        require(!isProviderInitiated(msg.sender),"Error: Provider already exists");
         createOracle(msg.sender, publicKey, title);
         addOracle(msg.sender);
         emit NewProvider(msg.sender, title);
@@ -62,9 +62,9 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         returns (bool)
     {
         // Provider must be initiated
-        require(isProviderInitiated(msg.sender));
+        require(isProviderInitiated(msg.sender),"Error; Provider does not yet exist");
         // Can't reset their curve
-        require(getCurveUnset(msg.sender, endpoint));
+        require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
 
         setCurve(msg.sender, endpoint, curve);        
         db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
@@ -78,7 +78,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     // Sets provider data
     function setProviderParameter(bytes32 key, bytes32 value) public {
         // Provider must be initiated
-        require(isProviderInitiated(msg.sender));
+        require(isProviderInitiated(msg.sender),"Error: Provider does not exist");
 
         if(!isProviderParamInitialized(msg.sender, key)){
             // initialize this provider param
@@ -91,24 +91,24 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     // Gets provider data
     function getProviderParameter(address provider, bytes32 key) public view returns (bytes32){
         // Provider must be initiated
-        require(isProviderInitiated(provider));
-        require(isProviderParamInitialized(provider, key));
+        require(isProviderInitiated(provider),"Error: Provider does not exist");
+        require(isProviderParamInitialized(provider, key),"Error: Provider parameter does not exist");
         return db.getBytes32(keccak256(abi.encodePacked('oracles', provider, 'providerParams', key)));
     }
 
     // Gets keys of all provider params
     function getAllProviderParams(address provider) public view returns (bytes32[]){
         // Provider must be initiated
-        require(isProviderInitiated(provider));
+        require(isProviderInitiated(provider),"Error: Provider does not exist");
         return db.getBytesArray(keccak256(abi.encodePacked('oracles', provider, 'providerParams')));
     }
 
     // Set endpoint specific parameters for a given endpoint
     function setEndpointParams(bytes32 endpoint, bytes32[] endpointParams) public {
         // Provider must be initiated
-        require(isProviderInitiated(msg.sender));
+        require(isProviderInitiated(msg.sender),"Error: Provider does not exist");
         // Can't set endpoint params on an unset provider
-        require(!getCurveUnset(msg.sender, endpoint));
+        require(!getCurveUnset(msg.sender, endpoint),"Error: Curve is not yet set");
 
         db.setBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpointParams', endpoint)), endpointParams);
     }
@@ -116,8 +116,8 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     // get endpoint specific parameters for a given endpoint
     function getEndpointParams(address provider, bytes32 endpoint) public view returns (bytes32[]) {
         // Provider, endpoint must be initiated
-        require(isProviderInitiated(msg.sender));
-        require(!getCurveUnset(msg.sender, endpoint));
+        require(isProviderInitiated(msg.sender),"Error: Provider does not exist");
+        require(!getCurveUnset(msg.sender, endpoint),"Error: Curve is not yet set");
 
         return db.getBytesArray(keccak256(abi.encodePacked('oracles', provider, 'endpointParams', endpoint)));
     }
@@ -142,12 +142,12 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         view
         returns (int[])
     {
-        require(!getCurveUnset(provider, endpoint));
+        require(!getCurveUnset(provider, endpoint),"Error: Curve is not yet set");
         return db.getIntArray(keccak256(abi.encodePacked('oracles', provider, 'curves', endpoint)));
     }
 
     function getProviderCurveLength(address provider, bytes32 endpoint) public view returns (uint256){
-        require(!getCurveUnset(provider, endpoint));
+        require(!getCurveUnset(provider, endpoint),"Error: Curve is not yet set");
         return db.getIntArray(keccak256(abi.encodePacked('oracles', provider, 'curves', endpoint))).length;
     }
 
@@ -227,15 +227,15 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         while ( index < curve.length ) {
             // Validate the length of the piece
             int len = curve[index];
-            require(len > 0);
+            require(len > 0, "Error: Number of constants must be greater than zero");
 
             // Validate the end index of the piece
             uint endIndex = index + uint(len) + 1;
-            require(endIndex < curve.length);
+            require(endIndex < curve.length, "Error: Out of bounds error. Verify correct curve length");
 
             // Validate that the end is continuous
             int end = curve[endIndex];
-            require(uint(end) > prevEnd);
+            require(uint(end) > prevEnd,"Error: Curve is not continuous");
 
             prevEnd = uint(end);
             index += uint(len) + 2; 

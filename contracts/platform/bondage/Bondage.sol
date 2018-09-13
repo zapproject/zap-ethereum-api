@@ -25,7 +25,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 
     // For restricting dot escrow/transfer method calls to Dispatch and Arbiter
     modifier operatorOnly() {
-        require(msg.sender == arbiterAddress || msg.sender == dispatchAddress);
+        require((msg.sender == arbiterAddress || msg.sender == dispatchAddress), "Error: Only Operator can access this function");
         _;
     }
 
@@ -77,7 +77,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         returns (bool success)
     {
         uint256 boundDots = getBoundDots(holderAddress, oracleAddress, endpoint);
-        require(numDots <= boundDots);
+        require(numDots <= boundDots,"Error: Bound dots must be greater than dots to Escrow");
         updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "add");
         updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
         emit Escrowed(holderAddress, oracleAddress, endpoint, numDots);
@@ -99,7 +99,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         returns (bool success)
     {
         uint256 numEscrowed = getNumEscrow(holderAddress, oracleAddress, endpoint);
-        require(numDots <= numEscrowed);
+        require(numDots <= numEscrowed,"Error: Escrowed dots must be greater than dots to release");
         updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
         updateBondValue(oracleAddress, oracleAddress, endpoint, numDots, "add");
         emit Released(holderAddress, oracleAddress, endpoint, numDots);
@@ -121,7 +121,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         returns (bool success)
     {
         uint256 numEscrowed = getNumEscrow(holderAddress, oracleAddress, endpoint);
-        require(numDots <= numEscrowed);
+        require(numDots <= numEscrowed,"Error: Escrowed dots must be greater than dots to release");
         updateEscrow(holderAddress, oracleAddress, endpoint, numDots, "sub");
         updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");
         emit Returned(holderAddress, oracleAddress, endpoint, numDots);
@@ -193,17 +193,17 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         address broker = getEndpointBroker(oracleAddress, endpoint);
 
         if( broker != address(0)){
-            require(msg.sender == broker);
+            require(msg.sender == broker, "Error: Only the Broker can bond to this address");
         }
 
         // This also checks if oracle is registered w/an initialized curve
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
-        require(issued + numDots <= dotLimit(oracleAddress, endpoint));
+        require((issued + numDots <= dotLimit(oracleAddress, endpoint)), "Error: The oracle must be registered with a a curve");
         
         uint256 numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
 
         // User must have approved contract to transfer working ZAP
-        require(token.transferFrom(msg.sender, this, numZap));
+        require((token.transferFrom(msg.sender, this, numZap)),"Error: You must have approved contract to transfer working ZAP");
 
         if (!isProviderInitialized(holderAddress, oracleAddress)) {            
             setProviderInitialized(holderAddress, oracleAddress);
@@ -229,13 +229,13 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         address broker = getEndpointBroker(oracleAddress, endpoint);
 
         if( broker != address(0)){
-            require(msg.sender == broker);
+            require(msg.sender == broker, "Error: Only the Broker can unbond from this address");
         }
 
         // Make sure the user has enough to bond with some additional sanity checks
         uint256 amountBound = getBoundDots(holderAddress, oracleAddress, endpoint);
-        require(amountBound >= numDots);
-        require(numDots > 0);
+        require(amountBound >= numDots,"Error: User doesnt have that many dots bound");
+        require(numDots > 0,"Error: User must unbond at least 1 Dot");
 
         // Get the value of the dots
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
@@ -247,7 +247,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
 
         // Do the transfer
-        require(token.transfer(msg.sender, numZap));
+        require((token.transfer(msg.sender, numZap)),"Token Not transferred");
 
         return numZap;
     }

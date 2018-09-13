@@ -29,34 +29,34 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\ncontract Client1 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    function callback(uint256 id, string response1) external;\n}\ncontract Client2 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    function callback(uint256 id, string response1, string response2) external;\n}\ncontract Client3 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    /// @param response3 third provider-specified param\n    function callback(uint256 id, string response1, string response2, string response3) external;\n}\ncontract Client4 {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response1 first provider-specified param\n    /// @param response2 second provider-specified param\n    /// @param response3 third provider-specified param\n    /// @param response4 fourth provider-specified param\n    function callback(uint256 id, string response1, string response2, string response3, string response4) external;\n}\n\ncontract ClientBytes32Array {\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response bytes32 array\n    function callback(uint256 id, bytes32[] response) external;\n}\n\ncontract ClientIntArray{\n    /// @dev callback that provider will call after Dispatch.query() call\n    /// @param id request id\n    /// @param response int array\n    function callback(uint256 id, int[] response) external;\n}\n\n",
-  "sourcePath": "/home/iefnw/office7/zap-ethereum-api/contracts/lib/platform/Client.sol",
+  "sourcePath": "/home/max/zprojects/zap-ethereum-api/contracts/lib/platform/Client.sol",
   "ast": {
-    "absolutePath": "/home/iefnw/office7/zap-ethereum-api/contracts/lib/platform/Client.sol",
+    "absolutePath": "/home/max/zprojects/zap-ethereum-api/contracts/lib/platform/Client.sol",
     "exportedSymbols": {
       "Client1": [
-        240
+        451
       ],
       "Client2": [
-        250
+        461
       ],
       "Client3": [
-        262
+        473
       ],
       "Client4": [
-        276
+        487
       ],
       "ClientBytes32Array": [
-        285
+        496
       ],
       "ClientIntArray": [
-        294
+        505
       ]
     },
-    "id": 295,
+    "id": 506,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 232,
+        "id": 443,
         "literals": [
           "solidity",
           "^",
@@ -64,7 +64,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:5"
+        "src": "0:24:6"
       },
       {
         "baseContracts": [],
@@ -72,9 +72,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 240,
+        "id": 451,
         "linearizedBaseContracts": [
-          240
+          451
         ],
         "name": "Client1",
         "nodeType": "ContractDefinition",
@@ -82,7 +82,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param",
-            "id": 239,
+            "id": 450,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -90,16 +90,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 237,
+              "id": 448,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 234,
+                  "id": 445,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 239,
-                  "src": "226:10:5",
+                  "scope": 450,
+                  "src": "226:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -107,10 +107,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 233,
+                    "id": 444,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "226:7:5",
+                    "src": "226:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -121,11 +121,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 236,
+                  "id": 447,
                   "name": "response1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 239,
-                  "src": "238:16:5",
+                  "scope": 450,
+                  "src": "238:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -133,10 +133,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 235,
+                    "id": 446,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "238:6:5",
+                    "src": "238:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -146,24 +146,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "225:30:5"
+              "src": "225:30:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 238,
+              "id": 449,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "264:0:5"
+              "src": "264:0:6"
             },
-            "scope": 240,
-            "src": "208:57:5",
+            "scope": 451,
+            "src": "208:57:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "26:241:5"
+        "scope": 506,
+        "src": "26:241:6"
       },
       {
         "baseContracts": [],
@@ -171,9 +171,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 250,
+        "id": 461,
         "linearizedBaseContracts": [
-          250
+          461
         ],
         "name": "Client2",
         "nodeType": "ContractDefinition",
@@ -181,7 +181,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param",
-            "id": 249,
+            "id": 460,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -189,16 +189,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 247,
+              "id": 458,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 242,
+                  "id": 453,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 249,
-                  "src": "525:10:5",
+                  "scope": 460,
+                  "src": "525:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -206,10 +206,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 241,
+                    "id": 452,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "525:7:5",
+                    "src": "525:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -220,11 +220,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 244,
+                  "id": 455,
                   "name": "response1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 249,
-                  "src": "537:16:5",
+                  "scope": 460,
+                  "src": "537:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -232,10 +232,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 243,
+                    "id": 454,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "537:6:5",
+                    "src": "537:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -246,11 +246,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 246,
+                  "id": 457,
                   "name": "response2",
                   "nodeType": "VariableDeclaration",
-                  "scope": 249,
-                  "src": "555:16:5",
+                  "scope": 460,
+                  "src": "555:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -258,10 +258,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 245,
+                    "id": 456,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "555:6:5",
+                    "src": "555:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -271,24 +271,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "524:48:5"
+              "src": "524:48:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 248,
+              "id": 459,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "581:0:5"
+              "src": "581:0:6"
             },
-            "scope": 250,
-            "src": "507:75:5",
+            "scope": 461,
+            "src": "507:75:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "268:316:5"
+        "scope": 506,
+        "src": "268:316:6"
       },
       {
         "baseContracts": [],
@@ -296,9 +296,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 262,
+        "id": 473,
         "linearizedBaseContracts": [
-          262
+          473
         ],
         "name": "Client3",
         "nodeType": "ContractDefinition",
@@ -306,7 +306,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param\n @param response3 third provider-specified param",
-            "id": 261,
+            "id": 472,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -314,16 +314,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 259,
+              "id": 470,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 252,
+                  "id": 463,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 261,
-                  "src": "898:10:5",
+                  "scope": 472,
+                  "src": "898:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -331,10 +331,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 251,
+                    "id": 462,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "898:7:5",
+                    "src": "898:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -345,11 +345,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 254,
+                  "id": 465,
                   "name": "response1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 261,
-                  "src": "910:16:5",
+                  "scope": 472,
+                  "src": "910:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -357,10 +357,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 253,
+                    "id": 464,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "910:6:5",
+                    "src": "910:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -371,11 +371,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 256,
+                  "id": 467,
                   "name": "response2",
                   "nodeType": "VariableDeclaration",
-                  "scope": 261,
-                  "src": "928:16:5",
+                  "scope": 472,
+                  "src": "928:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -383,10 +383,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 255,
+                    "id": 466,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "928:6:5",
+                    "src": "928:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -397,11 +397,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 258,
+                  "id": 469,
                   "name": "response3",
                   "nodeType": "VariableDeclaration",
-                  "scope": 261,
-                  "src": "946:16:5",
+                  "scope": 472,
+                  "src": "946:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -409,10 +409,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 257,
+                    "id": 468,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "946:6:5",
+                    "src": "946:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -422,24 +422,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "897:66:5"
+              "src": "897:66:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 260,
+              "id": 471,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "972:0:5"
+              "src": "972:0:6"
             },
-            "scope": 262,
-            "src": "880:93:5",
+            "scope": 473,
+            "src": "880:93:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "585:390:5"
+        "scope": 506,
+        "src": "585:390:6"
       },
       {
         "baseContracts": [],
@@ -447,9 +447,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 276,
+        "id": 487,
         "linearizedBaseContracts": [
-          276
+          487
         ],
         "name": "Client4",
         "nodeType": "ContractDefinition",
@@ -457,7 +457,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param\n @param response3 third provider-specified param\n @param response4 fourth provider-specified param",
-            "id": 275,
+            "id": 486,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -465,16 +465,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 273,
+              "id": 484,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 264,
+                  "id": 475,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1346:10:5",
+                  "scope": 486,
+                  "src": "1346:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -482,10 +482,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 263,
+                    "id": 474,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1346:7:5",
+                    "src": "1346:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -496,11 +496,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 266,
+                  "id": 477,
                   "name": "response1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1358:16:5",
+                  "scope": 486,
+                  "src": "1358:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -508,10 +508,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 265,
+                    "id": 476,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1358:6:5",
+                    "src": "1358:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -522,11 +522,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 268,
+                  "id": 479,
                   "name": "response2",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1376:16:5",
+                  "scope": 486,
+                  "src": "1376:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -534,10 +534,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 267,
+                    "id": 478,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1376:6:5",
+                    "src": "1376:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -548,11 +548,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 270,
+                  "id": 481,
                   "name": "response3",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1394:16:5",
+                  "scope": 486,
+                  "src": "1394:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -560,10 +560,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 269,
+                    "id": 480,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1394:6:5",
+                    "src": "1394:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -574,11 +574,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 272,
+                  "id": 483,
                   "name": "response4",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1412:16:5",
+                  "scope": 486,
+                  "src": "1412:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -586,10 +586,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 271,
+                    "id": 482,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1412:6:5",
+                    "src": "1412:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -599,24 +599,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1345:84:5"
+              "src": "1345:84:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 274,
+              "id": 485,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1438:0:5"
+              "src": "1438:0:6"
             },
-            "scope": 276,
-            "src": "1328:111:5",
+            "scope": 487,
+            "src": "1328:111:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "976:465:5"
+        "scope": 506,
+        "src": "976:465:6"
       },
       {
         "baseContracts": [],
@@ -624,9 +624,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 285,
+        "id": 496,
         "linearizedBaseContracts": [
-          285
+          496
         ],
         "name": "ClientBytes32Array",
         "nodeType": "ContractDefinition",
@@ -634,7 +634,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response bytes32 array",
-            "id": 284,
+            "id": 495,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -642,16 +642,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 282,
+              "id": 493,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 278,
+                  "id": 489,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 284,
-                  "src": "1636:10:5",
+                  "scope": 495,
+                  "src": "1636:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -659,10 +659,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 277,
+                    "id": 488,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1636:7:5",
+                    "src": "1636:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -673,11 +673,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 281,
+                  "id": 492,
                   "name": "response",
                   "nodeType": "VariableDeclaration",
-                  "scope": 284,
-                  "src": "1648:18:5",
+                  "scope": 495,
+                  "src": "1648:18:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -686,19 +686,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 279,
+                      "id": 490,
                       "name": "bytes32",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1648:7:5",
+                      "src": "1648:7:6",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "id": 280,
+                    "id": 491,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1648:9:5",
+                    "src": "1648:9:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
                       "typeString": "bytes32[]"
@@ -708,24 +708,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1635:32:5"
+              "src": "1635:32:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 283,
+              "id": 494,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1676:0:5"
+              "src": "1676:0:6"
             },
-            "scope": 285,
-            "src": "1618:59:5",
+            "scope": 496,
+            "src": "1618:59:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "1443:236:5"
+        "scope": 506,
+        "src": "1443:236:6"
       },
       {
         "baseContracts": [],
@@ -733,9 +733,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 294,
+        "id": 505,
         "linearizedBaseContracts": [
-          294
+          505
         ],
         "name": "ClientIntArray",
         "nodeType": "ContractDefinition",
@@ -743,7 +743,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response int array",
-            "id": 293,
+            "id": 504,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -751,16 +751,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 291,
+              "id": 502,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 287,
+                  "id": 498,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 293,
-                  "src": "1865:10:5",
+                  "scope": 504,
+                  "src": "1865:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -768,10 +768,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 286,
+                    "id": 497,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1865:7:5",
+                    "src": "1865:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -782,11 +782,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 290,
+                  "id": 501,
                   "name": "response",
                   "nodeType": "VariableDeclaration",
-                  "scope": 293,
-                  "src": "1877:14:5",
+                  "scope": 504,
+                  "src": "1877:14:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -795,19 +795,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 288,
+                      "id": 499,
                       "name": "int",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1877:3:5",
+                      "src": "1877:3:6",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "id": 289,
+                    "id": 500,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1877:5:5",
+                    "src": "1877:5:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_int256_$dyn_storage_ptr",
                       "typeString": "int256[]"
@@ -817,55 +817,55 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1864:28:5"
+              "src": "1864:28:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 292,
+              "id": 503,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1901:0:5"
+              "src": "1901:0:6"
             },
-            "scope": 294,
-            "src": "1847:55:5",
+            "scope": 505,
+            "src": "1847:55:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "1681:223:5"
+        "scope": 506,
+        "src": "1681:223:6"
       }
     ],
-    "src": "0:1906:5"
+    "src": "0:1906:6"
   },
   "legacyAST": {
-    "absolutePath": "/home/iefnw/office7/zap-ethereum-api/contracts/lib/platform/Client.sol",
+    "absolutePath": "/home/max/zprojects/zap-ethereum-api/contracts/lib/platform/Client.sol",
     "exportedSymbols": {
       "Client1": [
-        240
+        451
       ],
       "Client2": [
-        250
+        461
       ],
       "Client3": [
-        262
+        473
       ],
       "Client4": [
-        276
+        487
       ],
       "ClientBytes32Array": [
-        285
+        496
       ],
       "ClientIntArray": [
-        294
+        505
       ]
     },
-    "id": 295,
+    "id": 506,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 232,
+        "id": 443,
         "literals": [
           "solidity",
           "^",
@@ -873,7 +873,7 @@
           ".24"
         ],
         "nodeType": "PragmaDirective",
-        "src": "0:24:5"
+        "src": "0:24:6"
       },
       {
         "baseContracts": [],
@@ -881,9 +881,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 240,
+        "id": 451,
         "linearizedBaseContracts": [
-          240
+          451
         ],
         "name": "Client1",
         "nodeType": "ContractDefinition",
@@ -891,7 +891,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param",
-            "id": 239,
+            "id": 450,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -899,16 +899,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 237,
+              "id": 448,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 234,
+                  "id": 445,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 239,
-                  "src": "226:10:5",
+                  "scope": 450,
+                  "src": "226:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -916,10 +916,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 233,
+                    "id": 444,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "226:7:5",
+                    "src": "226:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -930,11 +930,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 236,
+                  "id": 447,
                   "name": "response1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 239,
-                  "src": "238:16:5",
+                  "scope": 450,
+                  "src": "238:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -942,10 +942,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 235,
+                    "id": 446,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "238:6:5",
+                    "src": "238:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -955,24 +955,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "225:30:5"
+              "src": "225:30:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 238,
+              "id": 449,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "264:0:5"
+              "src": "264:0:6"
             },
-            "scope": 240,
-            "src": "208:57:5",
+            "scope": 451,
+            "src": "208:57:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "26:241:5"
+        "scope": 506,
+        "src": "26:241:6"
       },
       {
         "baseContracts": [],
@@ -980,9 +980,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 250,
+        "id": 461,
         "linearizedBaseContracts": [
-          250
+          461
         ],
         "name": "Client2",
         "nodeType": "ContractDefinition",
@@ -990,7 +990,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param",
-            "id": 249,
+            "id": 460,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -998,16 +998,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 247,
+              "id": 458,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 242,
+                  "id": 453,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 249,
-                  "src": "525:10:5",
+                  "scope": 460,
+                  "src": "525:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1015,10 +1015,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 241,
+                    "id": 452,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "525:7:5",
+                    "src": "525:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1029,11 +1029,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 244,
+                  "id": 455,
                   "name": "response1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 249,
-                  "src": "537:16:5",
+                  "scope": 460,
+                  "src": "537:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1041,10 +1041,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 243,
+                    "id": 454,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "537:6:5",
+                    "src": "537:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1055,11 +1055,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 246,
+                  "id": 457,
                   "name": "response2",
                   "nodeType": "VariableDeclaration",
-                  "scope": 249,
-                  "src": "555:16:5",
+                  "scope": 460,
+                  "src": "555:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1067,10 +1067,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 245,
+                    "id": 456,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "555:6:5",
+                    "src": "555:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1080,24 +1080,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "524:48:5"
+              "src": "524:48:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 248,
+              "id": 459,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "581:0:5"
+              "src": "581:0:6"
             },
-            "scope": 250,
-            "src": "507:75:5",
+            "scope": 461,
+            "src": "507:75:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "268:316:5"
+        "scope": 506,
+        "src": "268:316:6"
       },
       {
         "baseContracts": [],
@@ -1105,9 +1105,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 262,
+        "id": 473,
         "linearizedBaseContracts": [
-          262
+          473
         ],
         "name": "Client3",
         "nodeType": "ContractDefinition",
@@ -1115,7 +1115,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param\n @param response3 third provider-specified param",
-            "id": 261,
+            "id": 472,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1123,16 +1123,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 259,
+              "id": 470,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 252,
+                  "id": 463,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 261,
-                  "src": "898:10:5",
+                  "scope": 472,
+                  "src": "898:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1140,10 +1140,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 251,
+                    "id": 462,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "898:7:5",
+                    "src": "898:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1154,11 +1154,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 254,
+                  "id": 465,
                   "name": "response1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 261,
-                  "src": "910:16:5",
+                  "scope": 472,
+                  "src": "910:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1166,10 +1166,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 253,
+                    "id": 464,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "910:6:5",
+                    "src": "910:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1180,11 +1180,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 256,
+                  "id": 467,
                   "name": "response2",
                   "nodeType": "VariableDeclaration",
-                  "scope": 261,
-                  "src": "928:16:5",
+                  "scope": 472,
+                  "src": "928:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1192,10 +1192,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 255,
+                    "id": 466,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "928:6:5",
+                    "src": "928:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1206,11 +1206,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 258,
+                  "id": 469,
                   "name": "response3",
                   "nodeType": "VariableDeclaration",
-                  "scope": 261,
-                  "src": "946:16:5",
+                  "scope": 472,
+                  "src": "946:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1218,10 +1218,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 257,
+                    "id": 468,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "946:6:5",
+                    "src": "946:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1231,24 +1231,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "897:66:5"
+              "src": "897:66:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 260,
+              "id": 471,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "972:0:5"
+              "src": "972:0:6"
             },
-            "scope": 262,
-            "src": "880:93:5",
+            "scope": 473,
+            "src": "880:93:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "585:390:5"
+        "scope": 506,
+        "src": "585:390:6"
       },
       {
         "baseContracts": [],
@@ -1256,9 +1256,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 276,
+        "id": 487,
         "linearizedBaseContracts": [
-          276
+          487
         ],
         "name": "Client4",
         "nodeType": "ContractDefinition",
@@ -1266,7 +1266,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response1 first provider-specified param\n @param response2 second provider-specified param\n @param response3 third provider-specified param\n @param response4 fourth provider-specified param",
-            "id": 275,
+            "id": 486,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1274,16 +1274,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 273,
+              "id": 484,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 264,
+                  "id": 475,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1346:10:5",
+                  "scope": 486,
+                  "src": "1346:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1291,10 +1291,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 263,
+                    "id": 474,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1346:7:5",
+                    "src": "1346:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1305,11 +1305,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 266,
+                  "id": 477,
                   "name": "response1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1358:16:5",
+                  "scope": 486,
+                  "src": "1358:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1317,10 +1317,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 265,
+                    "id": 476,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1358:6:5",
+                    "src": "1358:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1331,11 +1331,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 268,
+                  "id": 479,
                   "name": "response2",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1376:16:5",
+                  "scope": 486,
+                  "src": "1376:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1343,10 +1343,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 267,
+                    "id": 478,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1376:6:5",
+                    "src": "1376:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1357,11 +1357,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 270,
+                  "id": 481,
                   "name": "response3",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1394:16:5",
+                  "scope": 486,
+                  "src": "1394:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1369,10 +1369,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 269,
+                    "id": 480,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1394:6:5",
+                    "src": "1394:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1383,11 +1383,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 272,
+                  "id": 483,
                   "name": "response4",
                   "nodeType": "VariableDeclaration",
-                  "scope": 275,
-                  "src": "1412:16:5",
+                  "scope": 486,
+                  "src": "1412:16:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1395,10 +1395,10 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 271,
+                    "id": 482,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1412:6:5",
+                    "src": "1412:6:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_string_storage_ptr",
                       "typeString": "string"
@@ -1408,24 +1408,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1345:84:5"
+              "src": "1345:84:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 274,
+              "id": 485,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1438:0:5"
+              "src": "1438:0:6"
             },
-            "scope": 276,
-            "src": "1328:111:5",
+            "scope": 487,
+            "src": "1328:111:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "976:465:5"
+        "scope": 506,
+        "src": "976:465:6"
       },
       {
         "baseContracts": [],
@@ -1433,9 +1433,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 285,
+        "id": 496,
         "linearizedBaseContracts": [
-          285
+          496
         ],
         "name": "ClientBytes32Array",
         "nodeType": "ContractDefinition",
@@ -1443,7 +1443,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response bytes32 array",
-            "id": 284,
+            "id": 495,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1451,16 +1451,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 282,
+              "id": 493,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 278,
+                  "id": 489,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 284,
-                  "src": "1636:10:5",
+                  "scope": 495,
+                  "src": "1636:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1468,10 +1468,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 277,
+                    "id": 488,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1636:7:5",
+                    "src": "1636:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1482,11 +1482,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 281,
+                  "id": 492,
                   "name": "response",
                   "nodeType": "VariableDeclaration",
-                  "scope": 284,
-                  "src": "1648:18:5",
+                  "scope": 495,
+                  "src": "1648:18:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1495,19 +1495,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 279,
+                      "id": 490,
                       "name": "bytes32",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1648:7:5",
+                      "src": "1648:7:6",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes32",
                         "typeString": "bytes32"
                       }
                     },
-                    "id": 280,
+                    "id": 491,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1648:9:5",
+                    "src": "1648:9:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes32_$dyn_storage_ptr",
                       "typeString": "bytes32[]"
@@ -1517,24 +1517,24 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1635:32:5"
+              "src": "1635:32:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 283,
+              "id": 494,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1676:0:5"
+              "src": "1676:0:6"
             },
-            "scope": 285,
-            "src": "1618:59:5",
+            "scope": 496,
+            "src": "1618:59:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "1443:236:5"
+        "scope": 506,
+        "src": "1443:236:6"
       },
       {
         "baseContracts": [],
@@ -1542,9 +1542,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 294,
+        "id": 505,
         "linearizedBaseContracts": [
-          294
+          505
         ],
         "name": "ClientIntArray",
         "nodeType": "ContractDefinition",
@@ -1552,7 +1552,7 @@
           {
             "body": null,
             "documentation": "@dev callback that provider will call after Dispatch.query() call\n @param id request id\n @param response int array",
-            "id": 293,
+            "id": 504,
             "implemented": false,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -1560,16 +1560,16 @@
             "name": "callback",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 291,
+              "id": 502,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 287,
+                  "id": 498,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 293,
-                  "src": "1865:10:5",
+                  "scope": 504,
+                  "src": "1865:10:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1577,10 +1577,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 286,
+                    "id": 497,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1865:7:5",
+                    "src": "1865:7:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1591,11 +1591,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 290,
+                  "id": 501,
                   "name": "response",
                   "nodeType": "VariableDeclaration",
-                  "scope": 293,
-                  "src": "1877:14:5",
+                  "scope": 504,
+                  "src": "1877:14:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1604,19 +1604,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 288,
+                      "id": 499,
                       "name": "int",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1877:3:5",
+                      "src": "1877:3:6",
                       "typeDescriptions": {
                         "typeIdentifier": "t_int256",
                         "typeString": "int256"
                       }
                     },
-                    "id": 289,
+                    "id": 500,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1877:5:5",
+                    "src": "1877:5:6",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_int256_$dyn_storage_ptr",
                       "typeString": "int256[]"
@@ -1626,33 +1626,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1864:28:5"
+              "src": "1864:28:6"
             },
             "payable": false,
             "returnParameters": {
-              "id": 292,
+              "id": 503,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1901:0:5"
+              "src": "1901:0:6"
             },
-            "scope": 294,
-            "src": "1847:55:5",
+            "scope": 505,
+            "src": "1847:55:6",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 295,
-        "src": "1681:223:5"
+        "scope": 506,
+        "src": "1681:223:6"
       }
     ],
-    "src": "0:1906:5"
+    "src": "0:1906:6"
   },
   "compiler": {
     "name": "solc",
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.0",
-  "updatedAt": "2018-08-28T05:16:12.045Z"
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2018-09-12T20:31:41.713Z"
 }

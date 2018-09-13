@@ -77,7 +77,7 @@ contract Ownable {
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "Error: Owner Only error");
         _;
     }
     /**
@@ -85,7 +85,7 @@ contract Ownable {
      * @param newOwner The address to transfer ownership to.
      */
     function transferOwnership(address newOwner) onlyOwner public {
-        require(newOwner != address(0));
+        require(newOwner != address(0),"Error: Recipient cannot be address 0");
         emit OwnershipTransferred(owner, newOwner);
         owner = newOwner;
     }
@@ -99,7 +99,7 @@ contract StandardToken is ERC20, BasicToken {
      * @param _value uint256 the amount of tokens to be transferred
      */
     function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
-        require(_to != address(0));
+        require(_to != address(0),"Error: Recipient cannot be address 0");
         uint256 _allowance = allowed[_from][msg.sender];
         // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
         // require (_value <= _allowance);
@@ -163,7 +163,7 @@ contract MintableToken is StandardToken, Ownable {
     event MintFinished();
     bool public mintingFinished = false;
     modifier canMint() {
-        require(!mintingFinished);
+        require(!mintingFinished,"Error: Minting is finished");
         _;
     }
     
