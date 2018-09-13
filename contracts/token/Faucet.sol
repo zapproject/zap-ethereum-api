@@ -4,54 +4,41 @@ contract Token {
     function transfer(address to, uint256 amount) public returns (bool);
     function balanceOf(address addr) public view returns (uint256);
 }
-            
+
 contract Faucet {
     Token token;
     address public owner;
-    address public tokenAddress;
-
-    uint public decimals = 10 ** 18;
-    uint public rate = 1 * decimals / 1000; //change to whatever
+    uint256 public rate = 1000; //1 ETH = 1000 ZAP
+    event BUYZAP(address indexed _buyer, uint256 indexed _amount, uint indexed _rate);
 
     // 1: 1000 ratio
-    
+
     modifier ownerOnly {
-        require(msg.sender == owner); 
+        require(msg.sender == owner);
         _;
     }
-           
-    constructor(address _token, address _owner) public {
-        tokenAddress = _token;
+
+    constructor(address _token) public {
+        owner=msg.sender;
         token = Token(_token);
-        owner = _owner;
     }
-    
+
     event Log(uint256 n1, uint256 n2);
-    
+
     function buyZap() public payable {
-        if(msg.value > 0) {
-            uint256 amt = (msg.value / rate);
-            amt = amt * decimals;
-            if(amt <= token.balanceOf(this))
-                token.transfer(msg.sender, amt);                
-        }
-        else {
-            revert();
-        }
+        require(msg.value > 0);
+        uint256 amt = msg.value * rate;
+        require(amt <= token.balanceOf(address(this)));
+        token.transfer(msg.sender, amt);
+        emit BUYZAP(msg.sender,amt,rate);
     }
-  
-    function setOwner(address _owner) public ownerOnly {
-        require(_owner != address(0));
-        owner = _owner;
-    }
-    
+
+
     function withdrawTok() public ownerOnly {
-        if (owner != msg.sender) revert();
-        token.transfer(owner, token.balanceOf(this));        
+        token.transfer(owner, token.balanceOf(address(this)));
     }
-    
+
     function withdrawEther() public ownerOnly {
-        if (owner != msg.sender) revert();
         owner.transfer(address(this).balance);
-    }   
+    }
 }
