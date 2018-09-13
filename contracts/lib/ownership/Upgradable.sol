@@ -19,7 +19,7 @@ contract Upgradable {
     function _updateDependencies() internal;
 
     modifier coordinatorOnly() {
-    	require(msg.sender == coordinatorAddr,"Error: Only coordinator can access this function");
+    	require(msg.sender == coordinatorAddr);
     	_;
     }
 }
