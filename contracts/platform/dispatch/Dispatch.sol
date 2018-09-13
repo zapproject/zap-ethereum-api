@@ -154,7 +154,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
 
             // Make sure we've canceled in the past,
             // if it's current block ignore the cancel
-            require(block.number == canceled, , "Error: Cancel ignored");
+            require(block.number == canceled, "Error: Cancel ignored");
 
             // Uncancel the query
             setCanceled(id, false);
