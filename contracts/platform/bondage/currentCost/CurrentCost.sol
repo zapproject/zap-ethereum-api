@@ -59,7 +59,7 @@ contract CurrentCost is Destructible, CurrentCostInterface, Upgradable {
         curve = registry.getProviderCurve(oracleAddress, endpoint);
 
         int res = PiecewiseLogic.evaluateFunction(curve, start, nDots);
-        require(res >= 0, "Error: Cost of Dots cannot be negative");
+        require(res >= 0);
         return uint256(res);
     }
 
