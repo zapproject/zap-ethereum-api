@@ -143,7 +143,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     function fulfillQuery(uint256 id) private returns (bool) {
         Status status = getStatus(id);
 
-        require(status != Status.Fulfilled);
+        require(status != Status.Fulfilled, "Error: Status already fulfilled");
 
         address subscriber = getSubscriber(id);
         address provider = getProvider(id);
@@ -154,7 +154,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
 
             // Make sure we've canceled in the past,
             // if it's current block ignore the cancel
-            require(block.number == canceled);
+            require(block.number == canceled, , "Error: Cancel ignored");
 
             // Uncancel the query
             setCanceled(id, false);
@@ -182,8 +182,8 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         address provider = getProvider(id);
         bytes32 endpoint = getEndpoint(id);
 
-        require(subscriber == msg.sender);
-        require(getStatus(id) == Status.Pending);
+        require(subscriber == msg.sender, "Error: Wrong subscriber");
+        require(getStatus(id) == Status.Pending, "Error: Query is not pending");
 
         // Cancel the query
         setCanceled(id, true);
