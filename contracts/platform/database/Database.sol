@@ -18,12 +18,12 @@ contract Database is Ownable, DatabaseInterface {
 	}
 
 	modifier storageOnly {
-		require(allowed[msg.sender]);
+		require(allowed[msg.sender], "Error: Access not allowed to storage");
 		_;
 	}
 
 	function setStorageContract(address _storageContract, bool _allowed) public onlyOwner {
-		require(_storageContract != address(0));
+		require(_storageContract != address(0), "Error: Address zero is invalid storage contract");
 		allowed[_storageContract] = _allowed;
 		emit StorageModified(_storageContract, _allowed);
 	}
