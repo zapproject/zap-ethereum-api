@@ -39,7 +39,7 @@ contract('Arbiter', function (accounts) {
 
     async function prepareProvider() {
         await this.registry.initiateProvider(publicKey, title, { from: oracle });
-        await this.registry.initiateProviderCurve(specifier, piecewiseFunction, Utils.ZeroAddress, { from: oracle });
+        await this.registry.initiateProviderCurve(specifier, piecewiseFunction, { from: oracle });
     }
 
     async function prepareTokens() {

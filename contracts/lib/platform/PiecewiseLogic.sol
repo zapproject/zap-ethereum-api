@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 library PiecewiseLogic {
     function sumOfPowers(uint n, uint i) internal pure returns (uint) {
-        require(i <= 6 && i >= 0, "Error: Invalid Piecewise Logic");
+        require(i <= 6 && i >= 0);
 
         if ( i == 0 ) return n;
         if ( i == 1 ) return (n * (n + 1)) / 2;
@@ -21,7 +21,7 @@ library PiecewiseLogic {
         int sum = 0;
 
         // Require to be within the dot limit
-        require(a + b <= uint(curve[curve.length - 1]), "Error: Function not in dot limit");
+        require(a + b <= uint(curve[curve.length - 1]));
 
         // Loop invariant: i should always point to the start of a piecewise piece (the length)
         while ( i < curve.length ) {
@@ -61,7 +61,7 @@ library PiecewiseLogic {
             sum += curve[i] * int(sumOfPowers(a + b, i - base) - sumOfPowers(a - 1, i - base));
         }
 
-        require(sum >= 0, "Error: Cost must be greater than zero");
+        require(sum >= 0);
         return sum;
     }
 }

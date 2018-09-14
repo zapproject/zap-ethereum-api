@@ -80,10 +80,10 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
         public 
     {   
         // Must be atleast one block
-        require(blocks > 0, "Error: Must be at least one block");
+        require(blocks > 0);
 
         // Can't reinitiate a currently active contract
-        require(getDots(providerAddress, msg.sender, endpoint) == 0, "Error: Cannot reinstantiate a currently active contract");
+        require(getDots(providerAddress, msg.sender, endpoint) == 0);
 
         // Escrow the necessary amount of dots
         bondage.escrowDots(msg.sender, providerAddress, endpoint, blocks);
@@ -166,7 +166,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
         uint256 dots = getDots(providerAddress, subscriberAddress, endpoint);
         uint256 preblockend = getPreBlockEnd(providerAddress, subscriberAddress, endpoint);
         // Make sure the subscriber has a subscription
-        require(dots > 0, "Error: Subscriber must have a subscription");
+        require(dots > 0);
 
         if (block.number < preblockend) {
             // Subscription ended early
