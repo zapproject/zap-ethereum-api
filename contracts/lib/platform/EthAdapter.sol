@@ -1,23 +1,26 @@
-import "../lib/ownership/Ownable.sol";
-import "../lib/ownership/ZapCoordinatorInterface.sol";
-import "../../platform/bondage/BondageInterface.sol";
-import "../../platform/registry/RegistryInterface.sol";
-import "../lib/token/Token.sol";
+import "./ERCDotFactory.sol";
 
-contract EthAdapter is ERCDotFactory, Ownable{
+contract EthAdapter is ERCDotFactory {
 
     CurrentCostInterface currentCost;
     RegistryInterface registry;
     BondageInterface bondage;
     
-    uint reserveRate;
+    uint adapterRate;
 
     function setAdapterRate(int rate) internal {
         //children must set this
-        reserveRate = rate;
+        adapterRate = rate;
     } 
 
-    //cannot overload bond because payable extends signature
+    function bond(address wallet, bytes32 specifier, uint numDots) ownerOnly {
+        bond(wallet, specifier, numDots);
+    }
+
+    function unbond(address wallet, bytes32 specifier, uint numDots) ownerOnly {
+        unbond(wallet, specifier, numDots);
+    }
+
     function bond(address wallet, bytes32 specifier, uint numDots) internal {
 
         Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
@@ -43,13 +46,13 @@ contract EthAdapter is ERCDotFactory, Ownable{
         Token tok = Token(curves[specifier]);
 
         super.unbond(wallet, specifier, quantity); 
-        wallet.send(reserveCost * reserveRate);
+        wallet.send(reserveCost * adapterRate);
     } 
 
     function getAdapterPrice(bytes32 specifier, uint numDots) view returns(uint){
         Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
         uint memory reserveAmount = bondage.calcZapForDots(address(this), positions[posIndex].specifier, numDots);
-        return reserveAmount * reserveRate;
+        return reserveAmount * adapterRate;
     }
 
 }

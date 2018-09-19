@@ -1,28 +1,31 @@
-import "../lib/ownership/Ownable.sol";
-import "../lib/ownership/ZapCoordinatorInterface.sol";
-import "../../platform/bondage/BondageInterface.sol";
-import "../../platform/registry/RegistryInterface.sol";
-import "../lib/token/Token.sol";
+import "./ERCDotFactory.sol";
 
-contract TokenAdapter is ERCDotFactory, Ownable{
+contract TokenAdapter is ERCDotFactory{
 
     CurrentCostInterface currentCost;
     RegistryInterface registry;
     BondageInterface bondage;
     
-    uint reserveRate;
+    uint adapterRate;
     address acceptedToken;
 
-    constructor(address coordinator, address token){
-        
-        ERCDotFactory(coordinator);
-        acceptedToken = token;
+    constructor(address coordinator, address _acceptedToken)
+    EthAdapter(coordinator) {
+        acceptedToken = _acceptedToken;
     }
 
     function setAdapterRate(int rate) internal {
         //children must set this
-        reserveRate = rate;
+        adapterRate = rate;
     } 
+
+    function bond(address wallet, bytes32 specifier, uint numDots) ownerOnly {
+        bond(wallet, specifier, numDots);
+    }
+
+    function unbond(address wallet, bytes32 specifier, uint numDots) ownerOnly {
+        unbond(wallet, specifier, numDots);
+    }
 
     function bond(address wallet, bytes32 specifier, uint numDots) internal {
         
@@ -54,13 +57,13 @@ contract TokenAdapter is ERCDotFactory, Ownable{
         super.unbond(wallet, specifier, quantity); 
 
         Token tok = Token(acceptedToken);
-        require(tok.transfer(wallet, reserveCost * reserveRate), "Error: Transfer failed");
+        require(tok.transfer(wallet, reserveCost * adapterRate), "Error: Transfer failed");
     } 
 
     function getAdapterPrice(bytes32 specifier, uint numDots) view returns(uint){
         Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
         uint memory reserveAmount = bondage.calcZapForDots(address(this), positions[posIndex].specifier, numDots);
-        return reserveAmount * reserveRate;
+        return reserveAmount * adapterRate;
     }
 
 }
