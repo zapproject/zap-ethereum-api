@@ -1,3 +1,4 @@
+import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 import "./ERCDotFactory.sol";
 
 contract EthAdapter is ERCDotFactory {
@@ -8,50 +9,56 @@ contract EthAdapter is ERCDotFactory {
     
     uint adapterRate;
 
-    function setAdapterRate(int rate) internal {
+    constructor( address coordinator, uint256 rate)
+    ERCDotFactory(coordinator) {
+        adapterRate = rate;
+    }
+
+    function setAdapterRate(uint rate) internal {
         //children must set this
         adapterRate = rate;
     } 
 
-    function bond(address wallet, bytes32 specifier, uint numDots) ownerOnly {
+    function ownerBond(address wallet, bytes32 specifier, uint numDots) onlyOwner {
         bond(wallet, specifier, numDots);
     }
 
-    function unbond(address wallet, bytes32 specifier, uint numDots) ownerOnly {
-        unbond(wallet, specifier, numDots);
+
+    function ownerUnbond(address wallet, bytes32 specifier, uint quantity) onlyOwner {
+        unbond(wallet, specifier, quantity);
     }
 
-    function bond(address wallet, bytes32 specifier, uint numDots) internal {
+    function bond(address wallet, bytes32 specifier, uint quantity) internal {
 
-        Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
-        uint memory reserveCost = bondage.calcZapForDots(address(this), specifier, numDots);
+        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        uint reserveCost = bondage.calcZapForDots(address(this), specifier, quantity);
         if(reserveToken.balanceOf(this) < reserveCost ) {
             revert("EthAdapter does not hold enough reserve for bond");
         }
         
-        if(msg.value < getAdapterPrice(specifier, numDots)){
+        if(msg.value < getAdapterPrice(specifier, quantity)){
             revert("Not enough eth sent for requested number of dots");     
         }
 
-        super.bond(wallet, specifier, numDots);
+        super.bond(wallet, specifier, quantity);
     }
 
-    function unbond(address wallet, bytes32 specifier, uint numDots) internal {
+    function unbond(address wallet, bytes32 specifier, uint quantity) internal {
          
-        Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        bondage = BondageInterface(coord.getContract("BONDAGE")); 
         uint issued = bondage.getDotsIssued(address(this), specifier);
 
         currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST")); 
-        uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
-        Token tok = Token(curves[specifier]);
+        uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - quantity, quantity - 1);
+        FactoryToken tok = FactoryToken(curves[specifier]);
 
         super.unbond(wallet, specifier, quantity); 
-        wallet.send(reserveCost * adapterRate);
+        wallet.transfer(reserveCost * adapterRate);
     } 
 
-    function getAdapterPrice(bytes32 specifier, uint numDots) view returns(uint){
-        Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
-        uint memory reserveAmount = bondage.calcZapForDots(address(this), positions[posIndex].specifier, numDots);
+    function getAdapterPrice(bytes32 specifier, uint quantity) view returns(uint){
+        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        uint reserveAmount = bondage.calcZapForDots(address(this), specifier, quantity);
         return reserveAmount * adapterRate;
     }
 

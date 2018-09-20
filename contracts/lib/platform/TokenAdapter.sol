@@ -1,3 +1,4 @@
+import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 import "./ERCDotFactory.sol";
 
 contract TokenAdapter is ERCDotFactory{
@@ -5,64 +6,64 @@ contract TokenAdapter is ERCDotFactory{
     CurrentCostInterface currentCost;
     RegistryInterface registry;
     BondageInterface bondage;
+    FactoryToken acceptedToken;
     
     uint adapterRate;
-    address acceptedToken;
 
     constructor(address coordinator, address _acceptedToken)
-    EthAdapter(coordinator) {
-        acceptedToken = _acceptedToken;
+    ERCDotFactory(coordinator) {
+        acceptedToken = FactoryToken(_acceptedToken);
     }
 
-    function setAdapterRate(int rate) internal {
+    function setAdapterRate(uint rate) internal {
         //children must set this
         adapterRate = rate;
     } 
 
-    function bond(address wallet, bytes32 specifier, uint numDots) ownerOnly {
-        bond(wallet, specifier, numDots);
+    function ownerBond(address wallet, bytes32 specifier, uint quantity) onlyOwner {
+        bond(wallet, specifier, quantity);
     }
 
-    function unbond(address wallet, bytes32 specifier, uint numDots) ownerOnly {
-        unbond(wallet, specifier, numDots);
+    function ownerUnbond(address wallet, bytes32 specifier, uint quantity) onlyOwner {
+        unbond(wallet, specifier, quantity);
     }
 
-    function bond(address wallet, bytes32 specifier, uint numDots) internal {
+    function bond(address wallet, bytes32 specifier, uint quantity) internal {
         
         require(
-            acceptedToken.transferFrom( msg.sender, getPrice(specifier, numDots), 
+            acceptedToken.transferFrom( msg.sender, address(this), getAdapterPrice(specifier, quantity)), 
             "insufficient accepted token quantity approved for transfer"
         );
 
-        Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
-        uint memory reserveCost = bondage.calcZapForDots(address(this), specifier, numDots);
+        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        uint reserveCost = bondage.calcZapForDots(address(this), specifier, quantity);
         if(reserveToken.balanceOf(this) < reserveCost ) {
             revert("EthAdapter does not hold enough reserve for bond");
         }
         
-        if(msg.value < getAdapterPrice(specifier, numDots)){
+        if(msg.value < getAdapterPrice(specifier, quantity)){
             revert("Not enough tokens approved for requested number of dots");     
         }
 
-        super.bond(wallet, specifier, numDots);
+        super.bond(wallet, specifier, quantity);
     }
 
-    function unbond(address wallet, bytes32 specifier, uint numDots) internal {
+    function unbond(address wallet, bytes32 specifier, uint quantity) internal {
          
-        Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        bondage = BondageInterface(coord.getContract("BONDAGE")); 
         uint issued = bondage.getDotsIssued(address(this), specifier);
 
         currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST")); 
-        uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
+        uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - quantity, quantity - 1);
         super.unbond(wallet, specifier, quantity); 
 
-        Token tok = Token(acceptedToken);
+        FactoryToken tok = FactoryToken(acceptedToken);
         require(tok.transfer(wallet, reserveCost * adapterRate), "Error: Transfer failed");
     } 
 
-    function getAdapterPrice(bytes32 specifier, uint numDots) view returns(uint){
-        Bondage bondage = BondageInterface(coord.getContract("BONDAGE")); 
-        uint memory reserveAmount = bondage.calcZapForDots(address(this), positions[posIndex].specifier, numDots);
+    function getAdapterPrice(bytes32 specifier, uint quantity) view returns(uint){
+        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        uint reserveAmount = bondage.calcZapForDots(address(this), specifier, quantity);
         return reserveAmount * adapterRate;
     }
 

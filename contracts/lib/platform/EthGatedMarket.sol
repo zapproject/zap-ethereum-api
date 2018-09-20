@@ -1,4 +1,6 @@
 import "./EthAdapter.sol";
+import "./TokenAdapter.sol";
+
 //send eth to obtain market token
 //use market token to bond to gated markets
 //child contracts can control gate unbonding 
@@ -7,13 +9,14 @@ contract EthGatedMarket is EthAdapter{
 
     bool public bondAllow;
     bool public unbondAllow;
+    bytes32 public gatewaySpecifier;
 
-    Token reserveToken;//zap
-    Token gatewayToken;//token used to bond in gated markets
+    FactoryToken reserveToken;//zap
+    FactoryToken gatewayToken;//token used to bond in gated markets
     TokenAdapter marketFactory;//factory for gated curves  
 
     constructor(address coordinator)
-    EthAdapter(coordinator) {
+    ERCDotFactory(coordinator) {
 
         bondAllow = false;
         unbondAllow = false;
@@ -22,72 +25,82 @@ contract EthGatedMarket is EthAdapter{
     ///initiallize gateway eth->gateway token curve, set exchange rate of eth/reserve token 
     function initializeGateway( 
         bytes32 title, 
-        bytes32 pubKey,
+        uint256 pubKey,
         bytes32 specifier, 
         bytes32 symbol, 
         int256[] curve,
-        int256 adapterRate
-        ) ownerOnly {
+        uint256 adapterRate
+        ) onlyOwner {
 
-        gatewayToken = Token(
+        gatewayToken = FactoryToken(
             initializeCurve(
-                title, pubKey, specifier, symbol, curve
+                pubKey, title, specifier, symbol, curve
             )
         );
 
         gatewaySpecifier = specifier;
         setAdapterRate(adapterRate); 
-        marketFactory = new TokenAdapter(coordinator, address(gatewayToken)); 
+        marketFactory = new TokenAdapter(coord, address(gatewayToken)); 
         bondAllow = true; 
     } 
 
     ///bond to obtain gateway tokens in exchange for eth, able to bond to gated curves
-    function gatewayBond(numDots) public payable {
+    function gatewayBond(uint quantity) public payable {
         
         require(bondAllow, "bond not allowed");
-        super.bond(address(this), gatewaySpecifier, numDots)
+        super.bond(address(this), gatewaySpecifier, quantity);
     }  
 
     ///unbond to obtain eth in exchange for gateway tokens
-    function gatewayUnbond(bondQuantity) public {
+    function gatewayUnbond(uint quantity) public {
 
         require(unbondAllow, "unbond not allowed");
-        super.unbond(address(this), gatewaySpecifier, numDots)
+        super.unbond(address(this), gatewaySpecifier, quantity);
     }
 
     ///initialize a new gated market
     function initializeMarketCurve(
+        uint256 pubKey,
         bytes32 title, 
-        bytes32 pubKey,
         bytes32 specifier, 
         bytes32 symbol, 
-        int256[] curve,
+        int256[] curve
     ) public {
 
         marketFactory.initializeCurve(    
-            title, pubKey, specifier, symbol, curve
+            pubKey, title, specifier, symbol, curve
         );
     }
     
     ///bond to gated market with gateway token
-    function marketBond(bytes32 specifier, uint numDots) {
+    function marketBond(bytes32 specifier, uint quantity) {
         
-        marketFactory.bond(address(this), specifier, numDots); 
+        marketFactory.ownerBond(address(this), specifier, quantity); 
     }
 
     ///unbond from gated market with gateway token
-    function marketUnbond(bytes32 specifier, uint numDots) {
+    function marketUnbond(bytes32 specifier, uint quantity) {
 
-        marketFactory.unbond(address(this), specifier, numDots);
+        marketFactory.ownerUnbond(address(this), specifier, quantity);
+    }
+
+    ///allow bond
+    function allowBond() onlyOwner {  
+        bondAllow = true; 
+    }
+
+    ///disallow bond
+    function disallowBond() onlyOwner {  
+        bondAllow = false;
     }
 
     ///allow unbond
-    function allowUnbond() ownerOnly {  
-        unbond = true; 
+    function allowUnbond() onlyOwner {  
+        unbondAllow = true; 
     }
 
     ///disallow unbond
-    function disallowUnbond() ownerOnly {  
-        unbond = false;
+    function disallowUnbond() onlyOwner {  
+        unbondAllow = false;
     }
-
+}
