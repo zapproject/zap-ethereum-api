@@ -19,6 +19,7 @@ contract EthAdapter is ERCDotFactory {
         adapterRate = rate;
     } 
 
+    // TODO: must be payable
     function ownerBond(address wallet, bytes32 specifier, uint numDots) onlyOwner {
         bond(wallet, specifier, numDots);
     }
@@ -30,7 +31,7 @@ contract EthAdapter is ERCDotFactory {
 
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
 
-        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint reserveCost = bondage.calcZapForDots(address(this), specifier, quantity);
         if(reserveToken.balanceOf(this) < reserveCost ) {
             revert("EthAdapter does not hold enough reserve for bond");
@@ -39,7 +40,6 @@ contract EthAdapter is ERCDotFactory {
         if(msg.value < getAdapterPrice(specifier, quantity)){
             revert("Not enough eth sent for requested number of dots");     
         }
-
         super.bond(wallet, specifier, quantity);
     }
 

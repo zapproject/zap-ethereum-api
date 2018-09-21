@@ -25,11 +25,14 @@ contract ERCDotFactory is Ownable {
 
         require(curves[specifier] == 0, "Curve specifier already exists");
 
-        RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY")); 
+        RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY"));
+
+        // TODO: checking provider as msg.sender but initializing it from this contract address
         if(!registry.isProviderInitiated(msg.sender)) {
             registry.initiateProvider(providerPubKey, providerTitle);
         }
 
+        // TODO: checking provider as msg.sender but initializing curve from this contract address
         registry.initiateProviderCurve(specifier, curve, address(this));
         curves[specifier] = newFactoryToken(bytes32ToString(specifier), bytes32ToString(symbol)); 
         return curves[specifier];
@@ -37,14 +40,16 @@ contract ERCDotFactory is Ownable {
 
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
         //overload for custom bond behaviour
-        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE"));
+        // TODO: message sender is this contract
         bondage.bond(address(this), specifier, quantity);
         FactoryToken(curves[specifier]).mint(wallet, quantity);
     }    
 
     function unbond(address wallet, bytes32 specifier, uint quantity) internal {
         //overload for custom unbond behaviour
-        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE"));
+        // TODO: message sender is this contract
         bondage.unbond(address(this), specifier, quantity);
         FactoryToken(curves[specifier]).burnFrom(wallet, quantity);
     }    
