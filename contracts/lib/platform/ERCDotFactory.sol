@@ -1,9 +1,9 @@
+import "../token/Token.sol";
 import "../ownership/ZapCoordinatorInterface.sol";
 import "../../platform/bondage/BondageInterface.sol";
 import "../../platform/registry/RegistryInterface.sol";
-import "../token/FactoryToken.sol";
 
-contract ERCDotFactory is Ownable{
+contract ERCDotFactory is Ownable {
 
     FactoryToken reserveToken;
     ZapCoordinatorInterface coord;
