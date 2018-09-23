@@ -1,5 +1,6 @@
 import "../ownership/ZapCoordinatorInterface.sol";
 import "../../platform/bondage/BondageInterface.sol";
+import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 import "../../platform/registry/RegistryInterface.sol";
 import "../token/FactoryToken.sol";
 
@@ -7,8 +8,13 @@ contract ERCDotFactory is Ownable{
 
     FactoryToken reserveToken;
     ZapCoordinatorInterface coord;
+    BondageInterface bondage;
+    CurrentCostInterface cost;
+
     mapping(bytes32 => address) curves;
 
+    event DotTokenCreated(address tokenAddress);
+    
     constructor(address coordinator){
         coord = ZapCoordinatorInterface(coordinator); 
         reserveToken = FactoryToken(coord.getContract("ZAP_TOKEN"));
@@ -26,30 +32,60 @@ contract ERCDotFactory is Ownable{
         require(curves[specifier] == 0, "Curve specifier already exists");
 
         RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY")); 
-        if(!registry.isProviderInitiated(msg.sender)) {
+        if(!registry.isProviderInitiated(address(this))) {
             registry.initiateProvider(providerPubKey, providerTitle);
         }
 
         registry.initiateProviderCurve(specifier, curve, address(this));
-        curves[specifier] = newFactoryToken(bytes32ToString(specifier), bytes32ToString(symbol)); 
+        curves[specifier] = newToken(bytes32ToString(specifier), bytes32ToString(symbol)); 
+
+        DotTokenCreated(curves[specifier]);
         return curves[specifier];
     }
 
-    function bond(address wallet, bytes32 specifier, uint quantity) internal {
-        //overload for custom bond behaviour
-        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE")); 
-        bondage.bond(address(this), specifier, quantity);
-        FactoryToken(curves[specifier]).mint(wallet, quantity);
+    event Testing(address _address1, address address2,uint _quant1, uint _quant2);
+    event TestInt(uint q);
+
+    //overload for custom bond behaviour
+    //whether this contract holds tokens or coming from wallet,etc
+    function bond(address wallet, bytes32 specifier, uint numDots) {
+
+        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+
+        uint256 issued = bondage.getDotsIssued(address(this), specifier);
+        require(issued + numDots <= bondage.dotLimit(address(this), specifier), "Error: Dot limit exceeded");
+       
+        cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
+        uint256 numReserve = cost._costOfNDots(address(this), specifier, issued + 1, numDots - 1);
+
+        require(reserveToken.transferFrom(wallet, this, numReserve), "Error: User must have approved contract to transfer dot token");
+
+        reserveToken.approve(address(bondage), numReserve);
+        bondage.bond(address(this), specifier, numDots);
+
+        FactoryToken(curves[specifier]).mint(wallet, numDots);
     }    
 
-    function unbond(address wallet, bytes32 specifier, uint quantity) internal {
-        //overload for custom unbond behaviour
-        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE")); 
-        bondage.unbond(address(this), specifier, quantity);
-        FactoryToken(curves[specifier]).burnFrom(wallet, quantity);
+    //overload for custom bond behaviour
+    //whether this contract holds tokens or coming from msg.sender,etc
+    function unbond(address wallet, bytes32 specifier, uint numDots) {
+
+        //make sure sender has >= number of tokens sender has allowed factory to burn 
+        require( FactoryToken(curves[specifier]).allowance(wallet, address(this)) <= numDots);
+
+        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
+
+        // Get the value of the dots
+        uint256 issued = bondage.getDotsIssued(address(this), specifier);
+        uint256 numReserve = cost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
+
+        bondage.unbond(address(this), specifier, numDots);
+        FactoryToken(curves[specifier]).burnFrom(wallet, numDots);
+        reserveToken.transfer(wallet, numReserve); 
     }    
 
-    function newFactoryToken(
+    function newToken(
         string name,
         string symbol
     ) 
