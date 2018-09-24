@@ -19,8 +19,7 @@ contract EthAdapter is ERCDotFactory {
         adapterRate = rate;
     } 
 
-    // TODO: must be payable
-    function ownerBond(address wallet, bytes32 specifier, uint numDots) onlyOwner {
+    function ownerBond(address wallet, bytes32 specifier, uint numDots) payable onlyOwner {
         bond(wallet, specifier, numDots);
     }
 
@@ -31,6 +30,7 @@ contract EthAdapter is ERCDotFactory {
 
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
 
+        // TODO: check tokens balance, but transfer tokens from wallet after this check
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint reserveCost = bondage.calcZapForDots(address(this), specifier, quantity);
         if(reserveToken.balanceOf(this) < reserveCost ) {

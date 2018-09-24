@@ -20,7 +20,7 @@ contract TokenAdapter is ERCDotFactory{
         adapterRate = rate;
     } 
 
-    function ownerBond(address wallet, bytes32 specifier, uint quantity) onlyOwner {
+    function ownerBond(address wallet, bytes32 specifier, uint quantity) payable onlyOwner {
         bond(wallet, specifier, quantity);
     }
 
@@ -28,6 +28,7 @@ contract TokenAdapter is ERCDotFactory{
         unbond(wallet, specifier, quantity);
     }
 
+    // TODO: How to get accepted tokens?
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
         
         require(
