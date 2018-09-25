@@ -52,8 +52,8 @@ contract EthAdapter is ERCDotFactory {
         uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - quantity, quantity - 1);
         FactoryToken tok = FactoryToken(curves[specifier]);
 
-        super.unbond(wallet, specifier, quantity); 
-        wallet.transfer(reserveCost * adapterRate);
+        super.unbond(wallet, specifier, quantity);
+       // wallet.transfer(reserveCost * adapterRate);
     } 
 
     function getAdapterPrice(bytes32 specifier, uint quantity) view returns(uint){

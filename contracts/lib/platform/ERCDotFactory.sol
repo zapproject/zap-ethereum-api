@@ -72,7 +72,7 @@ contract ERCDotFactory is Ownable {
     function unbond(address wallet, bytes32 specifier, uint numDots) internal {
 
         //make sure sender has >= number of tokens sender has allowed factory to burn
-        require( FactoryToken(curves[specifier]).allowance(wallet, address(this)) <= numDots);
+        require(FactoryToken(curves[specifier]).allowance(wallet, address(this)) >= numDots);
 
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));

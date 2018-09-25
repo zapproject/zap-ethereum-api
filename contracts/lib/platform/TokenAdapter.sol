@@ -28,7 +28,6 @@ contract TokenAdapter is ERCDotFactory{
         unbond(wallet, specifier, quantity);
     }
 
-    // TODO: How to get accepted tokens?
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
         
         require(
@@ -66,6 +65,10 @@ contract TokenAdapter is ERCDotFactory{
         bondage = BondageInterface(coord.getContract("BONDAGE")); 
         uint reserveAmount = bondage.calcZapForDots(address(this), specifier, quantity);
         return reserveAmount * adapterRate;
+    }
+
+    function allocateAcceptedTokens(address _to, uint256 _amount) onlyOwner {
+        acceptedToken.mint(_to, _amount);
     }
 
 }
