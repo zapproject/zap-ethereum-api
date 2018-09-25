@@ -8,8 +8,6 @@ contract ERCDotFactory is Ownable {
 
     FactoryToken reserveToken;
     ZapCoordinatorInterface coord;
-    BondageInterface bondage;
-    CurrentCostInterface cost;
 
     mapping(bytes32 => address) curves;
 
@@ -49,16 +47,12 @@ contract ERCDotFactory is Ownable {
     //overload for custom bond behaviour
     //whether this contract holds tokens or coming from wallet,etc
     function bond(address wallet, bytes32 specifier, uint numDots) internal {
-
-        bondage = BondageInterface(coord.getContract("BONDAGE"));
-
+        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint256 issued = bondage.getDotsIssued(address(this), specifier);
-        require(issued + numDots <= bondage.dotLimit(address(this), specifier), "Error: Dot limit exceeded");
 
-        cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
+        CurrentCostInterface cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
         uint256 numReserve = cost._costOfNDots(address(this), specifier, issued + 1, numDots - 1);
 
-        // TODO: transfer tokens from wallet, but checking that tokens balance is enough before
         require(reserveToken.transferFrom(wallet, this, numReserve), "Error: User must have approved contract to transfer dot token");
 
         reserveToken.approve(address(bondage), numReserve);
@@ -70,12 +64,8 @@ contract ERCDotFactory is Ownable {
     //overload for custom bond behaviour
     //whether this contract holds tokens or coming from msg.sender,etc
     function unbond(address wallet, bytes32 specifier, uint numDots) internal {
-
-        //make sure sender has >= number of tokens sender has allowed factory to burn
-        require(FactoryToken(curves[specifier]).allowance(wallet, address(this)) >= numDots);
-
-        bondage = BondageInterface(coord.getContract("BONDAGE"));
-        cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
+        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE"));
+        CurrentCostInterface cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
 
         // Get the value of the dots
         uint256 issued = bondage.getDotsIssued(address(this), specifier);

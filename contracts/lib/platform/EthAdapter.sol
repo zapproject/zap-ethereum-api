@@ -9,6 +9,8 @@ contract EthAdapter is ERCDotFactory {
     
     uint adapterRate;
 
+    event MsgSender(address _sender);
+
     constructor( address coordinator, uint256 rate)
     ERCDotFactory(coordinator) {
         adapterRate = rate;
@@ -20,6 +22,7 @@ contract EthAdapter is ERCDotFactory {
     } 
 
     function ownerBond(address wallet, bytes32 specifier, uint numDots) payable onlyOwner {
+        emit MsgSender(msg.sender);
         bond(wallet, specifier, numDots);
     }
 
@@ -30,7 +33,7 @@ contract EthAdapter is ERCDotFactory {
 
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
 
-        // TODO: check tokens balance, but transfer tokens from wallet after this check
+        // TODO: unnecessary check
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint reserveCost = bondage.calcZapForDots(address(this), specifier, quantity);
         if(reserveToken.balanceOf(this) < reserveCost ) {
@@ -53,7 +56,7 @@ contract EthAdapter is ERCDotFactory {
         FactoryToken tok = FactoryToken(curves[specifier]);
 
         super.unbond(wallet, specifier, quantity);
-       // wallet.transfer(reserveCost * adapterRate);
+        wallet.transfer(reserveCost * adapterRate);
     } 
 
     function getAdapterPrice(bytes32 specifier, uint quantity) view returns(uint){

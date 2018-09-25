@@ -16,7 +16,7 @@ contract EthGatedMarket is EthAdapter{
     TokenAdapter marketFactory;//factory for gated curves  
 
     constructor(address coordinator)
-    ERCDotFactory(coordinator) {
+    EthAdapter(coordinator, 1) {
 
         bondAllow = false;
         unbondAllow = false;
@@ -40,7 +40,7 @@ contract EthGatedMarket is EthAdapter{
 
         gatewaySpecifier = specifier;
         setAdapterRate(adapterRate); 
-        marketFactory = new TokenAdapter(coord, address(gatewayToken)); 
+        marketFactory = new TokenAdapter(coord, gatewayToken);
         bondAllow = true; 
     } 
 

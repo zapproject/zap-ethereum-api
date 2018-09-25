@@ -1,7 +1,7 @@
 import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 import "./ERCDotFactory.sol";
 
-contract TokenAdapter is ERCDotFactory{
+contract TokenAdapter is ERCDotFactory {
 
     CurrentCostInterface currentCost;
     RegistryInterface registry;
@@ -10,12 +10,12 @@ contract TokenAdapter is ERCDotFactory{
     
     uint adapterRate;
 
-    constructor(address coordinator, address _acceptedToken)
+    constructor(address coordinator, FactoryToken _acceptedToken)
     ERCDotFactory(coordinator) {
-        acceptedToken = FactoryToken(_acceptedToken);
+        acceptedToken = _acceptedToken;
     }
 
-    function setAdapterRate(uint rate) internal {
+    function setAdapterRate(uint rate) public onlyOwner {
         //children must set this
         adapterRate = rate;
     } 
@@ -29,46 +29,41 @@ contract TokenAdapter is ERCDotFactory{
     }
 
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
-        
+
         require(
-            acceptedToken.transferFrom( msg.sender, address(this), getAdapterPrice(specifier, quantity)), 
+            acceptedToken.transferFrom( msg.sender, address(this), getAdapterPrice(specifier, quantity)),
             "insufficient accepted token quantity approved for transfer"
         );
 
-        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+        bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint reserveCost = bondage.calcZapForDots(address(this), specifier, quantity);
         if(reserveToken.balanceOf(this) < reserveCost ) {
             revert("EthAdapter does not hold enough reserve for bond");
         }
-        
+
         if(msg.value < getAdapterPrice(specifier, quantity)){
-            revert("Not enough tokens approved for requested number of dots");     
+            revert("Not enough tokens approved for requested number of dots");
         }
 
         super.bond(wallet, specifier, quantity);
     }
 
     function unbond(address wallet, bytes32 specifier, uint quantity) internal {
-         
-        bondage = BondageInterface(coord.getContract("BONDAGE")); 
+
+        bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint issued = bondage.getDotsIssued(address(this), specifier);
 
-        currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST")); 
+        currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
         uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - quantity, quantity - 1);
-        super.unbond(wallet, specifier, quantity); 
 
-        FactoryToken tok = FactoryToken(acceptedToken);
-        require(tok.transfer(wallet, reserveCost * adapterRate), "Error: Transfer failed");
-    } 
+        super.unbond(wallet, specifier, quantity);
+
+        require(acceptedToken.transfer(wallet, reserveCost * adapterRate), "Error: Transfer failed");
+    }
 
     function getAdapterPrice(bytes32 specifier, uint quantity) view returns(uint){
         bondage = BondageInterface(coord.getContract("BONDAGE")); 
         uint reserveAmount = bondage.calcZapForDots(address(this), specifier, quantity);
         return reserveAmount * adapterRate;
     }
-
-    function allocateAcceptedTokens(address _to, uint256 _amount) onlyOwner {
-        acceptedToken.mint(_to, _amount);
-    }
-
 }
