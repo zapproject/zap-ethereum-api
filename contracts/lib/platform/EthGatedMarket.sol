@@ -66,19 +66,20 @@ contract EthGatedMarket is EthAdapter{
         bytes32 symbol, 
         int256[] curve
     ) public {
-
         marketFactory.initializeCurve(    
             pubKey, title, specifier, symbol, curve
         );
     }
     
     ///bond to gated market with gateway token
+    //TODO: users can not get gateway tokens, because gateway token owner is this contract
     function marketBond(bytes32 specifier, uint quantity) {
         
         marketFactory.ownerBond(address(this), specifier, quantity); 
     }
 
     ///unbond from gated market with gateway token
+    //TODO: users can not get gateway tokens, because gateway token owner is this contract
     function marketUnbond(bytes32 specifier, uint quantity) {
 
         marketFactory.ownerUnbond(address(this), specifier, quantity);

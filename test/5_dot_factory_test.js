@@ -440,7 +440,7 @@ contract('EthGatedMarket', function (accounts) {
         await this.currentTest.coord.updateAllDependencies({ from: owner });
     });
 
-    it("ETH_GATED_MARKET_1 - constructor() - Check dot factory initialization", async function () {
+    /*it("ETH_GATED_MARKET_1 - constructor() - Check dot factory initialization", async function () {
         await EthGatedMarket.new(this.test.coord.address);
     });
 
@@ -482,6 +482,59 @@ contract('EthGatedMarket', function (accounts) {
 
         await factory.gatewayBond(2, {from: factoryOwner, value: 18});
         await factory.gatewayUnbond(1, {from: factoryOwner});
+    });*/
+
+    it("ETH_GATED_MARKET_5 - marketBond() - Check that owner can bond", async function () {
+        let factory = await EthGatedMarket.new(this.test.coord.address, {from: factoryOwner});
+        let gatewayCurveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
+        let gatewayCurveTokenAddress = gatewayCurveResult.logs[1].args.tokenAddress;
+        let marketCurveResult = await factory.initMarketCurve(publicKey + 1, title + '_1', specifier + '_1', 'a_1', piecewiseFunction, {from: factoryOwner});
+        let marketCurveTokenAddress = marketCurveResult.logs[1].args.tokenAddress;
+        await factory.setGatewayRate(1, {from: factoryOwner});
+        await factory.setMarketRate(1, {from: factoryOwner});
+        await factory.allowUnbond({from: factoryOwner});
+
+        await prepareTokens.call(this.test, factory.address);
+
+        await this.test.token.allocate(factoryOwner, tokensForSubscriber);
+        await this.test.token.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+
+        let gatewayToken = await FactoryToken.at(gatewayCurveTokenAddress);
+        await factory.allocateGatewayToken(factoryOwner, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(owner, tokensForSubscriber, {from: factoryOwner});
+
+        let marketToken = await FactoryToken.at(marketCurveTokenAddress);
+        await marketToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+
+        await factory.marketBond(specifier + '_1', 1, {from: factoryOwner, value: 18});
+    });
+
+    it("ETH_GATED_MARKET_6 - marketUnbond() - Check that owner can bond", async function () {
+        let factory = await EthGatedMarket.new(this.test.coord.address, {from: factoryOwner});
+        let gatewayCurveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
+        let gatewayCurveTokenAddress = gatewayCurveResult.logs[1].args.tokenAddress;
+        let marketCurveResult = await factory.initMarketCurve(publicKey + 1, title + '_1', specifier + '_1', 'a_1', piecewiseFunction, {from: factoryOwner});
+        let marketCurveTokenAddress = marketCurveResult.logs[1].args.tokenAddress;
+        await factory.setGatewayRate(1, {from: factoryOwner});
+        await factory.setMarketRate(1, {from: factoryOwner});
+        await factory.allowUnbond({from: factoryOwner});
+
+        await prepareTokens.call(this.test, factory.address);
+
+        await this.test.token.allocate(factoryOwner, tokensForSubscriber);
+        await this.test.token.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+
+        let gatewayToken = await FactoryToken.at(gatewayCurveTokenAddress);
+        await factory.allocateGatewayToken(factoryOwner, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(owner, tokensForSubscriber, {from: factoryOwner});
+
+        let marketToken = await FactoryToken.at(marketCurveTokenAddress);
+        await marketToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+
+        await factory.marketBond(specifier + '_1', 2, {from: factoryOwner, value: 18});
+        await factory.marketUnbond(specifier + '_1', 1, {from: factoryOwner});
     });
 });
 

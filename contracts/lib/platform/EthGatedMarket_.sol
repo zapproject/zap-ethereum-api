@@ -42,22 +42,26 @@ contract EthGatedMarket_ is ERCDotFactory {
         bondAllow = true;
     }
 
+    //TODO: no way to handle this token
     function initMarketCurve(
         uint256 providerPubKey,
         bytes32 providerTitle,
         bytes32 specifier,
         bytes32 symbol,
         int256[] curve) onlyOwner {
-        initializeCurve(
-            providerPubKey, providerTitle, specifier, symbol, curve
+        FactoryToken token = FactoryToken(
+            initializeCurve(
+                providerPubKey, providerTitle, specifier, symbol, curve
+            )
         );
+        token.approve(this, ~uint256(0));
     }
 
     ///bond to obtain gateway tokens in exchange for eth, able to bond to gated curves
     function gatewayBond(uint quantity) public payable {
         require(bondAllow, "bond not allowed");
 
-        if(msg.value < getAdapterPrice(gatewaySpecifier, quantity, gatewayRate)){
+        if (msg.value < getAdapterPrice(gatewaySpecifier, quantity, gatewayRate)) {
             revert("Not enough eth sent for requested number of dots");
         }
 
@@ -72,9 +76,9 @@ contract EthGatedMarket_ is ERCDotFactory {
     }
 
     ///bond to gated market with gateway token
-    function marketBond(bytes32 specifier, uint quantity) external onlyOwner {
+    function marketBond(bytes32 specifier, uint quantity) payable external onlyOwner {
         require(
-            gatewayToken.transferFrom( msg.sender, address(this), getAdapterPrice(specifier, quantity, marketRate)),
+            gatewayToken.transferFrom(msg.sender, address(this), getAdapterPrice(gatewaySpecifier, quantity, gatewayRate)),
             "insufficient accepted token quantity approved for transfer"
         );
 
@@ -94,8 +98,6 @@ contract EthGatedMarket_ is ERCDotFactory {
         uint reserveCost = currentCost._costOfNDots(this, specifier, issued + 1 - quantity, quantity - 1);
 
         super.unbond(this, specifier, quantity);
-
-        require(gatewayToken.transfer(this, reserveCost * marketRate), "Error: Transfer failed");
     }
 
     function getAdapterPrice(bytes32 specifier, uint quantity, uint rate) view returns(uint){
@@ -104,6 +106,9 @@ contract EthGatedMarket_ is ERCDotFactory {
         return reserveAmount * rate;
     }
 
+    function allocateGatewayToken(address _to, uint256 _amount) external onlyOwner {
+        gatewayToken.mint(_to, _amount);
+    }
 
     ///allow bond
     function allowBond() onlyOwner {
