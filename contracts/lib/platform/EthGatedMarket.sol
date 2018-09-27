@@ -11,12 +11,12 @@ contract EthGatedMarket is EthAdapter{
     bool public unbondAllow;
     bytes32 public gatewaySpecifier;
 
-    FactoryToken reserveToken;//zap
-    FactoryToken gatewayToken;//token used to bond in gated markets
+    FactoryTokenInterface reserveToken;//zap
+    FactoryTokenInterface gatewayToken;//token used to bond in gated markets
     TokenAdapter marketFactory;//factory for gated curves  
 
-    constructor(address coordinator)
-    EthAdapter(coordinator, 1) {
+    constructor(address coordinator, address tokenFactory)
+    EthAdapter(coordinator, tokenFactory, 1) {
 
         bondAllow = false;
         unbondAllow = false;
@@ -32,7 +32,7 @@ contract EthGatedMarket is EthAdapter{
         uint256 adapterRate
         ) onlyOwner {
 
-        gatewayToken = FactoryToken(
+        gatewayToken = FactoryTokenInterface(
             initializeCurve(
                 pubKey, title, specifier, symbol, curve
             )
@@ -40,7 +40,7 @@ contract EthGatedMarket is EthAdapter{
 
         gatewaySpecifier = specifier;
         setAdapterRate(adapterRate); 
-        marketFactory = new TokenAdapter(coord, gatewayToken);
+        marketFactory = new TokenAdapter(coord, tokenFactory, gatewayToken);
         bondAllow = true; 
     } 
 

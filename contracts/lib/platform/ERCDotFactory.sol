@@ -1,4 +1,5 @@
-import "../token/Token.sol";
+import "../token/TokenFactoryInterface.sol";
+import "../token/FactoryTokenInterface.sol";
 import "../ownership/ZapCoordinatorInterface.sol";
 import "../../platform/bondage/BondageInterface.sol";
 import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
@@ -6,17 +7,20 @@ import "../../platform/registry/RegistryInterface.sol";
 
 contract ERCDotFactory is Ownable {
 
-    FactoryToken reserveToken;
+    FactoryTokenInterface reserveToken;
     ZapCoordinatorInterface coord;
+    TokenFactoryInterface public tokenFactory;
+
 
     mapping(bytes32 => address) curves;
 
     event DotTokenCreated(address tokenAddress);
 
-    constructor(address coordinator){
+    constructor(address coordinator, address factory){
         coord = ZapCoordinatorInterface(coordinator); 
-        reserveToken = FactoryToken(coord.getContract("ZAP_TOKEN"));
-        reserveToken.approve(coord.getContract("BONDAGE"), ~uint256(0)); 
+        reserveToken = FactoryTokenInterface(coord.getContract("ZAP_TOKEN"));
+        reserveToken.approve(coord.getContract("BONDAGE"), ~uint256(0));
+        tokenFactory = TokenFactoryInterface(factory);
     }
 
     function initializeCurve(
@@ -58,7 +62,7 @@ contract ERCDotFactory is Ownable {
         reserveToken.approve(address(bondage), numReserve);
         bondage.bond(address(this), specifier, numDots);
 
-        FactoryToken(curves[specifier]).mint(wallet, numDots);
+        FactoryTokenInterface(curves[specifier]).mint(wallet, numDots);
     }    
 
     //overload for custom bond behaviour
@@ -72,7 +76,7 @@ contract ERCDotFactory is Ownable {
         uint256 numReserve = cost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
 
         bondage.unbond(address(this), specifier, numDots);
-        FactoryToken(curves[specifier]).burnFrom(wallet, numDots);
+        FactoryTokenInterface(curves[specifier]).burnFrom(wallet, numDots);
         reserveToken.transfer(wallet, numReserve);
     }    
 
@@ -80,11 +84,10 @@ contract ERCDotFactory is Ownable {
         string name,
         string symbol
     ) 
-        internal 
+        public
         returns (address tokenAddress) 
     {
-        FactoryToken token = new FactoryToken(name, symbol);
-        token.transferOwnership(address(this));
+        FactoryTokenInterface token = tokenFactory.create(name, symbol);
         tokenAddress = address(token);
         return tokenAddress;
     }

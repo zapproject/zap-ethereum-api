@@ -22,6 +22,7 @@ const EthAdapter = artifacts.require("EthAdapter");
 const TokenAdapter = artifacts.require("TokenAdapter");
 const EthGatedMarket = artifacts.require("EthGatedMarket_");
 const FactoryToken = artifacts.require("FactoryToken");
+const TokenFactory = artifacts.require("TokenFactory");
 
 contract('ERCDotFactory', function (accounts) {
     const owner = accounts[0];
@@ -71,24 +72,32 @@ contract('ERCDotFactory', function (accounts) {
         await this.currentTest.coord.addImmutableContract('ARBITER', accounts[3]);
 
         await this.currentTest.coord.updateAllDependencies({ from: owner });
+
+        this.currentTest.tokenFactory = await TokenFactory.new();
     });
 
     it("DOT_FACTORY_1 - constructor() - Check dot factory initialization", async function () {
-        await DotFactory.new(this.test.coord.address);
+        await DotFactory.new(this.test.coord.address, this.test.tokenFactory.address);
     });
 
     it("DOT_FACTORY_2 - constructor() - Check that address passed to constructor must be coordinator", async function () {
-        await expect(DotFactory.new(accounts[0])).to.be.eventually.rejectedWith(EVMRevert);
+        await expect(DotFactory.new(accounts[0], this.test.tokenFactory.address)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
-    it("DOT_FACTORY_3 - initializeCurve() - Check that factory can init curve", async function () {
-        let factory = await DotFactory.new(this.test.coord.address, {from: factoryOwner});
+    it("DOT_FACTORY_3 - newToken() - Check that factory can create token", async function () {
+        let factory = await DotFactory.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
+        await prepareProvider.call(this.test, true, false, oracle, piecewiseFunction, factory.address);
+        let token = await factory.newToken('name', 'symbol', {from: factoryOwner});
+    });
+
+    it("DOT_FACTORY_4 - initializeCurve() - Check that factory can init curve", async function () {
+        let factory = await DotFactory.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
         await prepareProvider.call(this.test, true, false, oracle, piecewiseFunction, factory.address);
         await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
     });
 
-    it("DOT_FACTORY_4 - initializeCurve() - Check that only factory owner can init curve", async function () {
-        let factory = await DotFactory.new(this.test.coord.address, {from: factoryOwner});
+    it("DOT_FACTORY_5 - initializeCurve() - Check that only factory owner can init curve", async function () {
+        let factory = await DotFactory.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
         await prepareProvider.call(this.test, true, false, oracle, piecewiseFunction, factory.address);
 
         // TODO: add onlyOwner modifier for initializeCurve() function
@@ -151,18 +160,20 @@ contract('EthAdapter', function (accounts) {
         await this.currentTest.coord.addImmutableContract('ARBITER', accounts[3]);
 
         await this.currentTest.coord.updateAllDependencies({ from: owner });
+
+        this.currentTest.tokenFactory = await TokenFactory.new();
     });
 
     it("ETH_ADAPTER_1 - constructor() - Check dot factory initialization", async function () {
-        await EthAdapter.new(this.test.coord.address, 1);
+        await EthAdapter.new(this.test.coord.address, this.test.tokenFactory.address, 1);
     });
 
     it("ETH_ADAPTER_2 - constructor() - Check that address passed to constructor must be coordinator", async function () {
-        await expect(EthAdapter.new(accounts[0], 1)).to.be.eventually.rejectedWith(EVMRevert);
+        await expect(EthAdapter.new(accounts[0], this.test.tokenFactory.address, 1)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
     it("ETH_ADAPTER_3 - ownerBond() - Check that owner can bond", async function () {
-        let factory = await EthAdapter.new(this.test.coord.address, 1, {from: factoryOwner});
+        let factory = await EthAdapter.new(this.test.coord.address, this.test.tokenFactory.address, 1, {from: factoryOwner});
         await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         await prepareTokens.call(this.test, factory.address);
 
@@ -173,7 +184,7 @@ contract('EthAdapter', function (accounts) {
     });
 
     it("ETH_ADAPTER_4 - ownerBond() - Check that only owner can bond", async function () {
-        let factory = await EthAdapter.new(this.test.coord.address, 1, {from: factoryOwner});
+        let factory = await EthAdapter.new(this.test.coord.address, this.test.tokenFactory.address, 1, {from: factoryOwner});
         await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         await prepareTokens.call(this.test, factory.address);
 
@@ -184,7 +195,7 @@ contract('EthAdapter', function (accounts) {
     });
 
     it("ETH_ADAPTER_5 - ownerUnbond() - Check that owner can unbond", async function () {
-        let factory = await EthAdapter.new(this.test.coord.address, 1, {from: factoryOwner});
+        let factory = await EthAdapter.new(this.test.coord.address, this.test.tokenFactory.address, 1, {from: factoryOwner});
 
         let curveResult = await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let curveTokenAddress = curveResult.logs[1].args.tokenAddress;
@@ -202,7 +213,7 @@ contract('EthAdapter', function (accounts) {
     });
 
     it("ETH_ADAPTER_6 - ownerUnbond() - Check that owner can unbond", async function () {
-        let factory = await EthAdapter.new(this.test.coord.address, 1, {from: factoryOwner});
+        let factory = await EthAdapter.new(this.test.coord.address, this.test.tokenFactory.address, 1, {from: factoryOwner});
 
         let curveResult = await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let curveTokenAddress = curveResult.logs[1].args.tokenAddress;
@@ -220,7 +231,7 @@ contract('EthAdapter', function (accounts) {
     });
 
     it("ETH_ADAPTER_7 - getAdapterPrice() - Check adapter price calculation", async function () {
-        let factory = await EthAdapter.new(this.test.coord.address, 1, {from: factoryOwner});
+        let factory = await EthAdapter.new(this.test.coord.address, this.test.tokenFactory.address, 1, {from: factoryOwner});
         await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         await prepareTokens.call(this.test, factory.address);
 
@@ -283,19 +294,21 @@ contract('TokenAdapter', function (accounts) {
         await this.currentTest.coord.addImmutableContract('ARBITER', accounts[3]);
 
         await this.currentTest.coord.updateAllDependencies({ from: owner });
+
+        this.currentTest.tokenFactory = await TokenFactory.new();
     });
 
     it("TOKEN_ADAPTER_1 - constructor() - Check dot factory initialization", async function () {
-        await TokenAdapter.new(this.test.coord.address, 1);
+        await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, 1);
     });
 
     it("TOKEN_ADAPTER_2 - constructor() - Check that address passed to constructor must be coordinator", async function () {
-        await expect(TokenAdapter.new(accounts[0], 1)).to.be.eventually.rejectedWith(EVMRevert);
+        await expect(TokenAdapter.new(accounts[0], this.test.tokenFactory.address, 1)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
     it("TOKEN_ADAPTER_3 - ownerBond() - Check that owner can bond", async function () {
         let acceptedToken = await FactoryToken.new('Accepted Token', 'AT', {from: factoryOwner});
-        let factory = await TokenAdapter.new(this.test.coord.address, acceptedToken.address, {from: factoryOwner});
+        let factory = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, acceptedToken.address, {from: factoryOwner});
         await factory.setAdapterRate(1, {from: factoryOwner});
         await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         await prepareTokens.call(this.test, factory.address);
@@ -311,7 +324,7 @@ contract('TokenAdapter', function (accounts) {
 
     it("TOKEN_ADAPTER_4 - ownerBond() - Check that only owner can bond", async function () {
         let acceptedToken = await FactoryToken.new('Accepted Token', 'AT', {from: factoryOwner});
-        let factory = await TokenAdapter.new(this.test.coord.address, acceptedToken.address, {from: factoryOwner});
+        let factory = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, acceptedToken.address, {from: factoryOwner});
         await factory.setAdapterRate(1, {from: factoryOwner});
         await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         await prepareTokens.call(this.test, factory.address);
@@ -327,7 +340,7 @@ contract('TokenAdapter', function (accounts) {
 
     it("TOKEN_ADAPTER_5 - ownerUnbond() - Check that owner can unbond", async function () {
         let acceptedToken = await FactoryToken.new('Accepted Token', 'AT', {from: factoryOwner});
-        let factory = await TokenAdapter.new(this.test.coord.address, acceptedToken.address, {from: factoryOwner});
+        let factory = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, acceptedToken.address, {from: factoryOwner});
         await factory.setAdapterRate(1, {from: factoryOwner});
         let curveResult = await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let curveTokenAddress = curveResult.logs[1].args.tokenAddress;
@@ -348,7 +361,7 @@ contract('TokenAdapter', function (accounts) {
 
     it("TOKEN_ADAPTER_6 - ownerUnbond() - Check that owner can unbond", async function () {
         let acceptedToken = await FactoryToken.new('Accepted Token', 'AT', {from: factoryOwner});
-        let factory = await TokenAdapter.new(this.test.coord.address, acceptedToken.address, {from: factoryOwner});
+        let factory = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, acceptedToken.address, {from: factoryOwner});
         await factory.setAdapterRate(1, {from: factoryOwner});
         let curveResult = await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let curveTokenAddress = curveResult.logs[1].args.tokenAddress;
@@ -369,7 +382,7 @@ contract('TokenAdapter', function (accounts) {
 
     it("TOKEN_ADAPTER_7 - getAdapterPrice() - Check adapter price calculation", async function () {
         let acceptedToken = await FactoryToken.new('Accepted Token', 'AT', {from: factoryOwner});
-        let factory = await TokenAdapter.new(this.test.coord.address, acceptedToken.address, {from: factoryOwner});
+        let factory = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, acceptedToken.address, {from: factoryOwner});
         await factory.setAdapterRate(1, {from: factoryOwner});
         await factory.initializeCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         await prepareTokens.call(this.test, factory.address);
@@ -441,18 +454,20 @@ contract('EthGatedMarket', function (accounts) {
         await this.currentTest.coord.addImmutableContract('ARBITER', accounts[3]);
 
         await this.currentTest.coord.updateAllDependencies({ from: owner });
+
+        this.currentTest.tokenFactory = await TokenFactory.new();
     });
 
     it("ETH_GATED_MARKET_1 - constructor() - Check dot factory initialization", async function () {
-        await EthGatedMarket.new(this.test.coord.address);
+        await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address);
     });
 
     it("ETH_GATED_MARKET_2 - constructor() - Check that address passed to constructor must be coordinator", async function () {
-        await expect(EthGatedMarket.new(accounts[0])).to.be.eventually.rejectedWith(EVMRevert);
+        await expect(EthGatedMarket.new(accounts[0], this.test.tokenFactory.address)).to.be.eventually.rejectedWith(EVMRevert);
     });
 
     it("ETH_GATED_MARKET_3 - gatewayBond() - Check that owner can bond", async function () {
-        let factory = await EthGatedMarket.new(this.test.coord.address, {from: factoryOwner});
+        let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
         let curveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let curveTokenAddress = curveResult.logs[1].args.tokenAddress;
         await factory.setGatewayRate(1, {from: factoryOwner});
@@ -469,7 +484,7 @@ contract('EthGatedMarket', function (accounts) {
     });
 
     it("ETH_GATED_MARKET_4 - gatewayUnbond() - Check that owner can bond", async function () {
-        let factory = await EthGatedMarket.new(this.test.coord.address, {from: factoryOwner});
+        let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
         let curveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let curveTokenAddress = curveResult.logs[1].args.tokenAddress;
         await factory.setGatewayRate(1, {from: factoryOwner});
@@ -488,7 +503,7 @@ contract('EthGatedMarket', function (accounts) {
     });
 
     it("ETH_GATED_MARKET_5 - marketBond() - Check that owner can bond", async function () {
-        let factory = await EthGatedMarket.new(this.test.coord.address, {from: factoryOwner});
+        let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
         let gatewayCurveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let gatewayCurveTokenAddress = gatewayCurveResult.logs[1].args.tokenAddress;
         let marketCurveResult = await factory.initMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
@@ -514,7 +529,7 @@ contract('EthGatedMarket', function (accounts) {
     });
 
     it("ETH_GATED_MARKET_6 - marketUnbond() - Check that owner can bond", async function () {
-        let factory = await EthGatedMarket.new(this.test.coord.address, {from: factoryOwner});
+        let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
         let gatewayCurveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let gatewayCurveTokenAddress = gatewayCurveResult.logs[1].args.tokenAddress;
         let marketCurveResult = await factory.initMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
@@ -540,4 +555,3 @@ contract('EthGatedMarket', function (accounts) {
         await factory.marketUnbond(marketSpecifier, 1, {from: factoryOwner});
     });
 });
-

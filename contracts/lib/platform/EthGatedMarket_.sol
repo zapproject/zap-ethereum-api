@@ -6,12 +6,12 @@ contract EthGatedMarket_ is ERCDotFactory {
     bool public bondAllow = false;
     bool public unbondAllow = false;
 
-    FactoryToken public gatewayToken;
+    FactoryTokenInterface public gatewayToken;
     bytes32 public gatewaySpecifier;
     uint256 public gatewayRate;
     uint256 public marketRate;
 
-    constructor(address _coordinator) ERCDotFactory(_coordinator) {
+    constructor(address _coordinator, address _tokenFactory) ERCDotFactory(_coordinator, _tokenFactory) {
         reserveToken.approve(this, ~uint256(0));
     }
 
@@ -32,7 +32,7 @@ contract EthGatedMarket_ is ERCDotFactory {
         bytes32 specifier,
         bytes32 symbol,
         int256[] curve) onlyOwner {
-        gatewayToken = FactoryToken(
+        gatewayToken = FactoryTokenInterface(
             initializeCurve(
                 providerPubKey, providerTitle, specifier, symbol, curve
             )
@@ -49,7 +49,7 @@ contract EthGatedMarket_ is ERCDotFactory {
         bytes32 specifier,
         bytes32 symbol,
         int256[] curve) onlyOwner {
-        FactoryToken token = FactoryToken(
+        FactoryTokenInterface token = FactoryTokenInterface(
             initializeCurve(
                 providerPubKey, providerTitle, specifier, symbol, curve
             )

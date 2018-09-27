@@ -6,12 +6,12 @@ contract TokenAdapter is ERCDotFactory {
     CurrentCostInterface currentCost;
     RegistryInterface registry;
     BondageInterface bondage;
-    FactoryToken acceptedToken;
+    FactoryTokenInterface acceptedToken;
     
     uint adapterRate;
 
-    constructor(address coordinator, FactoryToken _acceptedToken)
-    ERCDotFactory(coordinator) {
+    constructor(address coordinator, address tokenFactory, FactoryTokenInterface _acceptedToken)
+    ERCDotFactory(coordinator, tokenFactory) {
         acceptedToken = _acceptedToken;
     }
 

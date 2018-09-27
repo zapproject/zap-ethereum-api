@@ -11,8 +11,8 @@ contract EthAdapter is ERCDotFactory {
 
     event MsgSender(address _sender);
 
-    constructor( address coordinator, uint256 rate)
-    ERCDotFactory(coordinator) {
+    constructor(address coordinator, address tokenFactory, uint256 rate)
+    ERCDotFactory(coordinator, tokenFactory) {
         adapterRate = rate;
     }
 
@@ -53,7 +53,7 @@ contract EthAdapter is ERCDotFactory {
 
         currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST")); 
         uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - quantity, quantity - 1);
-        FactoryToken tok = FactoryToken(curves[specifier]);
+        FactoryTokenInterface tok = FactoryTokenInterface(curves[specifier]);
 
         super.unbond(wallet, specifier, quantity);
         wallet.transfer(reserveCost * adapterRate);
