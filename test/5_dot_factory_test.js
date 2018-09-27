@@ -23,7 +23,7 @@ const TokenAdapter = artifacts.require("TokenAdapter");
 const EthGatedMarket = artifacts.require("EthGatedMarket_");
 const FactoryToken = artifacts.require("FactoryToken");
 
-/*contract('ERCDotFactory', function (accounts) {
+contract('ERCDotFactory', function (accounts) {
     const owner = accounts[0];
     const subscriber = accounts[1];
     const oracle = accounts[2];
@@ -377,7 +377,7 @@ contract('TokenAdapter', function (accounts) {
         const res = await factory.getAdapterPrice(specifier, 3);
         await expect(res.toString()).to.be.equal('28');
     });
-});*/
+});
 
 contract('EthGatedMarket', function (accounts) {
     const owner = accounts[0];
@@ -386,11 +386,14 @@ contract('EthGatedMarket', function (accounts) {
     const factoryOwner = accounts[3];
 
     const publicKey = 111;
+    const marketPublicKey = 222;
     const title = "test";
+    const marketTitle = "test_1";
     const routeKeys = [1];
     const params = ["param1", "param2"];
 
     const specifier = "test-specifier";
+    const marketSpecifier = "test_spec_1";
     const zeroAddress = Utils.ZeroAddress;
 
     const piecewiseFunction = [3, 0, 0, 2, 10000];
@@ -440,7 +443,7 @@ contract('EthGatedMarket', function (accounts) {
         await this.currentTest.coord.updateAllDependencies({ from: owner });
     });
 
-    /*it("ETH_GATED_MARKET_1 - constructor() - Check dot factory initialization", async function () {
+    it("ETH_GATED_MARKET_1 - constructor() - Check dot factory initialization", async function () {
         await EthGatedMarket.new(this.test.coord.address);
     });
 
@@ -482,13 +485,13 @@ contract('EthGatedMarket', function (accounts) {
 
         await factory.gatewayBond(2, {from: factoryOwner, value: 18});
         await factory.gatewayUnbond(1, {from: factoryOwner});
-    });*/
+    });
 
     it("ETH_GATED_MARKET_5 - marketBond() - Check that owner can bond", async function () {
         let factory = await EthGatedMarket.new(this.test.coord.address, {from: factoryOwner});
         let gatewayCurveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let gatewayCurveTokenAddress = gatewayCurveResult.logs[1].args.tokenAddress;
-        let marketCurveResult = await factory.initMarketCurve(publicKey + 1, title + '_1', specifier + '_1', 'a_1', piecewiseFunction, {from: factoryOwner});
+        let marketCurveResult = await factory.initMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
         let marketCurveTokenAddress = marketCurveResult.logs[1].args.tokenAddress;
         await factory.setGatewayRate(1, {from: factoryOwner});
         await factory.setMarketRate(1, {from: factoryOwner});
@@ -507,14 +510,14 @@ contract('EthGatedMarket', function (accounts) {
         let marketToken = await FactoryToken.at(marketCurveTokenAddress);
         await marketToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
 
-        await factory.marketBond(specifier + '_1', 1, {from: factoryOwner, value: 18});
+        await factory.marketBond(marketSpecifier, 1, {from: factoryOwner, value: 18});
     });
 
     it("ETH_GATED_MARKET_6 - marketUnbond() - Check that owner can bond", async function () {
         let factory = await EthGatedMarket.new(this.test.coord.address, {from: factoryOwner});
         let gatewayCurveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
         let gatewayCurveTokenAddress = gatewayCurveResult.logs[1].args.tokenAddress;
-        let marketCurveResult = await factory.initMarketCurve(publicKey + 1, title + '_1', specifier + '_1', 'a_1', piecewiseFunction, {from: factoryOwner});
+        let marketCurveResult = await factory.initMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
         let marketCurveTokenAddress = marketCurveResult.logs[1].args.tokenAddress;
         await factory.setGatewayRate(1, {from: factoryOwner});
         await factory.setMarketRate(1, {from: factoryOwner});
@@ -533,8 +536,8 @@ contract('EthGatedMarket', function (accounts) {
         let marketToken = await FactoryToken.at(marketCurveTokenAddress);
         await marketToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
 
-        await factory.marketBond(specifier + '_1', 2, {from: factoryOwner, value: 18});
-        await factory.marketUnbond(specifier + '_1', 1, {from: factoryOwner});
+        await factory.marketBond(marketSpecifier, 2, {from: factoryOwner, value: 18});
+        await factory.marketUnbond(marketSpecifier, 1, {from: factoryOwner});
     });
 });
 
