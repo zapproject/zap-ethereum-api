@@ -33,17 +33,21 @@ contract EthAdapter is ERCDotFactory {
 
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
 
-        // TODO: unnecessary check
         bondage = BondageInterface(coord.getContract("BONDAGE"));
-        uint reserveCost = bondage.calcZapForDots(address(this), specifier, quantity);
-        if(reserveToken.balanceOf(this) < reserveCost ) {
-            revert("EthAdapter does not hold enough reserve for bond");
-        }
-        
+        uint256 issued = bondage.getDotsIssued(address(this), specifier);
+
+        CurrentCostInterface cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
+        uint256 numReserve = cost._costOfNDots(address(this), specifier, issued + 1, quantity - 1);
+
         if(msg.value < getAdapterPrice(specifier, quantity)){
             revert("Not enough eth sent for requested number of dots");     
         }
-        super.bond(wallet, specifier, quantity);
+
+        reserveToken.approve(address(bondage), numReserve);
+        bondage.bond(address(this), specifier, quantity);
+
+        FactoryTokenInterface(curves[specifier]).mint(wallet, quantity);
+
     }
 
     function unbond(address wallet, bytes32 specifier, uint quantity) internal {
@@ -55,7 +59,11 @@ contract EthAdapter is ERCDotFactory {
         uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - quantity, quantity - 1);
         FactoryTokenInterface tok = FactoryTokenInterface(curves[specifier]);
 
-        super.unbond(wallet, specifier, quantity);
+        //unbond dots
+        bondage.unbond(address(this), specifier, quantity);
+        //burn dot backed token
+        tok.burnFrom(wallet, quantity);
+        //send wallet eth
         wallet.transfer(reserveCost * adapterRate);
     } 
 
