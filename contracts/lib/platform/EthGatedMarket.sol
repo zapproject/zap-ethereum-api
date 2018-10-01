@@ -5,15 +5,15 @@ import "./TokenAdapter.sol";
 //use market token to bond to gated markets
 //child contracts can control gate unbonding 
 
-contract EthGatedMarket is EthAdapter{
+contract EthGatedMarket is EthAdapter {
 
     bool public bondAllow;
     bool public unbondAllow;
     bytes32 public gatewaySpecifier;
 
-    FactoryTokenInterface reserveToken;//zap
-    FactoryTokenInterface gatewayToken;//token used to bond in gated markets
-    TokenAdapter marketFactory;//factory for gated curves  
+    //FactoryTokenInterface public reserveToken;//zap
+    FactoryTokenInterface public gatewayToken;//token used to bond in gated markets
+    TokenAdapter public marketFactory;//factory for gated curves
 
     constructor(address coordinator, address tokenFactory)
     EthAdapter(coordinator, tokenFactory, 1) {
@@ -39,23 +39,26 @@ contract EthGatedMarket is EthAdapter{
         );
 
         gatewaySpecifier = specifier;
-        setAdapterRate(adapterRate); 
-        marketFactory = new TokenAdapter(coord, tokenFactory, gatewayToken);
-        bondAllow = true; 
-    } 
+        setAdapterRate(adapterRate);
+        bondAllow = true;
+    }
+
+    function setMarket(TokenAdapter _market) onlyOwner {
+        marketFactory = _market;
+    }
 
     ///bond to obtain gateway tokens in exchange for eth, able to bond to gated curves
     function gatewayBond(uint quantity) public payable {
-        
+
         require(bondAllow, "bond not allowed");
-        super.bond(address(this), gatewaySpecifier, quantity);
+        super.bond(msg.sender, gatewaySpecifier, quantity);
     }  
 
     ///unbond to obtain eth in exchange for gateway tokens
     function gatewayUnbond(uint quantity) public {
 
         require(unbondAllow, "unbond not allowed");
-        super.unbond(address(this), gatewaySpecifier, quantity);
+        super.unbond(msg.sender, gatewaySpecifier, quantity);
     }
 
     ///initialize a new gated market
@@ -72,36 +75,28 @@ contract EthGatedMarket is EthAdapter{
     }
     
     ///bond to gated market with gateway token
-    //TODO: users can not get gateway tokens, because gateway token owner is this contract
     function marketBond(bytes32 specifier, uint quantity) {
-        
-        marketFactory.ownerBond(address(this), specifier, quantity); 
+
+        marketFactory.ownerBond(msg.sender, specifier, quantity);
     }
 
     ///unbond from gated market with gateway token
-    //TODO: users can not get gateway tokens, because gateway token owner is this contract
     function marketUnbond(bytes32 specifier, uint quantity) {
 
-        marketFactory.ownerUnbond(address(this), specifier, quantity);
+        marketFactory.ownerUnbond(msg.sender, specifier, quantity);
+    }
+
+    function allocateGatewayToken(address _to, uint256 _amount) external onlyOwner {
+        gatewayToken.mint(_to, _amount);
     }
 
     ///allow bond
-    function allowBond() onlyOwner {  
-        bondAllow = true; 
-    }
-
-    ///disallow bond
-    function disallowBond() onlyOwner {  
-        bondAllow = false;
+    function allowBond(bool _allow) onlyOwner {
+        bondAllow = _allow;
     }
 
     ///allow unbond
-    function allowUnbond() onlyOwner {  
-        unbondAllow = true; 
-    }
-
-    ///disallow unbond
-    function disallowUnbond() onlyOwner {  
-        unbondAllow = false;
+    function allowUnbond(bool _allow) onlyOwner {
+        unbondAllow = _allow;
     }
 }

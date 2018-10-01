@@ -7,12 +7,12 @@ import "../../platform/registry/RegistryInterface.sol";
 
 contract ERCDotFactory is Ownable {
 
-    FactoryTokenInterface reserveToken;
-    ZapCoordinatorInterface coord;
+    FactoryTokenInterface public reserveToken;
+    ZapCoordinatorInterface public coord;
     TokenFactoryInterface public tokenFactory;
 
 
-    mapping(bytes32 => address) curves;
+    mapping(bytes32 => address) public curves;
 
     event DotTokenCreated(address tokenAddress);
 
@@ -51,34 +51,14 @@ contract ERCDotFactory is Ownable {
     //overload for custom bond behaviour
     //whether this contract holds tokens or coming from wallet,etc
     function bond(address wallet, bytes32 specifier, uint numDots) internal {
-        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE"));
-        uint256 issued = bondage.getDotsIssued(address(this), specifier);
 
-        CurrentCostInterface cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
-        uint256 numReserve = cost._costOfNDots(address(this), specifier, issued + 1, numDots - 1);
-
-        require(reserveToken.transferFrom(wallet, this, numReserve), "Error: User must have approved contract to transfer dot token");
-
-        reserveToken.approve(address(bondage), numReserve);
-        bondage.bond(address(this), specifier, numDots);
-
-        FactoryTokenInterface(curves[specifier]).mint(wallet, numDots);
-    }    
+    }
 
     //overload for custom bond behaviour
     //whether this contract holds tokens or coming from msg.sender,etc
     function unbond(address wallet, bytes32 specifier, uint numDots) internal {
-        BondageInterface bondage = BondageInterface(coord.getContract("BONDAGE"));
-        CurrentCostInterface cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
 
-        // Get the value of the dots
-        uint256 issued = bondage.getDotsIssued(address(this), specifier);
-        uint256 numReserve = cost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
-
-        bondage.unbond(address(this), specifier, numDots);
-        FactoryTokenInterface(curves[specifier]).burnFrom(wallet, numDots);
-        reserveToken.transfer(wallet, numReserve);
-    }    
+    }
 
     function newToken(
         string name,
@@ -96,19 +76,10 @@ contract ERCDotFactory is Ownable {
     //https://ethereum.stackexchange.com/questions/2519/how-to-convert-a-bytes32-to-string
     function bytes32ToString(bytes32 x) constant returns (string) {
         bytes memory bytesString = new bytes(32);
-        uint charCount = 0;
-        for (uint j = 0; j < 32; j++) {
-            byte char = byte(bytes32(uint(x) * 2 ** (8 * j)));
-            if (char != 0) {
-                bytesString[charCount] = char;
-                charCount++;
-            }
-        }
-        bytes memory bytesStringTrimmed = new bytes(charCount);
-        for (j = 0; j < charCount; j++) {
-            bytesStringTrimmed[j] = bytesString[j];
-        }
-        return string(bytesStringTrimmed);
+
+        bytesString = abi.encodePacked(x);
+
+        return string(bytesString);
     }
 
 

@@ -3,11 +3,11 @@ import "./ERCDotFactory.sol";
 
 contract EthAdapter is ERCDotFactory {
 
-    CurrentCostInterface currentCost;
-    RegistryInterface registry;
-    BondageInterface bondage;
+    CurrentCostInterface public currentCost;
+    RegistryInterface public registry;
+    BondageInterface public bondage;
     
-    uint adapterRate;
+    uint public adapterRate;
 
     event MsgSender(address _sender);
 
@@ -31,6 +31,7 @@ contract EthAdapter is ERCDotFactory {
         unbond(wallet, specifier, quantity);
     }
 
+    //Override
     function bond(address wallet, bytes32 specifier, uint quantity) internal {
 
         bondage = BondageInterface(coord.getContract("BONDAGE"));
@@ -50,6 +51,7 @@ contract EthAdapter is ERCDotFactory {
 
     }
 
+    //Override
     function unbond(address wallet, bytes32 specifier, uint quantity) internal {
          
         bondage = BondageInterface(coord.getContract("BONDAGE")); 

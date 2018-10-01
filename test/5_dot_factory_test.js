@@ -20,7 +20,7 @@ const Cost = artifacts.require("CurrentCost");
 const DotFactory = artifacts.require("ERCDotFactory");
 const EthAdapter = artifacts.require("EthAdapter");
 const TokenAdapter = artifacts.require("TokenAdapter");
-const EthGatedMarket = artifacts.require("EthGatedMarket_");
+const EthGatedMarket = artifacts.require("EthGatedMarket");
 const FactoryToken = artifacts.require("FactoryToken");
 const TokenFactory = artifacts.require("TokenFactory");
 
@@ -319,7 +319,7 @@ contract('TokenAdapter', function (accounts) {
         await acceptedToken.mint(factoryOwner, tokensForSubscriber, {from: factoryOwner});
         await acceptedToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
 
-        await factory.ownerBond(factoryOwner, specifier, 1, {from: factoryOwner, value: 18});
+        await factory.ownerBond(factoryOwner, specifier, 1, {from: factoryOwner});
     });
 
     it("TOKEN_ADAPTER_4 - ownerBond() - Check that only owner can bond", async function () {
@@ -335,7 +335,7 @@ contract('TokenAdapter', function (accounts) {
         await acceptedToken.mint(factoryOwner, tokensForSubscriber, {from: factoryOwner});
         await acceptedToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
 
-        await expect(factory.ownerBond(factoryOwner, specifier, 1, {from: accounts[1], value: 18})).to.be.eventually.rejectedWith(EVMRevert);
+        await expect(factory.ownerBond(factoryOwner, specifier, 1, {from: accounts[1]})).to.be.eventually.rejectedWith(EVMRevert);
     });
 
     it("TOKEN_ADAPTER_5 - ownerUnbond() - Check that owner can unbond", async function () {
@@ -355,7 +355,7 @@ contract('TokenAdapter', function (accounts) {
         let curveToken = await FactoryToken.at(curveTokenAddress);
         await curveToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
 
-        await factory.ownerBond(factoryOwner, specifier, 1, {from: factoryOwner, value: 18});
+        await factory.ownerBond(factoryOwner, specifier, 1, {from: factoryOwner});
         await factory.ownerUnbond(factoryOwner, specifier, 1, {from: factoryOwner});
     });
 
@@ -376,7 +376,7 @@ contract('TokenAdapter', function (accounts) {
         let curveToken = await FactoryToken.at(curveTokenAddress);
         await curveToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
 
-        await factory.ownerBond(factoryOwner, specifier, 1, {from: factoryOwner, value: 18});
+        await factory.ownerBond(factoryOwner, specifier, 1, {from: factoryOwner});
         await expect(factory.ownerUnbond(factoryOwner, specifier, 1, {from: accounts[1] })).to.be.eventually.rejectedWith(EVMRevert);
     });
 
@@ -416,11 +416,6 @@ contract('EthGatedMarket', function (accounts) {
     const tokensForSubscriber = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
     const dotBound = new BigNumber("999");
-
-    async function prepareProvider(provider = true, curve = true, account = oracle, curveParams = piecewiseFunction, bondBroker = broker) {
-        if (provider) await this.registry.initiateProvider(publicKey, title, { from: account });
-        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, bondBroker, { from: account });
-    }
 
     async function prepareTokens(allocAddress = subscriber) {
         await this.token.allocate(owner, tokensForOwner, { from: owner });
@@ -468,14 +463,10 @@ contract('EthGatedMarket', function (accounts) {
 
     it("ETH_GATED_MARKET_3 - gatewayBond() - Check that owner can bond", async function () {
         let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
-        let curveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
+        let curveResult = await factory.initializeGateway(title, publicKey, specifier, 'a', piecewiseFunction, 1, {from: factoryOwner});
         let curveTokenAddress = curveResult.logs[1].args.tokenAddress;
-        await factory.setGatewayRate(1, {from: factoryOwner});
 
         await prepareTokens.call(this.test, factory.address);
-
-        await this.test.token.allocate(factoryOwner, tokensForSubscriber);
-        await this.test.token.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
 
         let curveToken = await FactoryToken.at(curveTokenAddress);
         await curveToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
@@ -485,15 +476,11 @@ contract('EthGatedMarket', function (accounts) {
 
     it("ETH_GATED_MARKET_4 - gatewayUnbond() - Check that owner can bond", async function () {
         let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
-        let curveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
+        let curveResult = await factory.initializeGateway(title, publicKey, specifier, 'a', piecewiseFunction, 1, {from: factoryOwner});
         let curveTokenAddress = curveResult.logs[1].args.tokenAddress;
-        await factory.setGatewayRate(1, {from: factoryOwner});
-        await factory.allowUnbond({from: factoryOwner});
+        await factory.allowUnbond(true, {from: factoryOwner});
 
         await prepareTokens.call(this.test, factory.address);
-
-        await this.test.token.allocate(factoryOwner, tokensForSubscriber);
-        await this.test.token.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
 
         let curveToken = await FactoryToken.at(curveTokenAddress);
         await curveToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
@@ -504,54 +491,146 @@ contract('EthGatedMarket', function (accounts) {
 
     it("ETH_GATED_MARKET_5 - marketBond() - Check that owner can bond", async function () {
         let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
-        let gatewayCurveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
-        let gatewayCurveTokenAddress = gatewayCurveResult.logs[1].args.tokenAddress;
-        let marketCurveResult = await factory.initMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
-        let marketCurveTokenAddress = marketCurveResult.logs[1].args.tokenAddress;
-        await factory.setGatewayRate(1, {from: factoryOwner});
-        await factory.setMarketRate(1, {from: factoryOwner});
-        await factory.allowUnbond({from: factoryOwner});
 
-        await prepareTokens.call(this.test, factory.address);
+        await factory.initializeGateway(title, publicKey, specifier, 'a', piecewiseFunction, 1, {from: factoryOwner});
+        let gatewayTokenAddress = await factory.gatewayToken();
 
-        await this.test.token.allocate(factoryOwner, tokensForSubscriber);
-        await this.test.token.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+        let market = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, gatewayTokenAddress, {from: factoryOwner});
+        await market.setAdapterRate(1, {from: factoryOwner});
+        await market.transferOwnership(factory.address, {from: factoryOwner});
+        await factory.setMarket(market.address, {from: factoryOwner});
 
-        let gatewayToken = await FactoryToken.at(gatewayCurveTokenAddress);
+        await factory.initializeMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
+
+        let gatewayToken = await FactoryToken.at(gatewayTokenAddress);
         await factory.allocateGatewayToken(factoryOwner, tokensForSubscriber, {from: factoryOwner});
         await gatewayToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
-        await gatewayToken.approve(owner, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(market.address, tokensForSubscriber, {from: factoryOwner});
 
-        let marketToken = await FactoryToken.at(marketCurveTokenAddress);
-        await marketToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
-
-        await factory.marketBond(marketSpecifier, 1, {from: factoryOwner, value: 18});
+        await this.test.token.allocate(market.address, tokensForSubscriber);
+        await factory.marketBond(marketSpecifier, 1, {from: factoryOwner});
     });
 
     it("ETH_GATED_MARKET_6 - marketUnbond() - Check that owner can bond", async function () {
         let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
-        let gatewayCurveResult = await factory.initGatewayCurve(publicKey, title, specifier, 'a', piecewiseFunction, {from: factoryOwner});
-        let gatewayCurveTokenAddress = gatewayCurveResult.logs[1].args.tokenAddress;
-        let marketCurveResult = await factory.initMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
+
+        // init gateway for changing eth to dots
+        await factory.initializeGateway(title, publicKey, specifier, 'a', piecewiseFunction, 1, {from: factoryOwner});
+        let gatewayTokenAddress = await factory.gatewayToken();
+
+        // init market that allow to change specified token (gatewayToken in this case) to dots
+        let market = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, gatewayTokenAddress, {from: factoryOwner});
+        await market.setAdapterRate(1, {from: factoryOwner});
+        await market.transferOwnership(factory.address, {from: factoryOwner});
+        await factory.setMarket(market.address, {from: factoryOwner});
+
+        // init inner token for curve
+        // this token represent bonded dots in tokens
+        let marketCurveResult = await factory.initializeMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
         let marketCurveTokenAddress = marketCurveResult.logs[1].args.tokenAddress;
-        await factory.setGatewayRate(1, {from: factoryOwner});
-        await factory.setMarketRate(1, {from: factoryOwner});
-        await factory.allowUnbond({from: factoryOwner});
+
+        await factory.allowUnbond(true, {from: factoryOwner});
+
+        // give gateway tokens to user and approve that factory and market can use them
+        let gatewayToken = await FactoryToken.at(gatewayTokenAddress);
+        await factory.allocateGatewayToken(factoryOwner, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(market.address, tokensForSubscriber, {from: factoryOwner});
+
+        // allow market to burn user tokens on unbond
+        let marketToken = await FactoryToken.at(marketCurveTokenAddress);
+        await marketToken.approve(market.address, tokensForSubscriber, {from: factoryOwner});
+
+        // test unbonding
+        await this.test.token.allocate(market.address, tokensForSubscriber);
+        await factory.marketBond(marketSpecifier, 2, {from: factoryOwner});
+        await factory.marketUnbond(marketSpecifier, 1, {from: factoryOwner});
+    });
+
+    it("ETH_GATED_MARKET_7 - bond to specified endpoint using ether", async function () {
+        let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
+
+        // init gateway for changing eth to dots
+        await factory.initializeGateway(title, publicKey, specifier, 'a', piecewiseFunction, 1, {from: factoryOwner});
+        let gatewayTokenAddress = await factory.gatewayToken();
+
+        // init market that allow to change specified token (gatewayToken in this case) to dots
+        let market = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, gatewayTokenAddress, {from: factoryOwner});
+        await market.setAdapterRate(1, {from: factoryOwner});
+        await market.transferOwnership(factory.address, {from: factoryOwner});
+        await factory.setMarket(market.address, {from: factoryOwner});
+
+        // init inner token for curve
+        // this token represent bonded dots in tokens
+        await factory.initializeMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
+
+        await factory.allowUnbond(true, {from: factoryOwner});
 
         await prepareTokens.call(this.test, factory.address);
 
-        await this.test.token.allocate(factoryOwner, tokensForSubscriber);
-        await this.test.token.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+        // buy 18 gateway tokens for user
+        await factory.gatewayBond(18, {from: factoryOwner, value: 4218});
 
-        let gatewayToken = await FactoryToken.at(gatewayCurveTokenAddress);
-        await factory.allocateGatewayToken(factoryOwner, tokensForSubscriber, {from: factoryOwner});
+        // approve that market and factory can use gateway tokens of user
+        let gatewayToken = await FactoryToken.at(gatewayTokenAddress);
         await gatewayToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
-        await gatewayToken.approve(owner, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(market.address, tokensForSubscriber, {from: factoryOwner});
 
-        let marketToken = await FactoryToken.at(marketCurveTokenAddress);
-        await marketToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+        let balanceBeforeBond = parseInt((await gatewayToken.balanceOf(factoryOwner)).toString());
 
-        await factory.marketBond(marketSpecifier, 2, {from: factoryOwner, value: 18});
-        await factory.marketUnbond(marketSpecifier, 1, {from: factoryOwner});
+        // bond using bought gateway tokens
+        await this.test.token.allocate(market.address, tokensForSubscriber);
+        await factory.marketBond(marketSpecifier, 2, {from: factoryOwner});
+
+        let balanceAfterBond = parseInt((await gatewayToken.balanceOf(factoryOwner)).toString());
+
+        await expect(balanceBeforeBond).to.be.equal(18);
+        await expect(balanceAfterBond).to.be.equal(8);
+    });
+
+    it("ETH_GATED_MARKET_8 - exchange gateway tokens to ether", async function () {
+        let factory = await EthGatedMarket.new(this.test.coord.address, this.test.tokenFactory.address, {from: factoryOwner});
+
+        // init gateway for changing eth to dots
+        await factory.initializeGateway(title, publicKey, specifier, 'a', piecewiseFunction, 1, {from: factoryOwner});
+        let gatewayTokenAddress = await factory.gatewayToken();
+
+        // init market that allow to change specified token (gatewayToken in this case) to dots
+        let market = await TokenAdapter.new(this.test.coord.address, this.test.tokenFactory.address, gatewayTokenAddress, {from: factoryOwner});
+        await market.setAdapterRate(1, {from: factoryOwner});
+        await market.transferOwnership(factory.address, {from: factoryOwner});
+        await factory.setMarket(market.address, {from: factoryOwner});
+
+        // init inner token for curve
+        // this token represent bonded dots in tokens
+        await factory.initializeMarketCurve(marketPublicKey, marketTitle, marketSpecifier, 'b', piecewiseFunction, {from: factoryOwner});
+
+        await factory.allowUnbond(true, {from: factoryOwner});
+
+        await prepareTokens.call(this.test, factory.address);
+
+        // buy 18 gateway tokens for user
+        await factory.gatewayBond(18, {from: factoryOwner, value: 4218});
+
+        // approve that market and factory can use gateway tokens of users
+        let gatewayToken = await FactoryToken.at(gatewayTokenAddress);
+        await gatewayToken.approve(factory.address, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(market.address, tokensForSubscriber, {from: factoryOwner});
+        await gatewayToken.approve(factory.address, tokensForSubscriber, {from: owner});
+        await gatewayToken.approve(market.address, tokensForSubscriber, {from: owner});
+
+        let balanceBeforeBond = parseInt((await gatewayToken.balanceOf(factoryOwner)).toString());
+
+        // bond using bought gateway tokens
+        await this.test.token.allocate(market.address, tokensForSubscriber);
+        await factory.marketBond(marketSpecifier, 2, {from: factoryOwner});
+
+        let balanceAfterBond = parseInt((await gatewayToken.balanceOf(factoryOwner)).toString());
+
+        await expect(balanceBeforeBond).to.be.equal(18);
+        await expect(balanceAfterBond).to.be.equal(8);
+
+        await gatewayToken.transfer(owner, 1, {from: factoryOwner});
+        await factory.gatewayUnbond(1, {from: owner});
     });
 });
