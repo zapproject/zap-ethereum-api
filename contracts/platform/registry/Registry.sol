@@ -64,7 +64,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         // Provider must be initiated
         require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
         // Can't reset their curve
-        require(getCurveUnset(msg.sender, endpoint));
+        require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
 
         setCurve(msg.sender, endpoint, curve);        
         db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
