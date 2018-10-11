@@ -113,15 +113,6 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         db.setBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpointParams', endpoint)), endpointParams);
     }
 
-    // get endpoint specific parameters for a given endpoint
-    function getEndpointParams(address provider, bytes32 endpoint) public view returns (bytes32[]) {
-        // Provider, endpoint must be initiated
-        require(isProviderInitiated(msg.sender));
-        require(!getCurveUnset(msg.sender, endpoint));
-
-        return db.getBytesArray(keccak256(abi.encodePacked('oracles', provider, 'endpointParams', endpoint)));
-    }
-
     /// @return public key
     function getProviderPublicKey(address provider) public view returns (uint256) {
         return getPublicKey(provider);
@@ -175,7 +166,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     }
 
     /// @dev get all endpoint params
-    function getEndPointParams(address provider, bytes32 endpoint) public view returns (bytes32[]) {
+    function getEndpointParams(address provider, bytes32 endpoint) public view returns (bytes32[]) {
         return db.getBytesArray(keccak256(abi.encodePacked('oracles', provider, 'endpointParams', endpoint)));
     }
 
