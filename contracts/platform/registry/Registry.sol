@@ -76,7 +76,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     }
 
     // Sets provider data
-    function setProviderParameter(bytes32 key, bytes32 value) public {
+    function setProviderParameter(bytes32 key, bytes value) public {
         // Provider must be initiated
         require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
 
@@ -85,15 +85,15 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
             db.setNumber(keccak256(abi.encodePacked('oracles', msg.sender, 'is_param_set', key)), 1);
             db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'providerParams')), key);
         }
-        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, 'providerParams', key)), value);
+        db.setBytes(keccak256(abi.encodePacked('oracles', msg.sender, 'providerParams', key)), value);
     }
 
     // Gets provider data
-    function getProviderParameter(address provider, bytes32 key) public view returns (bytes32){
+    function getProviderParameter(address provider, bytes32 key) public view returns (bytes){
         // Provider must be initiated
         require(isProviderInitiated(provider), "Error: Provider is not yet initiated");
         require(isProviderParamInitialized(provider, key), "Error: Provider Parameter is not yet initialized");
-        return db.getBytes32(keccak256(abi.encodePacked('oracles', provider, 'providerParams', key)));
+        return db.getBytes(keccak256(abi.encodePacked('oracles', provider, 'providerParams', key)));
     }
 
     // Gets keys of all provider params
