@@ -141,7 +141,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @notice Transfer dots from Bondage escrow to data provider's Holder object under its own address
     /// @dev Called upon data-provider request fulfillment
     function fulfillQuery(uint256 id) private returns (bool) {
-        Status status = getStatus(id);
+        Status status = Status(getStatus(id));
 
         require(status != Status.Fulfilled, "Error: Status already fulfilled");
 
@@ -183,7 +183,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         bytes32 endpoint = getEndpoint(id);
 
         require(subscriber == msg.sender, "Error: Wrong subscriber");
-        require(getStatus(id) == Status.Pending, "Error: Query is not pending");
+        require(Status(getStatus(id)) == Status.Pending, "Error: Query is not pending");
 
         // Cancel the query
         setCanceled(id, true);
@@ -345,8 +345,8 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
 
     /// @dev get status of request
     /// @param id request id
-    function getStatus(uint256 id) public view returns (Status) {
-        return Status(db.getNumber(keccak256(abi.encodePacked('queries', id, 'status'))));
+    function getStatus(uint256 id) public view returns (uint256) {
+        return db.getNumber(keccak256(abi.encodePacked('queries', id, 'status')));
     }
 
     /// @dev get the cancelation block of a request
