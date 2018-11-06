@@ -59,6 +59,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         int256[] curve,
         address broker
     )
+        public
         returns (bool)
     {
         // Provider must be initiated
