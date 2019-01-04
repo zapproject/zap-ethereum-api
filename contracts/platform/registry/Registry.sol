@@ -113,6 +113,31 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         db.setBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpointParams', endpoint)), endpointParams);
     }
 
+    // Set endpoint specific parameters for a given endpoint
+    function setProviderTitle(bytes32 title) public {
+        // Provider must be initiated
+        require(isProviderInitiated(msg.sender), "Error: Provider is not yet initialized");
+        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, "title")), title);
+    }
+
+    // Delete endpoint that has no bonds. Note: not capable of handling large endpoints arrays 
+    function clearEndpoint(bytes32 endpoint) public {
+        // Provider must be initiated
+        require(isProviderInitiated(msg.sender), "Error: Provider is not yet initialized");
+        uint256 bound = db.getNumber(keccak256(abi.encodePacked('totalBound', msg.sender, endpoint)));
+        require(bound == 0, "Error: endpoint must be empty of bonds");
+
+        int256[] nullArray; 
+        bytes32[] memory endpoints  =  db.getBytesArray(keccak256(abi.encodePacked("oracles", msg.sender, "endpoints")));
+        for( uint256 i = 0; i < endpoints.length; i++ ){
+            if( endpoints[i] == endpoint ) {
+                db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(0));
+                db.setIntArray(keccak256(abi.encodePacked('oracles', msg.sender, 'curves', endpoint)), nullArray);
+                break;
+            }
+        }
+    }
+
     /// @return public key
     function getProviderPublicKey(address provider) public view returns (uint256) {
         return getPublicKey(provider);

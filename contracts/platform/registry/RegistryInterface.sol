@@ -9,6 +9,8 @@ contract RegistryInterface {
     function getProviderPublicKey(address) public view returns (uint256);
     function getProviderTitle(address) public view returns (bytes32);
     function setProviderParameter(bytes32, bytes) public;
+    function setProviderTitle(bytes32) public;
+    function clearEndpoint(bytes32) public;
     function getProviderParameter(address, bytes32) public view returns (bytes);
     function getAllProviderParams(address) public view returns (bytes32[]);
     function getProviderCurveLength(address, bytes32) public view returns (uint256);
