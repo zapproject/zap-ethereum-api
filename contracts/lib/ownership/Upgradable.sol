@@ -13,7 +13,7 @@ contract Upgradable {
     }
 
     function updateDependencies() external coordinatorOnly {
-        _updatedependencies();
+        _updateDependencies();
     }
 
     function _updateDependencies() internal;
