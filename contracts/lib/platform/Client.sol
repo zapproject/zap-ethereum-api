@@ -44,4 +44,3 @@ contract ClientIntArray{
     /// @param response int array
     function callback(uint256 id, int[] response) external;
 }
-

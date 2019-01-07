@@ -1,3 +1,5 @@
+pragma solidity ^0.4.24;
+
 import "../token/TokenFactoryInterface.sol";
 import "../token/FactoryTokenInterface.sol";
 import "../ownership/ZapCoordinatorInterface.sol";
@@ -17,7 +19,7 @@ contract ERCDotFactory is Ownable {
     event DotTokenCreated(address tokenAddress);
 
     constructor(address coordinator, address factory){
-        coord = ZapCoordinatorInterface(coordinator); 
+        coord = ZapCoordinatorInterface(coordinator);
         reserveToken = FactoryTokenInterface(coord.getContract("ZAP_TOKEN"));
         reserveToken.approve(coord.getContract("BONDAGE"), ~uint256(0));
         tokenFactory = TokenFactoryInterface(factory);
@@ -25,15 +27,15 @@ contract ERCDotFactory is Ownable {
 
     function initializeCurve(
         uint256 providerPubKey,
-        bytes32 providerTitle, 
-        bytes32 specifier, 
-        bytes32 symbol, 
+        bytes32 providerTitle,
+        bytes32 specifier,
+        bytes32 symbol,
         int256[] curve
     ) returns(address) {
 
         require(curves[specifier] == 0, "Curve specifier already exists");
 
-        RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY")); 
+        RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY"));
         if(!registry.isProviderInitiated(address(this))) {
             registry.initiateProvider(providerPubKey, providerTitle);
         }
@@ -63,9 +65,9 @@ contract ERCDotFactory is Ownable {
     function newToken(
         string name,
         string symbol
-    ) 
+    )
         public
-        returns (address tokenAddress) 
+        returns (address tokenAddress)
     {
         FactoryTokenInterface token = tokenFactory.create(name, symbol);
         tokenAddress = address(token);
@@ -81,6 +83,4 @@ contract ERCDotFactory is Ownable {
 
         return string(bytesString);
     }
-
-
 }

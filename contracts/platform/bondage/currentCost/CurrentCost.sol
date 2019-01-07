@@ -52,8 +52,6 @@ contract CurrentCost is Destructible, CurrentCostInterface, Upgradable {
         view
         returns (uint256 cost)
     {
-
-
         uint256 length = registry.getProviderCurveLength(oracleAddress,endpoint);
         int[] memory curve = new int[](length);
         curve = registry.getProviderCurve(oracleAddress, endpoint);
@@ -63,7 +61,7 @@ contract CurrentCost is Destructible, CurrentCostInterface, Upgradable {
         return uint256(res);
     }
 
-   function _dotLimit( 
+   function _dotLimit(
         address oracleAddress,
         bytes32 endpoint
     )

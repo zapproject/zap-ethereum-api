@@ -53,7 +53,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
     /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
     /// @param curve flattened array of all segments, coefficients across all polynomial terms, [e0,l0,c0,c1,c2,...]
-    /// @param broker address for endpoint. if non-zero address, only this address will be able to bond/unbond 
+    /// @param broker address for endpoint. if non-zero address, only this address will be able to bond/unbond
     function initiateProviderCurve(
         bytes32 endpoint,
         int256[] curve,
@@ -66,7 +66,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         // Can't reset their curve
         require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
 
-        setCurve(msg.sender, endpoint, curve);        
+        setCurve(msg.sender, endpoint, curve);
         db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
         db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(broker));
 
@@ -80,7 +80,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         // Provider must be initiated
         require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
 
-        if(!isProviderParamInitialized(msg.sender, key)){
+        if (!isProviderParamInitialized(msg.sender, key)) {
             // initialize this provider param
             db.setNumber(keccak256(abi.encodePacked('oracles', msg.sender, 'is_param_set', key)), 1);
             db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'providerParams')), key);
@@ -229,7 +229,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
             require(uint(end) > prevEnd, "Error: Invalid Curve");
 
             prevEnd = uint(end);
-            index += uint(len) + 2; 
+            index += uint(len) + 2;
         }
 
         db.setIntArray(keccak256(abi.encodePacked('oracles', provider, 'curves', endpoint)), curve);

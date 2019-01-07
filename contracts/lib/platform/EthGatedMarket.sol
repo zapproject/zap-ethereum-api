@@ -1,3 +1,5 @@
+pragma solidity ^0.4.24;
+
 import "./EthAdapter.sol";
 import "./TokenAdapter.sol";
 
@@ -11,9 +13,9 @@ contract EthGatedMarket is EthAdapter {
     bool public unbondAllow;
     bytes32 public gatewaySpecifier;
 
-    //FactoryTokenInterface public reserveToken;//zap
-    FactoryTokenInterface public gatewayToken;//token used to bond in gated markets
-    TokenAdapter public marketFactory;//factory for gated curves
+    //FactoryTokenInterface public reserveToken; //zap
+    FactoryTokenInterface public gatewayToken; //token used to bond in gated markets
+    TokenAdapter public marketFactory; //factory for gated curves
 
     constructor(address coordinator, address tokenFactory)
     EthAdapter(coordinator, tokenFactory, 1) {
@@ -22,16 +24,16 @@ contract EthGatedMarket is EthAdapter {
         unbondAllow = false;
     }
 
-    ///initiallize gateway eth->gateway token curve, set exchange rate of eth/reserve token 
-    function initializeGateway( 
-        bytes32 title, 
+    // initiallize gateway eth->gateway token curve, set exchange rate of eth/reserve token
+    function initializeGateway(
+        bytes32 title,
         uint256 pubKey,
-        bytes32 specifier, 
-        bytes32 symbol, 
+        bytes32 specifier,
+        bytes32 symbol,
         int256[] curve,
         uint256 adapterRate
         ) returns(address){
-        
+
         require(gatewaySpecifier == bytes32(0));
         gatewayToken = FactoryTokenInterface(
             initializeCurve(
@@ -42,47 +44,45 @@ contract EthGatedMarket is EthAdapter {
         gatewaySpecifier = specifier;
         setAdapterRate(adapterRate);
         bondAllow = true;
-        return gatewayToken;    
+        return gatewayToken;
     }
 
     function setMarket(TokenAdapter _market) onlyOwner {
         marketFactory = _market;
     }
 
-    ///bond to obtain gateway tokens in exchange for eth, able to bond to gated curves
+    // bond to obtain gateway tokens in exchange for eth, able to bond to gated curves
     function gatewayBond(uint quantity) public payable {
-
         require(bondAllow, "bond not allowed");
         super.bond(msg.sender, gatewaySpecifier, quantity);
-    }  
+    }
 
-    ///unbond to obtain eth in exchange for gateway tokens
+    // unbond to obtain eth in exchange for gateway tokens
     function gatewayUnbond(uint quantity) public {
-
         require(unbondAllow, "unbond not allowed");
         super.unbond(msg.sender, gatewaySpecifier, quantity);
     }
 
-    ///initialize a new gated market
+    // initialize a new gated market
     function initializeMarketCurve(
         uint256 pubKey,
-        bytes32 title, 
-        bytes32 specifier, 
-        bytes32 symbol, 
+        bytes32 title,
+        bytes32 specifier,
+        bytes32 symbol,
         int256[] curve
     ) public returns(address) {
-        return marketFactory.initializeCurve(    
+        return marketFactory.initializeCurve(
             pubKey, title, specifier, symbol, curve
         );
     }
-    
-    ///bond to gated market with gateway token
+
+    // bond to gated market with gateway token
     function marketBond(bytes32 specifier, uint quantity) {
 
         marketFactory.ownerBond(msg.sender, specifier, quantity);
     }
 
-    ///unbond from gated market with gateway token
+    // unbond from gated market with gateway token
     function marketUnbond(bytes32 specifier, uint quantity) {
 
         marketFactory.ownerUnbond(msg.sender, specifier, quantity);
@@ -92,12 +92,12 @@ contract EthGatedMarket is EthAdapter {
         gatewayToken.mint(_to, _amount);
     }
 
-    ///allow bond
+    // allow bond
     function allowBond(bool _allow) onlyOwner {
         bondAllow = _allow;
     }
 
-    ///allow unbond
+    // allow unbond
     function allowUnbond(bool _allow) onlyOwner {
         unbondAllow = _allow;
     }

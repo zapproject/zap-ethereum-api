@@ -8,7 +8,7 @@ import "./OnChainProvider.sol";
 import "../ERC20.sol";
 
 contract TestProvider is OnChainProvider {
-	event RecievedQuery(string query, bytes32 endpoint, bytes32[] params);
+    event RecievedQuery(string query, bytes32 endpoint, bytes32[] params);
 
     event TEST(uint res, bytes32 b, string s);
 
@@ -22,7 +22,7 @@ contract TestProvider is OnChainProvider {
     /* Endpoints to Functions:
     spec1: Hello? -> returns "Hello World"
     spec2: Reverse -> returns the query string in reverse
-    spec3: Add -> Adds up the values in endpointParams 
+    spec3: Add -> Adds up the values in endpointParams
     */
 
     // curve 2x^2
@@ -31,7 +31,7 @@ contract TestProvider is OnChainProvider {
     RegistryInterface registry;
 
     // middleware function for handling queries
-	function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external {
+    function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external {
         emit RecievedQuery(userQuery, endpoint, endpointParams);
         if(AM_A_BAD_ORACLE) return;
         bytes32 _endpoint = endpoint;
@@ -40,7 +40,7 @@ contract TestProvider is OnChainProvider {
 
             if(hash == keccak256(abi.encodePacked(spec1))){
                 endpoint1(id, userQuery, endpointParams);
-            } else if (hash == keccak256(abi.encodePacked(spec2))){               
+            } else if (hash == keccak256(abi.encodePacked(spec2))){
                 endpoint2(id, userQuery, endpointParams);
             } else if (hash == keccak256(abi.encodePacked(spec3))){
                 endpoint3(id, userQuery, endpointParams);
@@ -50,7 +50,7 @@ contract TestProvider is OnChainProvider {
                 revert("Invalid endpoint");
             }
         } // else: Do nothing (onchain only)
-	}
+    }
 
     constructor(address registryAddress, bool isBad) public{
         registry = RegistryInterface(registryAddress);
@@ -133,33 +133,32 @@ contract TestProvider is OnChainProvider {
 contract TestClient is Client1, Client2{
 
     event MadeQuery(address oracle, string query, uint256 id);
-	event Result1(uint256 id, string response1);
+    event Result1(uint256 id, string response1);
     event Result1(uint256 id, bytes32 response1);
     event Result2(uint256 id, string response1, string response2);
 
-	ERC20 token;
-	DispatchInterface dispatch;
-	BondageInterface bondage;
+    ERC20 token;
+    DispatchInterface dispatch;
+    BondageInterface bondage;
     RegistryInterface registry;
 
-	constructor(address tokenAddress, address dispatchAddress, address bondageAddress, address registryAddress) public {
-		token = ERC20(tokenAddress);
-		dispatch = DispatchInterface(dispatchAddress);
-		bondage = BondageInterface(bondageAddress);
+    constructor(address tokenAddress, address dispatchAddress, address bondageAddress, address registryAddress) public {
+        token = ERC20(tokenAddress);
+        dispatch = DispatchInterface(dispatchAddress);
+        bondage = BondageInterface(bondageAddress);
         registry = RegistryInterface(registryAddress);
-	}
+    }
 
     /*
     Implements overloaded callback functions for Client1
     */
     function callback(uint256 id, string response1) external {
-    	string memory _response1 = response1;
-    	emit Result1(id, _response1);
+        string memory _response1 = response1;
+        emit Result1(id, _response1);
         // do something with result
     }
 
     function callback(uint256 id, bytes32[] response) external {
-
         emit Result1(id, response[0]);
         // do something with result
     }
@@ -171,20 +170,20 @@ contract TestClient is Client1, Client2{
     }
 
     function testQuery(address oracleAddr, string query, bytes32 specifier, bytes32[] params) external returns (uint256) {
-    	uint256 id = dispatch.query(oracleAddr, query, specifier, params);
+        uint256 id = dispatch.query(oracleAddr, query, specifier, params);
         emit MadeQuery(oracleAddr, query, id);
         return id;
     }
 
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
-    	bytes memory tempEmptyStringTest = bytes(source);
+        bytes memory tempEmptyStringTest = bytes(source);
 
-    	if (tempEmptyStringTest.length == 0) {
-    		return 0x0;
-    	}
-    	assembly {
-    		result := mload(add(source, 32))
-    	}
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+        assembly {
+            result := mload(add(source, 32))
+        }
     }
 
     // attempts to cancel an existing query

@@ -61,7 +61,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     /// @param params arbitrary params to be passed
     function passParams(address receiver, bytes32 endpoint, bytes32[] params) public {
 
-        emit ParamsPassed(msg.sender, receiver, endpoint, params);    
+        emit ParamsPassed(msg.sender, receiver, endpoint, params);
     }
 
     /// @dev subscribe to specified number of blocks of provider
@@ -76,9 +76,9 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
         bytes32[] endpointParams,  //
         uint256 publicKey,         // Public key of the purchaser
         uint64 blocks              //
-    ) 
-        public 
-    {   
+    )
+        public
+    {
         // Must be atleast one block
         require(blocks > 0, "Error: Must be at least one block");
 
@@ -87,7 +87,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
 
         // Escrow the necessary amount of dots
         bondage.escrowDots(msg.sender, providerAddress, endpoint, blocks);
-        
+
         // Initiate the subscription struct
         setSubscription(
             providerAddress,
@@ -122,17 +122,17 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     }
 
     /// @dev Finish the data feed from the provider
-    function endSubscriptionProvider(        
+    function endSubscriptionProvider(
         address subscriberAddress,
         bytes32 endpoint
     )
-        public 
+        public
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(msg.sender, subscriberAddress, endpoint))
             emit DataSubscriptionEnd(
-                msg.sender, 
-                subscriberAddress, 
+                msg.sender,
+                subscriberAddress,
                 SubscriptionTerminator.Provider
             );
     }
@@ -142,7 +142,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
         address providerAddress,
         bytes32 endpoint
     )
-        public 
+        public
     {
         // Emit an event on success about who ended the contract
         if (endSubscription(providerAddress, msg.sender, endpoint))
@@ -154,14 +154,14 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     }
 
     /// @dev Finish the data feed
-    function endSubscription(        
+    function endSubscription(
         address providerAddress,
         address subscriberAddress,
         bytes32 endpoint
     )
         private
         returns (bool)
-    {   
+    {
         // get the total value/block length of this subscription
         uint256 dots = getDots(providerAddress, subscriberAddress, endpoint);
         uint256 preblockend = getPreBlockEnd(providerAddress, subscriberAddress, endpoint);
@@ -199,7 +199,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
         // Kill the subscription
         deleteSubscription(providerAddress, subscriberAddress, endpoint);
         return true;
-    }    
+    }
 
 
     /*** --- *** STORAGE METHODS *** --- ***/
@@ -286,4 +286,3 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     * 'totalIssued', oracleAddress, endpoint => {uint256} number of dots issued by this endpoint
     * 'holders', holderAddress, 'oracleList' => {address[]} array of oracle addresses associated with this holder
     ****************************************************************************************/
-

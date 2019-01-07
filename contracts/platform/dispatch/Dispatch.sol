@@ -5,11 +5,11 @@ import "../../lib/ownership/Upgradable.sol";
 import "../../lib/lifecycle/Destructible.sol";
 import "../../lib/platform/Client.sol";
 import "../../lib/platform/OnChainProvider.sol";
-import "../bondage/BondageInterface.sol"; 
+import "../bondage/BondageInterface.sol";
 import "./DispatchInterface.sol";
 import "../database/DatabaseInterface.sol";
 
-contract Dispatch is Destructible, DispatchInterface, Upgradable { 
+contract Dispatch is Destructible, DispatchInterface, Upgradable {
 
     enum Status { Pending, Fulfilled, Canceled }
 
@@ -113,7 +113,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         address provider,           // data provider address
         string userQuery,           // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
-        bytes32[] endpointParams   // endpoint-specific params
+        bytes32[] endpointParams    // endpoint-specific params
         )
         external
         returns (uint256 id)
@@ -129,7 +129,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
 
             createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
             if(onchainProvider) {
-                OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams, onchainSubscriber); 
+                OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams, onchainSubscriber);
             } else{
                 emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams, onchainSubscriber);
             }
@@ -148,7 +148,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         address subscriber = getSubscriber(id);
         address provider = getProvider(id);
         bytes32 endpoint = getEndpoint(id);
-        
+
         if ( status == Status.Canceled ) {
             uint256 canceled = getCancel(id);
 
@@ -367,7 +367,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         uint res = db.getNumber(keccak256(abi.encodePacked('queries', id, 'onchainSubscriber')));
         return res == 1 ? true : false;
     }
- 
+
     /**** Set Methods ****/
     function createQuery(
         uint256 id,
@@ -376,7 +376,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         bytes32 endpoint,
         string userQuery,
         bool onchainSubscriber
-    ) 
+    )
         private
     {
         db.setNumber(keccak256(abi.encodePacked('queries', id, 'provider')), uint256(provider));
@@ -398,7 +398,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         }
         else {
             db.setNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')), 0);
-            db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Pending));            
+            db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Pending));
         }
     }
 
@@ -420,7 +420,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
 /*
 /* Dots are moved from ZapBondage escrow to data-provider's bond Holder struct,
 /* with data provider address set as self's address.
-/*/ 
+/*/
 
 /*************************************** STORAGE ****************************************
 * 'queries', id, 'provider' => {address} address of provider that this query was sent to
