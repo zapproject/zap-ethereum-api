@@ -86,6 +86,7 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.bond(oracle, specifier, dotBound, {from: subscriber});
     });
 
+
     it("BONDAGE_2 - bond() - Check that we can't bond oracle with unregistered provider", async function () {
         await prepareTokens.call(this.test);
         await expect(this.test.bondage.bond(oracle, specifier, 1, {from: subscriber})).to.be.eventually.rejectedWith(EVMRevert);
@@ -420,7 +421,7 @@ contract('Bondage', function (accounts) {
         let testBroker = oracle;
         await this.test.registry.initiateProvider(publicKey, title, { from: oracle });
         await this.test.registry.initiateProviderCurve(specifier, piecewiseFunction, testBroker, { from: oracle });
- 
+
         let savedBroker = await this.test.registry.getEndpointBroker(oracle, specifier, { from: oracle });
 
         // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
@@ -447,6 +448,15 @@ contract('Bondage', function (accounts) {
         await expect(this.test.bondage.bond(oracle, specifier, 3, {from: subscriber})).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
+    it("BONDAGE_26 - bond() - Check registry.clearEndpoint cannot be applied to a bonded curve", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, dotBound, {from: subscriber});
+
+        await expect(this.test.registry.clearEndpoint( specifier, {from: oracle})).to.eventually.be.rejectedWith(EVMRevert);
+    });
 
 
 
