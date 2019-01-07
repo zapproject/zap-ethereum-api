@@ -7,13 +7,13 @@
 
 ## Running tests
 
-To run all tests run
+To execute all tests:
 
 ```
 $ npm run test
 ```
 
-To run a particular test run
+To execute a particular test:
 
 ```
 $ npm run develop
