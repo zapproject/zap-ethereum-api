@@ -65,6 +65,8 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
         // Can't reset their curve
         require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
+        // Can't initiate null endpoint
+        require(endpoint != bytes32(0), "Error: Can't initiate null endpoint");
 
         setCurve(msg.sender, endpoint, curve);        
         db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
@@ -111,6 +113,34 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         require(!getCurveUnset(msg.sender, endpoint), "Error: Curve is not yet set");
 
         db.setBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpointParams', endpoint)), endpointParams);
+    }
+
+    //Set title for registered provider account
+    function setProviderTitle(bytes32 title) public {
+
+        require(isProviderInitiated(msg.sender), "Error: Provider is not initiated");
+        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, "title")), title);
+    }
+
+    //Clear an endpoint with no bonds
+    function clearEndpoint(bytes32 endpoint) public {
+
+        require(isProviderInitiated(msg.sender), "Error: Provider is not initiated");
+
+        uint256 bound = db.getNumber(keccak256(abi.encodePacked('totalBound', msg.sender, endpoint)));
+        require(bound == 0, "Error: Endpoint must have no bonds");
+
+        int256[] memory nullArray = new int256[](0);
+        bytes32[] memory endpoints =  db.getBytesArray(keccak256(abi.encodePacked("oracles", msg.sender, "endpoints")));
+        for(uint256 i = 0; i < endpoints.length; i++) {
+            if( endpoints[i] == endpoint ) {
+               db.setBytesArrayIndex(keccak256(abi.encodePacked("oracles", msg.sender, "endpoints")), i, bytes32(0));
+               break; 
+            }
+        }
+        db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), bytes32(0));
+        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(0));
+        db.setIntArray(keccak256(abi.encodePacked('oracles', msg.sender, 'curves', endpoint)), nullArray);
     }
 
     /// @return public key

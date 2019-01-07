@@ -75,7 +75,6 @@ contract('Registry', async (accounts) => {
         await expect(this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
     });
 
-    it("REGISTRY_5 - initiateProviderCurve() - Check that we can't initiate provider curve if passing in invalid curve arguments ", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
 
         await expect(this.test.registry.initiateProviderCurve(specifier, [3, 0, 0, 0, 5, 100], emptyBroker, { from: owner }))
@@ -181,5 +180,36 @@ contract('Registry', async (accounts) => {
         console.log('broker: ', savedBroker); 
         expect(savedBroker).to.be.equal(testBroker);
     });
+
+
+    it("REGISTRY_17 -clearEndpoint() - Check that provider can clear endpoint with no bonds", async function () {
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner });
+        await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
+
+        let endpoints0 = await this.test.registry.getProviderEndpoints(owner, {from:owner});
+
+        await this.test.registry.clearEndpoint(specifier, {from: owner});
+
+        let endpoints1 = await this.test.registry.getProviderEndpoints(owner, {from:owner});
+        expect(endpoints0[0] != endpoints1[0]);
+    
+    });
+
+
+    it("REGISTRY_18 -setProviderTitle() - Check that provider can change their title", async function () {
+
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner });
+   
+        let title0 = await this.test.registry.getProviderTitle(owner, {from: owner}); 
+        
+        await this.test.registry.setProviderTitle('testRandom2341143', {from: owner});
+
+        let title1 = await this.test.registry.getProviderTitle(owner, {from: owner}); 
+
+        console.log(title0, title1); 
+
+    });
+
+
 
 });
