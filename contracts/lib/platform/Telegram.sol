@@ -14,8 +14,8 @@ contract Telegram is OnChainProvider {
     RegistryInterface registry;
 
     // middleware function for handling queries
-	function receive(uint256 /* id */, string /* userQuery */, bytes32 /* endpoint */, bytes32[] /* endpointParams */, bool /* onchainSubscriber*/) external {
-	}
+    function receive(uint256 /* id */, string /* userQuery */, bytes32 /* endpoint */, bytes32[] /* endpointParams */, bool /* onchainSubscriber*/) external {
+    }
 
     constructor(address registryAddress) public{
         registry = RegistryInterface(registryAddress);

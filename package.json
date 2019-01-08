@@ -7,8 +7,9 @@
     "test": "test"
   },
   "scripts": {
-    "compile": "./node_modules/.bin/truffle compile",
-    "test": "./node_modules/.bin/truffle develop"
+    "compile": "truffle compile",
+    "develop": "truffle develop",
+    "test": "bash scripts/test.sh"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
     "ethjs": "^0.4.0",
+    "ganache-cli": "^6.2.5",
     "truffle": "^4.1.11",
     "truffle-hdwallet-provider": "0.0.5",
     "truffle-hdwallet-provider-privkey": "^0.2.0",

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 import "./FactoryTokenInterface.sol";
 
@@ -138,7 +138,6 @@ contract FactoryToken is FactoryTokenInterface {
         allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
         _burn(_from, _value);
     }
-
 
 
     /**

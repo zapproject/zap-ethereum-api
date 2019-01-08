@@ -1,4 +1,5 @@
 pragma solidity ^0.4.11;
+
 library SafeMath {
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a * b;
@@ -21,12 +22,14 @@ library SafeMath {
         return c;
     }
 }
+
 contract ERC20Basic {
     uint256 public totalSupply;
     function balanceOf(address who) public constant returns (uint256);
     function transfer(address to, uint256 value) public returns (bool);
     event Transfer(address indexed from, address indexed to, uint256 value);
 }
+
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
@@ -63,6 +66,7 @@ contract BasicToken is ERC20Basic {
         return balances[_owner];
     }
 }
+
 contract Ownable {
     address public owner;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
@@ -90,6 +94,7 @@ contract Ownable {
         owner = newOwner;
     }
 }
+
 contract StandardToken is ERC20, BasicToken {
     mapping (address => mapping (address => uint256)) allowed;
     /**
@@ -166,7 +171,7 @@ contract MintableToken is StandardToken, Ownable {
         require(!mintingFinished);
         _;
     }
-    
+
     /**
      * @dev Function to mint tokens
      * @param _to The address that will receive the minted tokens.
@@ -180,7 +185,7 @@ contract MintableToken is StandardToken, Ownable {
         emit Transfer(0x0, _to, _amount);
         return true;
     }
-    
+
     /**
      * @dev Function to stop minting new tokens.
      * @return True if the operation was successful.
@@ -200,5 +205,4 @@ contract ZapToken is MintableToken {
     function allocate(address to, uint amount) public{
         mint(to,amount);
     }
-    
 }

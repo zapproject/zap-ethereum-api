@@ -39,8 +39,8 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         db = DatabaseInterface(databaseAddress);
         arbiterAddress = coordinator.getContract("ARBITER");
         dispatchAddress = coordinator.getContract("DISPATCH");
-        token = ERC20(coordinator.getContract("ZAP_TOKEN")); 
-        currentCost = CurrentCostInterface(coordinator.getContract("CURRENT_COST")); 
+        token = ERC20(coordinator.getContract("ZAP_TOKEN"));
+        currentCost = CurrentCostInterface(coordinator.getContract("CURRENT_COST"));
     }
 
     /// @dev will bond to an oracle
@@ -54,7 +54,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     function unbond(address oracleAddress, bytes32 endpoint, uint256 numDots) external returns (uint256 unbound) {
         unbound = _unbond(msg.sender, oracleAddress, endpoint, numDots);
         emit Unbound(msg.sender, oracleAddress, endpoint, numDots);
-    }        
+    }
 
     /// @dev will bond to an oracle on behalf of some holder
     /// @return total ZAP bound to oracle
@@ -63,17 +63,17 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         emit Bound(holderAddress, oracleAddress, endpoint, boundZap, numDots);
     }
 
-    /// @dev Move numDots dots from provider-requester to bondage according to 
+    /// @dev Move numDots dots from provider-requester to bondage according to
     /// data-provider address, holder address, and endpoint specifier (ala 'smart_contract')
     /// Called only by Dispatch or Arbiter Contracts
-    function escrowDots(        
+    function escrowDots(
         address holderAddress,
         address oracleAddress,
         bytes32 endpoint,
         uint256 numDots
     )
         external
-        operatorOnly        
+        operatorOnly
         returns (bool success)
     {
         uint256 boundDots = getBoundDots(holderAddress, oracleAddress, endpoint);
@@ -84,9 +84,9 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         return true;
     }
 
-    /// @dev Transfer N dots from fromAddress to destAddress. 
+    /// @dev Transfer N dots from fromAddress to destAddress.
     /// Called only by Disptach or Arbiter Contracts
-    /// In smart contract endpoint, occurs per satisfied request. 
+    /// In smart contract endpoint, occurs per satisfied request.
     /// In socket endpoint called on termination of subscription.
     function releaseDots(
         address holderAddress,
@@ -95,7 +95,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         uint256 numDots
     )
         external
-        operatorOnly 
+        operatorOnly
         returns (bool success)
     {
         uint256 numEscrowed = getNumEscrow(holderAddress, oracleAddress, endpoint);
@@ -106,9 +106,9 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         return true;
     }
 
-    /// @dev Transfer N dots from destAddress to fromAddress. 
+    /// @dev Transfer N dots from destAddress to fromAddress.
     /// Called only by Disptach or Arbiter Contracts
-    /// In smart contract endpoint, occurs per satisfied request. 
+    /// In smart contract endpoint, occurs per satisfied request.
     /// In socket endpoint called on termination of subscription.
     function returnDots(
         address holderAddress,
@@ -117,7 +117,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         uint256 numDots
     )
         external
-        operatorOnly 
+        operatorOnly
         returns (bool success)
     {
         uint256 numEscrowed = getNumEscrow(holderAddress, oracleAddress, endpoint);
@@ -134,8 +134,8 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     function calcZapForDots(
         address oracleAddress,
         bytes32 endpoint,
-        uint256 numDots       
-    ) 
+        uint256 numDots
+    )
         external
         view
         returns (uint256 numZap)
@@ -160,7 +160,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         return currentCost._currentCostOfDot(oracleAddress, endpoint, totalBound);
     }
 
-    /// @dev Get issuance limit of dots 
+    /// @dev Get issuance limit of dots
     /// @param endpoint specifier
     /// @param oracleAddress data-provider
     function dotLimit(
@@ -184,40 +184,39 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         address holderAddress,
         address oracleAddress,
         bytes32 endpoint,
-        uint256 numDots        
+        uint256 numDots
     )
         private
-        returns (uint256) 
-    {   
-
+        returns (uint256)
+    {
         address broker = getEndpointBroker(oracleAddress, endpoint);
 
         if( broker != address(0)){
             require(msg.sender == broker, "Error: Only the broker has access to this function");
         }
 
-        // This also checks if oracle is registered w/an initialized curve
+        // This also checks if oracle is registered w/ an initialized curve
         uint256 issued = getDotsIssued(oracleAddress, endpoint);
         require(issued + numDots <= dotLimit(oracleAddress, endpoint), "Error: Dot limit exceeded");
-        
+
         uint256 numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
 
         // User must have approved contract to transfer working ZAP
         require(token.transferFrom(msg.sender, this, numZap), "Error: User must have approved contract to transfer ZAP");
 
-        if (!isProviderInitialized(holderAddress, oracleAddress)) {            
+        if (!isProviderInitialized(holderAddress, oracleAddress)) {
             setProviderInitialized(holderAddress, oracleAddress);
             addHolderOracle(holderAddress, oracleAddress);
         }
 
-        updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");        
+        updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "add");
         updateTotalIssued(oracleAddress, endpoint, numDots, "add");
         updateTotalBound(oracleAddress, endpoint, numZap, "add");
 
         return numZap;
     }
 
-    function _unbond(        
+    function _unbond(
         address holderAddress,
         address oracleAddress,
         bytes32 endpoint,
@@ -228,7 +227,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     {
         address broker = getEndpointBroker(oracleAddress, endpoint);
 
-        if( broker != address(0)){
+        if (broker != address(0)) {
             require(msg.sender == broker, "Error: Only the broker has access to this function");
         }
 
@@ -312,7 +311,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 
     function updateBondValue(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots, bytes32 op) internal {
         uint256 bondValue = db.getNumber(keccak256(abi.encodePacked('holders', holderAddress, 'bonds', oracleAddress, endpoint)));
-        
+
         if (op == "sub") {
             bondValue -= numDots;
         } else if (op == "add") {
@@ -324,7 +323,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 
     function updateTotalBound(address oracleAddress, bytes32 endpoint, uint256 numZap, bytes32 op) internal {
         uint256 totalBound = db.getNumber(keccak256(abi.encodePacked('totalBound', oracleAddress, endpoint)));
-        
+
         if (op == "sub"){
             totalBound -= numZap;
         } else if (op == "add") {
@@ -333,13 +332,13 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         else {
             revert();
         }
-        
+
         db.setNumber(keccak256(abi.encodePacked('totalBound', oracleAddress, endpoint)), totalBound);
     }
 
     function updateTotalIssued(address oracleAddress, bytes32 endpoint, uint256 numDots, bytes32 op) internal {
         uint256 totalIssued = db.getNumber(keccak256(abi.encodePacked('totalIssued', oracleAddress, endpoint)));
-        
+
         if (op == "sub"){
             totalIssued -= numDots;
         } else if (op == "add") {
@@ -348,7 +347,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         else {
             revert();
         }
-    
+
         db.setNumber(keccak256(abi.encodePacked('totalIssued', oracleAddress, endpoint)), totalIssued);
     }
 }

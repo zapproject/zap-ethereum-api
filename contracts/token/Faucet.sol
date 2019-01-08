@@ -8,7 +8,7 @@ contract Token {
 contract Faucet {
     Token token;
     address public owner;
-    uint256 public rate = 1000; //1 ETH = 1000 ZAP
+    uint256 public rate = 1000; // 1 ETH = 1000 ZAP
     event BUYZAP(address indexed _buyer, uint256 indexed _amount, uint indexed _rate);
 
     // 1: 1000 ratio
