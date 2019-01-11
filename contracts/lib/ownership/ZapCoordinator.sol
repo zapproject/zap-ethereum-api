@@ -1,11 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "./Ownable.sol";
 import "./Upgradable.sol";
 import "./ZapCoordinatorInterface.sol";
 import "../../platform/database/DatabaseInterface.sol";
 
-contract ZapCoordinator is Ownable, ZapCoordinatorInterface {
+contract ZapCoordinator is ZapCoordinatorInterface {
 
     event UpdatedContract(string name, address previousAddr, address newAddr);
     event UpdatedDependencies(uint timestamp, string contractName, address contractAddr);
