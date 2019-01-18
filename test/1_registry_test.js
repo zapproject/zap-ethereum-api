@@ -14,7 +14,7 @@ const CurrentCost = artifacts.require("CurrentCost");
 
 const Utils = require("./helpers/utils.js");
 
-function hex2a(hexx) { 
+function hex2a(hexx) {
     let hex = hexx.toString(); //force conversion
     let str = '';
     for (let i = 2; i < hex.length; i += 2) {
@@ -73,7 +73,6 @@ contract('Registry', async (accounts) => {
 
     it("REGISTRY_4 - initiateProviderCurve() - Check that we can't initiate provider curve if provider wasn't initiated", async function () {
         await expect(this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner })).to.eventually.be.rejectedWith(EVMRevert);
-    });
 
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
 
@@ -150,7 +149,6 @@ contract('Registry', async (accounts) => {
         await expect(this.test.registry.getProviderCurve.call(owner, specifier, { from: owner })).to.be.eventually.rejectedWith(EVMRevert);
     });
 
-
     it("REGISTRY_14 - setProviderParameter()/setEndpointParams() - Check that a non-owner cannot edit provider & endpoint parameters", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
@@ -177,10 +175,9 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProvider(publicKey, title, {from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, testBroker, { from: owner });
         const savedBroker = await this.test.registry.getEndpointBroker(owner, specifier);
-        console.log('broker: ', savedBroker); 
+        console.log('broker: ', savedBroker);
         expect(savedBroker).to.be.equal(testBroker);
     });
-
 
     it("REGISTRY_17 -clearEndpoint() - Check that provider can clear endpoint with no bonds", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
@@ -192,24 +189,17 @@ contract('Registry', async (accounts) => {
 
         let endpoints1 = await this.test.registry.getProviderEndpoints(owner, {from:owner});
         expect(endpoints0[0] != endpoints1[0]);
-    
     });
-
 
     it("REGISTRY_18 -setProviderTitle() - Check that provider can change their title", async function () {
-
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
-   
-        let title0 = await this.test.registry.getProviderTitle(owner, {from: owner}); 
-        
+
+        let title0 = await this.test.registry.getProviderTitle(owner, {from: owner});
+
         await this.test.registry.setProviderTitle('testRandom2341143', {from: owner});
 
-        let title1 = await this.test.registry.getProviderTitle(owner, {from: owner}); 
+        let title1 = await this.test.registry.getProviderTitle(owner, {from: owner});
 
-        console.log(title0, title1); 
-
+        console.log(title0, title1);
     });
-
-
-
 });
