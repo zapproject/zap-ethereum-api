@@ -29,7 +29,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         _;
     }
 
-    /// @dev Initialize Storage, Token, anc CurrentCost Contracts
+    /// @dev Initialize Storage, Token, and CurrentCost Contracts
     constructor(address c) Upgradable(c) public {
         _updateDependencies();
     }
@@ -353,7 +353,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 }
 
     /*************************************** STORAGE ****************************************
-    * 'holders', holderAddress, 'initialized', oracleAddress => {uint256} 1 -> provider-subscriber initialized, 0 -> not initialized 
+    * 'holders', holderAddress, 'initialized', oracleAddress => {uint256} 1 -> provider-subscriber initialized, 0 -> not initialized
     * 'holders', holderAddress, 'bonds', oracleAddress, endpoint => {uint256} number of dots this address has bound to this endpoint
     * 'oracles', oracleAddress, endpoint, 'broker' => {address} address of endpoint broker, 0 if none
     * 'escrow', holderAddress, oracleAddress, endpoint => {uint256} amount of Zap that have been escrowed

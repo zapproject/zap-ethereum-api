@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 contract Token {
     function transfer(address to, uint256 amount) public returns (bool);
@@ -19,7 +19,7 @@ contract Faucet {
     }
 
     constructor(address _token) public {
-        owner=msg.sender;
+        owner = msg.sender;
         token = Token(_token);
     }
 
