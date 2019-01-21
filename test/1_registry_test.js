@@ -39,7 +39,6 @@ contract('Registry', async (accounts) => {
     beforeEach(async function deployContracts() {
         // Deploy initial contracts
         this.currentTest.coord = await ZapCoordinator.new();
-        const owner = await this.currentTest.coord.owner();
         this.currentTest.db = await Database.new();
         await this.currentTest.db.transferOwnership(this.currentTest.coord.address);
         await this.currentTest.coord.addImmutableContract('DATABASE', this.currentTest.db.address);
@@ -55,7 +54,7 @@ contract('Registry', async (accounts) => {
     });
 
     it("REGISTRY_1 - initiateProvider() - Check that we can initiate provider", async function () {
-        await this.test.registry.initiateProvider(publicKey, title, {from: owner });
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner });
     });
 
     it("REGISTRY_2 - initiateProvider() - Check that we can't change provider info if it was initated", async function () {
@@ -94,8 +93,8 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
         const val_a = web3utils.padLeft(web3utils.asciiToHex("World"), 64);
         const val_b = web3utils.padLeft(web3utils.asciiToHex("Orange"), 64);
-        await this.test.registry.setProviderParameter("Hello", val_a, {from: owner});
-        await this.test.registry.setProviderParameter("Apple", val_b, {from: owner});
+        await this.test.registry.setProviderParameter("Hello", val_a, { from: owner });
+        await this.test.registry.setProviderParameter("Apple", val_b, { from: owner });
 
         const a = await this.test.registry.getProviderParameter(owner, "Hello");
         const b = await this.test.registry.getProviderParameter(owner, "Apple");
@@ -131,7 +130,7 @@ contract('Registry', async (accounts) => {
     });
 
     it("REGISTRY_12 - getProviderCurve() - Check that we initialize and get provider curve", async function () {
-        await this.test.registry.initiateProvider(publicKey, title, {from: owner });
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
         const x = await this.test.registry.getProviderCurve(owner, specifier);
 
@@ -172,7 +171,7 @@ contract('Registry', async (accounts) => {
     it("REGISTRY_16 - getEndpointBroker() - Check that broker address can be saved and retreived", async function () {
 
         let testBroker = owner;
-        await this.test.registry.initiateProvider(publicKey, title, {from: owner });
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, testBroker, { from: owner });
         const savedBroker = await this.test.registry.getEndpointBroker(owner, specifier);
         console.log('broker: ', savedBroker);
@@ -183,22 +182,22 @@ contract('Registry', async (accounts) => {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
 
-        let endpoints0 = await this.test.registry.getProviderEndpoints(owner, {from:owner});
+        let endpoints0 = await this.test.registry.getProviderEndpoints(owner, { from: owner });
 
-        await this.test.registry.clearEndpoint(specifier, {from: owner});
+        await this.test.registry.clearEndpoint(specifier, { from: owner });
 
-        let endpoints1 = await this.test.registry.getProviderEndpoints(owner, {from:owner});
+        let endpoints1 = await this.test.registry.getProviderEndpoints(owner, { from: owner });
         expect(endpoints0[0] != endpoints1[0]);
     });
 
     it("REGISTRY_18 -setProviderTitle() - Check that provider can change their title", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
 
-        let title0 = await this.test.registry.getProviderTitle(owner, {from: owner});
+        let title0 = await this.test.registry.getProviderTitle(owner, { from: owner });
 
-        await this.test.registry.setProviderTitle('testRandom2341143', {from: owner});
+        await this.test.registry.setProviderTitle('testRandom2341143', { from: ownerj});
 
-        let title1 = await this.test.registry.getProviderTitle(owner, {from: owner});
+        let title1 = await this.test.registry.getProviderTitle(owner, { from: owner });
 
         console.log(title0, title1);
     });
