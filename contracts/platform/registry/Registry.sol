@@ -117,14 +117,12 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
 
     //Set title for registered provider account
     function setProviderTitle(bytes32 title) public {
-
         require(isProviderInitiated(msg.sender), "Error: Provider is not initiated");
         db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, "title")), title);
     }
 
     //Clear an endpoint with no bonds
     function clearEndpoint(bytes32 endpoint) public {
-
         require(isProviderInitiated(msg.sender), "Error: Provider is not initiated");
 
         uint256 bound = db.getNumber(keccak256(abi.encodePacked('totalBound', msg.sender, endpoint)));
@@ -135,7 +133,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         for(uint256 i = 0; i < endpoints.length; i++) {
             if( endpoints[i] == endpoint ) {
                db.setBytesArrayIndex(keccak256(abi.encodePacked("oracles", msg.sender, "endpoints")), i, bytes32(0));
-               break; 
+               break;
             }
         }
         db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), bytes32(0));

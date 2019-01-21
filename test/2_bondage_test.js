@@ -30,7 +30,7 @@ contract('Bondage', function (accounts) {
 
     const specifier = "test-specifier";
     const zeroAddress = Utils.ZeroAddress;
-    
+
     const piecewiseFunction = [3, 0, 0, 2, 10000];
     const broker = 0;
 
@@ -74,7 +74,7 @@ contract('Bondage', function (accounts) {
 
         // Hack for making arbiter an account we control for testing the escrow
         await this.currentTest.coord.addImmutableContract('ARBITER', accounts[3]);
-        
+
         await this.currentTest.coord.updateAllDependencies({ from: owner });
     });
 
@@ -121,7 +121,6 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_6 - calcZapForDots() - Check that function revert if curve not intialized", async function () {
-
         //prepareProvider.call(this.test, true, false);
         await this.test.registry.initiateProvider(publicKey, title, { from: oracle });
         await expect(this.test.bondage.calcZapForDots.call(oracle, specifier, 5)).to.be.eventually.rejectedWith(EVMRevert);
@@ -152,7 +151,6 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_8 - getBoundDots() - Check received dots getting", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -246,10 +244,10 @@ contract('Bondage', function (accounts) {
     it("BONDAGE_14 - escrowDots() - Check that operator can't escrow dots from oracle that haven't got enough dots", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
 
         /// we will get 0 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 0, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 0, { from: subscriber });
 
         const dots = 0;
         const dotsForEscrow = 2;
@@ -261,10 +259,10 @@ contract('Bondage', function (accounts) {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
 
         // we will get 3 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 3, { from: subscriber });
 
         const dots = 3;
         const dotsForEscrow = 2;
@@ -292,10 +290,10 @@ contract('Bondage', function (accounts) {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
 
         // we will get 3 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 3, { from: subscriber });
 
         const dots = 3;
         const dotsForEscrow = 2;
@@ -310,12 +308,12 @@ contract('Bondage', function (accounts) {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
 
         // we will get 3 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 3, { from: subscriber });
         // get another dot
-        await this.test.bondage.bond(oracle, specifier, 1, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 1, { from: subscriber });
 
         const issuedDots = await this.test.bondage.getDotsIssued.call(oracle, specifier);
         await expect(parseInt(issuedDots.valueOf())).to.be.equal(4);
@@ -325,14 +323,14 @@ contract('Bondage', function (accounts) {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
 
         // we will get 3 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 3, { from: subscriber });
         // and another to get 4 dots total
-        await this.test.bondage.bond(oracle, specifier, 1, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 1, { from: subscriber });
 
-        await this.test.bondage.unbond(oracle, specifier, 1, {from: subscriber});
+        await this.test.bondage.unbond(oracle, specifier, 1, { from: subscriber });
 
         const issuedDots = await this.test.bondage.getDotsIssued.call(oracle, specifier);
         await expect(parseInt(issuedDots.valueOf())).to.be.equal(3);
@@ -342,26 +340,26 @@ contract('Bondage', function (accounts) {
 
          await prepareProvider.call(this.test);
          await prepareTokens.call(this.test);
-         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+         await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
 
-         await expect(this.test.bondage.bond(oracle, specifier, approveTokens, {from: subscriber})).to.be.eventually.be.rejectedWith(EVMRevert);
+         await expect(this.test.bondage.bond(oracle, specifier, approveTokens, { from: subscriber })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("BONDAGE_20 - delegateBond() - Check that delegate bond can be executed", async function () {
-        await prepareProvider.call(this.test);      
+        await prepareProvider.call(this.test);
         await prepareTokens.call(this.test, accounts[4]);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: accounts[4]});
 
-        await this.test.bondage.delegateBond(subscriber, oracle, specifier, dotBound, {from: accounts[4]});
+        await this.test.bondage.delegateBond(subscriber, oracle, specifier, dotBound, { from: accounts[4] });
     });
 
     it("BONDAGE_21 - returnDots() - Check that dots can be returned", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we will get 3 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 3, { from: subscriber });
 
         const dots = 3;
         const dotsForEscrow = 2;
@@ -383,7 +381,7 @@ contract('Bondage', function (accounts) {
     it("BONDAGE_22 - returnDots() - Check that more dots can't be returned than already escrowed", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we will get 3 dots with current curve
         await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
@@ -399,10 +397,10 @@ contract('Bondage', function (accounts) {
     it("BONDAGE_23 - returnDots() - Check that more dots can't be called by someone who isn't the owner", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
 
         // we will get 3 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 3, { from: subscriber });
 
         const dots = 3;
         const dotsForEscrow = 2;
@@ -416,7 +414,7 @@ contract('Bondage', function (accounts) {
 
 
         await this.test.token.allocate(oracle, tokensForOwner, { from: owner });
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: oracle});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: oracle });
 
         let testBroker = oracle;
         await this.test.registry.initiateProvider(publicKey, title, { from: oracle });
@@ -425,42 +423,38 @@ contract('Bondage', function (accounts) {
         let savedBroker = await this.test.registry.getEndpointBroker(oracle, specifier, { from: oracle });
 
         // with current linear curve (startValue = 1, multiplier = 2) number of dots received should be equal to 5
-        await this.test.bondage.bond(oracle, specifier, 3, {from: oracle});
+        await this.test.bondage.bond(oracle, specifier, 3, { from: oracle });
 
         const res = await this.test.bondage.getZapBound.call(oracle, specifier, { from: oracle });
         const receivedTok = parseInt(res.valueOf());
 
         await expect(receivedTok).to.be.equal(28);
-
     });
 
 
     it("BONDAGE_25 - bond() - Check that nonbroker cannot bond to broker endpoint", async function () {
 
         await this.test.token.allocate(subscriber, tokensForOwner, { from: owner });
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
 
         await this.test.registry.initiateProvider(publicKey, title, { from: oracle });
         await this.test.registry.initiateProviderCurve(specifier, piecewiseFunction, oracle, { from: oracle });
 
         let savedBroker = await this.test.registry.getEndpointBroker(oracle, specifier, { from: subscriber });
 
-        await expect(this.test.bondage.bond(oracle, specifier, 3, {from: subscriber})).to.be.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.bondage.bond(oracle, specifier, 3, { from: subscriber })).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("BONDAGE_26 - bond() - Check registry.clearEndpoint cannot be applied to a bonded curve", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
 
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
-        await this.test.bondage.bond(oracle, specifier, dotBound, {from: subscriber});
+        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
+        await this.test.bondage.bond(oracle, specifier, dotBound, { from: subscriber });
 
-        await expect(this.test.registry.clearEndpoint( specifier, {from: oracle})).to.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.registry.clearEndpoint( specifier, { from: oracle })).to.eventually.be.rejectedWith(EVMRevert);
     });
-
-
-
-}); 
+});
 
 
 contract('CurrentCost', function (accounts) {
@@ -523,7 +517,7 @@ contract('CurrentCost', function (accounts) {
         // Deploy current cost
         this.currentTest.cost = await Cost.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('CURRENT_COST', this.currentTest.cost.address);
-        
+
         await this.currentTest.coord.updateAllDependencies({ from: owner });
     });
 

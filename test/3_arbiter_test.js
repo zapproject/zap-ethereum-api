@@ -32,7 +32,7 @@ contract('Arbiter', function (accounts) {
 
     // test function: 2x^2
     const piecewiseFunction = [3, 0, 0, 2, 10000];
-    
+
     const tokensForOwner = new BigNumber("1500e18");
     const tokensForSubscriber = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
@@ -195,7 +195,7 @@ contract('Arbiter', function (accounts) {
 
         await expect(this.test.arbiter.endSubscriptionProvider(subscriber, specifier, {from: accounts[7]})).to.eventually.be.rejectedWith(EVMRevert);
     });
-    
+
     it("ARBITER_10 - endSubscriptionProvider() - Check that subscriber receives any unused dots", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -213,7 +213,7 @@ contract('Arbiter', function (accounts) {
         await expect(parseInt(res[0].valueOf())).to.be.equal(10);
 
         const bondageEvents = this.test.bondage.allEvents({ fromBlock: 0, toBlock: 'latest' });
-        bondageEvents.watch((err, res) => { }); 
+        bondageEvents.watch((err, res) => { });
 
         var mine = function() {
             return new Promise((resolve, reject) => {
