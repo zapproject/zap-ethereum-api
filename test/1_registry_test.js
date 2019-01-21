@@ -1,6 +1,5 @@
 import EVMRevert from './helpers/EVMRevert';
 
-const BigNumber = web3.BigNumber;
 const web3utils = require("web3-utils");
 
 const expect = require('chai')
@@ -195,7 +194,7 @@ contract('Registry', async (accounts) => {
 
         let title0 = await this.test.registry.getProviderTitle(owner, { from: owner });
 
-        await this.test.registry.setProviderTitle('testRandom2341143', { from: ownerj});
+        await this.test.registry.setProviderTitle('testRandom2341143', { from: owner });
 
         let title1 = await this.test.registry.getProviderTitle(owner, { from: owner });
 

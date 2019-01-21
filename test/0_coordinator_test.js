@@ -1,10 +1,7 @@
 import EVMRevert from './helpers/EVMRevert';
 
-const BigNumber = web3.BigNumber;
-
 const should = require('chai')
           .use(require('chai-as-promised'))
-          .use(require('chai-bignumber')(web3.BigNumber))
           .should();
 
 const ZapCoordinator = artifacts.require("ZapCoordinator");
