@@ -13,10 +13,6 @@ contract Database is Ownable, DatabaseInterface {
     mapping (bytes32 => address[]) data_addressArray;
     mapping (address => bool) allowed;
 
-    constructor() public {
-
-    }
-
     modifier storageOnly {
         require(allowed[msg.sender], "Error: Access not allowed to storage");
         _;
