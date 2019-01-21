@@ -15,8 +15,6 @@ const CurrentCost = artifacts.require("CurrentCost");
 const Utils = require("./helpers/utils.js");
 
 contract('ZapCoordinator', async (accounts) => {
-    const owner = accounts[0];
-
     beforeEach(async function deployContracts() {
         // Deploy initial contracts
         this.currentTest.coord = await ZapCoordinator.new();
