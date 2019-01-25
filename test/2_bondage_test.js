@@ -45,9 +45,9 @@ contract('Bondage', function (accounts) {
     }
 
     async function prepareTokens(allocAddress = subscriber) {
-        await this.token.allocate(owner, tokensForOwner, { from: owner });
-        await this.token.allocate(allocAddress, tokensForSubscriber, { from: owner });
-        await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
+        await this.token.allocate(owner, tokensForOwner, { from: owner }).should.be.fulfilled;
+        await this.token.allocate(allocAddress, tokensForSubscriber, { from: owner }).should.be.fulfilled;
+        await this.token.approve(this.bondage.address, approveTokens, {from: subscriber}).should.be.fulfilled;
     }
 
     beforeEach(async function deployContracts() {
@@ -102,8 +102,8 @@ contract('Bondage', function (accounts) {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
 
-        await this.test.bondage.bond(oracle, specifier, 1, {from: subscriber});
-        await this.test.bondage.unbond(oracle, specifier, 1, {from: subscriber});
+        await this.test.bondage.bond(oracle, specifier, 1, {from: subscriber}).should.be.fulfilled;
+        await this.test.bondage.unbond(oracle, specifier, 1, {from: subscriber}).should.be.fulfilled;
     });
 
     it("BONDAGE_5 - calcZapForDots() - Check zap for dots calculating", async function () {

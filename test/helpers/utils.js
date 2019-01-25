@@ -19,7 +19,6 @@ exports.fetchPureArray = function (res, parseFunc) {
     return arr;
 };
 
-
 exports.structurizeCurve = function (parts) {
     const pieces = Array();
 
@@ -61,7 +60,7 @@ exports.calcNextDotCost = function (structurizedCurve, total) {
 
 exports.calcDotsCost = function (structurizedCurve, numDots) {
     let cost = 0;
-    
+
     for (let i = 1; i <= numDots; i++) {
         cost += exports.calcNextDotCost(structurizedCurve, i);
     }

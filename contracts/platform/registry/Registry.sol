@@ -132,7 +132,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         int256[] memory nullArray = new int256[](0);
         bytes32[] memory endpoints =  db.getBytesArray(keccak256(abi.encodePacked("oracles", msg.sender, "endpoints")));
         for(uint256 i = 0; i < endpoints.length; i++) {
-            if( endpoints[i] == endpoint ) {
+            if(endpoints[i] == endpoint) {
                db.setBytesArrayIndex(keccak256(abi.encodePacked("oracles", msg.sender, "endpoints")), i, bytes32(0));
                break;
             }
@@ -244,7 +244,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         uint index = 0;
 
         // Validate the curve
-        while ( index < curve.length ) {
+        while (index < curve.length) {
             // Validate the length of the piece
             int len = curve[index];
             require(len > 0, "Error: Invalid Curve");
