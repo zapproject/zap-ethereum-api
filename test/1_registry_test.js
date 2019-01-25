@@ -173,7 +173,7 @@ contract('Registry', async (accounts) => {
         savedBroker.should.equal(testBroker);
     });
 
-    it("REGISTRY_17 -clearEndpoint() - Check that provider can clear endpoint with no bonds", async function () {
+    it("REGISTRY_17 - clearEndpoint() - Check that provider can clear endpoint with no bonds", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
         await this.test.registry.initiateProviderCurve(specifier, curve, emptyBroker, { from: owner });
 
@@ -185,7 +185,7 @@ contract('Registry', async (accounts) => {
         endpoints0[0].should.not.equal(endpoints1[0]);
     });
 
-    it("REGISTRY_18 -setProviderTitle() - Check that provider can change their title", async function () {
+    it("REGISTRY_18 - setProviderTitle() - Check that provider can change their title", async function () {
         await this.test.registry.initiateProvider(publicKey, title, { from: owner });
 
         let title0 = await this.test.registry.getProviderTitle(owner, { from: owner });
