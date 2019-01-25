@@ -191,7 +191,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     {
         address broker = getEndpointBroker(oracleAddress, endpoint);
 
-        if( broker != address(0)){
+        if(broker != address(0)){
             require(msg.sender == broker, "Error: Only the broker has access to this function");
         }
 
