@@ -297,9 +297,9 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     function updateEscrow(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots, bytes32 op) internal {
         uint256 newEscrow = db.getNumber(keccak256(abi.encodePacked('escrow', holderAddress, oracleAddress, endpoint)));
 
-        if ( op == "sub" ) {
+        if (op == "sub") {
             newEscrow -= numDots;
-        } else if ( op == "add" ) {
+        } else if (op == "add") {
             newEscrow += numDots;
         }
         else {
