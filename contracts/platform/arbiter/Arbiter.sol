@@ -24,7 +24,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
         address indexed provider,                      // Provider from the subscription
         address indexed subscriber,                    // Subscriber from the subscription
         SubscriptionTerminator indexed terminator      // Which terminated the contract
-    ); 
+    );
 
     // Called when party passes arguments to another party
     event ParamsPassed(
@@ -60,7 +60,6 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     /// @param endpoint Endpoint specifier
     /// @param params arbitrary params to be passed
     function passParams(address receiver, bytes32 endpoint, bytes32[] params) public {
-
         emit ParamsPassed(msg.sender, receiver, endpoint, params);
     }
 
@@ -278,7 +277,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
 }
 
     /*************************************** STORAGE ****************************************
-    * 'holders', holderAddress, 'initialized', oracleAddress => {uint256} 1 -> provider-subscriber initialized, 0 -> not initialized 
+    * 'holders', holderAddress, 'initialized', oracleAddress => {uint256} 1 -> provider-subscriber initialized, 0 -> not initialized
     * 'holders', holderAddress, 'bonds', oracleAddress, endpoint => {uint256} number of dots this address has bound to this endpoint
     * 'oracles', oracleAddress, endpoint, 'broker' => {address} address of endpoint broker, 0 if none
     * 'escrow', holderAddress, oracleAddress, endpoint => {uint256} amount of Zap that have been escrowed
