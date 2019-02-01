@@ -40,13 +40,13 @@ contract('Bondage', function (accounts) {
     const dotBound = new BigNumber("999");
 
     async function prepareProvider(provider = true, curve = true, account = oracle, curveParams = piecewiseFunction, bondBroker = broker) {
-        if (provider) await this.registry.initiateProvider(publicKey, title, { from: account });
-        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, bondBroker, { from: account });
+        if (provider) await this.registry.initiateProvider(publicKey, title, {from: account});
+        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, bondBroker, {from: account});
     }
 
     async function prepareTokens(allocAddress = subscriber) {
-        await this.token.allocate(owner, tokensForOwner, { from: owner }).should.be.fulfilled;
-        await this.token.allocate(allocAddress, tokensForSubscriber, { from: owner }).should.be.fulfilled;
+        await this.token.allocate(owner, tokensForOwner, {from: owner}).should.be.fulfilled;
+        await this.token.allocate(allocAddress, tokensForSubscriber, {from: owner}).should.be.fulfilled;
         await this.token.approve(this.bondage.address, approveTokens, {from: subscriber}).should.be.fulfilled;
     }
 
@@ -125,7 +125,6 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_7 - unbond() - Check unbond zap for dots calculation", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -145,6 +144,31 @@ contract('Bondage', function (accounts) {
         final_balance.minus(bond_balance).should.be.bignumber.equal(web3.toBigNumber(100));
     });
 
+    it("BONDAGE_7_big - unbond() - Check unbond zap for dots calculation", async function () {
+        await prepareProvider.call(this.test);
+        await prepareTokens.call(this.test);
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
+
+        let balance = await this.test.token.balanceOf(subscriber);
+
+        // we will get 5 dots with current curve (n: [1-9999], p = 2n^2)
+        await this.test.bondage.bond(oracle, specifier, 9999, {from: subscriber});
+
+        const bond_balance = await this.test.token.balanceOf(subscriber);
+
+        // unbond three dots
+        await this.test.bondage.unbond(oracle, specifier, 3, {from: subscriber});
+        const final_balance = await this.test.token.balanceOf(subscriber);
+
+        // ghci> let f x = 2 * x ^ 2
+        // ghci> sum $ f <$> [1..9999]
+        // >>> 666566670000
+        // ghci> sum $ f <$> [9999,9998..9997]
+        // >>> 599760028
+        balance.minus(bond_balance).should.be.bignumber.equal(new BigNumber("666566670000"));
+        final_balance.minus(bond_balance).should.be.bignumber.equal(new BigNumber("599760028"));
+    });
+
     it("BONDAGE_8 - getBoundDots() - Check received dots getting", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
@@ -158,7 +182,6 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_9 - getBoundDots() - Check that number of dots of unbonded provider is 0", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -169,7 +192,6 @@ contract('Bondage', function (accounts) {
 
 
     it("BONDAGE_10 - getZapBound() - Check received ZAP getting", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -182,7 +204,6 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_11 - getZapBound() - Check that received ZAP of unbonded provider is 0", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
@@ -240,7 +261,6 @@ contract('Bondage', function (accounts) {
     });
 
     it("BONDAGE_15 - releaseDots() - Check that operator can release dots", async function () {
-
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
