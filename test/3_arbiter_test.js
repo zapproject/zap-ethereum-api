@@ -3,9 +3,9 @@ import EVMRevert from './helpers/EVMRevert';
 const BigNumber = web3.BigNumber;
 
 const expect = require('chai')
-.use(require('chai-as-promised'))
-.use(require('chai-bignumber')(BigNumber))
-.expect;
+    .use(require('chai-as-promised'))
+    .use(require('chai-bignumber')(BigNumber))
+    .expect;
 
 const Utils = require('./helpers/utils.js');
 
@@ -85,7 +85,7 @@ contract('Arbiter', function (accounts) {
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
 
         const res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(10));
     });
 
     it("ARBITER_2 - initiateSubscription() - Check subscription block must be more than 0", async function () {
@@ -107,7 +107,7 @@ contract('Arbiter', function (accounts) {
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
 
         const res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(10));
 
         await expect(this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 5, {from: subscriber})).to.eventually.be.rejectedWith(EVMRevert);
     });
@@ -121,12 +121,12 @@ contract('Arbiter', function (accounts) {
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
 
         let res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(10));
 
         await this.test.arbiter.endSubscriptionProvider(subscriber, specifier, {from: oracle});
 
         res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(0);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(0));
     });
 
     it("ARBITER_5 - endSubscriptionProvider() - Check that user can't end uninitialized subscription", async function () {
@@ -149,12 +149,12 @@ contract('Arbiter', function (accounts) {
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
 
         let res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(10));
 
         await this.test.arbiter.endSubscriptionSubscriber(oracle, specifier, {from: subscriber});
 
         res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(0);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(0));
     });
 
     it("ARBITER_7 - endSubscriptionSubscriber() - Check that user can't end uninitialized subscription", async function () {
@@ -177,7 +177,7 @@ contract('Arbiter', function (accounts) {
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
 
         let res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(10));
 
         await expect(this.test.arbiter.endSubscriptionSubscriber(oracle, specifier, {from: accounts[7]})).to.eventually.be.rejectedWith(EVMRevert);
     });
@@ -191,7 +191,7 @@ contract('Arbiter', function (accounts) {
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
 
         let res = await this.test.arbiter.getSubscription.call(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(10));
 
         await expect(this.test.arbiter.endSubscriptionProvider(subscriber, specifier, {from: accounts[7]})).to.eventually.be.rejectedWith(EVMRevert);
     });
@@ -210,7 +210,7 @@ contract('Arbiter', function (accounts) {
         expect(postEscrowBal.toString()).to.be.equal("90");
 
         let res = await this.test.arbiter.getSubscription(oracle, subscriber, specifier);
-        await expect(parseInt(res[0].valueOf())).to.be.equal(10);
+        res[0].should.be.bignumber.equal(web3.toBigNumber(10));
 
         const bondageEvents = this.test.bondage.allEvents({ fromBlock: 0, toBlock: 'latest' });
         bondageEvents.watch((err, res) => { });
