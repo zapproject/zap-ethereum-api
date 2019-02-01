@@ -115,9 +115,7 @@ contract('Bondage', function (accounts) {
         const structure = Utils.structurizeCurve(piecewiseFunction);
         const fun0Calc = Utils.calcDotsCost(structure, totalBound);
         const res0 = await this.test.bondage.calcZapForDots.call(accounts[5], specifier, totalBound);
-        const fun0Res = parseInt(res0.valueOf());
-
-        await expect(fun0Res).to.be.equal(fun0Calc);
+        res0.should.be.bignumber.equal(web3.toBigNumber(fun0Calc));
     });
 
     it("BONDAGE_6 - calcZapForDots() - Check that function revert if curve not intialized", async function () {
@@ -159,9 +157,7 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
 
         const res = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier, { from: subscriber });
-        const receivedDots = parseInt(res.valueOf());
-
-        await expect(receivedDots).to.be.equal(3);
+        res.should.be.bignumber.equal(web3.toBigNumber(3));
     });
 
     it("BONDAGE_9 - getBoundDots() - Check that number of dots of unbonded provider is 0", async function () {
@@ -171,9 +167,7 @@ contract('Bondage', function (accounts) {
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         const res = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier, { from: subscriber });
-        const receivedDots = parseInt(res.valueOf());
-
-        await expect(receivedDots).to.be.equal(0);
+        res.should.be.bignumber.equal(web3.toBigNumber(0));
     });
 
 
@@ -187,9 +181,7 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
 
         const res = await this.test.bondage.getZapBound.call(oracle, specifier, { from: subscriber });
-        const receivedTok = parseInt(res.valueOf());
-
-        await expect(receivedTok).to.be.equal(28);
+        res.should.be.bignumber.equal(web3.toBigNumber(28));
     });
 
     it("BONDAGE_11 - getZapBound() - Check that received ZAP of unbonded provider is 0", async function () {
@@ -199,15 +191,13 @@ contract('Bondage', function (accounts) {
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         const res = await this.test.bondage.getZapBound.call(oracle, specifier, { from: subscriber });
-        const receivedTok = parseInt(res.valueOf());
-
-        await expect(receivedTok).to.be.equal(0);
+        res.should.be.bignumber.equal(web3.toBigNumber(0));
     });
 
     it("BONDAGE_12 - escrowDots() - Check that operator can escrow dots", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber}); 
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we will get 3 dots with current curve
         await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
@@ -215,16 +205,13 @@ contract('Bondage', function (accounts) {
         const dots = 3;
         const dotsForEscrow = 2;
 
-        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
+        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, {from: accounts[3]});
 
-        const subscriberDotsRes = await this.test.bondage.getBoundDots(subscriber, oracle, specifier, { from: subscriber });
-        const subscriberDots = parseInt(subscriberDotsRes.valueOf());
+        const subscriberDots = await this.test.bondage.getBoundDots(subscriber, oracle, specifier, {from: subscriber});
+        subscriberDots.should.be.bignumber.equal(web3.toBigNumber(dots - dotsForEscrow));
 
-        const escrowDotsRes = await this.test.bondage.getNumEscrow(subscriber, oracle, specifier);
-        const escrowDots = parseInt(escrowDotsRes.valueOf());
-
-        await expect(subscriberDots).to.be.equal(dots - dotsForEscrow);
-        await expect(escrowDots).to.be.equal(dotsForEscrow);
+        const escrowDots = await this.test.bondage.getNumEscrow(subscriber, oracle, specifier);
+        escrowDots.should.be.bignumber.equal(web3.toBigNumber(dotsForEscrow));
     });
 
     it("BONDAGE_13 - escrowDots() - Check that not operator can't escrow dots", async function () {
@@ -252,38 +239,34 @@ contract('Bondage', function (accounts) {
         const dots = 0;
         const dotsForEscrow = 2;
 
-        await expect(this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] })).to.be.eventually.be.rejectedWith(EVMRevert);
+        await expect(this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, {from: accounts[3]})).to.be.eventually.be.rejectedWith(EVMRevert);
     });
 
     it("BONDAGE_15 - releaseDots() - Check that operator can release dots", async function () {
 
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, { from: subscriber });
+        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we will get 3 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 3, { from: subscriber });
+        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
 
         const dots = 3;
         const dotsForEscrow = 2;
 
         const forRelease = accounts[8];
 
-        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
-        await this.test.bondage.releaseDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
+        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, {from: accounts[3]});
+        await this.test.bondage.releaseDots(subscriber, oracle, specifier, dotsForEscrow, {from: accounts[3]});
 
-        const subscriberDotsRes = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier,);
-        const subscriberDots = parseInt(subscriberDotsRes.valueOf());
+        const subscriberDots = await this.test.bondage.getBoundDots.call(subscriber, oracle, specifier,);
+        subscriberDots.should.be.bignumber.equal(web3.toBigNumber(dots - dotsForEscrow));
 
-        const pendingDotsRes = await this.test.bondage.getNumEscrow.call(subscriber, oracle, specifier);
-        const pendingDots = parseInt(pendingDotsRes.valueOf());
+        const pendingDots = await this.test.bondage.getNumEscrow.call(subscriber, oracle, specifier);
+        pendingDots.should.be.bignumber.equal(web3.toBigNumber(0));
 
-        const releaseRes = await this.test.bondage.getBoundDots.call(oracle, oracle, specifier, { from: oracle });
-        const releaseDots = parseInt(releaseRes.valueOf());
-
-        await expect(subscriberDots).to.be.equal(dots - dotsForEscrow);
-        await expect(pendingDots).to.be.equal(0);
-        await expect(releaseDots).to.be.equal(dotsForEscrow);
+        const releaseDots = await this.test.bondage.getBoundDots.call(oracle, oracle, specifier, {from: oracle});
+        releaseDots.should.be.bignumber.equal(web3.toBigNumber(dotsForEscrow));
     });
 
     it("BONDAGE_16 - releaseDots() - Check that operator can't release dots if trying to release more dots than escrowed", async function () {
@@ -316,7 +299,7 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.bond(oracle, specifier, 1, { from: subscriber });
 
         const issuedDots = await this.test.bondage.getDotsIssued.call(oracle, specifier);
-        await expect(parseInt(issuedDots.valueOf())).to.be.equal(4);
+        issuedDots.should.be.bignumber.equal(web3.toBigNumber(4));
     });
 
     it("BONDAGE_18 - getDotsIssued() - Check that issued dots will decrease with every unbond", async function () {
@@ -333,7 +316,7 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.unbond(oracle, specifier, 1, { from: subscriber });
 
         const issuedDots = await this.test.bondage.getDotsIssued.call(oracle, specifier);
-        await expect(parseInt(issuedDots.valueOf())).to.be.equal(3);
+        issuedDots.should.be.bignumber.equal(web3.toBigNumber(3));
     });
 
     it("BONDAGE_19 - bond() - Check bond function", async function () {
@@ -359,23 +342,20 @@ contract('Bondage', function (accounts) {
         await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         // we will get 3 dots with current curve
-        await this.test.bondage.bond(oracle, specifier, 3, { from: subscriber });
+        await this.test.bondage.bond(oracle, specifier, 3, {from: subscriber});
 
         const dots = 3;
         const dotsForEscrow = 2;
         const dotsForReturn = 1;
 
-        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, { from: accounts[3] });
-        await this.test.bondage.returnDots(subscriber, oracle, specifier, dotsForReturn, { from: accounts[3] });
+        await this.test.bondage.escrowDots(subscriber, oracle, specifier, dotsForEscrow, {from: accounts[3]});
+        await this.test.bondage.returnDots(subscriber, oracle, specifier, dotsForReturn, {from: accounts[3]});
 
-        const subscriberDotsRes = await this.test.bondage.getBoundDots(subscriber, oracle, specifier, { from: subscriber });
-        const subscriberDots = parseInt(subscriberDotsRes.valueOf());
+        const subscriberDots = await this.test.bondage.getBoundDots(subscriber, oracle, specifier, {from: subscriber});
+        subscriberDots.should.be.bignumber.equal(web3.toBigNumber(dots - dotsForEscrow + dotsForReturn));
 
-        const escrowDotsRes = await this.test.bondage.getNumEscrow(subscriber, oracle, specifier);
-        const escrowDots = parseInt(escrowDotsRes.valueOf());
-
-        await expect(subscriberDots).to.be.equal(dots - dotsForEscrow + dotsForReturn);
-        await expect(escrowDots).to.be.equal(dotsForEscrow - dotsForReturn);
+        const escrowDots = await this.test.bondage.getNumEscrow(subscriber, oracle, specifier);
+        escrowDots.should.be.bignumber.equal(web3.toBigNumber(dotsForEscrow - dotsForReturn));
     });
 
     it("BONDAGE_22 - returnDots() - Check that more dots can't be returned than already escrowed", async function () {
@@ -426,9 +406,7 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.bond(oracle, specifier, 3, { from: oracle });
 
         const res = await this.test.bondage.getZapBound.call(oracle, specifier, { from: oracle });
-        const receivedTok = parseInt(res.valueOf());
-
-        await expect(receivedTok).to.be.equal(28);
+        res.should.be.bignumber.equal(web3.toBigNumber(28));
     });
 
 
@@ -480,8 +458,8 @@ contract('CurrentCost', function (accounts) {
     // 10 on [1, 1000]
     const curveParams3 = [1, 10, 1000];
 
-    // 10 on [1, 10]
-    // 20 on [10, 20]
+    // 1 + 2 x + 3 x ^ 2 on [1, 10]
+    // 2 on [10, 20]
     const curveParams4 = [3, 1, 2, 3, 10, 1, 2, 20];
 
     const tokensForOwner = new BigNumber("1500e18");
@@ -528,10 +506,8 @@ contract('CurrentCost', function (accounts) {
         const structure = Utils.structurizeCurve(curveParams1);
         const cost = Utils.calcNextDotCost(structure, dotNumber);
 
-        const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
-        const res = parseInt(_res.valueOf());
-
-        await expect(res).to.be.equal(cost);
+        const res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
+        res.should.be.bignumber.equal(web3.toBigNumber(cost));
     });
 
     it("CURRENT_COST_2 - _currentCostOfDot() - Check current cost for function 2", async function () {
@@ -541,10 +517,8 @@ contract('CurrentCost', function (accounts) {
         const structure = Utils.structurizeCurve(curveParams2);
         const cost = Utils.calcNextDotCost(structure, dotNumber);
 
-        const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
-        const res = parseInt(_res.valueOf());
-
-        await expect(res).to.be.equal(cost);
+        const res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
+        res.should.be.bignumber.equal(web3.toBigNumber(cost));
     });
 
     it("CURRENT_COST_3 - _currentCostOfDot() - Check current cost for function 3", async function () {
@@ -554,10 +528,8 @@ contract('CurrentCost', function (accounts) {
         const structure = Utils.structurizeCurve(curveParams3);
         const cost = Utils.calcNextDotCost(structure, dotNumber);
 
-        const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
-        const res = parseInt(_res.valueOf());
-
-        await expect(res).to.be.equal(cost);
+        const res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
+        res.should.be.bignumber.equal(web3.toBigNumber(cost));
     });
 
     it("CURRENT_COST_4 - _currentCostOfDot() - Check current cost for function 4", async function () {
@@ -567,10 +539,8 @@ contract('CurrentCost', function (accounts) {
         const structure = Utils.structurizeCurve(curveParams4);
         const cost = Utils.calcNextDotCost(structure, dotNumber);
 
-        const _res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
-        const res = parseInt(_res.valueOf());
-
-        await expect(res).to.be.equal(cost);
+        const res = await this.test.cost._currentCostOfDot.call(oracle, specifier, dotNumber);
+        res.should.be.bignumber.equal(web3.toBigNumber(cost));
     });
 
     it("CURRENT_COST_5 - _costOfNDots() - Check cost of n-dots for function 4", async function () {
@@ -580,9 +550,12 @@ contract('CurrentCost', function (accounts) {
         const structure = Utils.structurizeCurve(curveParams4);
         const cost = Utils.calcDotsCost(structure, dotNumber);
 
-        const _res = await this.test.cost._costOfNDots.call(oracle, specifier, 1, dotNumber - 1);
-        const res = parseInt(_res.valueOf());
-
-        await expect(res).to.be.equal(cost);
+        const res = await this.test.cost._costOfNDots.call(oracle, specifier, 1, dotNumber - 1);
+        res.should.be.bignumber.equal(web3.toBigNumber(cost));
+        // checking that Utils.calcDotsCost is working properly
+        // ghci> let f x = 1 + 2 * x + 3 * x^2
+        // ghci> sum (f <$> [1..10]) + 2 * 10
+        // >>> 1295
+        res.should.be.bignumber.equal(web3.toBigNumber(1295));
     });
 });
