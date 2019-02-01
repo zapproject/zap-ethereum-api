@@ -140,12 +140,9 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.unbond(oracle, specifier, 3, {from: subscriber});
         const final_balance = await this.test.token.balanceOf(subscriber);
 
-        const delta1 = balance.minus(bond_balance).toString();
-        const delta2 = final_balance.minus(bond_balance).toString();
-
         // expect total bonding to cost 110 and unbonding to return 100 zap (50+32+18)
-        await expect(delta1).to.be.equal("110");
-        await expect(delta2).to.be.equal("100");
+        balance.minus(bond_balance).should.be.bignumber.equal(web3.toBigNumber(110));
+        final_balance.minus(bond_balance).should.be.bignumber.equal(web3.toBigNumber(100));
     });
 
     it("BONDAGE_8 - getBoundDots() - Check received dots getting", async function () {
