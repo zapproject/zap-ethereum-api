@@ -95,7 +95,6 @@ contract('Dispatch', function (accounts) {
     async function prepareTokens(allocAddress = subscriber) {
         await this.token.allocate(owner, tokensForOwner, { from: owner });
         await this.token.allocate(allocAddress, tokensForSubscriber, { from: owner });
-        //await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
     }
 
     beforeEach(async function deployContracts() {
@@ -350,7 +349,7 @@ contract('Dispatch', function (accounts) {
         var postQueryDots = await this.test.bondage.getBoundDots(this.test.subscriber.address, oracleAddr, spec4);
 
         // expect to have escrowed a dot
-        expect(dotBalance.minus(postQueryDots).toString()).to.be.equal("1");
+        dotBalance.minus(postQueryDots).should.be.bignumber.equal(web3.toBigNumber(1));
 
         await this.test.subscriber.cancelQuery(queryId);
 
@@ -359,7 +358,7 @@ contract('Dispatch', function (accounts) {
 
         expect(d_logs[0].event).to.be.equal("CanceledRequest");
         // expect escrowed dot to be returned
-        expect(dotBalance.toString()).to.be.equal(newBalance.toString());
+        dotBalance.should.be.bignumber.equal(newBalance);
     });
 
     // converts an integer to its 32-bit hex representation

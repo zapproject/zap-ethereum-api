@@ -39,13 +39,13 @@ contract('Arbiter', function (accounts) {
 
     async function prepareProvider() {
         await this.registry.initiateProvider(publicKey, title, { from: oracle });
-        await this.registry.initiateProviderCurve(specifier, piecewiseFunction, Utils.ZeroAddress, { from: oracle });
+        await this.registry.initiateProviderCurve(specifier, piecewiseFunction, Utils.ZeroAddress, {from: oracle});
     }
 
     async function prepareTokens() {
-        await this.token.allocate(owner, tokensForOwner, { from: owner });
-        await this.token.allocate(subscriber, tokensForSubscriber, { from: owner });
-        //await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
+        await this.token.allocate(owner, tokensForOwner, {from: owner});
+        await this.token.allocate(subscriber, tokensForSubscriber, {from: owner});
+        await this.token.approve(this.bondage.address, approveTokens, {from: subscriber});
     }
 
     beforeEach(async function deployContracts() {
@@ -78,7 +78,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_1 - initiateSubscription() - Check subscription", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
@@ -91,7 +90,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_2 - initiateSubscription() - Check subscription block must be more than 0", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
 
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
@@ -101,7 +99,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_3 - initiateSubscription() - Check user can inititate subscription for same subscriber once", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
@@ -115,7 +112,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_4 - endSubscriptionProvider() - Check ending subscription", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
@@ -132,7 +128,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_5 - endSubscriptionProvider() - Check that user can't end uninitialized subscription", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
         //await this.test.arbiter.initiateSubscription(oracle, params, specifier, publicKey, 10, {from: subscriber});
@@ -143,7 +138,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_6 - endSubscriptionSubscriber() - Check ending subscription", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
@@ -160,7 +154,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_7 - endSubscriptionSubscriber() - Check that user can't end uninitialized subscription", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
         //await this.test.arbiter.initiateSubscription(oracle, params, specifier, publicKey, 10, {from: subscriber});
@@ -171,7 +164,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_8 - endSubscriptionSubscriber() - Check that only subscriber can end subscription by subscriber", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
@@ -185,7 +177,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_9 - endSubscriptionProvider() - Check that only provider can end subscription by provider", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 1000, {from: subscriber});
 
         await this.test.arbiter.initiateSubscription(oracle, specifier, params, publicKey, 10, {from: subscriber});
@@ -199,7 +190,6 @@ contract('Arbiter', function (accounts) {
     it("ARBITER_10 - endSubscriptionProvider() - Check that subscriber receives any unused dots", async function () {
         await prepareProvider.call(this.test);
         await prepareTokens.call(this.test);
-        await this.test.token.approve(this.test.bondage.address, approveTokens, {from: subscriber});
         await this.test.bondage.bond(oracle, specifier, 100, {from: subscriber});
 
         let initBalance = await this.test.bondage.getBoundDots(subscriber, oracle, specifier);

@@ -32,11 +32,10 @@ contract ERCDotFactory is Ownable {
         bytes32 symbol,
         int256[] curve
     ) returns(address) {
-
         require(curves[specifier] == 0, "Curve specifier already exists");
 
         RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY"));
-        if(!registry.isProviderInitiated(address(this))) {
+        if (!registry.isProviderInitiated(address(this))) {
             registry.initiateProvider(providerPubKey, providerTitle);
         }
 
@@ -73,7 +72,6 @@ contract ERCDotFactory is Ownable {
         tokenAddress = address(token);
         return tokenAddress;
     }
-
 
     //https://ethereum.stackexchange.com/questions/2519/how-to-convert-a-bytes32-to-string
     function bytes32ToString(bytes32 x) constant returns (string) {

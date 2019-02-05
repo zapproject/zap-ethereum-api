@@ -121,14 +121,14 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         uint256 dots = bondage.getBoundDots(msg.sender, provider, endpoint);
         bool onchainProvider = isContract(provider);
         bool onchainSubscriber = isContract(msg.sender);
-        if(dots >= 1) {
+        if (dots >= 1) {
             //enough dots
             bondage.escrowDots(msg.sender, provider, endpoint, 1);
 
             id = uint256(keccak256(abi.encodePacked(block.number, now, userQuery, msg.sender, provider)));
 
             createQuery(id, provider, msg.sender, endpoint, userQuery, onchainSubscriber);
-            if(onchainProvider) {
+            if (onchainProvider) {
                 OnChainProvider(provider).receive(id, userQuery, endpoint, endpointParams, onchainSubscriber);
             } else{
                 emit Incoming(id, provider, msg.sender, userQuery, endpoint, endpointParams, onchainSubscriber);
@@ -149,7 +149,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         address provider = getProvider(id);
         bytes32 endpoint = getEndpoint(id);
 
-        if ( status == Status.Canceled ) {
+        if (status == Status.Canceled) {
             uint256 canceled = getCancel(id);
 
             // Make sure we've canceled in the past,
@@ -205,7 +205,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     {
         if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
-        if(getSubscriberOnchain(id)) {
+        if (getSubscriberOnchain(id)) {
             ClientBytes32Array(getSubscriber(id)).callback(id, response);
         }
         else {
@@ -224,7 +224,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     {
         if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
-        if(getSubscriberOnchain(id)) {
+        if (getSubscriberOnchain(id)) {
             ClientIntArray(getSubscriber(id)).callback(id, response);
         }
         else {
@@ -245,7 +245,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
 
-        if(getSubscriberOnchain(id)) {
+        if (getSubscriberOnchain(id)) {
             Client1(getSubscriber(id)).callback(id, response);
         }
         else {
@@ -266,7 +266,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
 
-        if(getSubscriberOnchain(id)) {
+        if (getSubscriberOnchain(id)) {
             Client2(getSubscriber(id)).callback(id, response1, response2);
         }
         else {
@@ -289,7 +289,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
 
-        if(getSubscriberOnchain(id)) {
+        if (getSubscriberOnchain(id)) {
             Client3(getSubscriber(id)).callback(id, response1, response2, response3);
         }
         else {
@@ -313,7 +313,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         if (getProvider(id) != msg.sender || !fulfillQuery(id))
             revert();
 
-        if(getSubscriberOnchain(id)) {
+        if (getSubscriberOnchain(id)) {
             Client4(getSubscriber(id)).callback(id, response1, response2, response3, response4);
         }
         else {
@@ -392,7 +392,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     }
 
     function setCanceled(uint256 id, bool canceled) private {
-        if ( canceled ) {
+        if (canceled) {
             db.setNumber(keccak256(abi.encodePacked('queries', id, 'cancelBlock')), block.number);
             db.setNumber(keccak256(abi.encodePacked('queries', id, 'status')), uint256(Status.Canceled));
         }
