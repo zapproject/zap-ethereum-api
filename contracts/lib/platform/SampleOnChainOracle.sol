@@ -4,7 +4,7 @@ import "../ownership/ZapCoordinatorInterface.sol";
 import "../../platform/dispatch/DispatchInterface.sol";
 import "../../platform/registry/RegistryInterface.sol";
 import "./OnChainProvider.sol";
-import "../ERC20.sol";
+
 
 contract SampleOnChainOracle is OnChainProvider, Ownable {
 
