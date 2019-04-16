@@ -80,7 +80,6 @@ contract SampleContesty is Ownable {
         status = ContestStatus.Uninitialized;
     }
 
-    // TODO: add endTime
     function initializeContest(
         address oracleAddress
     ) onlyOwner public {
@@ -122,7 +121,7 @@ contract SampleContesty is Ownable {
 
     function redeem() {
         require(status == ContestStatus.Settled, "contest not settled");        
-        require(redeemed(msg.sender) == 0, "already redeeemed");
+        require(redeemed[msg.sender] == 0, "already redeeemed");
         
         uint reward = winValue * FactoryTokenInterface(getTokenAddress(winner)).balanceOf(msg.sender);
         FactoryTokenInterface(getTokenAddress(winner)).transfer(msg.sender, reward);
