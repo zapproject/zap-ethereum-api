@@ -56,12 +56,24 @@ contract SampleContesty is Ownable {
     ContestStatus public status; //state of contest
 
     mapping(bytes32 => address) public curves; // map of endpoint specifier to token-backed dotaddress
+    bytes32[] public curves_list; // array of endpoint specifiers
+
     mapping(address => uint8) public redeemed; // map of address redemption state
-    bytes32[] public endpoints; // array of endpoint specifiers
+    address[] public redeemed_list;
     
     event DotTokenCreated(address tokenAddress);
     event Bonded(bytes32 indexed endpoint, uint256 indexed numDots, address indexed sender); 
     event Unbonded(bytes32 indexed endpoint, uint256 indexed numDots, address indexed sender); 
+
+    //TODO ensure all has been redeemed or enough time has elasped 
+    function reset() public {
+        require(status == ContestStatus.Settled, "contest not settled");
+        require(msg.sender == oracle);
+        
+        delete redeemed_list;
+        delete curves_list;
+        status = ContestStatus.Initialized; 
+    }
 
     constructor(
         address coordinator, 
@@ -79,6 +91,8 @@ contract SampleContesty is Ownable {
         registry.initiateProvider(providerPubKey, providerTitle);
         status = ContestStatus.Uninitialized;
     }
+
+// contest lifecycle
 
     function initializeContest(
         address oracleAddress
@@ -104,11 +118,11 @@ contract SampleContesty is Ownable {
 
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint256 dots;
-        for( uint256 i = 0; i < endpoints.length; i++) {
+        for( uint256 i = 0; i < curves_list.length; i++) {
 
-            if(endpoints[i] != winner) {
-                dots =  bondage.getDotsIssued(address(this), endpoints[i]);  
-                bondage.unbond(address(this), endpoints[i], dots);                 
+            if(curves_list[i] != winner) {
+                dots =  bondage.getDotsIssued(address(this), curves_list[i]);  
+                bondage.unbond(address(this), curves_list[i], dots);                 
             }
         } 
 
@@ -136,7 +150,7 @@ contract SampleContesty is Ownable {
         int256[] curve
     ) public returns(address) {
         
-        require(curves[endpoint] == 0, "Curve endpoint already exists");
+        require(curves[endpoint] == 0, "Curve endpoint already exists or used in the past. Please choose new");
         
         RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY")); 
         require(registry.isProviderInitiated(address(this)), "Provider not intiialized");
