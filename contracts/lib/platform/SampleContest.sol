@@ -34,7 +34,7 @@ Ending Contest:
     *holders of winning token can optionally unbond 
 */
 
-contract SampleContesty is Ownable {
+contract SampleContest is Ownable {
 
     CurrentCostInterface currentCost;
     FactoryTokenInterface public reserveToken;
@@ -63,17 +63,7 @@ contract SampleContesty is Ownable {
     
     event DotTokenCreated(address tokenAddress);
     event Bonded(bytes32 indexed endpoint, uint256 indexed numDots, address indexed sender); 
-    event Unbonded(bytes32 indexed endpoint, uint256 indexed numDots, address indexed sender); 
-
-    //TODO ensure all has been redeemed or enough time has elasped 
-    function reset() public {
-        require(status == ContestStatus.Settled, "contest not settled");
-        require(msg.sender == oracle);
-        
-        delete redeemed_list;
-        delete curves_list;
-        status = ContestStatus.Initialized; 
-    }
+    event Unbonded(bytes32 indexed endpoint, uint256 indexed numDots, address indexed sender);
 
     constructor(
         address coordinator, 
@@ -93,7 +83,7 @@ contract SampleContesty is Ownable {
     }
 
 // contest lifecycle
-
+ 
     function initializeContest(
         address oracleAddress
     ) onlyOwner public {
@@ -122,24 +112,29 @@ contract SampleContesty is Ownable {
 
             if(curves_list[i] != winner) {
                 dots =  bondage.getDotsIssued(address(this), curves_list[i]);  
-                bondage.unbond(address(this), curves_list[i], dots);                 
+                if( dots > 0) {
+                    bondage.unbond(address(this), curves_list[i], dots);                 
+                }  
             }
         } 
 
         // how many winning dots    
         uint256 numWin =  bondage.getDotsIssued(address(this), winner);  
+        Reward(numWin, dots);
         // redeemable value of each dot token
         winValue = reserveToken.balanceOf(address(this)) / numWin;
         status = ContestStatus.Settled;
     }
 
-    function redeem() {
-        require(status == ContestStatus.Settled, "contest not settled");        
-        require(redeemed[msg.sender] == 0, "already redeeemed");
+
+    //TODO ensure all has been redeemed or enough time has elasped 
+    function reset() public {
+        require(status == ContestStatus.Settled, "contest not settled");
+        require(msg.sender == oracle);
         
-        uint reward = winValue * FactoryTokenInterface(getTokenAddress(winner)).balanceOf(msg.sender);
-        FactoryTokenInterface(getTokenAddress(winner)).transfer(msg.sender, reward);
-        redeemed[msg.sender] = 1;
+        delete redeemed_list;
+        delete curves_list;
+        status = ContestStatus.Initialized; 
     }
 
 /// TokenDotFactory methods
@@ -157,7 +152,7 @@ contract SampleContesty is Ownable {
 
         registry.initiateProviderCurve(endpoint, curve, address(this));
         curves[endpoint] = newToken(bytes32ToString(endpoint), bytes32ToString(symbol));
-        
+        curves_list.push(endpoint);        
         registry.setProviderParameter(endpoint, toBytes(curves[endpoint]));
         
         DotTokenCreated(curves[endpoint]);
@@ -186,27 +181,38 @@ contract SampleContesty is Ownable {
         Bonded(endpoint, numDots, msg.sender);
 
     }
-
+event Reward(uint a, uint b);
     //whether this contract holds tokens or coming from msg.sender,etc
     function unbond(bytes32 endpoint, uint numDots) public {
 
         require( status == ContestStatus.Settled, " contest not settled"); 
+        require(redeemed[msg.sender] == 0, "already redeeemed");
+        require(winner==endpoint, "only winners can unbond"); 
 
         bondage = BondageInterface(coord.getContract("BONDAGE"));
-        uint issued = bondage.getDotsIssued(address(this), endpoint);
+        uint issued = bondage.getDotsIssued(address(this), winner);
 
         currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
-        uint reserveCost = currentCost._costOfNDots(address(this), endpoint, issued + 1 - numDots, numDots - 1);
-
+        uint reserveCost = currentCost._costOfNDots(address(this), winner, issued + 1 - numDots, numDots - 1);
+        // Reward(reserveCost,reserveToken.balanceOf(address(this))); 
         //unbond dots
-        bondage.unbond(address(this), endpoint, numDots);
+        bondage.unbond(address(this), winner, numDots);
+
+        // Reward(reserveCost,reserveToken.balanceOf(address(this))); 
+
         //burn dot backed token
-        FactoryTokenInterface curveToken = FactoryTokenInterface(curves[endpoint]);
+        FactoryTokenInterface curveToken = FactoryTokenInterface(curves[winner]);
+        // require(reserveToken.transfer(msg.sender, reserveCost), "Error: Transfer failed");
+
+        uint reward = winValue * FactoryTokenInterface(getTokenAddress(winner)).balanceOf(msg.sender);
+        Reward(FactoryTokenInterface(getTokenAddress(winner)).balanceOf(msg.sender), winValue);
+
         curveToken.burnFrom(msg.sender, numDots);
 
-        require(reserveToken.transfer(msg.sender, reserveCost), "Error: Transfer failed");
-        Unbonded(endpoint, numDots, msg.sender);
+        reserveToken.transfer(msg.sender, reward);
+        redeemed[msg.sender] = 1;
 
+        Unbonded(winner, numDots, msg.sender);
     }
 
     function newToken(
@@ -236,9 +242,7 @@ contract SampleContesty is Ownable {
     //https://ethereum.stackexchange.com/questions/2519/how-to-convert-a-bytes32-to-string
     function bytes32ToString(bytes32 x) public pure returns (string) {
         bytes memory bytesString = new bytes(32);
-
         bytesString = abi.encodePacked(x);
-
         return string(bytesString);
     }
 
