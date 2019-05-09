@@ -65,6 +65,12 @@ contract SampleContest is Ownable {
     event Bonded(bytes32 indexed endpoint, uint256 indexed numDots, address indexed sender); 
     event Unbonded(bytes32 indexed endpoint, uint256 indexed numDots, address indexed sender);
 
+    event Initialized(address indexed oracle);
+    event Closed();
+    event Judged(bytes32 winner);
+    event Settled(uint256 winValue, uint256 winTokens); 
+    event Reset();
+
     constructor(
         address coordinator, 
         address factory,
@@ -90,10 +96,12 @@ contract SampleContest is Ownable {
         require( status == ContestStatus.Uninitialized, "Contest already initialized");
         oracle = oracleAddress;
         status = ContestStatus.Initialized;
+        emit Initialized(oracle);
     }
 
     function close() onlyOwner {
-       status = ContestStatus.ReadyToSettle; 
+        status = ContestStatus.ReadyToSettle; 
+        emit Closed();
     }
 
     function judge(bytes32 endpoint) {
@@ -101,6 +109,7 @@ contract SampleContest is Ownable {
         require( msg.sender == oracle, "not oracle");
         winner = endpoint;
         status = ContestStatus.Judged;
+        emit Judged(winner);
     }
 
     function settle() {
@@ -120,10 +129,10 @@ contract SampleContest is Ownable {
 
         // how many winning dots    
         uint256 numWin =  bondage.getDotsIssued(address(this), winner);  
-        Reward(numWin, dots);
         // redeemable value of each dot token
         winValue = reserveToken.balanceOf(address(this)) / numWin;
         status = ContestStatus.Settled;
+        emit Settled(winValue, numWin);
     }
 
 
@@ -135,6 +144,7 @@ contract SampleContest is Ownable {
         delete redeemed_list;
         delete curves_list;
         status = ContestStatus.Initialized; 
+        emit Reset();
     }
 
 /// TokenDotFactory methods
@@ -178,10 +188,9 @@ contract SampleContest is Ownable {
         reserveToken.approve(address(bondage), numReserve);
         bondage.bond(address(this), endpoint, numDots);
         FactoryTokenInterface(curves[endpoint]).mint(msg.sender, numDots);
-        Bonded(endpoint, numDots, msg.sender);
-
+        emit Bonded(endpoint, numDots, msg.sender);
     }
-event Reward(uint a, uint b);
+
     //whether this contract holds tokens or coming from msg.sender,etc
     function unbond(bytes32 endpoint, uint numDots) public {
 
@@ -194,25 +203,22 @@ event Reward(uint a, uint b);
 
         currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
         uint reserveCost = currentCost._costOfNDots(address(this), winner, issued + 1 - numDots, numDots - 1);
-        // Reward(reserveCost,reserveToken.balanceOf(address(this))); 
+
         //unbond dots
         bondage.unbond(address(this), winner, numDots);
 
-        // Reward(reserveCost,reserveToken.balanceOf(address(this))); 
-
         //burn dot backed token
         FactoryTokenInterface curveToken = FactoryTokenInterface(curves[winner]);
-        // require(reserveToken.transfer(msg.sender, reserveCost), "Error: Transfer failed");
 
-        uint reward = winValue * FactoryTokenInterface(getTokenAddress(winner)).balanceOf(msg.sender);
-        Reward(FactoryTokenInterface(getTokenAddress(winner)).balanceOf(msg.sender), winValue);
-
+        uint reward = ( winValue * FactoryTokenInterface(getTokenAddress(winner)).balanceOf(msg.sender) ) + reserveCost;
+        
+        //burn user's unbonded tokens
         curveToken.burnFrom(msg.sender, numDots);
 
         reserveToken.transfer(msg.sender, reward);
         redeemed[msg.sender] = 1;
 
-        Unbonded(winner, numDots, msg.sender);
+        emit Unbonded(winner, numDots, msg.sender);
     }
 
     function newToken(
