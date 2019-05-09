@@ -14,18 +14,23 @@ contract BTCcontest is Ownable, ClientIntArray {
 
   constructor(
     address _contest,
-    uint256 _settlePrice
+    uint256 _settlePrice,
+    bytes32 _upEndpoint,
+    bytes32 _downEndpoint
   ){
     oracle = msg.sender;
     contest = SampleContest(_contest);
     settlePrice = _settlePrice;
+    require(contest.isEndpointValid(_upEndpoint) && contest.isEndpointValid(_downEndpoint),"Endpoints are not valid")
+    upEndpoint = _upEndpoint;
+    downEndpoint = _downEndpoint;
   }
 
-  function queryToSettle(address _coincap,string _endpoint){
+  function queryToSettle(address _coincap,bytes32 _endpoint) public returns(uint256){
     require(msg.sender == oracle, "Only Oracle owner can call query to settle");
     address dispatchAddress = coordinator.getContract("DISPATCH");
     DispatchInterface dispatch = DispatchInterface(dispatchAddress);
-    query_id = dispatch.query(_coincap,"BTC",_endpoint,[18]);
+    query_id = dispatch.query(_coincap,"BTC",_endpoint);
     return query_id;
   }
 
@@ -35,14 +40,15 @@ contract BTCcontest is Ownable, ClientIntArray {
     address dispatchAddress = coordinator.getContract("DISPATCH");
     require(_id == query_id,"Query id is not correct");
     require(address(msg.sender)==address(dispatchAddress),"Only accept response from dispatch");
-    require(contest.status==2,"Contest is not ready to settle"); //2 is the ReadyToSettle enum value
-    uint256 price = responses[0];
-    for(uint256 i=0;i<contest.curves_list.length;i++){
-      if(contest.curves_list[i]=="BTC_UP" && price > settlePrice){
-        return contest.settle(contest.curves_list[i]);
+    require(contest.getStatus()==2,"Contest is not ready to settle"); //2 is the ReadyToSettle enum value
+    uint256 price = uint256(responses[0]);
+    bytes32[] endpoints = contest.getEndpoints();
+    for(uint256 i=0;i<endpoints.length;i++){
+      if(endpoints[i]==up_endpoint && price > settlePrice){
+        return contest.settle(endpoints[i]);
       }
-      if(contest.curves_list[i]=="BTC_DOWN" && price<settlePrice){
-        return contest.settle(contest.curves_list[i]);
+      if(endpoints[i]==down_endpoint && price<settlePrice){
+        return contest.settle(endpoints[i]);
       }
     }
   }
