@@ -256,9 +256,9 @@ contract SampleContest is Ownable {
     function newToken(
         string name,
         string symbol
-    ) 
-        public
-        returns (address tokenAddress) 
+    )
+        internal
+        returns (address tokenAddress)
     {
         FactoryTokenInterface token = tokenFactory.create(name, symbol);
         tokenAddress = address(token);
