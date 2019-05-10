@@ -45,7 +45,7 @@ contract SampleContest is Ownable {
     enum ContestStatus {
         Uninitialized,    //
         Initialized,      // ready for buys
-        ReadyToSettle,    // ready for judgement
+        // ReadyToSettle,    // ready for judgement
         Judged,           // winner determined
         Settled,           // value of winning tokens determined
         Canceled          // oracle did not respond in time
@@ -99,20 +99,21 @@ contract SampleContest is Ownable {
     ) onlyOwner public {
         require( status == ContestStatus.Uninitialized, "Contest already initialized");
         oracle = oracleAddress;
-        ttl = _ttl;
+        ttl = _ttl + block.number;
         status = ContestStatus.Initialized;
         emit Initialized(oracle);
     }
 
-    function close() onlyOwner {
-        status = ContestStatus.ReadyToSettle;
-        expired = block.number + ttl;
-        emit Closed();
-    }
+    // function close() onlyOwner {
+    //     status = ContestStatus.ReadyToSettle;
+    //     expired = block.number + ttl;
+    //     emit Closed();
+    // }
 
     function judge(bytes32 endpoint) {
-        require( status == ContestStatus.ReadyToSettle, "not closed" );
-        require( msg.sender == oracle, "not oracle");
+        require( status == ContestStatus.Initialized, "Contest not initialized" );
+        require( msg.sender == oracle, "Only designated Oracle can judge");
+        require(block.number < ttl, "Contest expired, refund in process");
         winner = endpoint;
         status = ContestStatus.Judged;
         emit Judged(winner);
@@ -203,7 +204,7 @@ contract SampleContest is Ownable {
     //whether this contract holds tokens or coming from msg.sender,etc
     function unbond(bytes32 endpoint, uint numDots) public {
 
-        require( status == ContestStatus.ReadyToSettle || status == ContestStatus.Settled, "not ready");
+        require(status == ContestStatus.Settled, "not ready");
 
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint issued = bondage.getDotsIssued(address(this), endpoint);
@@ -217,17 +218,18 @@ contract SampleContest is Ownable {
 
         FactoryTokenInterface curveToken = FactoryTokenInterface(curves[endpoint]);
 
-        if( status == ContestStatus.ReadyToSettle || status == ContestStatus.Canceled) {
-
-            status = ContestStatus.Canceled;
+        if( status == ContestStatus.Initialized || status == ContestStatus.Canceled) {
             //oracle has taken too long to judge winner so unbonds will be allowed for all
-            require(block.number > expired, "oracle query not expired.");
-            require( status == ContestStatus.ReadyToSettle, "contest not ready to settle");
+            require(block.number > ttl, "oracle query not expired.");
+            // require(status == ContestStatus.Settled, "contest not settled");
+            status = ContestStatus.Canceled;
 
             //unbond dots
+            //TODO get bound dot then unbond the correct amount ? or unbond all in 1 call
             bondage.unbond(address(this), endpoint, numDots);
 
             //burn dot backed token
+            //FIXME only burn the bound tokens ?
             curveToken.burnFrom(msg.sender, numDots);
 
             require(reserveToken.transfer(msg.sender, reserveCost), "transfer failed");
@@ -275,7 +277,7 @@ contract SampleContest is Ownable {
     }
 
     function getStatus() public view returns(uint256){
-      return status;
+      return uint(status);
     }
 
     function isEndpointValid(bytes32 _endpoint) public view returns(bool){
