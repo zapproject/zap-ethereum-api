@@ -275,7 +275,7 @@ contract SampleContest is Ownable {
     }
 
     function getStatus() public view returns(uint256){
-      return status;
+      return uint(status);
     }
 
     function isEndpointValid(bytes32 _endpoint) public view returns(bool){
