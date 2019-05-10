@@ -44,7 +44,7 @@ contract BTCcontest is Ownable, ClientIntArray {
     address dispatchAddress = coordinator.getContract("DISPATCH");
     require(_id == query_id,"Query id is not correct");
     require(address(msg.sender)==address(dispatchAddress),"Only accept response from dispatch");
-    require(contest.getStatus()==2,"Contest is not ready to settle"); //2 is the ReadyToSettle enum value
+    require(contest.getStatus()==1,"Contest is not in initialized state"); //2 is the ReadyToSettle enum value
     uint256 price = uint256(responses[0]);
     bytes32[] memory endpoints = contest.getEndpoints();
     for(uint256 i=0;i<endpoints.length;i++){
