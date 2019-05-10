@@ -53,7 +53,7 @@ contract SampleContest is Ownable {
 
     address public oracle;    // address of oracle who will choose the winner
     uint256 public ttl;    // time allowed before, close and judge. if time expired, allow unbond from all curves
-    uint256 public expired = 2**256 -1;    // time allowed before, close and judge. if time expired, allow unbond from all curves
+    // uint256 public expired = 2**256 -1;    // time allowed before, close and judge. if time expired, allow unbond from all curves
     bytes32 public winner;    // curve identifier of the winner
     uint256 public winValue;  // final value of the winning token
     ContestStatus public status; //state of contest
@@ -164,13 +164,12 @@ contract SampleContest is Ownable {
         bytes32 symbol,
         int256[] curve
     ) public returns(address) {
-
-        require(curves[endpoint] == 0, "Curve endpoint already exists or used in the past. Please choose new");
+        require(status==ContestStatus.Initialized,"Contest is not initalized")
+        require(curves[endpoint] == 0, "Curve endpoint already exists or used in the past. Please choose a new endpoint");
 
         RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY"));
-        require(registry.isProviderInitiated(address(this)), "Provider not intiialized");
-
         registry.initiateProviderCurve(endpoint, curve, address(this));
+
         curves[endpoint] = newToken(bytes32ToString(endpoint), bytes32ToString(symbol));
         curves_list.push(endpoint);
         registry.setProviderParameter(endpoint, toBytes(curves[endpoint]));
@@ -181,8 +180,7 @@ contract SampleContest is Ownable {
 
     //whether this contract holds tokens or coming from msg.sender,etc
     function bond(bytes32 endpoint, uint numDots) public  {
-
-        require( status == ContestStatus.Initialized, " contest not live");
+        require( status == ContestStatus.Initialized, " contest is not initiated");
 
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint256 issued = bondage.getDotsIssued(address(this), endpoint);
