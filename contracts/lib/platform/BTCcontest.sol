@@ -2,6 +2,8 @@ pragma solidity ^0.4.25;
 import "./SampleContest.sol";
 import "../ownership/ZapCoordinatorInterface.sol";
 import "../../platform/dispatch/DispatchInterface.sol";
+import "../token/FactoryTokenInterface.sol";
+import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 import "./Client.sol";
 
 
@@ -32,12 +34,13 @@ contract BTCcontest is Ownable, ClientIntArray {
   function bondToCoincap(address _coincap,bytes32 _endpoint,uint256 _numDots)public returns (bool){
     address bondageAddress = coordinator.getContract("BONDAGE");
     BondageInterface bondage = BondageInterface(bondageAddress);
-    urrentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
+    CurrentCostInterface currentCost = CurrentCostInterface(coordinator.getContract("CURRENT_COST"));
+    FactoryTokenInterface reserveToken = FactoryTokenInterface(coordinator.getContract("ZAP_TOKEN"));
     //get reserve value to send
-    uint issued = bondage.getDotsIssued(address(this), endpoint);
-    uint reserveCost = currentCost._costOfNDots(address(this), endpoint, issued + 1 - _numDots, _numDots - 1);
-    resevetoken.approve(address(bondageAddress),reserveCost);
-    bondage.bond(_coincap,_endpoint,_numDots);
+    uint issued = bondage.getDotsIssued(_coincap, _endpoint);
+    uint reserveCost = currentCost._costOfNDots(_coincap, _endpoint, issued + 1 - _numDots, _numDots - 1);
+    // reserveToken.approve(address(bondageAddress),reserveCost);
+    // bondage.bond(_coincap,_endpoint,_numDots);
 
   }
   function queryToSettle(address _coincap,bytes32 _endpoint) public returns(uint256){
@@ -55,7 +58,6 @@ contract BTCcontest is Ownable, ClientIntArray {
     address dispatchAddress = coordinator.getContract("DISPATCH");
     require(_id == query_id,"Query id is not correct");
     require(address(msg.sender)==address(dispatchAddress),"Only accept response from dispatch");
-    require(address(tx.or))
     require(contest.getStatus()==1,"Contest is not in initialized state"); //2 is the ReadyToSettle enum value
     uint256 price = uint256(responses[0]);
     bytes32[] memory endpoints = contest.getEndpoints();

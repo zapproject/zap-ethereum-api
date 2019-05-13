@@ -102,9 +102,8 @@ contract('SampleContest', function (accounts) {
         const upEndpoint = "BTC_UP"
         const downEndpoint = "BTC_DOWN"
         let factory = await SampleContest.new(this.test.coord.address, this.test.tokenFactory.address, publicKey, title);
-        let btcContest = await BTCcontest.new(factory.address, startPrice, upEndpoint, downEndpoint);
-        await this.test.registry.initiateProvider("coincap","coincap",{from:coincap});
-        await this.test.registry.initiateProviderCurve("coincap",piecewiseFunction,zeroAddress,{from:coincap})
+        await this.test.registry.initiateProvider(111,"coincaptitle",{from:coincap});
+        await this.test.registry.initiateProviderCurve("coincapendpoint",piecewiseFunction,zeroAddress,{from:coincap})
 
 	let tx;//tmp var for event tracking
 
@@ -112,6 +111,7 @@ contract('SampleContest', function (accounts) {
 
 	await factory.initializeCurve(upEndpoint,upEndpoint, piecewiseFunction);
 	await factory.initializeCurve(downEndpoint,downEndpoint, piecewiseFunction);
+  let btcContest = await BTCcontest.new(factory.address, startPrice, upEndpoint, downEndpoint);
         let reserveTokenAddr = await factory.reserveToken();
         let reserveToken = await ZapToken.at(reserveTokenAddr);
         await reserveToken.allocate(owner, tokensForOwner);
@@ -120,7 +120,7 @@ contract('SampleContest', function (accounts) {
         await reserveToken.approve(factory.address, tokensForOwner, {from: owner});
         await reserveToken.approve(factory.address, tokensForOwner, {from: participant1});
         await reserveToken.approve(factory.address, tokensForOwner, {from: participant2});
-        await btcContest.bondToCoincap(coincap,"coincap",5,{from:owner})
+        await btcContest.bondToCoincap(coincap,"coincapendpoint",5,{from:owner})
 	let zapBalance = await reserveToken.balanceOf(owner);
 	let zapAllowance = await reserveToken.allowance(owner, factory.address);
 	console.log('zap balance: ',zapBalance,', zap allowance: ',zapAllowance);
@@ -135,9 +135,9 @@ contract('SampleContest', function (accounts) {
 
 //spec1 balancce 2
   let query_id = btcContest.queryToSettle(coincap,"coincap",{from:owner})
-  const tx = await dispatch.respond(query_id,[9000],{from:coincap})
+  const tx2 = await dispatch.respond(query_id,[9000],{from:coincap})
   //up endpoint should win
-	console.log('tx ', tx);
+	console.log('tx ', tx2);
 
 	let winValue = await factory.winValue();
 	console.log('winValue: ', winValue.toNumber());
