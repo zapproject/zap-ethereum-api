@@ -79,6 +79,10 @@ contract('SampleContest', function (accounts) {
         this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
 
+        // Deploy Dispatch
+        this.currentTest.dispatch = await Dispatch.new(this.currentTest.coord.address);
+        await this.currentTest.coord.updateContract('DISPATCH', this.currentTest.dispatch.address);
+
         // Hack for making arbiter an account we control for testing the escrow
         // await this.currentTest.coord.addImmutableContract('ARBITER', accounts[3]);
 
@@ -87,14 +91,20 @@ contract('SampleContest', function (accounts) {
         this.currentTest.tokenFactory = await TokenFactory.new();
     });
 
-    function findEvent(logs, eventName) {
-        for (let i = 0; i < logs.length; i++) {
-            if (logs[i].event === eventName) {
-                return logs[i];
+    async function findEvent(contract, eventName) {
+      return new Promise((resolve,reject)=>{
+        let eventN = contract[eventName]()
+        eventN.watch()
+        eventN.get((err,logs)=>{
+          if(err)
+            return reject(err)
+          for(let log of logs){
+            if(log.event==eventName){
+              return resolve(log)
             }
-        }
-
-        return null;
+          }
+        })
+      })
     }
 
     it("BTC CONTEST - lifecycle", async function () {
@@ -103,7 +113,7 @@ contract('SampleContest', function (accounts) {
         const downEndpoint = "BTC_DOWN"
         let factory = await SampleContest.new(this.test.coord.address, this.test.tokenFactory.address, publicKey, title);
         await this.test.registry.initiateProvider(111,"coincaptitle",{from:coincap});
-        await this.test.registry.initiateProviderCurve("coincapendpoint",piecewiseFunction,zeroAddress,{from:coincap})
+        await this.test.registry.initiateProviderCurve("coincapendpoint",piecewiseFunction,zeroAddress,{from:coincap});
 
 	let tx;//tmp var for event tracking
 
@@ -111,16 +121,17 @@ contract('SampleContest', function (accounts) {
 
 	await factory.initializeCurve(upEndpoint,upEndpoint, piecewiseFunction);
 	await factory.initializeCurve(downEndpoint,downEndpoint, piecewiseFunction);
-  let btcContest = await BTCcontest.new(factory.address, startPrice, upEndpoint, downEndpoint);
+  let btcContest = await BTCcontest.new(this.test.coord.address,factory.address, startPrice, upEndpoint, downEndpoint);
         let reserveTokenAddr = await factory.reserveToken();
         let reserveToken = await ZapToken.at(reserveTokenAddr);
         await reserveToken.allocate(owner, tokensForOwner);
         await reserveToken.allocate(participant1, tokensForOwner, {from: owner});
         await reserveToken.allocate(participant2, tokensForOwner, {from: owner});
+        await reserveToken.allocate(btcContest.address, tokensForOwner, {from: owner});
         await reserveToken.approve(factory.address, tokensForOwner, {from: owner});
         await reserveToken.approve(factory.address, tokensForOwner, {from: participant1});
         await reserveToken.approve(factory.address, tokensForOwner, {from: participant2});
-        await btcContest.bondToCoincap(coincap,"coincapendpoint",5,{from:owner})
+        await btcContest.bondToCoincap(coincap,"coincapendpoint",3,{from:owner})
 	let zapBalance = await reserveToken.balanceOf(owner);
 	let zapAllowance = await reserveToken.allowance(owner, factory.address);
 	console.log('zap balance: ',zapBalance,', zap allowance: ',zapAllowance);
@@ -133,25 +144,34 @@ contract('SampleContest', function (accounts) {
 	await factory.bond(upEndpoint, 7, {from: participant1});
 	await factory.bond(downEndpoint, 8, {from: participant2});
 
-//spec1 balancce 2
-  let query_id = btcContest.queryToSettle(coincap,"coincap",{from:owner})
-  const tx2 = await dispatch.respond(query_id,[9000],{from:coincap})
-  //up endpoint should win
-	console.log('tx ', tx2);
-
-	let winValue = await factory.winValue();
-	console.log('winValue: ', winValue.toNumber());
-
-
-// //spec1 balancce 2
-	upOwnerBalanceBefore = await curveToken.balanceOf(participant1);
-  downOwnerBalanceBefore = await curveToken.balanceOf(participant2);
+  const incomingEvent = this.test.dispatch.Incoming()
+  incomingEvent.watch((err,logs)=>{console.log("Incoming event",err,logs)})
+  let txquery =await  btcContest.queryToSettle(coincap,"coincapendpoint",{from:owner})
+  let queryEvent = await findEvent(this.test.dispatch,"Incoming");
+  if(queryEvent && queryEvent.args && queryEvent.args.id){
+    let query_id = queryEvent.args.id
+    console.log("QUERY ID",query_id, "coincap", coincap, btcContest.address)
+    const tx2 = await this.test.dispatch.respondIntArray(query_id,[9000],{from:coincap})
+    const tx3 = await factory.settle({from:owner});
+  }
 
 
-	console.log('participants balances: ', upOwnerBalance.toNumber(),downOwnerBalance.toNumber());
-	// let after = await reserveToken.balanceOf(owner);
-	// console.log('before: ',before.toString(),', after: ',after.toString());
-  //       let subBalance = parseInt(await reserveToken.balanceOf(owner));
-  //       await expect(subBalance).to.be.not.equal(10000)
+//   //up endpoint should win
+// 	console.log('tx ', tx2);
+//
+// 	let winValue = await factory.winValue();
+// 	console.log('winValue: ', winValue.toNumber());
+//
+//
+// // //spec1 balancce 2
+// 	upOwnerBalanceBefore = await curveToken.balanceOf(participant1);
+//   downOwnerBalanceBefore = await curveToken.balanceOf(participant2);
+//
+//
+// 	console.log('participants balances: ', upOwnerBalance.toNumber(),downOwnerBalance.toNumber());
+// 	// let after = await reserveToken.balanceOf(owner);
+// 	// console.log('before: ',before.toString(),', after: ',after.toString());
+//   //       let subBalance = parseInt(await reserveToken.balanceOf(owner));
+//   //       await expect(subBalance).to.be.not.equal(10000)
     });
 });

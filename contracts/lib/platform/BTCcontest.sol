@@ -16,8 +16,8 @@ contract BTCcontest is Ownable, ClientIntArray {
   bytes32 public upEndpoint;
   bytes32 public downEndpoint;
 
-
   constructor(
+    address _cord,
     address _contest,
     uint256 _startPrice,
     bytes32 _upEndpoint,
@@ -26,21 +26,25 @@ contract BTCcontest is Ownable, ClientIntArray {
     oracle = msg.sender;
     contest = SampleContest(_contest);
     startPrice = _startPrice;
+    coordinator = ZapCoordinatorInterface(_cord);
     require(contest.isEndpointValid(_upEndpoint) && contest.isEndpointValid(_downEndpoint),"Endpoints are not valid");
     upEndpoint = _upEndpoint;
     downEndpoint = _downEndpoint;
+    address bondageAddress = coordinator.getContract("BONDAGE");
+    BondageInterface bondage = BondageInterface(bondageAddress);
+    FactoryTokenInterface reserveToken = FactoryTokenInterface(coordinator.getContract("ZAP_TOKEN"));
+    //get reserve value to send
+    reserveToken.approve(address(bondageAddress),~uint256(0));
+
   }
 
   function bondToCoincap(address _coincap,bytes32 _endpoint,uint256 _numDots)public returns (bool){
     address bondageAddress = coordinator.getContract("BONDAGE");
     BondageInterface bondage = BondageInterface(bondageAddress);
-    CurrentCostInterface currentCost = CurrentCostInterface(coordinator.getContract("CURRENT_COST"));
     FactoryTokenInterface reserveToken = FactoryTokenInterface(coordinator.getContract("ZAP_TOKEN"));
     //get reserve value to send
-    uint issued = bondage.getDotsIssued(_coincap, _endpoint);
-    uint reserveCost = currentCost._costOfNDots(_coincap, _endpoint, issued + 1 - _numDots, _numDots - 1);
-    // reserveToken.approve(address(bondageAddress),reserveCost);
-    // bondage.bond(_coincap,_endpoint,_numDots);
+    bondage.bond(_coincap,_endpoint,_numDots);
+    return true;
 
   }
   function queryToSettle(address _coincap,bytes32 _endpoint) public returns(uint256){
@@ -48,15 +52,13 @@ contract BTCcontest is Ownable, ClientIntArray {
     address dispatchAddress = coordinator.getContract("DISPATCH");
     DispatchInterface dispatch = DispatchInterface(dispatchAddress);
     bytes32[] memory params = new bytes32[](0);
-    query_id = dispatch.query(_coincap,"BTC",_endpoint,params);
-    return query_id;
+    return dispatch.query(_coincap,"BTC",_endpoint,params);
   }
 
 
 
   function callback(uint256 _id, int[] responses) external {
     address dispatchAddress = coordinator.getContract("DISPATCH");
-    require(_id == query_id,"Query id is not correct");
     require(address(msg.sender)==address(dispatchAddress),"Only accept response from dispatch");
     require(contest.getStatus()==1,"Contest is not in initialized state"); //2 is the ReadyToSettle enum value
     uint256 price = uint256(responses[0]);
