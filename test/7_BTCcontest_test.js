@@ -155,9 +155,8 @@ contract('SampleContest', function (accounts) {
         let part1ZapBalance = await reserveToken.balanceOf(participant1)
         let part2Balance = await downcurveToken.balanceOf(participant2);
         let part2ZapBalance = await reserveToken.balanceOf(participant2)
-        console.log("parts token balance", part1Balance.toNumber(), part2Balance.toNumber())
-        console.log("zap token balance", part1ZapBalance.toNumber(), part2ZapBalance.toNumber())
-        console.log("contract zap balance ", (await reserveToken.balanceOf(btcContest.address)).toNumber(),(await reserveToken.balanceOf(factory.address)).toNumber())
+        console.log("parts token balance before settle : participant1", part1Balance.toNumber(),"participant2", part2Balance.toNumber())
+        console.log("sampleContest zap balance before settle : ",(await reserveToken.balanceOf(factory.address)).toNumber())
 
 
 	await factory.bond(upEndpoint, 7, {from: participant1});
@@ -171,7 +170,7 @@ contract('SampleContest', function (accounts) {
     let query_id = queryEvent.args.id
     const tx2 = await this.test.dispatch.respondIntArray(query_id,[9000],{from:coincap})
     const tx3 = await factory.settle({from:owner});
-    console.log("contract zap balance after settled", (await reserveToken.balanceOf(btcContest.address)).toNumber(),(await reserveToken.balanceOf(factory.address)).toNumber())
+    console.log("sampleContest zap balance after settled", (await reserveToken.balanceOf(factory.address)).toNumber())
     const status = await factory.status()
     status.toNumber().should.equal(3)
 
@@ -182,12 +181,15 @@ contract('SampleContest', function (accounts) {
 
 
     //AFter the contest
-    let part1Balance = await upcurveToken.balanceOf(participant1);
-    let part1ZapBalanceAfter = await reserveToken.balanceOf(participant1)
-    let part2Balance = await downcurveToken.balanceOf(participant2);
-    let part2ZapBalanceAfter = await reserveToken.balanceOf(participant2)
-    console.log("AFTER parts token balance", part1Balance.toNumber(), part2Balance.toNumber())
-    console.log("AFTER zap token balance", part1ZapBalanceAfter.toNumber()-part1ZapBalance.toNumber(), part2ZapBalanceAfter.toNumber()-part2ZapBalance.toNumber())
+    let part1CurveTokenDelta = (await upcurveToken.balanceOf(participant1)).toNumber() - part1Balance.toNumber()
+    let part1ZapBalanceDelta = (await reserveToken.balanceOf(participant1)).toNumber()-part1ZapBalance.toNumber()
+    let part2CurveTokenDelta = (await downcurveToken.balanceOf(participant2)).toNumber() - part2Balance.toNumber()
+    let part2ZapBalanceDelta = (await reserveToken.balanceOf(participant2)).toNumber() - part2ZapBalance.toNumber()
+    console.log("Curve Token Delta after settle : participant1", part1CurveTokenDelta, "participant2",part2CurveTokenDelta)
+    console.log("Zap token delta after settle : partticipant1",part1ZapBalanceDelta,"participant2",part2ZapBalanceDelta)
+    part1CurveTokenDelta.should.equal(0)
+    part2CurveTokenDelta.should.equal(8)
+    part1ZapBalanceDelta.should.equal(-part2ZapBalanceDelta)
   }
   else{
     console.log("NO query event found")
