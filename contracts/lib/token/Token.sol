@@ -61,7 +61,7 @@ contract FactoryToken is FactoryTokenInterface {
 
     string public name;
     string public symbol;
-    uint8 public decimals = 18;
+    uint8 public decimals = 3;
     uint256 totalSupply_;
 
     mapping(address => mapping(address => uint256)) internal allowed;
