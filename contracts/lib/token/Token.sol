@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "./FactoryTokenInterface.sol";
 
@@ -61,7 +61,7 @@ contract FactoryToken is FactoryTokenInterface {
 
     string public name;
     string public symbol;
-    uint8 public decimals = 3;
+    uint8 public decimals = 18;
     uint256 totalSupply_;
 
     mapping(address => mapping(address => uint256)) internal allowed;
@@ -85,7 +85,7 @@ contract FactoryToken is FactoryTokenInterface {
         _;
     }
 
-    constructor(string _name, string _symbol) public {
+    constructor(string memory _name, string memory _symbol) public {
         name = _name;
         symbol = _symbol;
     }

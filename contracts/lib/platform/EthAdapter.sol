@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 import "./ERCDotFactory.sol";
@@ -13,7 +13,7 @@ contract EthAdapter is ERCDotFactory {
 
     event MsgSender(address _sender);
 
-    constructor(address coordinator, address tokenFactory, uint256 rate)
+    constructor(address coordinator, address tokenFactory, uint256 rate) public 
     ERCDotFactory(coordinator, tokenFactory) {
         adapterRate = rate;
     }
@@ -23,12 +23,12 @@ contract EthAdapter is ERCDotFactory {
         adapterRate = rate;
     }
 
-    function ownerBond(address wallet, bytes32 specifier, uint numDots) payable onlyOwner {
+    function ownerBond(address wallet, bytes32 specifier, uint numDots) public payable onlyOwner {
         emit MsgSender(msg.sender);
         bond(wallet, specifier, numDots);
     }
 
-    function ownerUnbond(address wallet, bytes32 specifier, uint quantity) onlyOwner {
+    function ownerUnbond(address wallet, bytes32 specifier, uint quantity) public onlyOwner {
         unbond(wallet, specifier, quantity);
     }
 
@@ -52,8 +52,8 @@ contract EthAdapter is ERCDotFactory {
     }
 
     //Override
-    function unbond(address wallet, bytes32 specifier, uint quantity) internal {
-
+    function unbond1(address payable wallet, bytes32 specifier, uint quantity) internal {
+       
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint issued = bondage.getDotsIssued(address(this), specifier);
 
@@ -66,10 +66,10 @@ contract EthAdapter is ERCDotFactory {
         //burn dot backed token
         tok.burnFrom(wallet, quantity);
         //send wallet eth
-        wallet.transfer(reserveCost * adapterRate);
+        address(wallet).transfer(reserveCost * adapterRate);
     }
 
-    function getAdapterPrice(bytes32 specifier, uint quantity) view returns(uint){
+    function getAdapterPrice(bytes32 specifier, uint quantity) public payable returns(uint){
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint reserveAmount = bondage.calcZapForDots(address(this), specifier, quantity);
         return reserveAmount * adapterRate;

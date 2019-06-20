@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 // v1.0
 
 import "../../lib/ownership/Upgradable.sol";
@@ -59,7 +59,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     /// @param receiver address
     /// @param endpoint Endpoint specifier
     /// @param params arbitrary params to be passed
-    function passParams(address receiver, bytes32 endpoint, bytes32[] params) public {
+    function passParams(address receiver, bytes32 endpoint, bytes32[] memory params) public {
         emit ParamsPassed(msg.sender, receiver, endpoint, params);
     }
 
@@ -72,7 +72,7 @@ contract Arbiter is Destructible, ArbiterInterface, Upgradable {
     function initiateSubscription(
         address providerAddress,   //
         bytes32 endpoint,          //
-        bytes32[] endpointParams,  //
+        bytes32[] memory endpointParams,  //
         uint256 publicKey,         // Public key of the purchaser
         uint64 blocks              //
     )

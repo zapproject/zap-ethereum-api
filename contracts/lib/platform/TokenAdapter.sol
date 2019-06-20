@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 import "./ERCDotFactory.sol";
@@ -12,7 +12,7 @@ contract TokenAdapter is ERCDotFactory {
 
     uint adapterRate;
 
-    constructor(address coordinator, address tokenFactory, FactoryTokenInterface _acceptedToken)
+    constructor(address coordinator, address tokenFactory, FactoryTokenInterface _acceptedToken) public
     ERCDotFactory(coordinator, tokenFactory) {
         acceptedToken = _acceptedToken;
     }
@@ -66,7 +66,7 @@ contract TokenAdapter is ERCDotFactory {
         require(acceptedToken.transfer(wallet, reserveCost * adapterRate), "Error: Transfer failed");
     }
 
-    function getAdapterPrice(bytes32 specifier, uint quantity) view returns(uint){
+    function getAdapterPrice(bytes32 specifier, uint quantity) public payable returns(uint){
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint reserveAmount = bondage.calcZapForDots(address(this), specifier, quantity);
         return reserveAmount * adapterRate;

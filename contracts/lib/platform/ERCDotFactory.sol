@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "../token/TokenFactoryInterface.sol";
 import "../token/FactoryTokenInterface.sol";
@@ -18,7 +18,7 @@ contract ERCDotFactory is Ownable {
 
     event DotTokenCreated(address tokenAddress);
 
-    constructor(address coordinator, address factory){
+    constructor(address coordinator, address factory) public {
         coord = ZapCoordinatorInterface(coordinator);
         reserveToken = FactoryTokenInterface(coord.getContract("ZAP_TOKEN"));
         reserveToken.approve(coord.getContract("BONDAGE"), ~uint256(0));
@@ -30,9 +30,9 @@ contract ERCDotFactory is Ownable {
         bytes32 providerTitle,
         bytes32 specifier,
         bytes32 symbol,
-        int256[] curve
-    ) returns(address) {
-        require(curves[specifier] == 0, "Curve specifier already exists");
+        int256[] memory curve
+    ) public returns(address) {
+        require(curves[specifier] == address(0) , "Curve specifier already exists");
 
         RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY"));
         if (!registry.isProviderInitiated(address(this))) {
@@ -42,7 +42,7 @@ contract ERCDotFactory is Ownable {
         registry.initiateProviderCurve(specifier, curve, address(this));
         curves[specifier] = newToken(bytes32ToString(specifier), bytes32ToString(symbol));
 
-        DotTokenCreated(curves[specifier]);
+        emit DotTokenCreated(curves[specifier]);
         return curves[specifier];
     }
 
@@ -62,8 +62,8 @@ contract ERCDotFactory is Ownable {
     }
 
     function newToken(
-        string name,
-        string symbol
+        string memory name,
+        string memory symbol
     )
         public
         returns (address tokenAddress)
@@ -74,7 +74,7 @@ contract ERCDotFactory is Ownable {
     }
 
     //https://ethereum.stackexchange.com/questions/2519/how-to-convert-a-bytes32-to-string
-    function bytes32ToString(bytes32 x) constant returns (string) {
+    function bytes32ToString(bytes32 x) pure public returns (string memory) {
         bytes memory bytesString = new bytes(32);
 
         bytesString = abi.encodePacked(x);

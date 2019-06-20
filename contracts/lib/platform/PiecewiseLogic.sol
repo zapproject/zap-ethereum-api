@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 library PiecewiseLogic {
     function sumOfPowers(uint n, uint i) internal pure returns (uint) {
@@ -16,7 +16,7 @@ library PiecewiseLogic {
         return 0;
     }
 
-    function evaluateFunction(int[] curve, uint a, uint b) internal pure returns (int) {
+    function evaluateFunction(int[] memory curve, uint a, uint b) internal pure returns (int) {
         uint i = 0;
         int sum = 0;
 
@@ -50,7 +50,7 @@ library PiecewiseLogic {
         }
     }
 
-    function evaluatePiece(int[] curve, uint index, uint a, uint b) internal pure returns (int) {
+    function evaluatePiece(int[] memory curve, uint index, uint a, uint b) internal pure returns (int) {
         int sum = 0;
         uint len = uint(curve[index]);
         uint base = index + 1;
