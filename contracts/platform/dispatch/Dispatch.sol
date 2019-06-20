@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 // v1.0
 
 import "../../lib/ownership/Upgradable.sol";
@@ -111,9 +111,9 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @dev Called by user contract
     function query(
         address provider,           // data provider address
-        string userQuery,           // query string
+        string calldata userQuery,           // query string
         bytes32 endpoint,           // endpoint specifier ala 'smart_contract'
-        bytes32[] endpointParams    // endpoint-specific params
+        bytes32[] calldata endpointParams    // endpoint-specific params
         )
         external
         returns (uint256 id)
@@ -198,7 +198,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @dev Parameter-count specific method called by data provider in response
     function respondBytes32Array(
         uint256 id,
-        bytes32[] response
+        bytes32[] calldata response
     )
         external
         returns (bool)
@@ -217,7 +217,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @dev Parameter-count specific method called by data provider in response
     function respondIntArray(
         uint256 id,
-        int[] response
+        int[] calldata response
     )
         external
         returns (bool)
@@ -237,7 +237,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @dev Parameter-count specific method called by data provider in response
     function respond1(
         uint256 id,
-        string response
+        string calldata response
     )
         external
         returns (bool)
@@ -257,8 +257,8 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @dev Parameter-count specific method called by data provider in response
     function respond2(
         uint256 id,
-        string response1,
-        string response2
+        string calldata response1,
+        string calldata response2
     )
         external
         returns (bool)
@@ -279,9 +279,9 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @dev Parameter-count specific method called by data provider in response
     function respond3(
         uint256 id,
-        string response1,
-        string response2,
-        string response3
+        string calldata response1,
+        string calldata response2,
+        string calldata response3
     )
         external
         returns (bool)
@@ -302,10 +302,10 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
     /// @dev Parameter-count specific method called by data provider in response
     function respond4(
         uint256 id,
-        string response1,
-        string response2,
-        string response3,
-        string response4
+        string calldata response1,
+        string calldata response2,
+        string calldata response3,
+        string calldata response4
     )
         external
         returns (bool)
@@ -357,7 +357,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
 
     /// @dev get user specified query of request
     /// @param id request id
-    function getUserQuery(uint256 id) public view returns (string) {
+    function getUserQuery(uint256 id) public view returns (string memory) {
         return db.getString(keccak256(abi.encodePacked('queries', id, 'userQuery')));
     }
 
@@ -374,7 +374,7 @@ contract Dispatch is Destructible, DispatchInterface, Upgradable {
         address provider,
         address subscriber,
         bytes32 endpoint,
-        string userQuery,
+        string memory userQuery,
         bool onchainSubscriber
     )
         private

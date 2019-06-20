@@ -1,7 +1,7 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "./FactoryTokenInterface.sol";
 
 contract TokenFactoryInterface {
-    function create(string _name, string _symbol) public returns (FactoryTokenInterface);
+    function create(string memory _name, string memory _symbol) public returns (FactoryTokenInterface);
 }

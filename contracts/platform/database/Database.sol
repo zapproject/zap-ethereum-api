@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "./DatabaseInterface.sol";
 import "../../lib/ownership/Ownable.sol";
@@ -43,25 +43,25 @@ contract Database is Ownable, DatabaseInterface {
     }
 
     /*** Bytes ***/
-    function getBytes(bytes32 key) external view returns(bytes) {
+    function getBytes(bytes32 key) external view returns(bytes memory) {
         return data_bytes[key];
     }
 
-    function setBytes(bytes32 key, bytes value) external storageOnly {
+    function setBytes(bytes32 key, bytes calldata value) external storageOnly {
         data_bytes[key] = value;
     }
 
     /*** String ***/
-    function getString(bytes32 key) external view returns(string) {
+    function getString(bytes32 key) external view returns(string memory) {
         return string(data_bytes[key]);
     }
 
-    function setString(bytes32 key, string value) external storageOnly {
+    function setString(bytes32 key, string calldata value) external storageOnly {
         data_bytes[key] = bytes(value);
     }
 
     /*** Bytes Array ***/
-    function getBytesArray(bytes32 key) external view returns (bytes32[]) {
+    function getBytesArray(bytes32 key) external view returns (bytes32[] memory) {
         return data_bytesArray[key];
     }
 
@@ -81,12 +81,12 @@ contract Database is Ownable, DatabaseInterface {
         data_bytesArray[key][index] = value;
     }
 
-    function setBytesArray(bytes32 key, bytes32[] value) external storageOnly {
+    function setBytesArray(bytes32 key, bytes32[] calldata value) external storageOnly {
         data_bytesArray[key] = value;
     }
 
     /*** Int Array ***/
-    function getIntArray(bytes32 key) external view returns (int[]) {
+    function getIntArray(bytes32 key) external view returns (int[] memory) {
         return data_intArray[key];
     }
 
@@ -106,12 +106,12 @@ contract Database is Ownable, DatabaseInterface {
         data_intArray[key][index] = value;
     }
 
-    function setIntArray(bytes32 key, int[] value) external storageOnly {
+    function setIntArray(bytes32 key, int[] calldata value) external storageOnly {
         data_intArray[key] = value;
     }
 
     /*** Address Array ***/
-    function getAddressArray(bytes32 key) external view returns (address[]) {
+    function getAddressArray(bytes32 key) external view returns (address[] memory) {
         return data_addressArray[key];
     }
 
@@ -131,7 +131,7 @@ contract Database is Ownable, DatabaseInterface {
         data_addressArray[key][index] = value;
     }
 
-    function setAddressArray(bytes32 key, address[] value) external storageOnly {
+    function setAddressArray(bytes32 key, address[] calldata value) external storageOnly {
         data_addressArray[key] = value;
     }
 }

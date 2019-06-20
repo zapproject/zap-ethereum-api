@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 
 import "./Client.sol";
 import "../../platform/dispatch/DispatchInterface.sol";
@@ -31,7 +31,7 @@ contract TestProvider is OnChainProvider {
     RegistryInterface registry;
 
     // middleware function for handling queries
-    function receive(uint256 id, string userQuery, bytes32 endpoint, bytes32[] endpointParams, bool onchainSubscriber) external {
+    function receive(uint256 id, string calldata userQuery, bytes32 endpoint, bytes32[] calldata endpointParams, bool onchainSubscriber) external {
         emit RecievedQuery(userQuery, endpoint, endpointParams);
         if(AM_A_BAD_ORACLE) return;
         bytes32 _endpoint = endpoint;
@@ -73,19 +73,19 @@ contract TestProvider is OnChainProvider {
 
 
     // return Hello World to query-maker
-    function endpoint1(uint256 id, string /* userQuery */, bytes32[] /* endpointParams */) internal{
+    function endpoint1(uint256 id, string memory/* userQuery */, bytes32[] memory /* endpointParams */) internal{
         DispatchInterface(msg.sender).respond1(id, "Hello World");
     }
 
     // return the hash of the query
-    function endpoint2(uint256 id, string userQuery, bytes32[] /* endpointParams */) internal{
+    function endpoint2(uint256 id, string memory userQuery, bytes32[] memory /* endpointParams */) internal{
         // endpointParams
         string memory reversed = reverseString(userQuery);
         DispatchInterface(msg.sender).respond1(id, reversed);
     }
 
      // returns the sum of all values in endpointParams
-    function endpoint3(uint256 id, string /* userQuery */, bytes32[] endpointParams) internal{
+    function endpoint3(uint256 id, string memory /* userQuery */, bytes32[] memory endpointParams) internal{
         uint sum = 0;
         for(uint i = 0; i<endpointParams.length; i++){
             uint value = uint(endpointParams[i]);
@@ -99,11 +99,11 @@ contract TestProvider is OnChainProvider {
     }
 
     // returns the sum of all values in endpointParams
-    function endpoint4(uint256 id, string /* userQuery */, bytes32[] /* endpointParams */) internal{
+    function endpoint4(uint256 id, string memory /* userQuery */, bytes32[] memory /* endpointParams */) internal{
         DispatchInterface(msg.sender).respond2(id, "Hello", "World");
     }
 
-    function reverseString(string _base) internal pure returns (string){
+    function reverseString(string memory _base) internal pure returns (string memory){
         bytes memory _baseBytes = bytes(_base);
         string memory _tempValue = new string(_baseBytes.length);
         bytes memory _newValue = bytes(_tempValue);
@@ -116,7 +116,7 @@ contract TestProvider is OnChainProvider {
     }
 
 
-    function bytes32ToString (bytes32 data) internal pure returns (string) {
+    function bytes32ToString (bytes32 data) internal pure returns (string memory) {
         bytes memory bytesString = new bytes(32);
         for (uint j=0; j<32; j++) {
             byte char = byte(bytes32(uint(data) * 2 ** (8 * j)));
@@ -152,24 +152,24 @@ contract TestClient is Client1, Client2{
     /*
     Implements overloaded callback functions for Client1
     */
-    function callback(uint256 id, string response1) external {
+    function callback(uint256 id, string calldata response1) external {
         string memory _response1 = response1;
         emit Result1(id, _response1);
         // do something with result
     }
 
-    function callback(uint256 id, bytes32[] response) external {
+    function callback(uint256 id, bytes32[] calldata response) external {
         emit Result1(id, response[0]);
         // do something with result
     }
 
     // Client2 callback
-    function callback(uint256 id, string response1, string response2) external {
+    function callback(uint256 id, string calldata response1, string calldata response2) external {
         emit Result2(id, response1, response2);
         // do something with result
     }
 
-    function testQuery(address oracleAddr, string query, bytes32 specifier, bytes32[] params) external returns (uint256) {
+    function testQuery(address oracleAddr, string calldata query, bytes32 specifier, bytes32[] calldata params) external returns (uint256) {
         uint256 id = dispatch.query(oracleAddr, query, specifier, params);
         emit MadeQuery(oracleAddr, query, id);
         return id;
