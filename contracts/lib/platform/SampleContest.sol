@@ -104,12 +104,6 @@ contract SampleContest is Ownable {
         emit Initialized(oracle);
     }
 
-    // function close() onlyOwner {
-    //     status = ContestStatus.ReadyToSettle;
-    //     expired = block.number + ttl;
-    //     emit Closed();
-    // }
-
     function judge(bytes32 endpoint) {
         require( status == ContestStatus.Initialized, "Contest not initialized" );
         require( msg.sender == oracle, "Only designated Oracle can judge");
@@ -200,8 +194,6 @@ contract SampleContest is Ownable {
 
     //whether this contract holds tokens or coming from msg.sender,etc
     function unbond(bytes32 endpoint, uint numDots) public returns(uint256) {
-
-        require(status == ContestStatus.Settled, "not ready");
 
         bondage = BondageInterface(coord.getContract("BONDAGE"));
         uint issued = bondage.getDotsIssued(address(this), endpoint);
