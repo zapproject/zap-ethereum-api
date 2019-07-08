@@ -7,12 +7,12 @@ import "../../platform/registry/RegistryInterface.sol";
 import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 
 /*
-Contest where users can bond to contestant curves which mint tokens( unbondabe*),
+Fundsaising where users can bond to contestant curves which mint tokens( unbondabe*),
 winner decided by oracle
 contract unbonds from loser curves
-holders of winning token allowed to take share of reserve token(zap) which was unbonded from loser curves
+winner takes all of fund
 
-Starting Contest:
+Starting Fundsaising Contest:
 
     deploys with contest uninitialized: status = Uninitialized
 
@@ -20,16 +20,18 @@ Starting Contest:
 
     owner initializes contest with oracle: status = Initialized
 
-Ending Contest:
+Expired :
+    When Oracle fails to respond in time
+    contract will unbond from all Endpoints
+    All users will be able to unbond to receive what they have paid
 
-    owner calls close: status = ReadyToSettle
+Resolve Funding Contest:
 
-    oracle calls judge to set winning curve: status = Judged
+    owner calls query to data provider oracle.
 
-    anyone calls settle, contest unbonds from losing curves: status = Settled
+    Data provider oracle respond with data, trigger judge function to set winning curve
 
-    holders of winnning token call redeem to retrieve their share of reserve token
-    based on their holding of winning token
+    anyone calls settle, contest unbonds from all curves, winner endpoint owner receive all funds
 
     *holders of winning token can optionally unbond
 */
@@ -58,8 +60,9 @@ contract SampleContest is Ownable {
 
     mapping(bytes32 => address) public curves; // map of endpoint specifier to token-backed dotaddress
     bytes32[] public curves_list; // array of endpoint specifiers
+    mapping(bytes32 => address) public curvesOwner
 
-    mapping(address => uint8) public redeemed; // map of address redemption state
+    mapping(address => uint8) public redeemed; // map of address redemption amount in case of expired
     address[] public redeemed_list;
 
     event DotTokenCreated(address tokenAddress);
@@ -102,6 +105,28 @@ contract SampleContest is Ownable {
         ttl = _ttl + block.number;
         status = ContestStatus.Initialized;
         emit Initialized(oracle);
+    }
+
+  /// TokenDotFactory methods
+
+    function initializeCurve(
+        bytes32 endpoint,
+        bytes32 symbol,
+        int256[] curve
+    ) public returns(address) {
+        // require(status==ContestStatus.Initialized,"Contest is not initalized")
+        require(curves[endpoint] == 0, "Curve endpoint already exists or used in the past. Please choose a new endpoint");
+
+        RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY"));
+        registry.initiateProviderCurve(endpoint, curve, address(this));
+
+        curves[endpoint] = newToken(bytes32ToString(endpoint), bytes32ToString(symbol));
+        curves_list.push(endpoint);
+        curvesOwner[endpoint]=msg.sender;
+        registry.setProviderParameter(endpoint, toBytes(curves[endpoint]));
+
+        DotTokenCreated(curves[endpoint]);
+        return curves[endpoint];
     }
 
     function judge(bytes32 endpoint) {
@@ -168,26 +193,6 @@ contract SampleContest is Ownable {
         emit Reset();
     }
 
-/// TokenDotFactory methods
-
-    function initializeCurve(
-        bytes32 endpoint,
-        bytes32 symbol,
-        int256[] curve
-    ) public returns(address) {
-        // require(status==ContestStatus.Initialized,"Contest is not initalized")
-        require(curves[endpoint] == 0, "Curve endpoint already exists or used in the past. Please choose a new endpoint");
-
-        RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY"));
-        registry.initiateProviderCurve(endpoint, curve, address(this));
-
-        curves[endpoint] = newToken(bytes32ToString(endpoint), bytes32ToString(symbol));
-        curves_list.push(endpoint);
-        registry.setProviderParameter(endpoint, toBytes(curves[endpoint]));
-
-        DotTokenCreated(curves[endpoint]);
-        return curves[endpoint];
-    }
 
     //whether this contract holds tokens or coming from msg.sender,etc
     function bond(bytes32 endpoint, uint numDots) public  {
