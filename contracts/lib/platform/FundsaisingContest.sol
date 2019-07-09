@@ -72,8 +72,8 @@ contract SampleContest is Ownable {
     event Initialized(address indexed oracle);
     event Closed();
     event Judged(bytes32 winner);
-    event Settled(uint256 winValue, uint256 winTokens);
-    event Expired(bytes32 endpoint, uint256 totalDots);
+    event Settled(address indexed winnerAddress, bytes32 indexed winnerEndpoint);
+    event Expired(bytes32 indexed endpoint, uint256 indexed totalDots);
     event Reset();
 
     constructor(
@@ -129,71 +129,6 @@ contract SampleContest is Ownable {
         return curves[endpoint];
     }
 
-    function judge(bytes32 endpoint) {
-
-        require(status!=ContestStatus.Expired, "Contest is already in Expired state, ready to unbond");
-
-        if(block.number > ttl ){ //expired
-            status=ContestStatus.Expired;
-            emit Expired(endpoint,ttl);
-        }
-        else{
-          require( status == ContestStatus.Initialized, "Contest not initialized" );
-          require( msg.sender == oracle, "Only designated Oracle can judge");
-          winner = endpoint;
-          status = ContestStatus.Judged;
-          emit Judged(winner);
-        }
-    }
-
-    function settle() public {
-        if(status===ContestStatus.Expired){
-          for(uint256 i = 0; i<curves_list.length; i++){
-            uint256 numDots = bondage.getDotsIssued(address(this), curves_list[i]);
-            if(numDots>0){
-              bondage.unbond(address(this), curves_list[i], numDots);
-            }
-            emit Expired(curves_list[i],numDots);
-          }
-        }
-        else{
-          require( status == ContestStatus.Judged, "winner not determined");
-          // how many winning dots
-          uint256 numWin =  bondage.getDotsIssued(address(this), winner);
-          // redeemable value of each dot token
-          uint256 dots;
-          for( uint256 i = 0; i < curves_list.length; i++) {
-            if(curves_list[i]!=winner){
-              dots =  bondage.getDotsIssued(address(this), curves_list[i]);
-              if( dots > 0) {
-                  bondage.unbond(address(this), curves_list[i], dots);
-              }
-            }
-          }
-          winValue = reserveToken.balanceOf(address(this)) / numWin;
-
-          status = ContestStatus.Settled;
-          emit Settled(winValue, numWin);
-        }
-    }
-
-
-    //TODO ensure all has been redeemed or enough time has elasped
-    function reset() public {
-        require(msg.sender == oracle);
-        //todo balance is 0
-        require(status == ContestStatus.Settled || status == ContestStatus.Canceled, "contest not settled");
-        if( status == ContestStatus.Canceled ) {
-            require(reserveToken.balanceOf(address(this)) == 0, "funds remain");
-        }
-
-        delete redeemed_list;
-        delete curves_list;
-        status = ContestStatus.Initialized;
-        emit Reset();
-    }
-
-
     //whether this contract holds tokens or coming from msg.sender,etc
     function bond(bytes32 endpoint, uint numDots) public  {
         require( status == ContestStatus.Initialized, " contest is not initiated");
@@ -214,7 +149,66 @@ contract SampleContest is Ownable {
         emit Bonded(endpoint, numDots, msg.sender);
     }
 
-    //whether this contract holds tokens or coming from msg.sender,etc
+    function judge(bytes32 endpoint) external {
+
+        require(status!=ContestStatus.Expired, "Contest is already in Expired state, ready to unbond");
+
+        if(block.number > ttl ){ //expired
+          status=ContestStatus.Expired;
+        }
+        else{
+          require( status == ContestStatus.Initialized, "Contest not initialized" );
+          require( msg.sender == oracle, "Only designated Oracle can judge");
+          winner = endpoint;
+          status = ContestStatus.Judged;
+          emit Judged(winner);
+        }
+    }
+
+    function settle() public {
+        if(status===ContestStatus.Expired || block.number>ttl){
+          for(uint256 i = 0; i<curves_list.length; i++){
+            uint256 numDots = bondage.getDotsIssued(address(this), curves_list[i]);
+            if(numDots>0){
+              bondage.unbond(address(this), curves_list[i], numDots);
+            }
+            emit Expired(curves_list[i],numDots);
+          }
+          status=ContestStatus.Expired;
+        }
+        else{
+          require( status == ContestStatus.Judged, "winner not determined");
+          uint256 dots;
+          for( uint256 i = 0; i < curves_list.length; i++) {
+            dots =  bondage.getDotsIssued(address(this), curves_list[i]);
+            if( dots > 0) {
+                bondage.unbond(address(this), curves_list[i], dots);
+            }
+          }
+          address winnerAddress = curvesOwner[winner];
+
+          status = ContestStatus.Settled;
+          emit Settled(winnerAddress,winner);
+        }
+    }
+
+
+    //TODO ensure all has been redeemed or enough time has elasped
+    function reset() public {
+        require(msg.sender == oracle);
+        //todo balance is 0
+        require(status == ContestStatus.Settled || status == ContestStatus.Canceled, "contest not settled");
+        if( status == ContestStatus.Canceled ) {
+            require(reserveToken.balanceOf(address(this)) == 0, "funds remain");
+        }
+
+        delete redeemed_list;
+        delete curves_list;
+        status = ContestStatus.Initialized;
+        emit Reset();
+    }
+
+    // If the contract is expired, users can call unbond to get refund back
     function unbond(bytes32 endpoint) public returns(uint256) {
 
         uint issued = bondage.getDotsIssued(address(this), endpoint);
@@ -251,9 +245,7 @@ contract SampleContest is Ownable {
             emit Unbonded(endpoint, reserveCost, msg.sender);
             return reserveCost;
         }
-
         else {
-
             require( status == ContestStatus.Settled, " contest not settled");
             require(redeemed[msg.sender] == 0, "already redeeemed");
             require(winner==endpoint, "only winners can unbond for rewards");
