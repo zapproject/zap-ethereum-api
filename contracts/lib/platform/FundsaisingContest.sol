@@ -36,7 +36,7 @@ Resolve Funding Contest:
     *holders of winning token can optionally unbond
 */
 
-contract SampleContest is Ownable {
+contract FundRaisingContest is Ownable {
 
     CurrentCostInterface currentCost;
     FactoryTokenInterface public reserveToken;
@@ -62,7 +62,7 @@ contract SampleContest is Ownable {
     bytes32[] public curves_list; // array of endpoint specifiers
     mapping(bytes32 => address) public beneficiaries; // beneficiaries of endpoint that participate in funding contest
 
-    mapping(address => uint8) public redeemed; // map of address redemption amount in case of expired
+    mapping(address => uint256) public redeemed; // map of address redemption amount in case of expired
     address[] public redeemed_list;
 
     event DotTokenCreated(address tokenAddress);
@@ -124,10 +124,9 @@ contract SampleContest is Ownable {
 
         curves[endpoint] = newToken(bytes32ToString(endpoint), bytes32ToString(symbol));
         curves_list.push(endpoint);
-        curvesOwner[endpoint]=msg.sender;
         registry.setProviderParameter(endpoint, toBytes(curves[endpoint]));
-        registry.setProviderParameter(endpoint,beneficiary);
-        DotTokenCreated(curves[endpoint]);
+        beneficiaries[endpoint]=beneficiary;
+        emit DotTokenCreated(curves[endpoint]);
         return curves[endpoint];
     }
 
@@ -142,6 +141,7 @@ contract SampleContest is Ownable {
             reserveToken.transferFrom(msg.sender, address(this), numReserve),
             "insufficient accepted token numDots approved for transfer"
         );
+        redeemed[msg.sender]=numReserve;
 
         reserveToken.approve(address(bondage), numReserve);
         bondage.bond(address(this), endpoint, numDots);
@@ -170,7 +170,7 @@ contract SampleContest is Ownable {
     Else -> allow unbond for winner
     */
     function settle() public {
-        if(status===ContestStatus.Expired || block.number>ttl){//expired
+        if(status == ContestStatus.Expired || block.number>ttl){//expired
           for(uint256 i = 0; i<curves_list.length; i++){
             uint256 numDots = bondage.getDotsIssued(address(this), curves_list[i]);
             if(numDots>0){ //unbond from this address for all
@@ -187,13 +187,12 @@ contract SampleContest is Ownable {
           for( uint256 i = 0; i < curves_list.length; i++) {
             dots =  bondage.getDotsIssued(address(this), curves_list[i]);
             if( dots > 0) {
-                require(bondage.unbond(address(this), curves_list[i], dots), "Unbond failed");
+                bondage.unbond(address(this), curves_list[i], dots);
             }
             uint256 numWin = bondage.getDotsIssued(address(this), winner);
-            winValue = reserveToken.balanceOf(address(this)) / numWim;
+            winValue = reserveToken.balanceOf(address(this)) / numWin;
           }
           status = ContestStatus.Settled;
-          emit Settled(winValue,numWin);
         }
     }
 
@@ -202,8 +201,8 @@ contract SampleContest is Ownable {
     function reset() public {
         require(msg.sender == oracle);
         //todo balance is 0
-        require(status == ContestStatus.Settled || status == ContestStatus.Canceled, "contest not settled");
-        if( status == ContestStatus.Canceled ) {
+        require(status == ContestStatus.Settled || status == ContestStatus.Expired, "contest not settled");
+        if( status == ContestStatus.Expired ) {
             require(reserveToken.balanceOf(address(this)) == 0, "funds remain");
         }
 
@@ -233,10 +232,10 @@ contract SampleContest is Ownable {
             uint256 tokensBalance = curveToken.balanceOf(msg.sender);
             require(tokensBalance>0, "Unsufficient balance to redeem");
             // transfer back to user what they paid
-            uint256 reserveCost = reserves[endpoint][msg.sender];
+            uint256 reserveCost = redeemed[msg.sender];
             require(reserveCost>0,"No funding found");
 
-            require(curveToken.burnFrom(msg.sender, tokensBalance), "Failed to burn token");
+            curveToken.burnFrom(msg.sender, tokensBalance);
             require(reserveToken.transfer(msg.sender, reserveCost), "transfer failed");
 
             emit Unbonded(endpoint, reserveCost, msg.sender);
@@ -257,7 +256,7 @@ contract SampleContest is Ownable {
             uint256 funderReward = reward + reserveCost;
 
             //burn user's unbonded tokens
-            curveToken.approve(address(this),token);
+            curveToken.approve(address(this),tokensBalance);
             curveToken.burnFrom(msg.sender, tokensBalance);
 
             require(reserveToken.transfer(msg.sender, funderReward),"Failed to send to funder");

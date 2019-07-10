@@ -13,7 +13,7 @@ contract GitFundContest is Ownable, ClientIntArray {
   address public owner;
   uint256 public query_id;
   uint256 public startPrice;
-  bytes32[] public endpoints
+  bytes32[] public endpoints;
 
   constructor(
     address _cord,
@@ -48,7 +48,7 @@ contract GitFundContest is Ownable, ClientIntArray {
 
 
 
-  function callback(uint256 _id, string _endpoint) external {
+  function callback(uint256 _id, bytes32 _endpoint) external {
     address dispatchAddress = coordinator.getContract("DISPATCH");
     require(address(msg.sender)==address(dispatchAddress),"Only accept response from dispatch");
     require(contest.getStatus()==1,"Contest is not in initialized state"); //2 is the ReadyToSettle enum value
