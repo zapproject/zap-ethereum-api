@@ -146,7 +146,7 @@ contract SampleContest is Ownable {
         emit Bonded(endpoint, numDots, msg.sender);
     }
 
-    function redeem() public returns(uint256) {
+    function unbond() public returns(uint256) {
 
 
         if( status == ContestStatus.Expired) {
