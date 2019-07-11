@@ -46,8 +46,6 @@ contract GitFundContest is Ownable, ClientBytes32Array {
     return queryId;
   }
 
-
-
   function callback(uint256 _id, bytes32[] _endpoints) external {
     address dispatchAddress = coordinator.getContract("DISPATCH");
     require(address(msg.sender)==address(dispatchAddress),"Only accept response from dispatch");

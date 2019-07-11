@@ -60,6 +60,7 @@ contract FundingContest is Ownable {
     mapping(bytes32 => address) public curves; // map of endpoint specifier to token-backed dotaddress
     bytes32[] public curves_list; // array of endpoint specifiers
     mapping(bytes32 => address) public beneficiaries; // beneficiaries of endpoint that participate in funding contest
+    mapping(bytes32 => address) public curve_creators; 
 
     mapping(address => uint256) public redeemed; // map of address redemption amount in case of expired
     address[] public redeemed_list;
@@ -84,8 +85,7 @@ contract FundingContest is Ownable {
         coord = ZapCoordinatorInterface(coordinator);
         reserveToken = FactoryTokenInterface(coord.getContract("ZAP_TOKEN"));
         bondage = BondageInterface(coord.getContract("BONDAGE"));
-        currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
-        //always allow bondage to transfer from wallet
+        currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST")); //always allow bondage to transfer from wallet
         reserveToken.approve(bondage, ~uint256(0));
         tokenFactory = TokenFactoryInterface(factory);
 
@@ -112,8 +112,7 @@ contract FundingContest is Ownable {
     function initializeCurve(
         bytes32 endpoint,
         bytes32 symbol,
-        int256[] curve,
-        address beneficiary
+        int256[] curve
     ) public returns(address) {
         // require(status==ContestStatus.Initialized,"Contest is not initalized")
         require(curves[endpoint] == 0, "Curve endpoint already exists or used in the past. Please choose a new endpoint");
@@ -124,9 +123,9 @@ contract FundingContest is Ownable {
         curves[endpoint] = newToken(bytes32ToString(endpoint), bytes32ToString(symbol));
         curves_list.push(endpoint);
         registry.setProviderParameter(endpoint, toBytes(curves[endpoint]));
-        beneficiaries[endpoint]=beneficiary;
         emit DotTokenCreated(curves[endpoint]);
-        return curves[endpoint];
+	curve_creators[endpoint] = msg.sender;
+	return curves[endpoint];
     }
 
     //whether this contract holds tokens or coming from msg.sender,etc
@@ -306,6 +305,13 @@ contract FundingContest is Ownable {
       }
       return false;
     }
+
+    function setBeneficiary(bytes32 endpoint, address b) { 
+       require(beneficiaries[endpoint] == 0, "Beneficiary already set for this curve");
+       require(curve_creators[endpoint] == msg.sender, "Only curve creator can set beneficiary address");
+       beneficiaries[endpoint] = b;
+    }
+
 
     // https://ethereum.stackexchange.com/questions/884/how-to-convert-an-address-to-bytes-in-solidity
     function toBytes(address x) public pure returns (bytes b) {
