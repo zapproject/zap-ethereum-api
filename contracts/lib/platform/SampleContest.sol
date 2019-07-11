@@ -1,3 +1,5 @@
+pragma solidity ^0.4.25;
+
 import "../token/TokenFactoryInterface.sol";
 import "../token/FactoryTokenInterface.sol";
 import "../ownership/ZapCoordinatorInterface.sol";
@@ -59,7 +61,7 @@ contract SampleContest is Ownable {
     mapping(bytes32 => address) public curves; // map of endpoint specifier to token-backed dotaddress
     bytes32[] public curves_list; // array of endpoint specifiers
 
-    mapping(address => uint8) public redeemed; // map of address redemption state
+    mapping(address => uint256) public redeemed; // map of address redemption state
     address[] public redeemed_list;
 
     event DotTokenCreated(address tokenAddress);
@@ -82,6 +84,7 @@ contract SampleContest is Ownable {
         coord = ZapCoordinatorInterface(coordinator);
         reserveToken = FactoryTokenInterface(coord.getContract("ZAP_TOKEN"));
         bondage = BondageInterface(coord.getContract("BONDAGE"));
+        currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
         //always allow bondage to transfer from wallet
         reserveToken.approve(bondage, ~uint256(0));
         tokenFactory = TokenFactoryInterface(factory);
@@ -121,7 +124,7 @@ contract SampleContest is Ownable {
         curves_list.push(endpoint);
         registry.setProviderParameter(endpoint, toBytes(curves[endpoint]));
 
-        DotTokenCreated(curves[endpoint]);
+        emit DotTokenCreated(curves[endpoint]);
         return curves[endpoint];
     }
 
@@ -131,8 +134,7 @@ contract SampleContest is Ownable {
 
         uint256 issued = bondage.getDotsIssued(address(this), endpoint);
 
-        CurrentCostInterface cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
-        uint256 numReserve = cost._costOfNDots(address(this), endpoint, issued + 1, numDots - 1);
+        uint256 numReserve = currentCost._costOfNDots(address(this), endpoint, issued + 1, numDots - 1);
 
         require(
             reserveToken.transferFrom(msg.sender, address(this), numReserve),
@@ -147,51 +149,51 @@ contract SampleContest is Ownable {
     }
 
     function unbond(bytes32 endpoint) public returns(uint256) {
-        uint tokensBalance;
+      uint256 issued = bondage.getDotsIssued(address(this), endpoint);
+      uint256 reserveCost;
+      uint256 tokensBalance;
+      FactoryTokenInterface curveToken = FactoryTokenInterface(getTokenAddress(endpoint));
 
-        if( status == ContestStatus.Expired) {
-            //this mean settle has been called and already unbond to all endpoints
+      if( status == ContestStatus.Initialized || status == ContestStatus.Expired) {
+          //oracle has taken too long to judge winner so unbonds will be allowed for all
+          require(block.number > ttl, "oracle query not expired.");
+          // require(status == ContestStatus.Settled, "contest not settled");
+          status = ContestStatus.Expired;
 
-            //burn dot backed token
-            tokensBalance = curveToken.balanceOf(msg.sender);
-            curveToken.burnFrom(msg.sender, tokensBalance);
+          //burn dot backed token
+          tokensBalance = curveToken.balanceOf(msg.sender);
+          require(tokensBalance>0, "Unsufficient balance to redeem");
+          // transfer back to user what they paid
+          reserveCost = redeemed[msg.sender];
+          require(reserveCost>0,"No funding found");
 
-            // transfer back to user what they paid
-            uint256 redeemAmount = redeemed[msg.sender];
-            if(redeemAmount>0){
-              require(reserveToken.transfer(msg.sender, reserveCost), "transfer failed");
-              emit Unbonded(endpoint, reserveCost, msg.sender);
-            }
-            return redeemAmount;
-        }
-        else {
-          //not expired and Settled has been called, winners can unbond
+          curveToken.burnFrom(msg.sender, tokensBalance);
+          require(reserveToken.transfer(msg.sender, reserveCost), "transfer failed");
 
-            require( status == ContestStatus.Settled, " contest not settled");
-            require(winner==endpoint, "only winners can unbond for rewards");
+          emit Unbonded(endpoint, reserveCost, msg.sender);
+          return reserveCost;
+      }
+      else {
+          require( status == ContestStatus.Settled, " contest not settled");
+          require(winner==endpoint, "only winners can unbond for rewards");
+          //
+          tokensBalance = curveToken.balanceOf(msg.sender);
+          require(tokensBalance>0, "Unsufficient balance to redeem");
+          // //get reserve value to send
+          reserveCost = currentCost._costOfNDots(address(this), endpoint, issued + 1 - tokensBalance, tokensBalance - 1);
+          //
+          // //reward user's winning tokens unbond value + share of losing curves reserve token proportional to winning token holdings
+          //
+          uint256 reward = ( winValue * tokensBalance ) + reserveCost;
 
-            FactoryTokenInterface curveToken = FactoryTokenInterface(curves[winner]);
-            tokensBalance = curveToken.balanceOf(msg.sender);
-            require(tokensBalance>0, "Unsufficient balance to redeem");
+          //burn user's unbonded tokens
+          require(bondage.unbond(address(this), winner,tokensBalance)>0,"fail to unbond");
+          curveToken.approve(address(this),tokensBalance);
+          curveToken.burnFrom(msg.sender, tokensBalance);
 
-            currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
-            uint issued = bondage.getDotsIssued(address(this), winner);
-
-
-            //get reserve value to send
-            uint reserveCost = currentCost._costOfNDots(address(this), winner, issued + 1 - tokensBalance, tokensBalance - 1);
-
-            //reward user's winning tokens unbond value + share of losing curves reserve token proportional to winning token holdings
-            uint reward = ( winValue * FactoryTokenInterface(getTokenAddress(winner)).balanceOf(msg.sender) ) + reserveCost;
-
-            //burn user's unbonded tokens
-            // curveToken.approve(address(this),numDots); TODO ??
-            curveToken.burnFrom(msg.sender, tokensBalance);
-
-            reserveToken.transfer(msg.sender, reward);
-
-            return reward;
-        }
+          require(reserveToken.transfer(msg.sender, reward),"Failed to send reward");
+          return reward;
+      }
     }
 
     function newToken(
@@ -207,7 +209,7 @@ contract SampleContest is Ownable {
     }
 
 
-    function judge(bytes32 endpoint) {
+    function judge(bytes32 endpoint) external {
 
         require(status!=ContestStatus.Expired, "Contest is already in Expired state, ready to unbond");
 
@@ -226,7 +228,7 @@ contract SampleContest is Ownable {
 
 
     function settle() public {
-        if(status == ContestStatus.Expired){
+        if(status == ContestStatus.Expired || block.number > ttl){
           for(uint256 i = 0; i<curves_list.length; i++){
             //unbond all the endpoints
             uint256 numDots = bondage.getDotsIssued(address(this), curves_list[i]);
@@ -240,12 +242,15 @@ contract SampleContest is Ownable {
           require( status == ContestStatus.Judged, "winner not determined");
           // how many winning dots
           uint256 numWin =  bondage.getDotsIssued(address(this), winner);
+          require(numWin>0,"No dots to settle");
           // redeemable value of each dot token
           uint256 dots;
-          for( uint256 i = 0; i < curves_list.length; i++) {
-            dots =  bondage.getDotsIssued(address(this), curves_list[i]);
-            if( dots > 0) {
-                bondage.unbond(address(this), curves_list[i], dots);
+          for( uint256 j = 0; j < curves_list.length; j++) {
+            if(curves_list[j]!=winner){
+              dots =  bondage.getDotsIssued(address(this), curves_list[j]);
+              if( dots > 0) {
+                  bondage.unbond(address(this), curves_list[j], dots);
+              }
             }
           }
           winValue = reserveToken.balanceOf(address(this)) / numWin;
