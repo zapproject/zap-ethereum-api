@@ -17,6 +17,7 @@ contract GitFundContest is Ownable, ClientBytes32Array {
   uint256 public startPrice;
   bytes32[] public endpoints;
   uint256 queryId;
+	uint256 start_time;
 
   constructor(
     address _cord,
@@ -31,7 +32,7 @@ contract GitFundContest is Ownable, ClientBytes32Array {
     dispatch = DispatchInterface(dispatchAddress);
     FactoryTokenInterface reserveToken = FactoryTokenInterface(coordinator.getContract("ZAP_TOKEN"));
     reserveToken.approve(address(bondageAddress),~uint256(0));
-
+		start_time = now;
   }
 
   function bondToGitOracle(address _gitOracle,bytes32 _endpoint,uint256 _numDots)public returns (bool){
@@ -41,8 +42,14 @@ contract GitFundContest is Ownable, ClientBytes32Array {
   }
   function queryToSettle(address _gitOracle,bytes32 _endpoint) public returns(uint256){
     require(msg.sender == owner, "Only owner can call query to settle");
-    bytes32[] memory params = contest.getEndpoints();
-    queryId = dispatch.query(_gitOracle,"GitCommitsQuery",_endpoint,params);
+		bytes32[] memory params = new bytes32[]( contest.getEndpoints().length + 1);
+		params[0] = bytes32(now); // for the timestamp
+		bytes32[] memory tmp_params = contest.getEndpoints();
+		for ( uint i = 1; i < tmp_params.length; i++) {
+				params[i] = tmp_params[i-1];
+		}
+
+		queryId = dispatch.query(_gitOracle,"GitCommits",_endpoint,params);
     return queryId;
   }
 
@@ -54,5 +61,6 @@ contract GitFundContest is Ownable, ClientBytes32Array {
     return contest.judge(_endpoints[0]);
 
   }
+
 
 }

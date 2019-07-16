@@ -105,8 +105,10 @@ contract('GitFund', function (accounts) {
 
       	let tx;//tmp var for event tracking
 
-      	await fundingContest.initializeCurve(projectEndpointA,projectEndpointA, piecewiseFunction, beneficiaryA);
-      	await fundingContest.initializeCurve(projectEndpointB,projectEndpointB, piecewiseFunction, beneficiaryB);
+      	await fundingContest.initializeCurve(projectEndpointA,projectEndpointA, piecewiseFunction);
+      	await fundingContest.setBeneficiary(projectEndpointA, beneficiaryA);
+      	await fundingContest.initializeCurve(projectEndpointB,projectEndpointB, piecewiseFunction);
+      	await fundingContest.setBeneficiary(projectEndpointB, beneficiaryB);
         console.log("funding contest", fundingContest.address)
         let gitFund = await GitFund.new(this.test.coord.address,fundingContest.address);
         // await this.test.token.allocate(gitOracleOwner, tokensAllocation);
@@ -188,8 +190,11 @@ contract('GitFund', function (accounts) {
 
         let ttl = 0;//expired right away
 
-        await fundingContest.initializeCurve(projectEndpointA,projectEndpointA, piecewiseFunction, beneficiaryA);
-        await fundingContest.initializeCurve(projectEndpointB,projectEndpointB, piecewiseFunction, beneficiaryB);
+				await fundingContest.initializeCurve(projectEndpointA,projectEndpointA, piecewiseFunction);
+      	await fundingContest.setBeneficiary(projectEndpointA, beneficiaryA);
+      	await fundingContest.initializeCurve(projectEndpointB,projectEndpointB, piecewiseFunction);
+      	await fundingContest.setBeneficiary(projectEndpointB, beneficiaryB);
+
         console.log("funding contest", fundingContest.address)
         let gitFund = await GitFund.new(this.test.coord.address,fundingContest.address);
 
