@@ -124,8 +124,8 @@ contract FundingContest is Ownable {
         curves_list.push(endpoint);
         registry.setProviderParameter(endpoint, toBytes(curves[endpoint]));
         emit DotTokenCreated(curves[endpoint]);
-	curve_creators[endpoint] = msg.sender;
-	return curves[endpoint];
+				curve_creators[endpoint] = msg.sender;
+				return curves[endpoint];
     }
 
     //whether this contract holds tokens or coming from msg.sender,etc
