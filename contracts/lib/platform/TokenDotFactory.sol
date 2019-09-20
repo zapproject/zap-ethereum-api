@@ -14,8 +14,8 @@ contract TokenDotFactory is Ownable {
     TokenFactoryInterface public tokenFactory;
     BondageInterface bondage;
 
-    mapping(bytes32 => address) public curves;
-
+    mapping(bytes32 => address) public curves; // map of endpoint specifier to token-backed dotaddress
+    bytes32[] public curves_list; // array of endpoint specifiers
     event DotTokenCreated(address tokenAddress);
 
     constructor(
@@ -47,6 +47,7 @@ contract TokenDotFactory is Ownable {
 
         registry.initiateProviderCurve(specifier, curve, address(this));
         curves[specifier] = newToken(bytes32ToString(specifier), bytes32ToString(symbol));
+        curves_list.push(specifier);
         
         registry.setProviderParameter(specifier, toBytes(curves[specifier]));
         
@@ -82,21 +83,21 @@ contract TokenDotFactory is Ownable {
 
     //whether this contract holds tokens or coming from msg.sender,etc
     function unbond(bytes32 specifier, uint numDots) public {
+				require(1==2, "NO UNBONDING ALLOWED");
+        //bondage = BondageInterface(coord.getContract("BONDAGE"));
+        //uint issued = bondage.getDotsIssued(address(this), specifier);
 
-        bondage = BondageInterface(coord.getContract("BONDAGE"));
-        uint issued = bondage.getDotsIssued(address(this), specifier);
+        //currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
+        //uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
 
-        currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
-        uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
+        ////unbond dots
+        //bondage.unbond(address(this), specifier, numDots);
+        ////burn dot backed token
+        //FactoryTokenInterface curveToken = FactoryTokenInterface(curves[specifier]);
+        //curveToken.burnFrom(msg.sender, numDots);
 
-        //unbond dots
-        bondage.unbond(address(this), specifier, numDots);
-        //burn dot backed token
-        FactoryTokenInterface curveToken = FactoryTokenInterface(curves[specifier]);
-        curveToken.burnFrom(msg.sender, numDots);
-
-        require(reserveToken.transfer(msg.sender, reserveCost), "Error: Transfer failed");
-        Unbonded(specifier, numDots, msg.sender);
+        //require(reserveToken.transfer(msg.sender, reserveCost), "Error: Transfer failed");
+        //Unbonded(specifier, numDots, msg.sender);
 
     }
 
@@ -112,9 +113,13 @@ contract TokenDotFactory is Ownable {
         return tokenAddress;
     }
 
-    function getTokenAddress(bytes32 specifier) public view returns(address) {
-        RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY")); 
-        return bytesToAddr(registry.getProviderParameter(address(this), specifier));
+    function getTokenAddress(bytes32 endpoint) public view returns(address) {
+        RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY"));
+        return bytesToAddr(registry.getProviderParameter(address(this), endpoint));
+    }
+
+    function getEndpoints() public view returns(bytes32[]){
+      return curves_list;
     }
 
     // https://ethereum.stackexchange.com/questions/884/how-to-convert-an-address-to-bytes-in-solidity
