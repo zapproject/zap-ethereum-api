@@ -83,21 +83,20 @@ contract TokenDotFactory is Ownable {
 
     //whether this contract holds tokens or coming from msg.sender,etc
     function unbond(bytes32 specifier, uint numDots) public {
-				require(1==2, "NO UNBONDING ALLOWED");
-        //bondage = BondageInterface(coord.getContract("BONDAGE"));
-        //uint issued = bondage.getDotsIssued(address(this), specifier);
+        bondage = BondageInterface(coord.getContract("BONDAGE"));
+        uint issued = bondage.getDotsIssued(address(this), specifier);
 
-        //currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
-        //uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
+        currentCost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
+        uint reserveCost = currentCost._costOfNDots(address(this), specifier, issued + 1 - numDots, numDots - 1);
 
-        ////unbond dots
-        //bondage.unbond(address(this), specifier, numDots);
-        ////burn dot backed token
-        //FactoryTokenInterface curveToken = FactoryTokenInterface(curves[specifier]);
-        //curveToken.burnFrom(msg.sender, numDots);
+        //unbond dots
+        bondage.unbond(address(this), specifier, numDots);
+        //burn dot backed token
+        FactoryTokenInterface curveToken = FactoryTokenInterface(curves[specifier]);
+        curveToken.burnFrom(msg.sender, numDots);
 
-        //require(reserveToken.transfer(msg.sender, reserveCost), "Error: Transfer failed");
-        //Unbonded(specifier, numDots, msg.sender);
+        require(reserveToken.transfer(msg.sender, reserveCost), "Error: Transfer failed");
+        Unbonded(specifier, numDots, msg.sender);
 
     }
 
