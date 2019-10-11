@@ -196,4 +196,17 @@ contract('Registry', async (accounts) => {
 
         console.log(title0, title1);
     });
+
+    it("REGISTRY_19 - initiateCustomCurve() - Check that we can initiate custom curve", async function () {
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner }).should.be.fulfilled;
+        await this.test.registry.initiateCustomCurve(specifier, curve, emptyBroker, owner, { from: owner }).should.be.fulfilled;
+    });
+
+    it("REGISTRY_20 - initiateCustomCurve() - Check that we can't initiate custom curve if provider wasn't initiated", async function () {
+        await this.test.registry.initiateCustomCurve(specifier, curve, emptyBroker, owner, { from: owner }).should.be.rejectedWith(EVMRevert);
+
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner }).should.be.fulfilled;
+
+        await this.test.registry.initiateCustomCurve(specifier, [3, 0, 0, 0, 5, 100], emptyBroker, owner, { from: owner }).should.be.rejectedWith(EVMRevert);
+    });
 });

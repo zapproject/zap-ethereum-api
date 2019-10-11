@@ -5,6 +5,7 @@ import "../../platform/bondage/BondageInterface.sol";
 import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
 import "../../platform/registry/RegistryInterface.sol";
 import "../../platform/bondage/currentCost/CurrentCostInterface.sol";
+import "./TokenDotFactoryRegistry.sol";
 
 contract TokenDotFactory is Ownable {
 
@@ -32,6 +33,9 @@ contract TokenDotFactory is Ownable {
 
         RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY")); 
         registry.initiateProvider(providerPubKey, providerTitle);
+
+        TokenDotFactoryRegistry tdfRegistry = coord.getContract("TDF_REGISTRY");
+        tdfRegistry.register(this);
     }
 
     function initializeCurve(

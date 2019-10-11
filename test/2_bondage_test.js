@@ -50,9 +50,21 @@ contract('Bondage', function (accounts) {
         await this.token.approve(this.bondage.address, approveTokens, {from: subscriber}).should.be.fulfilled;
     }
 
+    async function prepareCustomProvider(provider = true, curve = true, account = oracle, curveParams = piecewiseFunction, bondBroker = broker) {
+        if (provider) await this.registry.initiateProvider(publicKey, title, {from: account});
+        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, bondBroker, this.customToken.address, {from: account});
+    }
+
+    async function prepareCustomTokens(allocAddress = subscriber) {
+        await this.customToken.allocate(owner, tokensForOwner, {from: owner}).should.be.fulfilled;
+        await this.customToken.allocate(allocAddress, tokensForSubscriber, {from: owner}).should.be.fulfilled;
+        await this.customToken.approve(this.bondage.address, approveTokens, {from: subscriber}).should.be.fulfilled;
+    }
+
     beforeEach(async function deployContracts() {
         // Deploy initial contracts
         this.currentTest.token = await ZapToken.new();
+        this.currentTest.customToken = await ZapToken.new();
         this.currentTest.coord = await ZapCoordinator.new();
         const owner = await this.currentTest.coord.owner();
         this.currentTest.db = await Database.new();
@@ -84,7 +96,6 @@ contract('Bondage', function (accounts) {
 
         await this.test.bondage.bond(oracle, specifier, dotBound, {from: subscriber});
     });
-
 
     it("BONDAGE_2 - bond() - Check that we can't bond oracle with unregistered provider", async function () {
         await prepareTokens.call(this.test);
@@ -422,6 +433,21 @@ contract('Bondage', function (accounts) {
         await this.test.bondage.bond(oracle, specifier, dotBound, { from: subscriber });
 
         await expect(this.test.registry.clearEndpoint( specifier, { from: oracle })).to.eventually.be.rejectedWith(EVMRevert);
+    });
+
+    it("BONDAGE_27 - bond() - Check bond function with custom token", async function () {
+        await prepareCustomProvider.call(this.test);
+        await prepareCustomTokens.call(this.test);
+
+        await this.test.bondage.bond(oracle, specifier, dotBound, {from: subscriber});
+    });
+
+    it("BONDAGE_28 - unbond() - Check unbond function with custom token", async function () {
+        await prepareCustomProvider.call(this.test);
+        await prepareCustomTokens.call(this.test);
+
+        await this.test.bondage.bond(oracle, specifier, 1, {from: subscriber}).should.be.fulfilled;
+        await this.test.bondage.unbond(oracle, specifier, 1, {from: subscriber}).should.be.fulfilled;
     });
 });
 
