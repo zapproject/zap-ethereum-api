@@ -63,16 +63,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         public
         returns (bool)
     {
-        // Provider must be initiated
-        require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
-        // Can't reset their curve
-        require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
-        // Can't initiate null endpoint
-        require(endpoint != bytes32(0), "Error: Can't initiate null endpoint");
-
-        setCurve(msg.sender, endpoint, curve);
-        db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
-        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(broker));
+        initializeCurve(endpoint, curve, broker);
 
         emit NewCurve(msg.sender, endpoint, curve, broker, address(0));
 
@@ -94,16 +85,8 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     public
     returns (bool)
     {
-        // Provider must be initiated
-        require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
-        // Can't reset their curve
-        require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
-        // Can't initiate null endpoint
-        require(endpoint != bytes32(0), "Error: Can't initiate null endpoint");
+        initializeCurve(endpoint, curve, broker);
 
-        setCurve(msg.sender, endpoint, curve);
-        db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
-        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(broker));
         db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'token')), bytes32(token));
 
         emit NewCurve(msg.sender, endpoint, curve, broker, token);
@@ -260,6 +243,25 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     /// @dev add new provider address to oracles array
     function addOracle(address provider) private {
         db.pushAddressArray(keccak256(abi.encodePacked('oracleIndex')), provider);
+    }
+
+    function initializeCurve(
+        bytes32 endpoint,
+        int256[] curve,
+        address broker
+    )
+        private
+    {
+        // Provider must be initiated
+        require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
+        // Can't reset their curve
+        require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
+        // Can't initiate null endpoint
+        require(endpoint != bytes32(0), "Error: Can't initiate null endpoint");
+
+        setCurve(msg.sender, endpoint, curve);
+        db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
+        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(broker));
     }
 
     /// @dev initialize new curve for provider

@@ -34,8 +34,8 @@ contract TokenDotFactory is Ownable {
         RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY")); 
         registry.initiateProvider(providerPubKey, providerTitle);
 
-        TokenDotFactoryRegistry tdfRegistry = TokenDotFactoryRegistry(coord.getContract("TDF_REGISTRY"));
-        tdfRegistry.register(this);
+//        TokenDotFactoryRegistry tdfRegistry = TokenDotFactoryRegistry(coord.getContract("TDF_REGISTRY"));
+//        tdfRegistry.register(this);
     }
 
     function initializeCurve(

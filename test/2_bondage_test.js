@@ -52,7 +52,7 @@ contract('Bondage', function (accounts) {
 
     async function prepareCustomProvider(provider = true, curve = true, account = oracle, curveParams = piecewiseFunction, bondBroker = broker) {
         if (provider) await this.registry.initiateProvider(publicKey, title, {from: account});
-        if (curve) await this.registry.initiateProviderCurve(specifier, curveParams, bondBroker, this.customToken.address, {from: account});
+        if (curve) await this.registry.initiateCustomCurve(specifier, curveParams, bondBroker, this.customToken.address, {from: account});
     }
 
     async function prepareCustomTokens(allocAddress = subscriber) {
