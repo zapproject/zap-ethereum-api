@@ -18,7 +18,7 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         bytes32 indexed endpoint,
         int[] curve,
         address indexed broker,
-        address indexed token
+        address token
     );
 
     DatabaseInterface public db;

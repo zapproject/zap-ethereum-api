@@ -307,7 +307,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     function chooseToken(address oracleAddress, bytes32 endpoint) internal returns (ERC20) {
         address customToken = getEndpointToken(oracleAddress, endpoint);
         if (customToken != address(0)) {
-            return customToken;
+            return ERC20(customToken);
         }
 
         // use default token if custom token not specified for endpoint
