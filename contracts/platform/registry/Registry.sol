@@ -187,6 +187,11 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         return db.getIntArray(keccak256(abi.encodePacked('oracles', provider, 'curves', endpoint))).length;
     }
 
+    function getCurveToken(address provider, bytes32 endpoint) public view returns (address) {
+        require(!getCurveUnset(provider, endpoint), "Error: Curve is not yet set");
+        return address(db.getBytes32(keccak256(abi.encodePacked('oracles', provider, endpoint, 'token'))));
+    }
+
     /// @dev is provider initiated
     /// @param oracleAddress the provider address
     /// @return Whether or not the provider has initiated in the Registry.

@@ -209,4 +209,12 @@ contract('Registry', async (accounts) => {
 
         await this.test.registry.initiateCustomCurve(specifier, [3, 0, 0, 0, 5, 100], emptyBroker, owner, { from: owner }).should.be.rejectedWith(EVMRevert);
     });
+
+    it("REGISTRY_21 - getCurveToken() - Check that we can get curve token", async function () {
+        await this.test.registry.initiateProvider(publicKey, title, { from: owner }).should.be.fulfilled;
+        await this.test.registry.initiateCustomCurve(specifier, curve, emptyBroker, owner, { from: owner }).should.be.fulfilled;
+        let res = await this.test.registry.getCurveToken(owner, specifier);
+        console.log(res);
+        res.should.be.equal(owner);
+    });
 });

@@ -15,6 +15,7 @@ contract RegistryInterface {
     function getAllProviderParams(address) public view returns (bytes32[]);
     function getProviderCurveLength(address, bytes32) public view returns (uint256);
     function getProviderCurve(address, bytes32) public view returns (int[]);
+    function getCurveToken(address, bytes32) public view returns (address);
     function isProviderInitiated(address) public view returns (bool);
     function getAllOracles() external view returns (address[]);
     function getProviderEndpoints(address) public view returns (bytes32[]);
