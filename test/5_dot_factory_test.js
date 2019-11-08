@@ -129,7 +129,7 @@ contract('TokenDotFactory', function (accounts) {
     it("TOKEN_DOT_FACTORY_5 - bond() - Check bonding", async function () {
         let factory = await TokenDotFactory.new(this.test.coord.address, this.test.tokenFactory.address, publicKey, title);
         await factory.initializeCurve(specifier, "sbl", piecewiseFunction, this.test.testToken.address);
-        let reserveTokenAddr = await factory.getReserveAddress(factory.address, specifier);
+        let reserveTokenAddr = await factory.getReserveAddress(specifier);
 				console.log(reserveTokenAddr);
 				let reserveToken = await ZapToken.at(reserveTokenAddr);
         await reserveToken.allocate(subscriber, 10000);
@@ -143,7 +143,7 @@ contract('TokenDotFactory', function (accounts) {
     it("TOKEN_DOT_FACTORY_6 - bond() - Check that user can not bond without tokens", async function () {
         let factory = await TokenDotFactory.new(this.test.coord.address, this.test.tokenFactory.address, publicKey, title);
         await factory.initializeCurve(specifier, "sbl", piecewiseFunction, this.test.testToken.address);
-        let reserveTokenAddr = await factory.getReserveAddress(factory.address, specifier);
+        let reserveTokenAddr = await factory.getReserveAddress(specifier);
         let reserveToken = await ZapToken.at(reserveTokenAddr);
        // await reserveToken.allocate(subscriber, 10000);
         await reserveToken.approve(factory.address, 10000, {from: subscriber});
@@ -153,7 +153,7 @@ contract('TokenDotFactory', function (accounts) {
     it("TOKEN_DOT_FACTORY_7 - unbond() - Check unbonding", async function () {
         let factory = await TokenDotFactory.new(this.test.coord.address, this.test.tokenFactory.address, publicKey, title);
         await factory.initializeCurve(specifier, "sbl", piecewiseFunction, this.test.testToken.address);
-        let reserveTokenAddr = await factory.getReserveAddress(factory.address, specifier);
+        let reserveTokenAddr = await factory.getReserveAddress(specifier);
         let reserveToken = await ZapToken.at(reserveTokenAddr);
         await reserveToken.allocate(subscriber, 10000);
         await reserveToken.approve(factory.address, 10000, {from: subscriber});
@@ -168,7 +168,7 @@ contract('TokenDotFactory', function (accounts) {
     it("TOKEN_DOT_FACTORY_8 - unbond() - Check that user can not unbond more than have", async function () {
         let factory = await TokenDotFactory.new(this.test.coord.address, this.test.tokenFactory.address, publicKey, title);
         await factory.initializeCurve(specifier, "sbl", piecewiseFunction, this.test.testToken.address);
-        let reserveTokenAddr = await factory.getReserveAddress(factory.address, specifier);
+        let reserveTokenAddr = await factory.getReserveAddress(specifier);
         let reserveToken = await ZapToken.at(reserveTokenAddr);
         await reserveToken.allocate(subscriber, 10000);
         await reserveToken.approve(factory.address, 10000, {from: subscriber});

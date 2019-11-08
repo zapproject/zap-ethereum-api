@@ -48,7 +48,6 @@ contract TokenDotFactory is Ownable {
         RegistryInterface registry = RegistryInterface(coord.getContract("REGISTRY")); 
         require(registry.isProviderInitiated(address(this)), "Provider not intiialized");
 
-
 			  FactoryTokenInterface reserveToken = FactoryTokenInterface(coord.getContract("ZAP_TOKEN"));
 				if ( token != address(0)) {
           reserveToken = FactoryTokenInterface(token);
@@ -67,23 +66,17 @@ contract TokenDotFactory is Ownable {
         return curves[specifier];
     }
 
-    function getEndpointToken(address oracleAddress, bytes32 endpoint) public view returns (address) {
-        db = DatabaseInterface(coord.getContract("DATABASE"));
-				return address(db.getBytes32(keccak256(abi.encodePacked('oracles', oracleAddress, endpoint, 'token'))));
-    }
+		function getReserveAddress(bytes32 endpoint) public view returns (FactoryTokenInterface) {
 
-		function chooseToken(address oracleAddress, bytes32 endpoint) internal returns (FactoryTokenInterface) {
-        address customToken = getEndpointToken(oracleAddress, endpoint);
-        if (customToken != address(0)) {
+        db = DatabaseInterface(coord.getContract("DATABASE"));
+				address customToken = address(db.getBytes32(keccak256(abi.encodePacked('oracles', address(this), endpoint, 'token'))));
+
+				if (customToken != address(0)) {
             return FactoryTokenInterface(customToken);
         }
         // use default token if custom token not specified for endpoint
 				return FactoryTokenInterface(coord.getContract("ZAP_TOKEN"));
     }
-
-		function getReserveAddress(address oracleAddress, bytes32 endpoint) public view returns (address) {
-			return chooseToken(oracleAddress, endpoint);
-		}
 
 		event Bonded(bytes32 indexed specifier, uint256 indexed numDots, address indexed sender); 
 
@@ -96,7 +89,7 @@ contract TokenDotFactory is Ownable {
         CurrentCostInterface cost = CurrentCostInterface(coord.getContract("CURRENT_COST"));
         uint256 numReserve = cost._costOfNDots(address(this), specifier, issued + 1, numDots - 1);
 
-				FactoryTokenInterface reserveToken = chooseToken(address(this), specifier)	;
+				FactoryTokenInterface reserveToken = getReserveAddress(specifier)	;
 
         require(
             reserveToken.transferFrom(msg.sender, address(this), numReserve),
@@ -126,7 +119,7 @@ contract TokenDotFactory is Ownable {
         FactoryTokenInterface curveToken = FactoryTokenInterface(curves[specifier]);
         curveToken.burnFrom(msg.sender, numDots);
 
-				FactoryTokenInterface reserveToken = chooseToken(address(this), specifier);	
+				FactoryTokenInterface reserveToken = getReserveAddress(specifier);	
         require(reserveToken.transfer(msg.sender, reserveCost), "Error: Transfer failed");
         Unbonded(specifier, numDots, msg.sender);
     }
