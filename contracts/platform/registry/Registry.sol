@@ -17,7 +17,8 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         address indexed provider,
         bytes32 indexed endpoint,
         int[] curve,
-        address indexed broker
+        address indexed broker,
+        address token
     );
 
     DatabaseInterface public db;
@@ -62,18 +63,33 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         public
         returns (bool)
     {
-        // Provider must be initiated
-        require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
-        // Can't reset their curve
-        require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
-        // Can't initiate null endpoint
-        require(endpoint != bytes32(0), "Error: Can't initiate null endpoint");
+        initializeCurve(endpoint, curve, broker);
 
-        setCurve(msg.sender, endpoint, curve);
-        db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
-        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(broker));
+        emit NewCurve(msg.sender, endpoint, curve, broker, address(0));
 
-        emit NewCurve(msg.sender, endpoint, curve, broker);
+        return true;
+    }
+
+    /// @dev initiates an endpoint specific provider curve
+    /// If oracle[specfifier] is uninitialized, Curve is mapped to endpoint
+    /// @param endpoint specifier of endpoint. currently "smart_contract" or "socket_subscription"
+    /// @param curve flattened array of all segments, coefficients across all polynomial terms, [e0,l0,c0,c1,c2,...]
+    /// @param broker address for endpoint. if non-zero address, only this address will be able to bond/unbond
+    /// @param token address that will be used in bonding
+    function initiateCustomCurve(
+        bytes32 endpoint,
+        int256[] curve,
+        address broker,
+        address token
+    )
+    public
+    returns (bool)
+    {
+        initializeCurve(endpoint, curve, broker);
+
+        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'token')), bytes32(token));
+
+        emit NewCurve(msg.sender, endpoint, curve, broker, token);
 
         return true;
     }
@@ -171,6 +187,11 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
         return db.getIntArray(keccak256(abi.encodePacked('oracles', provider, 'curves', endpoint))).length;
     }
 
+    function getCurveToken(address provider, bytes32 endpoint) public view returns (address) {
+        require(!getCurveUnset(provider, endpoint), "Error: Curve is not yet set");
+        return address(db.getBytes32(keccak256(abi.encodePacked('oracles', provider, endpoint, 'token'))));
+    }
+
     /// @dev is provider initiated
     /// @param oracleAddress the provider address
     /// @return Whether or not the provider has initiated in the Registry.
@@ -227,6 +248,25 @@ contract Registry is Destructible, RegistryInterface, Upgradable {
     /// @dev add new provider address to oracles array
     function addOracle(address provider) private {
         db.pushAddressArray(keccak256(abi.encodePacked('oracleIndex')), provider);
+    }
+
+    function initializeCurve(
+        bytes32 endpoint,
+        int256[] curve,
+        address broker
+    )
+        private
+    {
+        // Provider must be initiated
+        require(isProviderInitiated(msg.sender), "Error: Provider is not yet initiated");
+        // Can't reset their curve
+        require(getCurveUnset(msg.sender, endpoint), "Error: Curve is already set");
+        // Can't initiate null endpoint
+        require(endpoint != bytes32(0), "Error: Can't initiate null endpoint");
+
+        setCurve(msg.sender, endpoint, curve);
+        db.pushBytesArray(keccak256(abi.encodePacked('oracles', msg.sender, 'endpoints')), endpoint);
+        db.setBytes32(keccak256(abi.encodePacked('oracles', msg.sender, endpoint, 'broker')), bytes32(broker));
     }
 
     /// @dev initialize new curve for provider

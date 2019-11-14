@@ -201,8 +201,11 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 
         uint256 numZap = currentCost._costOfNDots(oracleAddress, endpoint, issued + 1, numDots - 1);
 
+        // use curve specific token or ZapToken if curve token is 0x0
+        ERC20 tokenToUse = chooseToken(oracleAddress, endpoint);
+
         // User must have approved contract to transfer working ZAP
-        require(token.transferFrom(msg.sender, this, numZap), "Error: User must have approved contract to transfer ZAP");
+        require(tokenToUse.transferFrom(msg.sender, this, numZap), "Error: User must have approved contract to transfer ZAP");
 
         if (!isProviderInitialized(holderAddress, oracleAddress)) {
             setProviderInitialized(holderAddress, oracleAddress);
@@ -245,6 +248,9 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
         updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
 
+        // use curve specific token or ZapToken if curve token is 0x0
+        ERC20 tokenToUse = chooseToken(oracleAddress, endpoint);
+
         // Calc fee
         uint256 feeDivider = getFeeDivider();
         uint256 fee = 0;
@@ -255,7 +261,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         uint256 userTokens = numZap.sub(fee);
 
         // Do the transfer
-        require(token.transfer(msg.sender, userTokens), "Error: Transfer failed");
+        require(tokenToUse.transfer(msg.sender, userTokens), "Error: Transfer failed");
 
         // Transfer fee
         address feeHolder = getFeeHolder();
@@ -273,6 +279,10 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     /// @dev get broker address for endpoint
     function getEndpointBroker(address oracleAddress, bytes32 endpoint) public view returns (address) {
         return address(db.getBytes32(keccak256(abi.encodePacked('oracles', oracleAddress, endpoint, 'broker'))));
+    }
+
+    function getEndpointToken(address oracleAddress, bytes32 endpoint) public view returns (address) {
+        return address(db.getBytes32(keccak256(abi.encodePacked('oracles', oracleAddress, endpoint, 'token'))));
     }
 
     function getNumEscrow(address holderAddress, address oracleAddress, bytes32 endpoint) public view returns (uint256) {
@@ -300,7 +310,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     }
 
     function setFeeDivider(uint256 divider) external {
-        db.setNumber(keccak256(abi.encodePacked('fee_divider')), 1);
+        db.setNumber(keccak256(abi.encodePacked('fee_divider')), divider);
     }
 
     function getFeeDivider() public view returns (uint256) {
@@ -322,6 +332,16 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 
     function setProviderInitialized(address holderAddress, address oracleAddress) internal {
         db.setNumber(keccak256(abi.encodePacked('holders', holderAddress, 'initialized', oracleAddress)), 1);
+    }
+
+    function chooseToken(address oracleAddress, bytes32 endpoint) internal returns (ERC20) {
+        address customToken = getEndpointToken(oracleAddress, endpoint);
+        if (customToken != address(0)) {
+            return ERC20(customToken);
+        }
+
+        // use default token if custom token not specified for endpoint
+        return token;
     }
 
     function updateEscrow(address holderAddress, address oracleAddress, bytes32 endpoint, uint256 numDots, bytes32 op) internal {
