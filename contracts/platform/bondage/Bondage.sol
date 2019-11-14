@@ -245,8 +245,22 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         updateTotalIssued(oracleAddress, endpoint, numDots, "sub");
         updateBondValue(holderAddress, oracleAddress, endpoint, numDots, "sub");
 
+        // Calc fee
+        uint256 feeDivider = getFeeDivider();
+        uint256 fee = 0;
+        if (numZap >= feeDivider) {
+            fee = numZap.div(feeDivider);
+        }
+
+        uint256 userTokens = numZap.sub(fee);
+
         // Do the transfer
-        require(token.transfer(msg.sender, numZap), "Error: Transfer failed");
+        require(token.transfer(msg.sender, userTokens), "Error: Transfer failed");
+
+        // Transfer fee
+        address feeHolder = getFeeHolder();
+        require(feeHolder != address(0), "Fee holder address is 0x0");
+        require(token.transfer(feeHolder, fee), "Error: Fee transfer failed");
 
         return numZap;
     }
@@ -283,6 +297,22 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
 
     function getOracleAddress(address holderAddress, uint256 index) public view returns (address) {
         return db.getAddressArrayIndex(keccak256(abi.encodePacked('holders', holderAddress, 'oracleList')), index);
+    }
+
+    function setFeeDivider(uint256 divider) external {
+        db.setNumber(keccak256(abi.encodePacked('fee_divider')), 1);
+    }
+
+    function getFeeDivider() public view returns (uint256) {
+        return db.getNumber(keccak256(abi.encodePacked('fee_divider')));
+    }
+
+    function setFeeHolder(address holder) external {
+        db.setBytes32(keccak256(abi.encodePacked('fee_holder')), holder);
+    }
+
+    function getFeeHolder() public view returns (address) {
+        return address(db.getBytes32(keccak256(abi.encodePacked('fee_holder'))));
     }
 
     /**** Set Methods ****/

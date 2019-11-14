@@ -13,4 +13,6 @@ contract BondageInterface {
     function getBoundDots(address, address, bytes32) public view returns (uint256);
     function getZapBound(address, bytes32) public view returns (uint256);
     function dotLimit( address, bytes32) public view returns (uint256);
+    function setFeeDivider(uint256) external;
+    function setFeeHolder(address) external;
 }
