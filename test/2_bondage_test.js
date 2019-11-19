@@ -7,6 +7,11 @@ const expect = require('chai')
     .use(require('chai-bignumber')(BigNumber))
     .expect;
 
+const should = require('chai')
+    .use(require('chai-as-promised'))
+    .use(require('chai-bignumber')(BigNumber))
+    .should();
+
 const Utils = require('./helpers/utils');
 
 const ZapCoordinator = artifacts.require("ZapCoordinator");
@@ -38,6 +43,7 @@ contract('Bondage', function (accounts) {
     const tokensForSubscriber = new BigNumber("5000e18");
     const approveTokens = new BigNumber("1000e18");
     const dotBound = new BigNumber("999");
+    const feeDivider = new BigNumber("100");
 
     async function prepareProvider(provider = true, curve = true, account = oracle, curveParams = piecewiseFunction, bondBroker = broker) {
         if (provider) await this.registry.initiateProvider(publicKey, title, {from: account});
@@ -83,6 +89,8 @@ contract('Bondage', function (accounts) {
         // Deploy Bondage
         this.currentTest.bondage = await Bondage.new(this.currentTest.coord.address);
         await this.currentTest.coord.updateContract('BONDAGE', this.currentTest.bondage.address);
+        await this.currentTest.bondage.setFeeDivider(feeDivider);
+        await this.currentTest.bondage.setFeeHolder(owner);
 
         // Hack for making arbiter an account we control for testing the escrow
         await this.currentTest.coord.addImmutableContract('ARBITER', accounts[3]);
@@ -144,13 +152,17 @@ contract('Bondage', function (accounts) {
 
         const bond_balance = await this.test.token.balanceOf(subscriber);
 
+        const owner_balance = await this.test.token.balanceOf(owner);
         // unbond three dots
         await this.test.bondage.unbond(oracle, specifier, 3, {from: subscriber});
         const final_balance = await this.test.token.balanceOf(subscriber);
+        const owner_fee_balance = await this.test.token.balanceOf(owner);
 
-        // expect total bonding to cost 110 and unbonding to return 100 zap (50+32+18)
+        // expect total bonding to cost 110 and unbonding to return 99 zap and 1 zap fee (50+32+18)
+        const fee = web3.toBigNumber(100).div(feeDivider);
         balance.minus(bond_balance).should.be.bignumber.equal(web3.toBigNumber(110));
-        final_balance.minus(bond_balance).should.be.bignumber.equal(web3.toBigNumber(100));
+        final_balance.minus(bond_balance).should.be.bignumber.equal(web3.toBigNumber(100).sub(fee));
+        owner_fee_balance.minus(owner_balance).should.be.bignumber.equal(fee);
     });
 
     it("BONDAGE_7_big - unbond() - Check unbond zap for dots calculation", async function () {
@@ -165,16 +177,20 @@ contract('Bondage', function (accounts) {
         const bond_balance = await this.test.token.balanceOf(subscriber);
 
         // unbond three dots
+        const owner_balance = await this.test.token.balanceOf(owner);
         await this.test.bondage.unbond(oracle, specifier, 3, {from: subscriber});
         const final_balance = await this.test.token.balanceOf(subscriber);
+        const owner_fee_balance = await this.test.token.balanceOf(owner);
 
         // ghci> let f x = 2 * x ^ 2
         // ghci> sum $ f <$> [1..9999]
         // >>> 666566670000
         // ghci> sum $ f <$> [9999,9998..9997]
         // >>> 599760028
+        const fee = web3.toBigNumber(new BigNumber("599760028")).div(feeDivider).round(0);
         balance.minus(bond_balance).should.be.bignumber.equal(new BigNumber("666566670000"));
-        final_balance.minus(bond_balance).should.be.bignumber.equal(new BigNumber("599760028"));
+        final_balance.minus(bond_balance).should.be.bignumber.equal(new BigNumber("599760028").sub(fee));
+        owner_fee_balance.minus(owner_balance).should.be.bignumber.equal(fee);
     });
 
     it("BONDAGE_8 - getBoundDots() - Check received dots getting", async function () {

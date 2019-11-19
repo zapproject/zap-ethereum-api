@@ -255,10 +255,10 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
         uint256 feeDivider = getFeeDivider();
         uint256 fee = 0;
         if (numZap >= feeDivider) {
-            fee = numZap.div(feeDivider);
+            fee = numZap / feeDivider;
         }
 
-        uint256 userTokens = numZap.sub(fee);
+        uint256 userTokens = numZap - fee;
 
         // Do the transfer
         require(tokenToUse.transfer(msg.sender, userTokens), "Error: Transfer failed");
@@ -318,7 +318,7 @@ contract Bondage is Destructible, BondageInterface, Upgradable {
     }
 
     function setFeeHolder(address holder) external {
-        db.setBytes32(keccak256(abi.encodePacked('fee_holder')), holder);
+        db.setBytes32(keccak256(abi.encodePacked('fee_holder')), bytes32(holder));
     }
 
     function getFeeHolder() public view returns (address) {
