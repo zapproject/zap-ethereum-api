@@ -10,7 +10,7 @@ import "./Client.sol";
 contract BTCcontest is Ownable, ClientIntArray {
   SampleContest public contest;
   ZapCoordinatorInterface public coordinator;
-  address public oracle;
+  address public owner;
   uint256 public query_id;
   uint256 public startPrice;
   bytes32 public upEndpoint;
@@ -23,7 +23,7 @@ contract BTCcontest is Ownable, ClientIntArray {
     bytes32 _upEndpoint,
     bytes32 _downEndpoint
   ){
-    oracle = msg.sender;
+    owner = msg.sender;
     contest = SampleContest(_contest);
     startPrice = _startPrice;
     coordinator = ZapCoordinatorInterface(_cord);
@@ -48,7 +48,7 @@ contract BTCcontest is Ownable, ClientIntArray {
 
   }
   function queryToSettle(address _coincap,bytes32 _endpoint) public returns(uint256){
-    require(msg.sender == oracle, "Only Oracle owner can call query to settle");
+    require(msg.sender == owner, "Only owner can call query to settle");
     address dispatchAddress = coordinator.getContract("DISPATCH");
     DispatchInterface dispatch = DispatchInterface(dispatchAddress);
     bytes32[] memory params = new bytes32[](0);

@@ -172,13 +172,11 @@ contract('SampleContest', function (accounts) {
     const tx3 = await factory.settle({from:owner});
     console.log("sampleContest zap balance after settled", (await reserveToken.balanceOf(factory.address)).toNumber())
     const status = await factory.status()
-    status.toNumber().should.equal(3)
+    status.toNumber().should.equal(4)
 
     //unbond to claim winning
     let approveToBurn = await upcurveToken.approve(factory.address,7,{from:participant1})
-    let unbondTx = await factory.unbond(upEndpoint,7,{from:participant1})
-
-
+    let unbondTx = await factory.unbond(upEndpoint,{from:participant1})
 
     //AFter the contest
     let part1CurveTokenDelta = (await upcurveToken.balanceOf(participant1)).toNumber() - part1Balance.toNumber()
@@ -190,6 +188,90 @@ contract('SampleContest', function (accounts) {
     part1CurveTokenDelta.should.equal(0)
     part2CurveTokenDelta.should.equal(8)
     part1ZapBalanceDelta.should.equal(-part2ZapBalanceDelta)
+  }
+  else{
+    console.log("NO query event found")
+  }
+    });
+    it("BTC CONTEST - Expired case", async function () {
+        const startPrice = 8000
+        const upEndpoint = "BTC_UP"
+        const downEndpoint = "BTC_DOWN"
+        let factory = await SampleContest.new(this.test.coord.address, this.test.tokenFactory.address, publicKey, title);
+        await this.test.registry.initiateProvider(111,"coincaptitle",{from:coincap});
+        await this.test.registry.initiateProviderCurve("coincapendpoint",piecewiseFunction,zeroAddress,{from:coincap});
+
+	let tx;//tmp var for event tracking
+
+	let ttl = 0;//Expired
+
+	await factory.initializeCurve(upEndpoint,upEndpoint, piecewiseFunction);
+	await factory.initializeCurve(downEndpoint,downEndpoint, piecewiseFunction);
+  let btcContest = await BTCcontest.new(this.test.coord.address,factory.address, startPrice, upEndpoint, downEndpoint);
+        let reserveTokenAddr = await factory.reserveToken();
+        let reserveToken = await ZapToken.at(reserveTokenAddr);
+        await reserveToken.allocate(owner, tokensForOwner);
+        await reserveToken.allocate(participant1, tokensForOwner, {from: owner});
+        await reserveToken.allocate(participant2, tokensForOwner, {from: owner});
+        await reserveToken.allocate(btcContest.address, tokensForOwner, {from: owner});
+        await reserveToken.approve(factory.address, tokensForOwner, {from: owner});
+        await reserveToken.approve(factory.address, tokensForOwner, {from: participant1});
+        await reserveToken.approve(factory.address, tokensForOwner, {from: participant2});
+        await btcContest.bondToCoincap(coincap,"coincapendpoint",3,{from:owner})
+	let zapBalance = await reserveToken.balanceOf(owner);
+	let zapAllowance = await reserveToken.allowance(owner, factory.address);
+	await factory.initializeContest(btcContest.address, ttl, {from: owner});
+
+        let curveTokenAddr = await factory.getTokenAddress(upEndpoint);
+        let curveToken = await FactoryToken.at(curveTokenAddr);
+        let upcurveTokenAddr = await factory.getTokenAddress(upEndpoint);
+        let upcurveToken = await FactoryToken.at(upcurveTokenAddr);
+        let downcurveTokenAddr = await factory.getTokenAddress(downEndpoint);
+        let downcurveToken = await FactoryToken.at(downcurveTokenAddr);
+
+        //Before the contest
+        let part1Balance = await upcurveToken.balanceOf(participant1);
+        let part1ZapBalance = await reserveToken.balanceOf(participant1)
+        let part2Balance = await downcurveToken.balanceOf(participant2);
+        let part2ZapBalance = await reserveToken.balanceOf(participant2)
+        console.log("parts token balance before settle : participant1", part1Balance.toNumber(),"participant2", part2Balance.toNumber())
+        console.log("sampleContest zap balance before settle : ",(await reserveToken.balanceOf(factory.address)).toNumber())
+
+
+	await factory.bond(upEndpoint, 7, {from: participant1});
+	await factory.bond(downEndpoint, 8, {from: participant2});
+
+
+
+  let txquery =await  btcContest.queryToSettle(coincap,"coincapendpoint",{from:owner})
+  let queryEvent = await findEvent(this.test.dispatch,"Incoming");
+  if(queryEvent && queryEvent.args && queryEvent.args.id){
+    let query_id = queryEvent.args.id
+    const tx2 = await this.test.dispatch.respondIntArray(query_id,[9000],{from:coincap})
+    const tx3 = await factory.settle({from:owner});
+    console.log("sampleContest zap balance after settled", (await reserveToken.balanceOf(factory.address)).toNumber())
+    const status = await factory.status()
+    status.toNumber().should.equal(2)
+
+    //unbond to claim winning
+    let approveToBurn1 = await upcurveToken.approve(factory.address,7,{from:participant1})
+    let unbondTx1 = await factory.unbond(upEndpoint,{from:participant1})
+
+    //unbond to claim winning
+    let approveToBurn2 = await downcurveToken.approve(factory.address,8,{from:participant2})
+    let unbondTx2 = await factory.unbond(downEndpoint,{from:participant2})
+
+    //AFter the contest
+    let part1CurveTokenDelta = (await upcurveToken.balanceOf(participant1)).toNumber() - part1Balance.toNumber()
+    let part1ZapBalanceDelta = (await reserveToken.balanceOf(participant1)).toNumber()-part1ZapBalance.toNumber()
+    let part2CurveTokenDelta = (await downcurveToken.balanceOf(participant2)).toNumber() - part2Balance.toNumber()
+    let part2ZapBalanceDelta = (await reserveToken.balanceOf(participant2)).toNumber() - part2ZapBalance.toNumber()
+    console.log("Curve Token Delta after settle : participant1", part1CurveTokenDelta, "participant2",part2CurveTokenDelta)
+    console.log("Zap token delta after settle : partticipant1",part1ZapBalanceDelta,"participant2",part2ZapBalanceDelta)
+    part1CurveTokenDelta.should.equal(0)
+    part2CurveTokenDelta.should.equal(0)
+    part1ZapBalanceDelta.should.equal(0)
+    part2ZapBalanceDelta.should.equal(0)
   }
   else{
     console.log("NO query event found")
